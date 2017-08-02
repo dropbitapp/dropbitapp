@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "WebApp\WebApp.csproj", "{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAppTests", "WebAppTests\WebAppTests.csproj", "{6AE24A04-C486-49B8-BB47-D10B6019C5B7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Debug|x64.ActiveCfg = Debug|x64
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Debug|x64.Build.0 = Debug|x64
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Debug|x86.ActiveCfg = Debug|x86
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Debug|x86.Build.0 = Debug|x86
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Release|x64.ActiveCfg = Release|x64
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Release|x64.Build.0 = Release|x64
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Release|x86.ActiveCfg = Release|x86
+		{C5994179-8EAC-4D9D-8BDC-223A5CEF49B4}.Release|x86.Build.0 = Release|x86
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Debug|x64.ActiveCfg = Debug|x64
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Debug|x64.Build.0 = Debug|x64
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Debug|x86.Build.0 = Debug|Any CPU
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Release|x64.ActiveCfg = Release|x64
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Release|x64.Build.0 = Release|x64
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Release|x86.ActiveCfg = Release|Any CPU
+		{6AE24A04-C486-49B8-BB47-D10B6019C5B7}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://seattleinfluence.visualstudio.com/defaultcollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = WebApp\\WebApp.csproj
+		SccProjectName1 = WebApp
+		SccLocalPath1 = WebApp
+		SccProjectUniqueName2 = WebAppTests\\WebAppTests.csproj
+		SccProjectName2 = WebAppTests
+		SccLocalPath2 = WebAppTests
+	EndGlobalSection
+EndGlobal

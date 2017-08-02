@@ -1,0 +1,43 @@
+﻿select *
+
+--PurToRawMat.PurchaseId, PurToRawMat.PurchaseToRawMaterialId, PurToRawMat.RawMaterialId,-- PurToRawMat.IdentifierId as purToRMatIdent, 
+--RawMat.RawMaterialName
+--,ISNULL(Quant.QuantityValue,0) as Quantity--, Quant.IdentifierId as quantIdent
+--,ISNULL(Store.StorageName, '') as [Storage Name]
+--,ISNULL(Store.StorageId, 0) as [StorageId]
+----,Store.StorageId as [StorageId]
+----,ISNULL(RecToStor.RecordToStorageId, 0) as storageId--, RecToStor.IdentifierId as RecToStorIdentifierId
+--,note.NoteValue--, note.IdentifierId as noteIdentofierId
+--,PurInfo.PurchaseDate
+--,price.PriceValue
+--,PurToVendor.VendorId
+--,vendor.VendorName
+--,ISNULL(VBW.VolumeByWeightValue, 0) as VBW
+--,ISNULL(Alcohol.AlcContValue, 0) as AlcoholCont
+--,ISNULL(Proof.ProofGallonValue, 0) as ProofCont
+from dbo.InvDistillable as DistillableT
+where DistillableT.DistillMethod = 'FromDistill'
+--from dbo.Fermented as Ferm
+--left join dbo.Quantity as Quant
+--	on Ferm.FermentedId = Quant.RecordId AND Ferm.IdentifierId = Quant.IdentifierId
+--left join dbo.RecordToStorage as RecToStor 
+--	on  Ferm.FermentedId = RecToStor.RecordId AND Ferm.IdentifierId = RecToStor.IdentifierId
+--left join dbo.Storage as Store
+--	on RecToStor.StorageId = Store.StorageId
+--left join dbo.Note as note
+--	on  Ferm.FermentedId = note.RecordId AND Ferm.IdentifierId = note.IdentifierId
+--left join dbo.Purchase as PurInfo
+--	on PurToRawMat.PurchaseId = PurInfo.PurchaseId
+--left join dbo.Price as price
+--	on PurToRawMat.PurchaseId = price.PurchaseId
+--left join dbo.PurchaseToVendor as PurToVendor
+--	on PurToRawMat.PurchaseId = PurToVendor.PurchaseId
+--left join dbo.Vendor as vendor
+--	on PurToVendor.VendorId = vendor.VendorId
+--left join dbo.VolumeByWeight as VBW
+--	on Ferm.FermentedId = VBW.RecordId AND Ferm.IdentifierId = VBW.IdentifierId
+--left join dbo.AlcoholContent as Alcohol
+--	on Ferm.FermentedId = Alcohol.RecordId AND Ferm.IdentifierId = Alcohol.IdentifierId
+--left join dbo.ProofGallon as Proof
+--	on Ferm.FermentedId = Proof.RecordId AND Ferm.IdentifierId = Proof.IdentifierId
+--where Ferm.IdentifierId = 9 OR Ferm.IdentifierId = 14

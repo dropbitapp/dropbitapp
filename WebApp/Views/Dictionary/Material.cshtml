@@ -1,0 +1,718 @@
+﻿@{
+    ViewBag.Title = "Material";
+}
+@section scripts {
+    <script type="text/javascript">
+        var rawMaterialCreationFunction = (function () {
+            var genericWorkflowHelper = new genWHelpers();
+
+            // data adapters
+            var unitsListAdapater;
+
+            // Matrial Category adapter
+            var materialCategoryAdapter;
+
+            function addEventListeners() {
+
+                /// -------------- this section makes the dropdown to show up and disapear based on user's checkbox selection -------------//
+                $( "#VisibilityFermentableCheckbox" ).on( 'change', function ( event ) {
+                    var checked = event.args.checked;
+                    if ( checked ) {
+                        // make Material Category dropdown visible
+                        document.getElementById( "materialCategoryContainer" ).style.display = "block";
+                    }
+                    else if ( !checked && ( !$( '#VisibilityFermentedCheckbox' ).jqxCheckBox( 'checked' ) ) )
+                    {
+                        // make Material Category dropdown visible
+                        document.getElementById( "materialCategoryContainer" ).style.display = "none";
+                    }
+                } );
+
+                $( "#VisibilityFermentedCheckbox" ).on( 'change', function ( event ) {
+                    var checked = event.args.checked;
+                    if ( checked ) {
+                        // make Material Category dropdown visible
+                        document.getElementById( "materialCategoryContainer" ).style.display = "block";
+                    }
+                    else if ( !checked && ( !$( '#VisibilityFermentableCheckbox' ).jqxCheckBox( 'checked' ) ) )
+                    {
+                        // make Material Category dropdown visible
+                        document.getElementById( "materialCategoryContainer" ).style.display = "none";
+                    }
+                } );
+                /// -------------- end of the section -------------//
+
+                $("#CreateRecordButton").click(function () {
+                    $('#validationForm').jqxValidator('validate');
+                });
+
+                $("#ClearInputElementsButton").click(function () {
+                    genericWorkflowHelper.emptyControls();
+                });
+
+                // Select jqxDataTable row
+                $("#dataTable").on('rowDoubleClick', function (event) {
+                    var args = event.args;
+                    var index = args.index;
+                    var row = args.row;
+                    // update the widgets inside jqxWindow.
+                    $("#EditDialog").jqxWindow('setTitle', "Edit RawMaterial Record: #" + row.RawMaterialId);
+                    $("#EditDialog").jqxWindow('open');
+                    $("#EditDialog").attr('data-row', index);
+                    $("#dataTable").jqxDataTable({ disabled: true });
+                    $("#EditDialogRawMaterialIdInput").val(row.RawMaterialId);
+                    $("#EditDialogRawMaterialNameInput").val(row.RawMaterialName);
+                    $("#EditDialogVisibilityFermentableCheckbox").val(row.Fermentable);
+                    $("#EditDialogVisibilityFermentedCheckbox").val(row.Fermented);
+                    $("#EditDialogVisibilityDistilledCheckbox").val(row.Distilled);
+                    $("#EditDialogVisibilitySuppliesCheckbox").val(row.Supply);
+                    $("#EditDialogVisibilityAdditivesCheckbox").val(row.Additive);
+                    $("#EditDialogNotesInput").val(row.Note);
+                    $("#EditDialogUnitListbox").jqxListBox('selectItem', row.UnitType);
+                    
+                    // since value member is an id of Unit, we should extract unit Id, given the name of the unit
+                    var items = $("#EditDialogUnitListbox").jqxListBox('getItems');
+                    var value;
+                    for (var i = 0; i < items.length; i++) {
+                        if (items[i].label == row.UnitType)
+                        {
+                            var value = items[i].value;
+                            break;
+                        }
+                    }
+                    var item = $("#EditDialogUnitListbox").jqxListBox('getItemByValue', value);
+                    if (item != undefined) {
+                        $("#EditDialogUnitListbox").jqxListBox({ selectedIndex: item.index });
+                    }
+                    else
+                    {
+                        $("#EditDialogUnitListbox").jqxListBox({ selectedIndex: 0});
+                    }
+                    
+                });
+
+                // Save record within Edit Dialog
+                $("#EditDialogSaveRecordButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // update edited row.
+                    var editRow = parseInt($("#EditDialog").attr('data-row'));
+                    var rowData = {
+                        RawMaterialId: $("#EditDialogRawMaterialIdInput").val(),
+                        RawMaterialName: $("#EditDialogRawMaterialNameInput").val(),
+                        PurchaseMaterialTypes: {
+                            Fermentable: $("#EditDialogVisibilityFermentableCheckbox").val(),
+                            Fermented: $("#EditDialogVisibilityFermentedCheckbox").val(),
+                            Distilled: $("#EditDialogVisibilityDistilledCheckbox").val(),
+                            Supply: $("#EditDialogVisibilitySuppliesCheckbox").val(),
+                            Additive: $("#EditDialogVisibilityAdditivesCheckbox").val(),
+                        },
+                        Note: $("#EditDialogNotesInput").val(),
+                        UnitType: $("#EditDialogUnitListbox").jqxListBox('getSelectedItem').label,
+                        UnitTypeId: $("#EditDialogUnitListbox").jqxListBox('getSelectedItem').value,
+                    };
+                    $("#dataTable").jqxDataTable('updateRow', editRow, rowData);
+                });
+
+                // Delete record within Edit Dialog
+                $("#EditDialogDeleteRecordButton").click(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // delete row from table.
+                    var deleteRow = parseInt($("#EditDialog").attr('data-row'));
+                    $("#dataTable").jqxDataTable('deleteRow', deleteRow);
+                });
+
+                $("#EditDialogClearInputElementsButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                });
+
+                $("#EditDialog").on('close', function () {
+                    // enable jqxDataTable.
+                    $("#dataTable").jqxDataTable({ disabled: false });
+                });
+            };
+
+            function createElements() {
+                $( "#materialCategoryDropdown" ).jqxDropDownList( {
+                    theme: 'bootstrap',
+                    source: materialCategoryAdapter,
+                    displayMember: "MaterialCategoryName",
+                    selectedIndex: 0,
+                    width: '200px',
+                    height: '26px'
+                } );
+
+                $("#RawMaterialNameInput").jqxInput({
+                    theme: 'bootstrap', height: '26px', width: '200px', minLength: 0
+                });
+
+                $("#VisibilityFermentableCheckbox").jqxCheckBox({
+                    theme: 'bootstrap', height: '26px', width: '200px'
+                });
+
+                $("#VisibilityFermentedCheckbox").jqxCheckBox({
+                    theme: 'bootstrap', height: '26px', width: '200px'
+                });
+
+                $("#VisibilityDistilledCheckbox").jqxCheckBox({
+                    theme: 'bootstrap', height: '26px', width: '200px'
+                });
+
+                $("#VisibilitySuppliesCheckbox").jqxCheckBox({
+                    theme: 'bootstrap', height: '26px', width: '200px'
+                });
+
+                $("#VisibilityAdditivesCheckbox").jqxCheckBox({
+                    theme: 'bootstrap', height: '26px', width: '200px'
+                });
+
+                $('#NotesInput').jqxTextArea({
+                    theme: 'bootstrap', height: '300px', width: '75%', minLength: 1
+                });
+
+                $("#CreateRecordButton").jqxButton({
+                    theme: 'bootstrap', width: '220px', height: '28px'
+                });
+
+                $("#ClearInputElementsButton").jqxButton({
+                    theme: 'bootstrap', width: '220px', height: '28px'
+                });
+
+                $("#unitListbox").jqxListBox({ width: 80, source: unitsListAdapater, displayMember: "UnitName", valueMember: "UnitOfMeasurementId", height: 125 });
+
+                $('#validationForm').jqxValidator({
+                    closeOnClick: true,
+                    onSuccess: function () {
+                        createRawMaterialRecord();
+                        genericWorkflowHelper.emptyControls();
+                    },
+                    onError: function () {
+                        alert('Please complete filling out the form');
+                    },
+                    rules: [
+                        { input: '#RawMaterialNameInput', message: 'Material Name Required', action: 'blur', rule: 'required' },
+                        {
+                            input: "#unitListbox", message: "Please Select Units", action: 'click', rule: function (input, commit) {
+                                var index = $("#unitListbox").jqxListBox('getSelectedIndex');
+                                return index != -1;
+                            }
+                        },
+                        {
+                            input: '#VisibilityFermentableCheckbox', message: 'Please Select Material Type', action: 'change', rule: function () {
+                                var checked1 = $("#VisibilityFermentableCheckbox").jqxCheckBox("checked");
+                                var checked2 = $("#VisibilityFermentedCheckbox").jqxCheckBox("checked");
+                                var checked3 = $("#VisibilityDistilledCheckbox").jqxCheckBox("checked");
+                                var checked4 = $("#VisibilitySuppliesCheckbox").jqxCheckBox("checked");
+                                var checked5 = $("#VisibilityAdditivesCheckbox").jqxCheckBox("checked");
+                                return (checked1 || checked2 || checked3 || checked4 || checked5);
+                            }
+                        }
+
+                    ]
+                });
+                
+            };
+
+            function createRawMaterialRecord() {
+                var rawMaterialObject = {
+                    RawMaterialId: "",
+                    RawMaterialName: $("#RawMaterialNameInput").jqxInput('val'),
+                    PurchaseMaterialTypes: {
+                        Fermentable: $("#VisibilityFermentableCheckbox").jqxCheckBox('val'),
+                        Fermented: $("#VisibilityFermentedCheckbox").jqxCheckBox('val'),
+                        Distilled: $("#VisibilityDistilledCheckbox").jqxCheckBox('val'),
+                        Supply: $("#VisibilitySuppliesCheckbox").jqxCheckBox('val'),
+                        Additive: $("#VisibilityAdditivesCheckbox").jqxCheckBox('val'),
+                    },
+                    UnitType: $("#unitListbox").jqxListBox('getSelectedItem').label,
+                    UnitTypeId: $("#unitListbox").jqxListBox('getSelectedItem').value,
+                    Note: $( '#NotesInput' ).jqxTextArea( 'val' ),
+                    MaterialCategoryID: $( "#materialCategoryDropdown" ).jqxDropDownList( 'getSelectedItem' ).originalItem.uid != 'undefined' ? $( "#materialCategoryDropdown" ).jqxDropDownList( 'getSelectedItem' ).originalItem.uid : 0
+                };
+                $.ajax({
+                    type: "POST",
+                    url: '/Dictionary/CreateRawMaterial',
+                    data: JSON.stringify(rawMaterialObject),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    error: function (response) {
+                        alert(response.responseText)
+                    },
+                    success: function (result) {
+                        //on success will need to refresh the table and also empty the form
+                        alert(result);
+                        $("#dataTable").jqxDataTable('updateBoundData');
+                        //window.locationre = result.url;
+                    }
+                });
+            }
+
+            // bindUnitsListBox function queries db for the list of avaiable
+            // units of measurement and binds them to Units Of Measurement control which is used 
+            // when creating new materials.
+            function bindUnitsListBox() {
+                var url = '/Dictionary/GetUnitList';
+                var source = {
+                    datatype: "json",
+                    datafields: [
+                        { name: 'UnitName' }
+                        ,{ name: "UnitOfMeasurementId" }
+                    ],
+                    id: 'UnitOfMeasurementId',
+                    url: url
+                }
+                unitsListAdapater = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true
+                    });
+            }
+            
+            function bindMaterialCategory()
+            {
+                var url = '/Dictionary/GetMaterialCategory';
+                var source =
+                    {
+                        datatype: "json",
+                        datafields: [{
+                            name: 'MaterialCategoryID',
+                            name: 'MaterialCategoryName'
+                        }],
+                        id: 'MaterialCategoryID',
+                        url: url
+                    }
+                materialCategoryAdapter = new $.jqx.dataAdapter( source,
+                {
+                    autoBind: true
+                } );
+            }
+
+            // cellClass function handles conditional cell formatting
+            var cellClass = function (row, dataField, cellText, rowData) {
+                var cellValue = rowData[dataField];
+                var retVal = "";
+                switch (dataField) {
+                    case "Fermentable":
+                        if (cellValue) {
+                            retVal = "Yes";
+                            return retVal;
+                        }
+                        if (!cellValue) {
+                            retVal = "";
+                            return retVal;
+                        }
+                        return retVal;
+                    case "Fermented":
+                        if (cellValue) {
+                            retVal = "Yes";
+                            return retVal;
+                        }
+                        if (!cellValue) {
+                            retVal = "";
+                            return retVal;
+                        }
+                        return retVal;
+                    case "Distilled":
+                        if (cellValue) {
+                            retVal = "Yes";
+                            return retVal;
+                        }
+                        if (!cellValue) {
+                            retVal = "";
+                            return retVal;
+                        }
+                        return retVal;
+                    case "Supply":
+                        if (cellValue) {
+                            retVal = "Yes";
+                            return retVal;
+                        }
+                        if (!cellValue) {
+                            retVal = "";
+                            return retVal;
+                        }
+                        return retVal;
+                    case "Additive":
+                        if (cellValue) {
+                            retVal = "Yes";
+                            return retVal;
+                        }
+                        if (!cellValue) {
+                            retVal = "";
+                            return retVal;
+                        }
+                        return retVal;
+                }
+            }
+            function rawMaterialRecordsViewFunction() {
+                // prepare the data
+                var source =
+                {
+                    dataType: "json",
+                    dataFields: [
+                        { name: 'RawMaterialId', type: 'number' },
+                        { name: 'RawMaterialName', type: 'string' },
+                        { name: 'Fermentable', map: 'PurchaseMaterialTypes>Fermentable', type: 'bool', cellclassName: cellClass },
+                        { name: 'Fermented', map: 'PurchaseMaterialTypes>Fermented', type: 'bool', cellclassName: cellClass },
+                        { name: 'Distilled', map: 'PurchaseMaterialTypes>Distilled', type: 'bool', cellclassName: cellClass },
+                        { name: 'Supply', map: 'PurchaseMaterialTypes>Supply', type: 'bool', cellclassName: cellClass },
+                        { name: 'Additive', map: 'PurchaseMaterialTypes>Additive', type: 'bool', cellCclassName: cellClass },
+                        { name: 'UnitType', type: 'string' },
+                        { name: 'UnitTypeId', type: 'number' },
+                        { name: 'Note', type: 'string' }
+                    ],
+                    sortcolumn: 'RawMaterialName',
+                    sortdirection: 'desc',
+                    id: 'RawMaterialId',
+                    url: '/Dictionary/GetRawMaterialList',
+                    addRow: function (rowID, rowData, position, commit) {
+                        // synchronize with the server - send insert command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        // you can pass additional argument to the commit callback which represents the new ID if it is generated from a DB.
+                        commit(true);
+                    },
+                    updateRow: function (rowID, rowData, commit) {
+                        // synchronize with the server - send update command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var rawMaterialObject = {
+                            RawMaterialId: rowData.RawMaterialId,
+                            RawMaterialName: rowData.RawMaterialName,
+                            PurchaseMaterialTypes: {
+                                Fermentable: rowData.PurchaseMaterialTypes.Fermentable,
+                                Fermented: rowData.PurchaseMaterialTypes.Fermented,
+                                Distilled: rowData.PurchaseMaterialTypes.Distilled,
+                                Supply: rowData.PurchaseMaterialTypes.Supply,
+                                Additive: rowData.PurchaseMaterialTypes.Additive,
+                            },
+                            Note: rowData.Note,
+                            UnitType: rowData.UnitType,
+                            UnitTypeId: rowData.UnitTypeId
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Dictionary/UpdateRawMaterial',
+                            data: JSON.stringify(rawMaterialObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                rawMaterialRecordsDataAdapter.dataBind();
+                                unitsListAdapater.dataBind();
+                                commit(true);
+                                //window.locationre = result.url;
+                            }
+                        });
+                    },
+
+                    // new delete function
+                    deleteRow: function (rowID, commit) {
+                        // synchronize with the server - send delete command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var DeleteRecordObject = {
+                            DeleteRecordID: rowID,
+                            DeleteRecordType: "RawMaterial"
+                        }
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Dictionary/DeleteRecord',
+                            data: JSON.stringify(DeleteRecordObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                alert(result);
+                                commit(true);
+                                rawMaterialRecordsDataAdapter.dataBind();
+                            }
+                        });
+                    }
+                };
+
+                var rawMaterialRecordsDataAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true,
+                        loadComplete: function () {
+                            var t = rawMaterialRecordsDataAdapter;
+                        }
+                    } );
+
+                // create Table Grid
+                $("#dataTable").jqxDataTable(
+                {
+                    width: '100%',
+                    source: rawMaterialRecordsDataAdapter,
+                    theme: 'bootstrap',
+                    pageSize: 15,
+                    sortable: true,
+                    filterable: false,
+                    pageable: true,
+                    pagerPosition: 'top',
+                    autoRowHeight: false,
+                    ready: function () {
+
+                        $("#EditDialogRawMaterialIdInput").jqxInput({
+                            disabled: true, theme: 'bootstrap', width: 50, height: 25
+                        });
+
+                        $("#EditDialogRawMaterialNameInput").jqxInput({
+                            theme: 'bootstrap', height: '26px', width: '100px', minLength: 0
+                        });
+
+                        $("#EditDialogVisibilityFermentableCheckbox").jqxCheckBox({
+                            theme: 'bootstrap', height: '26px', width: '200px'
+                        });
+
+                        $("#EditDialogVisibilityFermentedCheckbox").jqxCheckBox({
+                            theme: 'bootstrap', height: '26px', width: '200px'
+                        });
+
+                        $("#EditDialogVisibilityDistilledCheckbox").jqxCheckBox({
+                            theme: 'bootstrap', height: '26px', width: '200px'
+                        });
+
+                        $("#EditDialogVisibilitySuppliesCheckbox").jqxCheckBox({
+                            theme: 'bootstrap', height: '26px', width: '200px'
+                        });
+
+                        $("#EditDialogVisibilityAdditivesCheckbox").jqxCheckBox({
+                            theme: 'bootstrap', height: '26px', width: '200px'
+                        });
+
+                        $('#EditDialogNotesInput').jqxTextArea({
+                            theme: 'bootstrap', height: '50px', width: '200px', minLength: 1
+                        });
+
+                        $("#EditDialogSaveRecordButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+
+                        $("#EditDialogDeleteRecordButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+
+                        $("#EditDialogClearInputElementsButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+
+                        $("#EditDialogUnitListbox").jqxListBox({ width: 80, source: unitsListAdapater, displayMember: "UnitName", valueMember: "UnitOfMeasurementId", height: 125 });
+
+                        $("#EditDialog").jqxWindow({
+                            position: 'center',
+                            width: 'auto',
+                            height: 'auto',
+                            modalOpacity: 0.5,
+                            autoOpen: false,
+                            isModal: false
+                        });
+                        $("#EditDialog").css('visibility', 'visible');
+                    },
+                    columns: [
+                        { text: 'Material Name', dataField: 'RawMaterialName', cellsAlign: 'center', align: 'center', width: '20%' },
+                        { text: 'Fermentable', columngroup: 'PurchaseMaterialTypes', dataField: 'Fermentable', cellsAlign: 'center', align: 'center' },
+                        { text: 'Fermented', columngroup: 'PurchaseMaterialTypes', dataField: 'Fermented', cellsAlign: 'center', align: 'center' },
+                        { text: 'Distilled', columngroup: 'PurchaseMaterialTypes', dataField: 'Distilled', cellsAlign: 'center', align: 'center' },
+                        { text: 'Supply', columngroup: 'PurchaseMaterialTypes', dataField: 'Supply', cellsAlign: 'center', align: 'center' },
+                        { text: 'Additive', columngroup: 'PurchaseMaterialTypes', dataField: 'Additive', cellsAlign: 'center', align: 'center' },
+                        { text: 'Unit Of Measurement', dataField: 'UnitType', cellsAlign: 'center', align: 'center' },
+                        { text: 'Notes', dataField: 'Note', cellsAlign: 'center', align: 'center', width: '20%' }
+                    ],
+                    columnGroups: [
+                      { text: 'Purchase Material Type', align: 'center', name: 'PurchaseMaterialTypes' }
+                    ]
+                });
+            }
+
+            return {
+                config: {
+                    dragArea: null
+                },
+                init: function () {
+                    //load Units List and bind its data
+                    bindUnitsListBox();
+                    //bind material category dropdown
+                    bindMaterialCategory();
+                    //Creating all jqxWindgets except the window
+                    createElements();
+                    //Populate Table
+                    rawMaterialRecordsViewFunction();
+                    //Attaching event listeners
+                    addEventListeners();
+                }
+            };
+        }());
+
+        $(document).ready(function () {
+            rawMaterialCreationFunction.init();
+        });
+    </script>
+}
+
+<div class="container-fluid body-content">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li>@Html.ActionLink("Spirit", "Spirit", "Dictionary")</li>
+                <li>@Html.ActionLink("Vendor", "Vendor", "Dictionary")</li>
+                <li>@Html.ActionLink("Storage", "Storage", "Dictionary")</li>
+                <li class="active">@Html.ActionLink("Material", "Material", "Dictionary")</li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1>Dictionary / Material</h1>
+            <div class="well">
+                <!-- Nav tabs -->
+                <ul class="nav nav-pills" role="tablist">
+                    <li role="presentation" class="active"><a href="#createRecord" aria-controls="createRecord" role="tab" data-toggle="pill">Create Material</a></li>
+                    <li role="presentation"><a href="#viewRecord" aria-controls="viewRecord" role="tab" data-toggle="tab">View/Edit Material Data</a></li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade in active" id="createRecord">
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="RawMaterialNameInput" class="col-sm-4 control-label">Material Name</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="RawMaterialNameInput">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Material Type</label>
+                                    <div class="col-sm-8">
+                                        <div id='VisibilityFermentableCheckbox'>Fermentable</div>
+                                        <div id='VisibilityFermentedCheckbox'>Fermented</div>
+                                        <div id='VisibilityDistilledCheckbox'>Distilled</div>
+                                        <div id='VisibilitySuppliesCheckbox'>Supplies</div>
+                                        <div id='VisibilityAdditivesCheckbox'>Additives</div>
+                                    </div>
+                                </div>
+                                <div id="materialCategoryContainer" class="form-group" style = "display:none">
+                                    <label class="col-sm-4 control-label">Material Category</label>
+                                    <div class="col-sm-8">
+                                        <div id='materialCategoryDropdown'></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Units used to measure Material</label>
+                                    <div class="col-sm-8">
+                                        <div id='unitListbox'></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="NotesInput" class="col-sm-4 control-label">Notes</label>
+                                    <div class="col-sm-8">
+                                        <textarea id='NotesInput'></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-8">
+                                        <div id='validationForm'></div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <button id="CreateRecordButton">Create Material</button>
+                                <button id="ClearInputElementsButton">Clear Form</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="viewRecord">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="dataTable"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="visibility: hidden;" id="EditDialog">
+                <div style="overflow: hidden;">
+                    <table style="table-layout: fixed; border-style: none;">
+                        <tr>
+                            <td align="right">
+                                Material ID:
+                            </td>
+                            <td align="left">
+                                <input id="EditDialogRawMaterialIdInput" type="text" readonly disabled="disabled" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                Material Name:
+                            </td>
+                            <td align="left">
+                                <input id="EditDialogRawMaterialNameInput" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                Material Type:
+                            </td>
+                            <td align="left">
+                                <div id='EditDialogVisibilityFermentableCheckbox'>Fermentable</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right"></td>
+                            <td align="left">
+                                <div id='EditDialogVisibilityFermentedCheckbox'>Fermented</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right"></td>
+                            <td align="left">
+                                <div id='EditDialogVisibilityDistilledCheckbox'>Distilled</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right"></td>
+                            <td align="left">
+                                <div id='EditDialogVisibilitySuppliesCheckbox'>Supplies</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right"></td>
+                            <td align="left">
+                                <div id='EditDialogVisibilityAdditivesCheckbox'>Additives</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td allign="right">U of M</td>
+                            <td allign="right"><div id='EditDialogUnitListbox'></div></td>
+                        </tr>
+                        <tr>
+                            <td align="right">Notes:</td>
+                            <td align="left">
+                                <textarea class="pull-left" id='EditDialogNotesInput'></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="right">
+                                <br />
+                                <button id="EditDialogSaveRecordButton">Save</button>
+                                <button id="EditDialogDeleteRecordButton">Delete</button>
+                                <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            @Html.Partial("_FooterPartial")
+        </div>
+    </div>
+</div>
+

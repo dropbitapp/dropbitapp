@@ -1,0 +1,59 @@
+﻿@using Microsoft.AspNet.Identity
+@if (Request.IsAuthenticated)
+{
+    @Html.AntiForgeryToken()
+    <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Alpha V2", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Purchase <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Fermentable", "Fermentable", "Purchase")</li>
+                            <li>@Html.ActionLink("Fermented", "Fermented", "Purchase")</li>
+                            <li>@Html.ActionLink("Distilled", "Distilled", "Purchase")</li>
+                            <li>@Html.ActionLink("Supplies", "Supplies", "Purchase")</li>
+                            <li>@Html.ActionLink("Additives", "Additives", "Purchase")</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Production <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Fermentation", "Fermentation", "Production")</li>
+                            <li>@Html.ActionLink("Distillation", "Distillation", "Production")</li>
+                            <li>@Html.ActionLink("Blending", "Blending", "Production")</li>
+                            <li>@Html.ActionLink("Bottling", "Bottling", "Production")</li>
+                        </ul>
+                    <li>@Html.ActionLink("Destruction", "Index", "Destruction")</li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dictionary <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Spirit", "Spirit", "Dictionary")</li>
+                            <li>@Html.ActionLink("Vendor", "Vendor", "Dictionary")</li>
+                            <li>@Html.ActionLink("Storage", "Storage", "Dictionary")</li>
+                            <li>@Html.ActionLink("Material", "Material", "Dictionary")</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Reporting <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Production Operations", "Production", "Reporting")</li>
+                            <li>@Html.ActionLink("Processing Operations", "Processing", "Reporting")</li>
+                            <li>@Html.ActionLink("Storage Operations", "Storage", "Reporting")</li>
+                        </ul>
+                    </li>
+                </ul>
+                @Html.Partial("_LoginPartial")
+            </div>
+        </div>
+    </div>
+}

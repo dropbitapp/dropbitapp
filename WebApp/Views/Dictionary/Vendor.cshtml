@@ -1,0 +1,407 @@
+﻿@{
+    ViewBag.Title = "Vendor";
+}
+
+@section scripts {
+    <script type="text/javascript">
+        var vendorCreationFunction = (function () {
+
+            var genericWorkflowHelper = new genWHelpers();
+
+            function _addEventListeners() {
+                $("#CreateRecordButton").click(function () {
+                    $('#validationForm').jqxValidator('validate');
+                });
+
+                $("#ClearInputElementsButton").click(function () {
+                    genericWorkflowHelper.emptyControls();
+                });
+
+                // Select jqxDataTable row
+                $("#dataTable").on('rowDoubleClick', function (event) {
+                    var args = event.args;
+                    var index = args.index;
+                    var row = args.row;
+                    // update the widgets inside jqxWindow.
+                    $("#EditDialog").jqxWindow('setTitle', "Edit Vendor Record: #" + row.VendorId);
+                    $("#EditDialog").jqxWindow('open');
+                    $("#EditDialog").attr('data-row', index);
+                    $("#dataTable").jqxDataTable({ disabled: true });
+                    $("#EditDialogVendorIdInput").val(row.VendorId);
+                    $("#EditDialogVendorNameInput").val(row.VendorName);
+                    $("#EditDialogNotesInput").val(row.Note);
+                });
+
+                // Save record within Edit Dialog
+                $("#EditDialogSaveRecordButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // update edited row.
+                    var editRow = parseInt($("#EditDialog").attr('data-row'));
+                    var rowData = {
+                        VendorId: $("#EditDialogVendorIdInput").val(),
+                        VendorName: $("#EditDialogVendorNameInput").val(),
+                        Note: $("#EditDialogNotesInput").val()
+                    };
+                    $("#dataTable").jqxDataTable('updateRow', editRow, rowData);
+                });
+
+                // Delete record within Edit Dialog
+                $("#EditDialogDeleteRecordButton").click(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // delete row from table.
+                    var deleteRow = parseInt($("#EditDialog").attr('data-row'));
+                    $("#dataTable").jqxDataTable('deleteRow', deleteRow);
+                });
+
+                $("#EditDialogClearInputElementsButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                });
+
+                $("#EditDialog").on('close', function () {
+                    // enable jqxDataTable.
+                    $("#dataTable").jqxDataTable({ disabled: false });
+                });
+            };
+
+            function _createElements() {
+                $("#VendorNameInput").jqxInput({
+                    theme: 'bootstrap', height: '26px', width: '200px', minLength: 0
+                });
+
+                $('#NotesInput').jqxTextArea({
+                    theme: 'bootstrap', height: '300px', width: '75%', minLength: 1
+                });
+
+                $("#CreateRecordButton").jqxButton({
+                    theme: 'bootstrap', width: '220px', height: '28px'
+                });
+
+                $("#ClearInputElementsButton").jqxButton({
+                    theme: 'bootstrap', width: '220px', height: '28px'
+                });
+
+                $('#validationForm').jqxValidator({
+                    closeOnClick: true,
+                    onSuccess: function () {
+                        _createVendorRecord();
+                        genericWorkflowHelper.emptyControls();
+                    },
+                    onError: function () {
+                        alert('Please complete filling out the form');
+                    },
+                    rules: [
+                        { input: '#VendorNameInput', message: 'Vendor Name Required', action: 'blur', rule: 'required' }
+                    ]
+                });
+            };
+
+            function _createVendorRecord() {
+                var vendorObject = {
+                    VendorId: "",
+                    VendorName: $("#VendorNameInput").jqxInput('val'),
+                    Note: $('#NotesInput').jqxTextArea('val')
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: '/Dictionary/CreateVendor',
+                    data: JSON.stringify(vendorObject),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    error: function (response) {
+                        alert(response.responseText)
+                    },
+                    success: function (result) {
+                        //on success will need to refresh the table and also empty the form
+                        alert(result);
+                        $("#dataTable").jqxDataTable('updateBoundData');
+                        //window.locationre = result.url;
+                    }
+                });
+            }
+
+            function _vendorRecordsViewFunction() {
+                // prepare the data
+                var source =
+                {
+                    dataType: "json",
+                    dataFields: [
+                        { name: 'VendorId', type: 'number' },
+                        { name: 'VendorName', type: 'string' },
+                        { name: 'Note', type: 'string' }
+                    ],
+                    sortcolumn: 'VendorId',
+                    sortdirection: 'desc',
+                    id: 'VendorId',
+                    url: '/Dictionary/GetVendorList',
+                    addRow: function (rowID, rowData, position, commit) {
+                        // synchronize with the server - send insert command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        // you can pass additional argument to the commit callback which represents the new ID if it is generated from a DB.
+                        commit(true);
+                    },
+                    updateRow: function (rowID, rowData, commit) {
+                        // synchronize with the server - send update command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var vendorObject = {
+                            VendorId: rowData.VendorId,
+                            VendorName: rowData.VendorName,
+                            Note: rowData.Note
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Dictionary/UpdateVendor',
+                            data: JSON.stringify(vendorObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                commit(true);
+                                vendorRecordsDataAdapter.dataBind();
+                                //window.locationre = result.url;
+                            }
+                        });
+                    },
+
+                    /*
+                    deleteRow: function (rowID, commit) {
+                        // synchronize with the server - send delete command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var vendorObject = {
+                            VendorId: rowID
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Dictionary/DeleteVendor',
+                            data: JSON.stringify(vendorObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                commit(true);
+                                vendorRecordsDataAdapter.dataBind();
+                                //window.locationre = result.url;
+                            }
+                        });
+                    },
+                    */
+
+                    //new delete row
+                    deleteRow: function (rowID, commit) {
+                        // synchronize with the server - send delete command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var DeleteRecordObject = {
+                            DeleteRecordID: rowID,
+                            DeleteRecordType: "Vendor"
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Dictionary/DeleteRecord',
+                            data: JSON.stringify(DeleteRecordObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                alert(result);
+                                commit(true);
+                                vendorRecordsDataAdapter.dataBind();
+                            }
+                        });
+                    }
+                };
+                
+                var vendorRecordsDataAdapter = new $.jqx.dataAdapter(source);
+                // create Table Grid
+                $("#dataTable").jqxDataTable(
+                {
+                    width: '100%',
+                    source: vendorRecordsDataAdapter,
+                    theme: 'bootstrap',
+                    pageSize: 15,
+                    sortable: true,
+                    filterable: false,
+                    pageable: true,
+                    pagerPosition: 'top',
+                    autoRowHeight: false,
+                    ready: function () {
+
+                        $("#EditDialogVendorIdInput").jqxInput({
+                            disabled: true, theme: 'bootstrap', width: 50, height: 25
+                        });
+
+                        $("#EditDialogVendorNameInput").jqxInput({
+                            theme: 'bootstrap', height: '26px', width: '100px', minLength: 0
+                        });
+
+                        $('#EditDialogNotesInput').jqxTextArea({
+                            theme: 'bootstrap', height: '50px', width: '200px', minLength: 1
+                        });
+
+                        $("#EditDialogSaveRecordButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+
+                        $("#EditDialogDeleteRecordButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+
+                        $("#EditDialogClearInputElementsButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+
+                        $("#EditDialog").jqxWindow({
+                            position: 'center',
+                            width: 'auto',
+                            height: 'auto',
+                            modalOpacity: 0.5,
+                            autoOpen: false,
+                            isModal: false
+                        });
+                        $("#EditDialog").css('visibility', 'visible');
+                    },
+                    columns: [
+                        { text: 'Vendor Name', dataField: 'VendorName', cellsAlign: 'center', align: 'center', width: '20%'},
+                        { text: 'Notes', dataField: 'Note', cellsAlign: 'center', align: 'center' }
+                    ]
+                });
+            }
+
+            return {
+                config: {
+                    dragArea: null
+                },
+                init: function () {
+                    //Creating all jqxWindgets except the window
+                    _createElements();
+                    //Populate Table
+                    _vendorRecordsViewFunction();
+                    //Attaching event listenerst
+                    _addEventListeners();
+                }
+            };
+        }());
+
+        $(document).ready(function () {
+            vendorCreationFunction.init();
+        });
+    </script>
+}
+
+<div class="container-fluid body-content">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li>@Html.ActionLink("Spirit", "Spirit", "Dictionary")</li>
+                <li class="active">@Html.ActionLink("Vendor", "Vendor", "Dictionary")</li>
+                <li>@Html.ActionLink("Storage", "Storage", "Dictionary")</li>
+                <li>@Html.ActionLink("Material", "Material", "Dictionary")</li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1>Dictionary / Vendor</h1>
+            <div class="well">
+                <!-- Nav tabs -->
+                <ul class="nav nav-pills" role="tablist">
+                    <li role="presentation" class="active"><a href="#createRecord" aria-controls="createRecord" role="tab" data-toggle="pill">Create Vendor</a></li>
+                    <li role="presentation"><a href="#viewRecord" aria-controls="viewRecord" role="tab" data-toggle="tab">View/Edit Vendor Data</a></li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade in active" id="createRecord">
+                        <div class="row">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="VendorNameInput" class="col-sm-4 control-label">Vendor Name</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="VendorNameInput">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="NotesInput" class="col-sm-4 control-label">Notes</label>
+                                    <div class="col-sm-8">
+                                        <textarea id='NotesInput'></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-8">
+                                        <div id='validationForm'></div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <button id="CreateRecordButton">Create Vendor</button>
+                                <button id="ClearInputElementsButton">Clear Form</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="viewRecord">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="dataTable"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="visibility: hidden;" id="EditDialog">
+                <div style="overflow: hidden;">
+                    <table style="table-layout: fixed; border-style: none;">
+                        <tr>
+                            <td align="right">
+                                Vendor ID:
+                            </td>
+                            <td align="left">
+                                <input id="EditDialogVendorIdInput" type="text" readonly disabled="disabled" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                Vendor Name:
+                            </td>
+                            <td align="left">
+                                <input id="EditDialogVendorNameInput" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">Notes:</td>
+                            <td align="left">
+                                <textarea class="pull-left" id='EditDialogNotesInput'></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="right">
+                                <br />
+                                <button id="EditDialogSaveRecordButton">Save</button>
+                                <button id="EditDialogDeleteRecordButton">Delete</button>
+                                <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            @Html.Partial("_FooterPartial")
+        </div>
+    </div>
+</div>
+

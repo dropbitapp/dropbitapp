@@ -1,0 +1,1409 @@
+﻿@{
+    ViewBag.Title = "Blending";
+}
+
+@section scripts {
+    <script type="text/javascript">
+        var main = (function () {
+
+            //helper classes declarations
+            var distillCompInstance = new distillCompute();
+            var genericWorkflowHelper = new genWHelpers();
+
+            // data adapters
+            var rawMaterialTypeAdapter;
+            var blendingsAdapter;
+            var storageAdapter;
+            var distilsAdapter;
+            var blendAddAdapter;
+            var spiritTypeAdapter;
+
+            var curRawMatIndex; // this index is used to keep index value of the current selected material that will be used in production
+            var usedMat = {}; // front-end representation of an object in Helpers.cs
+            // this is the structure of usedMat object
+            /*
+                var usedMat = {
+                    ID: "",
+                    OldVal: "",
+                    NewVal: "",
+                    DistillableOrigin: "", // whether it came from purchase or production
+                    BurningDownMethod: "" // are we burning down by Volume or by Weight? {volume, weight}
+                };
+            */
+
+            var usedMatsList = []; // this is a new arra of objects of type UsedMats. It is a replacementto PurchaseIdList.
+
+            var storageList = [];
+            var StorageObject = {};
+
+            var materialR = {};
+
+            //global variables
+            // additive array is used in creation of Blending Record
+            var additivesArray = [];
+            var distilledIdsSelected = [];
+            //for simplicity and neatness, let's assign variables to avoid using selectors TODO: not sure if we'll need it here though
+            //this.BlendingFinalSpiritId = "#BlendingFinalSpiritId";
+
+            var additiveObject = {
+                BlendingAdditiveId: "",
+                RawMaterialId: "",
+                RawMaterialName: "",
+                RawMaterialQuantity: "",
+                UnitOfMeasurement: ""
+            };
+
+            // global ProductionId variable
+            var prodId = 0;
+
+            function _addEventListeners() {
+
+                // Material Burndown state machine
+                // on burndown open event
+                $( '#MatBurnDwnDialog' ).on( 'open', function ( e ) {
+                    if ( distilsAdapter.records[curRawMatIndex].BurningDownMethod === "volume" ) {
+                        $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { checked: true } );
+                        $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { disabled: true } );
+                    }
+                    else if ( distilsAdapter.records[curRawMatIndex].BurningDownMethod === "weight" ) {
+                        $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { checked: true } );
+                        $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { disabled: true } );
+                    }
+                    else {
+                        if ( distilsAdapter.records[curRawMatIndex].VolumeByWeight <= 0 || distilsAdapter.records[curRawMatIndex].VolumeByWeight == undefined ) {
+                            $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { disabled: true } );
+                        }
+
+                        if ( distilsAdapter.records[curRawMatIndex].Quantity <= 0 || distilsAdapter.records[curRawMatIndex].Quantity == undefined ) {
+                            $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { disabled: true } );
+                        }
+
+                        if ( distilsAdapter.records[curRawMatIndex].VolumeByWeight > 0 && distilsAdapter.records[curRawMatIndex].VolumeByWeight != undefined ) {
+                            $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { checked: true } );
+                            $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( distilsAdapter.records[curRawMatIndex].VolumeByWeight );
+                            usedMat.OldVal = distilsAdapter.records[curRawMatIndex].VolumeByWeight;
+                            usedMat.BurningDownMethod = "weight";
+                        }
+                        else if ( distilsAdapter.records[curRawMatIndex].Quantity > 0 && distilsAdapter.records[curRawMatIndex].Quantity != undefined ) {
+                            $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { checked: true } );
+                            $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( distilsAdapter.records[curRawMatIndex].Quantity );
+                            usedMat.OldVal = distilsAdapter.records[curRawMatIndex].Quantity;
+                            usedMat.BurningDownMethod = "volume";
+                        }
+                    }
+                    $( '#MatBurnDwnDialogRadioBtnAll' ).jqxRadioButton( { checked: true } );
+                    $( "#MatBurnDwnDialogQuantityInput" ).val( '' );
+                });
+
+                // burndown type
+                $('#MatBurnDwnDialogRadioBtnGal').on('change', function (event) {
+                    var checked = event.args.checked;
+                    if (checked) {
+                        $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( distilsAdapter.records[curRawMatIndex].Quantity );
+                        usedMat.OldVal = distilsAdapter.records[curRawMatIndex].Quantity;
+                        usedMat.BurnDownMethod = "volume";
+                    }
+                });
+
+                $('#MatBurnDwnDialogRadioBtnVBW').on('change', function (event) {
+                    var checked = event.args.checked;
+                    if (checked) {
+                        //set the the burndown quantity type flag so it can be sent off to the respective record in purhase or production record and be written
+                        $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( distilsAdapter.records[curRawMatIndex].VolumeByWeight );
+                        usedMat.OldVal = distilsAdapter.records[curRawMatIndex].VolumeByWeight;
+                        usedMat.BurnDownMethod = "weight";
+                    }
+                } );
+
+                // burndown amount radio button group
+                $('#MatBurnDwnDialogRadioBtnPartial').on('change', function (event) {
+                    var checked = event.args.checked;
+                    if (checked) {
+                        // make input field visible
+                        inpRow1.style.visibility = "visible";
+                    }
+                    else if (!checked) {
+                        // make input field invisible
+                        inpRow1.style.visibility = "hidden";
+                    }
+                });
+
+                // listen to blur event for burndown material input window so we can update original quantity in time before we close the dialog
+                // Otherwise, if user will click on add button right after updating burndown input field, without clicking anywhere else in the dialog
+                // we don't get an opportunity to update original amount field.
+                MatBurnDwnDialogQuantityInput.addEventListener("blur", () => {
+                    usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
+                } );
+
+                // todo: this was a start of the experimentation for toggling on/off isModal features. This, somehow, didn't work. so need to investigate further.
+                // this is why I kept commented out code here.
+                //$( '#MatBurnDwnDialog' ).on( "close", ( e ) => {
+                //    $( '#MatBurnDwnDialog' ).jqxWindow( { isModal: false } );
+                //    var isModal = $( '#MatBurnDwnDialog' ).jqxWindow( 'isModal' );
+                //} );
+
+                // listen to add button click in burndown dialog
+                $("#MatBurnDwnDialogAdd").click(function () {
+                    if ($('#MatBurnDwnDialogRadioBtnPartial').jqxRadioButton('checked')) {
+                        if ($('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton('checked')) {
+                            // burning down weight case
+                            usedMat.NewVal = $("#MatBurnDwnDialogQuantityInput").val();
+                            usedMat.BurningDownMethod = "volume";
+                        }
+                            // burning down weight case
+                        else if ($('#MatBurnDwnDialogRadioBtnVBW').jqxRadioButton('checked')) {
+                            usedMat.NewVal = $("#MatBurnDwnDialogQuantityInput").val();
+                            usedMat.BurningDownMethod = "weight";
+                        }
+                        usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
+                    }
+                    else {
+                        // burning down by weight case
+                        if ( $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( 'checked' ) ) {
+                            usedMat.NewVal = usedMat.OldVal;
+                            usedMat.BurningDownMethod = "weight";
+                        }
+                        // burning down by volume case
+                        else if ( $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( 'checked' ) ) {
+                            usedMat.NewVal = usedMat.OldVal;
+                            usedMat.BurningDownMethod = "volume";
+                        }
+                        usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
+                    }
+                    usedMat.DistillableOrigin = distilsAdapter.records[curRawMatIndex].DistillableOrigin;
+
+                    if ( ( usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight" ) || usedMat.BurningDownMethod == "volume" ) {
+                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.NewVal, distilsAdapter.records[curRawMatIndex].AlcoholContent );
+                    }
+
+                    usedMatsList.push(usedMat);
+                    usedMat = {};
+                    $("#MatBurnDwnDialog").jqxWindow('close');
+                });
+
+                // listen to cancel button click in burndown dialog
+                $("#MatBurnDwnDialogCancel").click(function () {
+                    // close dialog
+                    usedMat = {};
+                    $("#MatBurnDwnDialogQuantityInput").val('');
+                    $("#MatBurnDwnDialogQuantityInputOriginal").val('');
+                    $("#MatBurnDwnDialog").jqxWindow('close');
+                    $("#DistilList").jqxListBox('uncheckIndex', curRawMatIndex);
+                });
+
+                $('#MatBurnDwnDialogQuantityInput').on('change', function (e) {
+                    var newInpVal = $( "#MatBurnDwnDialogQuantityInput" ).val();
+                    var oldInpVal = 0;
+
+                    if ( usedMat.BurningDownMethod === 'weight' )
+                    {
+                        oldInpVal = distilsAdapter.records[curRawMatIndex].VolumeByWeight;
+                    }
+                    if ( usedMat.BurningDownMethod === 'volume' )
+                    {
+                        oldInpVal = distilsAdapter.records[curRawMatIndex].Quantity;
+                    }
+
+                    $("#MatBurnDwnDialogQuantityInputOriginal").val(oldInpVal - newInpVal);
+                });
+
+                $('#DistilList').on('select', function (event) {
+                    var args = event.args;
+                    if ( args ) {
+                        var index = args.index;
+                        if ( distilsAdapter.records[index].Quantity !== undefined && distilsAdapter.records[index].VolumeByWeight !== undefined ) {
+                            initializeDialogs();
+
+                            if ( distilsAdapter.records[index].DistillableOrigin == 'pur' ) {
+                                usedMat.ID = distilsAdapter.records[index].PurchaseId;
+                                usedMat.DistillableOrigin = distilsAdapter.records[index].DistillableOrigin;
+                            }
+
+                            if ( distilsAdapter.records[index].DistillableOrigin == 'prod' ) {
+                                usedMat.ID = distilsAdapter.records[index].ProductionId;
+                                usedMat.DistillableOrigin = distilsAdapter.records[index].DistillableOrigin;
+                            }
+
+                            curRawMatIndex = index;
+                            if ( args.item.checked ) {
+                                // make burndown window visible and open it-
+                                $( "#MatBurnDwnDialog" ).css( 'visibility', 'visible' );
+                                $('#MatBurnDwnDialog').jqxWindow('open');
+                                $('#DistilList').jqxListBox({ disabled: true });
+                            } else {
+                                removeBurnDownMaterialRecord( curRawMatIndex );
+                            }
+                        }
+                        else {
+                            $( "#DistilList" ).jqxListBox( 'uncheckIndex', index);
+                            alert( "Both values for selected record are undefined, you can't burn down records with non existing quantities" );
+                        }
+                    }
+                });
+
+                // re-enables distilation source batch listbox.
+                $('#MatBurnDwnDialog').on('close', function (event) {
+                    $('#DistilList').jqxListBox({ disabled: false });
+                })
+
+                $("#BlendingCreateButton").click(function () {
+                    $('#validationForm').jqxValidator('validate');
+                });
+
+                $("#AdditiveRemoveButton").click(function () {
+                    $("#BlendingAdditiveList").empty();
+                    additivesArray.length = 0;
+                });
+
+                $("#ClearInputElementsButton").click(function () {
+                    genericWorkflowHelper.emptyControls();
+                    $("#BlendingAdditiveList").empty(); // clearing additive input here so we don't have to create special case in generic emptyControls method. 
+                });
+
+                // listen to the Add button when adding additives in the creation of new blending workflow
+                $("#AdditiveCreateButton").click(function () {
+                    var index = $("#RawMaterialList").jqxListBox('getSelectedIndex');
+                    var datarecord = rawMaterialTypeAdapter.records[index];
+                    additiveObject.RawMaterialId = datarecord.RawMaterialId;
+                    additiveObject.RawMaterialName = datarecord.RawMaterialName;
+                    additiveObject.RawMaterialQuantity = $("#AdditivesQuantity").val();
+                    additiveObject.UnitOfMeasurement = datarecord.UnitType;
+                    additivesArray.push(additiveObject);
+                    $("#BlendingAdditiveList").append($("<tr><td>" + additiveObject.RawMaterialName + "</td><td>" + additiveObject.RawMaterialQuantity + "</td><td>" + datarecord.UnitType + "</td></tr>"));
+                    $('#AdditivesQuantity').jqxNumberInput('val', ''); // clearing additive input here instead of having a one-off function in generic emptyControls method.
+                    additiveObject = {};
+                });
+
+                // adding event listeners for calculation of Proof Gallons when adding new record
+                $('#BlendingQuantity').on('change', function (event) {
+                    if (!($('#BlendingAlcohol').val() == undefined || $('#BlendingAlcohol').val() == "")) {
+                        var qty = $("#BlendingQuantity").val();
+                        var alc = $("#BlendingAlcohol").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $("#BlendingProof").val(prf);
+                    }
+                    else {
+                        $('#BlendingProof').val(0);
+                    }
+                });
+                $('#BlendingAlcohol').on('change', function (event) {
+                    if (!($('#BlendingQuantity').val() == "undefined" || $('#BlendingQuantity').val() == "")) {
+                        var qty = $("#BlendingQuantity").val();
+                        var alc = $("#BlendingAlcohol").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $("#BlendingProof").val(prf);
+                    }
+                    else {
+                        $('#BlendingProof').val(0);
+                    }
+                });
+
+                // this section of code implements listening to the change of BlendingAdditive Name dropdown
+                //selection in BlendingAdditive Edit record and updates units that are associated with a given additive
+                $('#BlendingAdditivesEditDialogAdditiveName').on('select', function (event) {
+                    var args = event.args;
+                    if (args) {
+                        // index represents the item's index.
+                        var index = args.index;
+                        var item = args.item;
+                        // get item's label and value.
+                        var label = item.label;
+                        var value = item.value;
+                        var type = args.type; // keyboard, mouse or null depending on how the item was selected.
+                        $("#BlendingAdditivesEditDialogUnits").val(genericHelper.mapAdditivesToUnits(label));
+                    }
+                });
+
+                // Select jqxDataTable row
+                $("#dataTable").on('rowDoubleClick', function (event) {
+                    var args = event.args;
+                    var index = args.index;
+                    var row = args.row;
+                    prodId = row.ProductionId;
+                    // update the widgets inside jqxWindow.
+                    $("#EditDialog").jqxWindow('setTitle', "Edit Blending Record: #" + prodId);
+                    $("#EditDialog").jqxWindow('open');
+                    $("#EditDialog").attr('data-row', index);
+                    $("#dataTable").jqxDataTable({ disabled: true });
+                    $("#EditDialogPurBatchNameInput").val(row.BatchName);
+                    $("#EditDialogProductionStartDate").jqxDateTimeInput({ value: new Date(row.ProductionStart) });
+                    $("#EditDialogProductionEndDate").jqxDateTimeInput({ value: new Date(row.ProductionEnd) });
+                    $("#EditDialogQuantityInput").val(row.Quantity);
+                    $("#EditDialogVolumeByWeightInput").val(row.VolumeByWeight);
+                    $("#EditDialogAlcConInput").val(row.AlcoholContent);
+                    $("#EditDialogProofInput").val(row.ProofGallon);
+                    $("#EditDialogSpiritTypeInput").jqxDropDownList('selectItem', row.SpiritName);
+                    $("#EditDialogNotesInput").val(row.Note);
+
+                    $("#EditDialogStorageNameInput").jqxListBox('clearSelection');
+
+                    for (var k = 0; k < row.Storage.length; k++) {
+                        $("#EditDialogStorageNameInput").jqxListBox('selectItem', row.Storage[k].StorageName);
+                    }
+
+                    /* adding event listeners for calculation of Proof Gallons when editing existing record.
+                       They have to be registered here becasue this is a new window dialog. 
+                       Registering it's inputs change events in the main page's markup doesn't actually register the event listeners
+                    */
+                    $('#EditDialogQuantityInput').on('change', function (event) {
+                        if (!($('#EditDialogAlcConInput').val() == undefined || $('#EditDialogAlcConInput').val() == "")) {
+                            var qty = $("#EditDialogQuantityInput").val();
+                            var alc = $("#EditDialogAlcConInput").val();
+                            var prf = distillCompInstance.calculateProof(qty, alc);
+                            $("#EditDialogProofInput").val(prf);
+                        }
+                        else {
+                            $('#EditDialogProofInput').val(0);
+                        }
+                    });
+                    $('#EditDialogAlcConInput').on('change', function (event) {
+                        if (!($('#EditDialogQuantityInput').val() == undefined || $('#EditDialogQuantityInput').val() == "")) {
+                            var qty = $("#EditDialogQuantityInput").val();
+                            var alc = $("#EditDialogAlcConInput").val();
+                            var prf = distillCompInstance.calculateProof(qty, alc);
+                            $("#EditDialogProofInput").val(prf);
+                        }
+                        else {
+                            $('#EditDialogProofInput').val(0);
+                        }
+                    });
+                });
+
+                // Save record within Edit Dialog
+                $("#EditDialogSaveRecordButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // update edited row.
+                    var editRow = parseInt($("#EditDialog").attr('data-row'));
+                    var items = $("#EditDialogStorageNameInput").jqxListBox('getSelectedItems');
+
+                    if (items.length != 0) {
+                        for (var i = 0; i < items.length; i++) {
+                            StorageObject = {};
+                            StorageObject.StorageId = items[i].originalItem.StorageId;
+                            StorageObject.StorageName = items[i].originalItem.StorageName;
+                            storageList.push(StorageObject);
+                        }
+                    }
+                    else {
+                        storageList = [];
+                    }
+
+                    var prodStartUtc = genericWorkflowHelper.convertUTC($("#EditDialogProductionStartDate").jqxDateTimeInput('val'), true);
+                    var prodEndUtc = genericWorkflowHelper.convertUTC($("#EditDialogProductionEndDate").jqxDateTimeInput('val'), true);
+
+                    var rowData = {
+                        ProductionType: "Blending",
+                        ProductionId: prodId,
+                        PurBatchName: $('#EditDialogPurBatchNameInput').jqxInput('val'),
+                        ProductionDate: prodEndUtc,
+                        ProductionStart: prodStartUtc,
+                        ProductionEnd: prodEndUtc,
+                        Quantity: $("#EditDialogQuantityInput").jqxNumberInput('val'),
+                        AlcoholContent: $("#EditDialogAlcConInput").jqxNumberInput('val'),
+                        VolumeByWeight: $("#EditDialogVolumeByWeightInput").jqxNumberInput('val'),
+                        ProofGallon: $("#EditDialogProofInput").jqxNumberInput('val'),
+                        SpiritName: $("#EditDialogSpiritTypeInput").jqxDropDownList('getSelectedItem').originalItem.SpiritName,
+                        SpiritId: $("#EditDialogSpiritTypeInput").jqxDropDownList('getSelectedItem').originalItem.SpiritId,
+                        Storage: storageList,
+                        Note: $('#EditDialogNotesInput').jqxTextArea('val')
+                    };
+                    $("#dataTable").jqxDataTable('updateRow', editRow, rowData);
+                    storageList = [];
+                });
+
+                // Delete record within Edit Dialog
+                $("#EditDialogDeleteRecordButton").click(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // delete row from table.
+                    var deleteRow = parseInt($("#EditDialog").attr('data-row'));
+                    $("#dataTable").jqxDataTable('deleteRow', deleteRow);
+                });
+
+                $("#EditDialogClearInputElementsButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                });
+
+                $("#EditDialog").on('close', function () {
+                    // enable jqxDataTable.
+                    $("#dataTable").jqxDataTable({ disabled: false });
+                });
+
+                // listen to the selection of any row in parent table so the details
+                // for a selected record could be displayed in the child table.
+                $("#dataTable").on('rowSelect', function (event) {
+
+                    if (event.args.index != -1)
+                    {
+                        _bindBlendAddData(event.args.row.BlendingAdditives);
+                    }
+                    // update the details DataTable.
+                    // var blendingAdditiveDataAdapter = new $.jqx.dataAdapter(blendingAdditivesSource);
+                    $("#dataTableAdditives").jqxDataTable({ source: blendAddAdapter });
+                });
+            };
+
+            // _createElements function creates a jqxwidgets elements that do not require any sort of data binding later
+            function _createElements() {
+                $("#ProductionStartDate").jqxDateTimeInput({ textAlign: 'center', height: '25px', width: '180px', formatString: "MM/dd/yyyy HH:mm" });
+                $("#ProductionEndDate").jqxDateTimeInput({ textAlign: 'center', height: '25px', width: '180px', formatString: "MM/dd/yyyy HH:mm" });
+                $("#BlendingProof").jqxNumberInput({ height: '25px', width: '100px', disabled: true, inputMode: 'simple', textAlign: 'center', min: 0 });
+                $("#BlendingAlcohol").jqxNumberInput({ height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 });
+                $("#BlendingQuantity").jqxNumberInput({ height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 });
+                $("#BlendingWeight").jqxNumberInput({ height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 });
+                $('#BlendingNotes').jqxTextArea({ height: '100%', width: '100%', minLength: 1 });
+                $("#BlendingCreateButton").jqxButton({ width: '220px', height: '40px' });
+                $("#ClearInputElementsButton").jqxButton({ width: '220px', height: '40px' });
+                $("#AdditivesQuantity").jqxNumberInput({ height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 });
+                $("#AdditiveCreateButton").jqxButton({ width: '130px', height: '30px' });
+                $("#AdditiveRemoveButton").jqxButton({ width: '130px', height: '30px' });
+                $("#BatchName").jqxInput({ height: '25px', width: '160px' });
+
+                $("#RawMaterialList").jqxListBox({
+                    theme: 'bootstrap', multiple: false, source: rawMaterialTypeAdapter, displayMember: "RawMaterialName", valueMember: "RawMaterialId"
+                });
+
+                $("#ProdStorage").jqxListBox({
+                    source: storageAdapter, displayMember: "StorageName", multiple: true,
+                    theme: 'bootstrap'
+                });
+
+                $("#SpiritType").jqxDropDownList({
+                    source: spiritTypeAdapter, displayMember: "SpiritName",
+                    theme: 'bootstrap', height: '26px', width: '150px', autoDropDownHeight: true, autoOpen: false, placeHolder: ""
+                });
+
+                $("#DistilList").jqxListBox({
+                    theme: 'bootstrap', multiple: true, source: distilsAdapter, displayMember: "BatchName", valueMember: "ProductionId", checkboxes: true, width: '100%',
+                });
+
+                $('#validationForm').jqxValidator({
+                    closeOnClick: true,
+                    onSuccess: function () {
+                        _createBlendingRecord();
+                        genericWorkflowHelper.emptyControls();
+                        $("#BlendingAdditiveList").empty(); // clearing additive input here so we don't have to create special case in generic emptyControls method. 
+                    },
+                    onError: function () {
+                        alert('Please complete filling out the form');
+                    },
+                    rules: [
+                        {
+                            input: "#RawMaterialList", message: "Please Select Additive Type", action: 'click', rule: function (input, commit) {
+                                var index = $("#RawMaterialList").jqxListBox('getSelectedIndex');
+                                return index != -1;
+                            }
+                        },
+                        {
+                            input: "#DistilList", message: "Please Select Distilled Batch", action: 'click', rule: function (input, commit) {
+                                var index = $("#DistilList").jqxListBox('getSelectedIndex');
+                                return index != -1;
+                            }
+                        },
+                        { input: '#BatchName', message: 'Batch Name Required', action: 'blur', rule: 'required' },
+                        {
+                            input: "#ProdStorage", message: "Please Select Storage", action: 'click', rule: function (input, commit) {
+                                var index = $("#ProdStorage").jqxListBox('getSelectedIndex');
+                                return index != -1;
+                            }
+                        },
+                        {
+                            input: "#SpiritType", message: "Please Select Spirit Type", action: 'blur', rule: function (input, commit) {
+                                var index = $("#SpiritType").jqxDropDownList('getSelectedIndex');
+                                return index != -1;
+                            }
+                        },
+                        {   
+                            input: '#BlendingQuantity', message: 'Please Enter Quantity', action: 'blur', rule: function () {
+                                var quantityValue = $("#BlendingQuantity").val();
+                                var volumeValue = $('#BlendingWeight').val();
+                                if (volumeValue != 0) {
+                                    return true;
+                                } else if (quantityValue > 0) {
+                                    $('#validationForm').jqxValidator('validateInput', '#BlendingWeight');
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        {
+                            input: '#BlendingWeight', message: 'Please Enter Volume', action: 'blur', rule: function () {
+                                var volumeValue = $('#BlendingWeight').val();
+                                var quantityValue = $("#BlendingQuantity").val();
+                                if (quantityValue != 0) {
+                                    return true;
+                                } else if (volumeValue > 0) {
+                                    $('#validationForm').jqxValidator('validateInput', '#BlendingQuantity');
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        {
+                            input: '#BlendingAlcohol', message: 'Please Enter Price', action: 'blur', rule: function () {
+                                var value = $('#BlendingAlcohol').val();
+                                return value > 0 ? true : false;
+                            }
+                        }
+                    ]
+                });
+
+                // create and initialize parent table
+                $("#dataTable").jqxDataTable({
+                    width: '100%',
+                    source: blendingsAdapter,
+                    theme: 'metro',
+                    sortable: true,
+                    pageable: true,
+                    pagerPosition: 'top',
+                    autoRowHeight: false,
+                    ready: function ()
+                    {
+                        $("#EditDialogPurBatchNameInput").jqxInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px'
+                        });
+                        $("#EditDialogProductionStartDate").jqxDateTimeInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            formatString: 'MM/dd/yyyy HH:mm'
+                        });
+                        $("#EditDialogProductionEndDate").jqxDateTimeInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            formatString: 'MM/dd/yyyy HH:mm'
+                        });
+                        $("#EditDialogQuantityInput").jqxNumberInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            inputMode: 'simple',
+                            textAlign: 'center',
+                            min: 0
+                        });
+                        $("#EditDialogVolumeByWeightInput").jqxNumberInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            inputMode: 'simple',
+                            textAlign: 'center',
+                            min: 0
+                        });
+                        $("#EditDialogAlcConInput").jqxNumberInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            inputMode: 'simple',
+                            textAlign: 'center',
+                            min: 0
+                        });
+                        $("#EditDialogProofInput").jqxNumberInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            inputMode: 'simple',
+                            textAlign: 'center',
+                            min: 0
+                        });
+                        $("#EditDialogStorageNameInput").jqxListBox({
+                            source: storageAdapter,
+                            displayMember: "StorageName",
+                            theme: 'bootstrap',
+                            multiple: true
+                        });
+
+                        $("#EditDialogSpiritTypeInput").jqxDropDownList({
+                            source: spiritTypeAdapter,
+                            displayMember: "SpiritName",
+                            theme: 'bootstrap'
+                        });
+                        $('#EditDialogNotesInput').jqxTextArea({
+                            theme: 'bootstrap',
+                            height: '150px',
+                            width: '150px',
+                            minLength: 1
+                        });
+                        $("#EditDialogSaveRecordButton").jqxButton({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px'
+                        });
+                        $("#EditDialogDeleteRecordButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+                        $("#EditDialogClearInputElementsButton").jqxButton({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px'
+                        });
+                        $("#EditDialog").jqxWindow({
+                            position: 'center',
+                            maxHeight: '100%',
+                            width: 'auto',
+                            height: 'auto',
+                            modalOpacity: 0.5,
+                            autoOpen: false,
+                            isModal: false
+                        });
+                        $("#EditDialog").css('visibility', 'visible');
+                        _initializeChildTable();
+                        $("#dataTable").jqxDataTable('selectRow', 0);
+                    },
+                    columns: [
+                      {
+                          text: 'Batch Name',
+                          dataField: 'BatchName',
+                          cellsAlign: 'center',
+                          align: 'center',
+                          width: '20%'
+                      },
+                      {
+                          text: 'Date/Time',
+                          dataField: 'ProductionDate',
+                          cellsFormat: 'MM/dd/yyyy hh:mm tt',
+                          cellsAlign: 'center',
+                          align: 'center',
+                          width: '12%'
+                      },
+                      {
+                          text: 'Qty (gal)',
+                          dataField: 'Quantity',
+                          cellsAlign: 'center',
+                          align: 'center',
+                          width: '8%'
+                      },
+                      {
+                          text: 'Volume By Weight (lb)',
+                          dataField: 'VolumeByWeight',
+                          cellsAlign: 'center',
+                          align: 'center',
+                          width: '12%'
+                      },
+                      {
+                          text: 'Alcohol %',
+                          dataField: 'AlcoholContent',
+                          cellsAlign: 'center',
+                          align: 'center',
+                          width: '8%'
+                      },
+                      {
+                          text: 'Proof Gallon',
+                          dataField: 'ProofGallon',
+                          cellsAlign: 'center',
+                          align: 'center',
+                          width: '8%'
+                      },
+                      {
+                          text: 'Spirit Type',
+                          dataField: 'SpiritName',
+                          cellsAlign: 'center',
+                          align: 'center',
+                          width: '8%'
+                      },
+                      {
+                          text: 'Notes',
+                          dataField: 'Note',
+                          cellsAlign: 'center',
+                          align: 'center'
+                      }
+                    ]
+                });
+            };
+
+            // create and initialize child table
+            function _initializeChildTable() {
+                
+                $("#dataTableAdditives").jqxDataTable(
+                {
+                    width: '100%',
+                    height: 'auto',
+                    source: blendAddAdapter,
+                    theme: 'metro',
+                    editable: true,
+                    showToolbar: false,
+                    altRows: true,
+                    autoRowHeight: true,
+                    toolbarHeight: 35,
+                    ready: function () {
+
+                    },
+                    columns: [
+                   //{ text: 'Blending Additive ID', dataField: 'BlendingAdditiveId', cellsAlign: 'center', align: 'center', width: '8%' },
+                   //{ text: 'Blending ID', dataField: 'BlendingId', cellsAlign: 'center', align: 'center', width: '10%', editable: false },
+                   { text: 'Additive Name', dataField: 'RawMaterialName', width: '12%', cellsAlign: 'center', align: 'center', },
+                   { text: 'Additive Quantity', dataField: 'RawMaterialQuantity', cellsAlign: 'center', align: 'center', width: '10%' },
+                   { text: 'Unit Of Measurement', dataField: 'UnitOfMeasurement', cellsAlign: 'center', align: 'center', width: '14%', editable: false }
+                    ]
+                });
+            }
+
+            function initializeDialogs() {
+                $( '#MatBurnDwnDialog' ).jqxWindow( {
+                    width: '30%',
+                    height: 'auto',
+                    minHeight: '90%',
+                    draggable: false,
+                    resizable: false,
+                    autoOpen: false,
+                    isModal: false,
+                    showCloseButton: false,
+                    initContent: function () {
+                        $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { checked: true, groupName: "Quanity" } );
+                        $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { groupName: "Quanity" } );
+                        $( '#MatBurnDwnDialogRadioBtnAll' ).jqxRadioButton( { checked: true, groupName: "Amount" } )
+                        $( '#MatBurnDwnDialogRadioBtnPartial' ).jqxRadioButton( { groupName: "Amount" } )
+                        $( "#MatBurnDwnDialogQuantityInput" ).jqxNumberInput( { height: '25px', width: '80px', inputMode: 'simple', textAlign: 'center' } );
+                        $( "#MatBurnDwnDialogQuantityInputOriginal" ).jqxNumberInput( { height: '25px', width: '80px', inputMode: 'simple', textAlign: 'center' } );
+                        $( '#MatBurnDwnDialogCancel' ).jqxButton( { height: '25px', width: '80px' } );
+                        $( '#MatBurnDwnDialogAdd' ).jqxButton( { height: '25px', width: '80px' } );
+                    }
+                } );
+            }
+            function _bindRawMaterialTypes() {
+                var url = '/Production/GetAdditivesList';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'RawMaterialId' },
+                        { name: 'RawMaterialName' },
+                        { name: 'UnitType' },
+                        { name: 'Note' }
+                    ],
+                    id: 'RawMaterialId',
+                    url: url,
+                    data: { matType: "Additive" }
+                }
+                rawMaterialTypeAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true
+                    });
+            }
+
+            function _bindProdData() {
+                var url = '/Production/GetProductionData';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'BatchName', type: 'string' },
+                        { name: 'ProductionId', type: 'number' },
+                        { name: 'SpiritCutId', type: 'number' },
+                        { name: 'ProductionDate', type: 'date' },
+                        { name: 'ProductionStart', type: 'date' },
+                        { name: 'ProductionEnd', type: 'date' },
+                        { name: 'Quantity', type: 'float' },
+                        { name: 'VolumeByWeight', type: 'float' },
+                        { name: 'AlcoholContent', type: 'float' },
+                        { name: 'ProofGallon', type: 'float' },
+                        { name: 'SpiritCutName', type: 'string' },
+                        { name: 'SpiritName', type: 'string' },
+                        { name: 'SpiritId', type: 'number' },
+                        { name: 'Storage' },
+                        { name: 'UnitOfMeasurementId', type: 'number' },
+                        { name: 'BlendingAdditives' },
+                        { name: 'Note', type: 'string' }
+                    ],
+                    id: 'ProductionId',
+                    url: url,
+                    data: { prodType: "Blending" },
+                    async: true,
+                    updateRow: function (rowID, rowData, commit) {
+                        // synchronize with the server - send update command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var productionObject = {
+                            ProductionType: "Blending",
+                            ProductionId: rowData.ProductionId,
+                            BatchName: rowData.BatchName,
+                            ProductionDate: rowData.ProductionEnd,
+                            ProductionEnd: rowData.ProductionEnd,
+                            ProductionStart: rowData.ProductionStart,
+                            Quantity: rowData.Quantity,
+                            VolumeByWeight: rowData.VolumeByWeight,
+                            AlcoholContent: rowData.AlcoholContent,
+                            ProofGallon: rowData.ProofGallon,
+                            SpiritName: rowData.SpiritName,
+                            SpiritId: rowData.SpiritId,
+                            Storage: storageList,
+                            Note: rowData.Note
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/UpdateProduction',
+                            data: JSON.stringify(productionObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                blendingsAdapter.dataBind();
+                                commit(true);
+                                //window.locationre = result.url;
+                            }
+                        });
+                    },
+                    deleteRow: function (rowID, commit) {
+                        // synchronize with the server - send delete command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var productionObject = {
+                            ProductionType: "Blending",
+                            ProductionId: rowID
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/DeleteBlending',
+                            data: JSON.stringify(productionObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                commit(true);
+                                blendingsAdapter.dataBind();
+                                //window.locationre = result.url;
+                            }
+                        });
+                    }
+                };
+                blendingsAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true,
+                        beforeLoadComplete: function (records) {
+                            var data = [];
+                            for (var i = 0; i < records.length; i++) {
+                                records[i].ProductionDate = genericWorkflowHelper.convertUTC(records[i].ProductionDate, false);
+                                records[i].ProductionStart = genericWorkflowHelper.convertUTC(records[i].ProductionStart, false);
+                                records[i].ProductionEnd = genericWorkflowHelper.convertUTC(records[i].ProductionEnd, false);
+                                for (var k = 0; k < records[i].BlendingAdditives.length; k++) {
+                                    data.push(records[i].BlendingAdditives[k]);
+                                }
+                            }
+                            _bindBlendAddData(data);
+                        }
+                    });
+            }
+
+            function _bindBlendAddData(blendingsAdapter) {
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'ProductionId', type: 'number' },
+                        { name: 'BlendingAdditiveId', type: 'number' },
+                        { name: 'RawMaterialId', type: 'number' },
+                        { name: 'RawMaterialQuantity', type: 'number' },
+                        { name: 'RawMaterialName', type: 'string' },
+                        { name: 'UnitOfMeasurement', type: 'string' }
+                    ],
+                    id: 'BlendingAdditiveId',
+                    async: true,
+                    localdata: blendingsAdapter
+                };
+
+                blendAddAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true,
+                    });
+            }
+
+            function _bindStorageData() {
+                var url = '/Production/GetStorageData';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'StorageId' },
+                        { name: 'StorageName' },
+                        { name: 'Note' }
+                    ],
+                    id: 'StorageId',
+                    url: url
+                }
+                storageAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true
+                    });
+            }
+
+            function _bindSpiritTypeData() {
+                var url = '/Production/GetSpiritTypes';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'SpiritId' },
+                        { name: 'SpiritName' }
+                    ],
+                    id: 'SpiritId',
+                    url: url
+                }
+                spiritTypeAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true
+                    });
+            }
+
+            function _bindDistillData() {
+                var url = '/Production/GetMaterialListForProduction';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'BatchName' },
+                        { name: 'RecordId' },
+                        { name: 'ProductionId' },
+                        { name: 'PurchaseId' },
+                        { name: 'productionType' },
+                        { name: 'DistillableOrigin' },
+                        { name: 'VolumeByWeight' },
+                        { name: 'Quantity' }
+                    ],
+                    id: 'RecordId',
+                    url: url,
+                    data: { productionType: "blending" }
+                }
+                distilsAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true,
+                        async: true
+                    });
+            }
+
+            function _createBlendingRecord() {
+
+                var items = $("#ProdStorage").jqxListBox('getSelectedItems');
+
+                if (items) {
+                    for (var i = 0; i < items.length; i++) {
+                        StorageObject = {};
+                        StorageObject.StorageId = items[i].originalItem.StorageId;
+                        StorageObject.StorageName = items[i].originalItem.StorageName;
+                        storageList.push(StorageObject);
+                    }
+                }
+
+                var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStartDate").jqxDateTimeInput('val'), true);
+                var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProductionEndDate").jqxDateTimeInput('val'), true);
+
+                var ProductionObject = {
+                    BatchName: 'PROD-' + $('#BatchName').jqxInput('val'),
+                    ProductionType: "Blending",
+                    RecordIds: distilledIdsSelected,
+                    ProductionDate: prodEndUtc,
+                    ProductionStart: prodStartUtc,
+                    ProductionEnd: prodEndUtc,
+                    Quantity: $('#BlendingQuantity').jqxNumberInput('val'),
+                    VolumeByWeight: $('#BlendingWeight').jqxNumberInput('val'),
+                    AlcoholContent: $('#BlendingAlcohol').jqxNumberInput('val'),
+                    ProofGallon: $('#BlendingProof').jqxNumberInput('val'),
+                    Storage: storageList,
+                    SpiritId: $("#SpiritType").jqxDropDownList('getSelectedItem').originalItem.SpiritId,
+                    SpiritName: $("#SpiritType").jqxDropDownList('getSelectedItem').label,
+                    Note: $('#BlendingNotes').jqxTextArea('val'),
+                    BlendingAdditives: additivesArray,
+                    UsedMats: usedMatsList
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/CreateProductionRecord',
+                    data: JSON.stringify(ProductionObject),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    error: function (response) {
+                        alert(response.responseText)
+                    },
+                    success: function (result) {
+                        //on success will need to refresh the table and also empty the form
+                        alert(result);
+                        distilledIdsSelected = [];
+                        $('#DistilList').jqxListBox('refresh');
+                        $("#dataTable").jqxDataTable('updateBoundData');
+                        usedMatsList = [];
+                        storageList = [];
+                    }
+                });
+            }
+
+            // this function is used to remove an item from the array of burndown material objects
+            function removeBurnDownMaterialRecord(index) {
+                for ( var i = 0; i < usedMatsList.length; i++ ) {
+                    if ( usedMatsList[i].DistillableOrigin === 'pur' ) {
+                        if ( usedMatsList[i].ID === distilsAdapter.records[index].PurchaseId ) {
+                            var slice1 = usedMatsList.slice( 0, i );
+                            var slice2 = usedMatsList.slice( i + 1, usedMatsList.length + 1 );
+                            usedMatsList = slice1.concat( slice2 );
+                        }
+                    }
+                    else if ( usedMatsList[i].DistillableOrigin === 'prod' ) {
+                        if ( usedMatsList[i].ID === distilsAdapter.records[index].ProductionId ) {
+                            var slice1 = usedMatsList.slice( 0, i );
+                            var slice2 = usedMatsList.slice( i + 1, usedMatsList.length + 1 );
+                            usedMatsList = slice1.concat( slice2 );
+                        }
+                    }
+                }
+            }
+
+            return {
+                config: {
+                    dragArea: null
+                },
+                init: function () {
+                    // bind to server data
+                    _bindRawMaterialTypes();
+                    _bindStorageData();
+                    _bindDistillData();
+                    _bindProdData();
+                    _bindSpiritTypeData();
+                    // create page elements
+                    _createElements();
+                    //Attaching event listeners
+                    _addEventListeners();
+                    //Adding jqxWindow
+                }
+            };
+        }());
+
+        $(document).ready(function () {
+            main.init();
+        });
+    </script>
+}
+
+<div class="container-fluid body-content">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li>@Html.ActionLink("Fermentation", "Fermentation", "Production")</li>
+                <li>@Html.ActionLink("Distillation", "Distillation", "Production")</li>
+                <li class="active">@Html.ActionLink("Blending", "Blending", "Production")</li>
+                <li>@Html.ActionLink("Bottling", "Bottling", "Production")</li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1>Production / Blending</h1>
+            <div class="well">
+                <!-- Nav tabs -->
+                <ul class="nav nav-pills" role="tablist">
+                    <li role="presentation" class="active"><a href="#createRecord" aria-controls="createRecord" role="tab" data-toggle="pill">Enter Blending Data</a></li>
+                    <li role="presentation"><a href="#viewRecord" aria-controls="viewRecord" role="tab" data-toggle="tab">View/Edit Blending Data</a></li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade in active" id="createRecord">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <label for="RawMaterialList" class="col-sm-6 control-label">Additive List</label>
+                                        <div class="col-sm-6">
+                                            <div id="RawMaterialList"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="AdditivesQuantity" class="col-sm-6 control-label">Additive Quantity</label>
+                                        <div class="col-sm-6">
+                                            <div id="AdditivesQuantity"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-6">
+                                            <button class="pull-right" id="AdditiveCreateButton" type="button">Add Additive</button>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <button class="pull-left" id="AdditiveRemoveButton" type="button">Remove Additive</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="BlendingAdditiveList" class="col-sm-6 control-label">Selected Blending Additives:</label>
+                                        <div class="col-sm-6">
+                                            <table>
+                                                <tbody id="BlendingAdditiveList"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12 text-center">
+                                            <label for="DistilList">Select Distilled Batches to Blend</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <div id="DistilList"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <p class="help-block text-center">Final Blending Data</p>
+                                        <label for="BatchName" class="col-sm-6 control-label">Batch Name</label>
+                                        <div class="col-sm-6">
+                                            PROD-<input id="BatchName" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProductionStartDate" class="col-sm-6 control-label">Blending Start Date</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProductionStartDate"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProductionEndDate" class="col-sm-6 control-label">Blending End Date</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProductionEndDate"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProdStorage" class="col-sm-6 control-label">Storage</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProdStorage"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="SpiritType" class="col-sm-6 control-label">Spirit Type</label>
+                                        <div class="col-sm-6">
+                                            <div id="SpiritType"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="BlendingQuantity" class="col-sm-6 control-label">Volume (gal)</label>
+                                        <div class="col-sm-6">
+                                            <div id="BlendingQuantity"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="BlendingWeight" class="col-sm-6 control-label">Weight (lb)</label>
+                                        <div class="col-sm-6">
+                                            <div id="BlendingWeight"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="BlendingAlcohol" class="col-sm-6 control-label">Alcohol Content</label>
+                                        <div class="col-sm-6">
+                                            <div id="BlendingAlcohol"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="BlendingProof" class="col-sm-6 control-label">Proof Gallons</label>
+                                        <div class="col-sm-6">
+                                            <div id="BlendingProof"></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-6 note-column">
+                                <form class="text-center">
+                                    <div class="form-group">
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading">Notes</div>
+                                            <div class="panel-body">
+                                                <textarea class="form-control" id='BlendingNotes'></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-8">
+                                            <div id='validationForm'></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <button id="BlendingCreateButton">Create Record</button>
+                                <button id="ClearInputElementsButton">Clear Form</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="viewRecord">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="dataTable"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="dataTableAdditives"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @Html.Partial("_FooterPartial")
+        </div>
+    </div>
+    <!--This html is hidden. It is used for table editing dialog-->
+    <div style="visibility: hidden;" id="EditDialog">
+        <div style="overflow: hidden;">
+            <table style="table-layout: fixed; border-style: none;">
+                <tr>
+                    <td align="right">
+                        Batch Name:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogPurBatchNameInput" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Blending Start Date:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogProductionStartDate" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Blending End Date:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogProductionEndDate" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Quantity:
+                    </td>
+                    <td align="left">
+                        <div id="EditDialogQuantityInput" type="text"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Volume By Weight:
+                    </td>
+                    <td align="left">
+                        <div id="EditDialogVolumeByWeightInput" type="text"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Alcohol Content:
+                    </td>
+                    <td align="left">
+                        <div id="EditDialogAlcConInput" type="text"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Proof Gallons:
+                    </td>
+                    <td align="left">
+                        <div id="EditDialogProofInput" type="text"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Spirit Type:
+                    </td>
+                    <td align="left">
+                        <div id="EditDialogSpiritTypeInput"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Storage:
+                    </td>
+                    <td align="left">
+                        <div id="EditDialogStorageNameInput" type="text"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">Notes:</td>
+                    <td align="left">
+                        <textarea class="pull-left" id='EditDialogNotesInput'></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right">
+                        <br />
+                        <button id="EditDialogSaveRecordButton">Save</button>
+                        <button id="EditDialogDeleteRecordButton">Delete</button>
+                        <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!--Hidden markup. Material Burndown dialog-->
+    <div id="MatBurnDwnDialog" style="visibility: hidden;">
+        <div id="MatBurnDwnDialogHeader">
+            <span>Material Quantity Burndown</span>
+        </div>
+        <div id="MatBurnDwnDialogContent" style="overflow:hidden">
+            <div class="panel-wrapper">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Step 1</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnGal" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnGal">Burndown By Volume</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnVBW" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnVBW">Burndown By Weight</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Step 2</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnAll" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnAll">Burndown All Amount</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnPartial" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnPartial">Burndown Partial Amount</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-body">
+                        <div id="inpRow1" style="visibility: hidden">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="text-center">Amount to Burndown</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="text-center">Amount Remaining</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="center-block" id="MatBurnDwnDialogQuantityInput"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="center-block" id="MatBurnDwnDialogQuantityInputOriginal"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="center-block" id="MatBurnDwnDialogAdd">Add</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="center-block" id="MatBurnDwnDialogCancel">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1388 @@
+﻿@{
+    ViewBag.Title = "Bottling";
+}
+
+@section scripts {
+    <script type="text/javascript">
+        var bottlingCreationFunction = (function () {
+
+            // initialize helper classes
+            var distillCompInstance = new distillCompute();
+            var genericWorkflowHelper = new genWHelpers();
+
+
+            // spirit ID for a spirit Name currently selected from Blend's selection
+            var spiritId;
+
+            // dataAdapters
+            var blendingDataAdapter;
+            var spiritTypeDataAdapter;
+
+            var curRawMatIndex; // this index is used to keep index value of the current selected material that will be used in production
+            var usedMat = {}; // front-end representation of an object in Helpers.cs
+            // this is the structure of usedMat object
+            /*
+                var usedMat = {
+                    ID: "",
+                    OldVal: "",
+                    NewVal: "",
+                    DistillableOrigin: "", // whether it came from purchase or production
+                    BurningDownMethod: "" // are we burning down by Volume or by Weight? {volume, weight}
+                };
+            */
+
+            var usedMatsList = []; // this is a new arra of objects of type UsedMats. It is a replacementto PurchaseIdList.
+            var storageList = [];
+            var StorageObject = {};
+
+            // object to be used in the array below
+            var materialR = {};
+
+            // this object is used to keep global variables values. In order to avoid slowly filling
+            // the code with multiple global variables, proposing creating an object that will keep track of globals Example:
+            /*
+            var globals ={};
+            globals.EditDialogTotalProofValue = x;
+            */
+            var globals = {
+                prodId: 0,//global ProductionId variable
+                editDialogTotalProofVal: 0
+            };
+
+            function _addEventListeners() {
+                // Material Burndown state machine
+                // on burndown dialog open event
+                $( '#MatBurnDwnDialog' ).on( 'open', function ( e ) {
+                    if ( blendingDataAdapter.records[curRawMatIndex].BurningDownMethod === "volume" ) {
+                        $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { checked: true } );
+                        $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { disabled: true } );
+                    }
+                    else if ( blendingDataAdapter.records[curRawMatIndex].BurningDownMethod === "weight" ) {
+                        $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { checked: true } );
+                        $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { disabled: true } );
+                    }
+                    else {
+                        if ( blendingDataAdapter.records[curRawMatIndex].VolumeByWeight <= 0 || blendingDataAdapter.records[curRawMatIndex].VolumeByWeight == undefined ) {
+                            $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { disabled: true } );
+                        }
+
+                        if ( blendingDataAdapter.records[curRawMatIndex].Quantity <= 0 || blendingDataAdapter.records[curRawMatIndex].Quantity == undefined ) {
+                            $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { disabled: true } );
+                        }
+
+                        if ( blendingDataAdapter.records[curRawMatIndex].VolumeByWeight > 0 && blendingDataAdapter.records[curRawMatIndex].VolumeByWeight != undefined ) {
+                            $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { checked: true } );
+                            $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( blendingDataAdapter.records[curRawMatIndex].VolumeByWeight );
+                            usedMat.OldVal = blendingDataAdapter.records[curRawMatIndex].VolumeByWeight;
+                            usedMat.BurningDownMethod = "weight";
+                        }
+                        else if ( blendingDataAdapter.records[curRawMatIndex].Quantity > 0 && blendingDataAdapter.records[curRawMatIndex].Quantity != undefined ) {
+                            $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { checked: true } );
+                            $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( blendingDataAdapter.records[curRawMatIndex].Quantity );
+                            usedMat.OldVal = blendingDataAdapter.records[curRawMatIndex].Quantity;
+                            usedMat.BurningDownMethod = "volume";
+                        }
+                    }
+
+                    $( '#MatBurnDwnDialogRadioBtnAll' ).jqxRadioButton( { checked: true } );
+                    $( "#MatBurnDwnDialogQuantityInput" ).val( '' );
+                } );
+
+                // burndown type
+                $( '#MatBurnDwnDialogRadioBtnGal' ).on( 'change', function ( event ) {
+                    var checked = event.args.checked;
+                    if ( checked ) {
+                        $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( blendingDataAdapter.records[curRawMatIndex].Quantity );
+                        usedMat.OldVal = blendingDataAdapter.records[curRawMatIndex].Quantity;
+                        usedMat.BurnDownMethod = "volume";
+                    }
+                } );
+
+                $( '#MatBurnDwnDialogRadioBtnVBW' ).on( 'change', function ( event ) {
+                    var checked = event.args.checked;
+                    if ( checked ) {
+                        //set the the burndown quantity type flag so it can be sent off to the respective record in purhase or production record and be written
+                        $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( blendingDataAdapter.records[curRawMatIndex].VolumeByWeight );
+                        usedMat.OldVal = blendingDataAdapter.records[curRawMatIndex].VolumeByWeight;
+                        usedMat.BurnDownMethod = "weight";
+                    }
+                } );
+
+                // burndown amount radio button group
+                $( '#MatBurnDwnDialogRadioBtnPartial' ).on( 'change', function ( event ) {
+                    var checked = event.args.checked;
+                    if ( checked ) {
+                        // make input field visible
+                        inpRow1.style.visibility = "visible";
+                    }
+                    else if ( !checked ) {
+                        // make input field invisible
+                        inpRow1.style.visibility = "hidden";
+                    }
+                } );
+
+                // listen to blur event for burndown material input window so we can update original quantity in time before we close the dialog
+                // Otherwise, if user will click on add button right after updating burndown input field, without clicking anywhere else in the dialog
+                // we don't get an opportunity to update original amount field.
+                MatBurnDwnDialogQuantityInput.addEventListener( "blur", () => {
+                    usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
+                } );
+
+                // listen to add button click in burndown dialog
+                $( "#MatBurnDwnDialogAdd" ).click( function () {
+                    if ( $( '#MatBurnDwnDialogRadioBtnPartial' ).jqxRadioButton( 'checked' ) ) {
+                        if ( $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( 'checked' ) ) {
+                            // burning down weight case
+                            usedMat.NewVal = $( "#MatBurnDwnDialogQuantityInput" ).val();
+                            usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
+                            usedMat.BurningDownMethod = "volume";
+                        }
+                            // burning down weight case
+                        else if ( $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( 'checked' ) ) {
+                            usedMat.NewVal = $( "#MatBurnDwnDialogQuantityInput" ).val();
+                            usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
+                            usedMat.BurningDownMethod = "weight";
+                        }
+                    }
+                    else {
+                        // burning down by weight case
+                        if ( $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( 'checked' ) ) {
+                            usedMat.NewVal = usedMat.OldVal;
+                            usedMat.BurningDownMethod = "weight";
+                        }
+                            // burning down by volume case
+                        else if ( $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( 'checked' ) ) {
+                            usedMat.NewVal = usedMat.OldVal;
+                            usedMat.BurningDownMethod = "volume";
+                        }
+                        usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
+                    }
+
+                    usedMat.DistillableOrigin = blendingDataAdapter.records[curRawMatIndex].DistillableOrigin;
+
+                    if ( ( usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight" ) || usedMat.BurningDownMethod == "volume" )
+                    {
+                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.NewVal, blendingDataAdapter.records[curRawMatIndex].AlcoholContent );
+                    }
+
+                    usedMatsList.push( usedMat );
+                    usedMat = {};
+                    $( "#MatBurnDwnDialog" ).jqxWindow( 'close' );
+                } );
+
+                // listen to cancel button click in burndown dialog
+                $( "#MatBurnDwnDialogCancel" ).click( function () {
+                    // close dialog
+                    usedMat = {};
+                    $( "#MatBurnDwnDialogQuantityInput" ).val( '' );
+                    $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( '' );
+                    $("#MatBurnDwnDialog").jqxWindow('close');
+                    $("#BlendList").jqxListBox('uncheckIndex', curRawMatIndex);
+                } );
+
+                $( '#MatBurnDwnDialogQuantityInput' ).on( 'change', function ( e ) {
+                    var newInpVal = $( "#MatBurnDwnDialogQuantityInput" ).val();
+
+                    var oldInpVal = 0;
+
+                    if ( usedMat.BurningDownMethod === 'weight' ) {
+                        oldInpVal = blendingDataAdapter.records[curRawMatIndex].VolumeByWeight;
+                    }
+                    if ( usedMat.BurningDownMethod === 'volume' ) {
+                        oldInpVal = blendingDataAdapter.records[curRawMatIndex].Quantity;
+                    }
+
+                    $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( oldInpVal - newInpVal );
+                } );
+
+                $("#CreateRecordButton").click(function () {
+                    $('#validationForm').jqxValidator('validate');
+                });
+
+                $("#ClearInputElementsButton").click(function () {
+                    genericWorkflowHelper.emptyControls();
+                    $("#CaseCapacityInput").jqxNumberInput('setDecimal', 12); // resetting to default value after clearing
+                });
+
+                // Create Record Form: recalculate Bottle Quantity and Case Capacity upon user input of Case Quantity
+                $('#CaseQuantityInput').on('change', function (event) {
+                    distillCompInstance.caseQuantityUpdateEvent('#BottleQuantityInput', '#CaseCapacityInput', '#CaseQuantityInput');
+                    // update total Quantity in Gallons
+                    $("#QuantityInput").val(distillCompInstance.calculateTotalQuant($('#BottleCapacityInput').val(), $('#BottleQuantityInput').val()));
+                    var qty = $("#QuantityInput").val();
+                    var alc = $("#AlcoholInput").val();
+                    var prf = distillCompInstance.calculateProof(qty, alc);
+                    $("#ProofInput").val(prf);
+                });
+
+                // Create Record Form: recalculate Bottle Quantity and Case Capacity upon user input of Case Quantity
+                $('#CaseCapacityInput').on('change', function (event) {
+                    distillCompInstance.caseQuantityUpdateEvent('#BottleQuantityInput', '#CaseCapacityInput', '#CaseQuantityInput');
+                    // update total Quantity in Gallons
+                    $("#QuantityInput").val(distillCompInstance.calculateTotalQuant($('#BottleCapacityInput').val(), $('#BottleQuantityInput').val()));
+                    var qty = $("#QuantityInput").val();
+                    var alc = $("#AlcoholInput").val();
+                    var prf = distillCompInstance.calculateProof(qty, alc);
+                    $("#ProofInput").val(prf);
+                });
+
+                // Create Record Form: recalculate Case Quantity and Case Capacity upon user input of Bottle Quantity. Also, calculate total quantity
+                $('#BottleQuantityInput').on('change', function (event) {
+                    distillCompInstance.bottleQuantityUpdateEvent('#CaseCapacityInput', '#CaseQuantityInput', '#BottleQuantityInput');
+                    // update total Quantity in Gallons
+                    $("#QuantityInput").val(distillCompInstance.calculateTotalQuant($('#BottleCapacityInput').val(), $('#BottleQuantityInput').val()));
+                    var qty = $("#QuantityInput").val();
+                    var alc = $("#AlcoholInput").val();
+                    var prf = distillCompInstance.calculateProof(qty, alc);
+                    $("#ProofInput").val(prf);
+                });
+
+                //  calculate total quantity
+                $('#BottleCapacityInput').on('change', function (event) {
+                    // update total Quantity in Gallons
+                    $("#QuantityInput").val(distillCompInstance.calculateTotalQuant($('#BottleCapacityInput').val(), $('#BottleQuantityInput').val()));
+                    var qty = $("#QuantityInput").val();
+                    var alc = $("#AlcoholInput").val();
+                    var prf = distillCompInstance.calculateProof(qty, alc);
+                    $("#ProofInput").val(prf);
+                });
+
+                $('#AlcoholInput').on('change', function (e) {
+                    if (!($('#AlcoholInput').val() == undefined || $('#AlcoholInput').val() == "")) {
+                        var qty = $("#QuantityInput").val();
+                        var alc = $("#AlcoholInput").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $("#ProofInput").val(prf);
+                    }
+                    else {
+                        $('#ProofInput').val(0);
+                    }
+                });
+
+                $('#QuantityInput').on('change', function (e) {
+                    if (!($('#QuantityInput').val() == undefined || $('#QuantityInput').val() == "")) {
+                        var qty = $("#QuantityInput").val();
+                        var alc = $("#AlcoholInput").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $("#ProofInput").val(prf);
+                    }
+                    else {
+                        $('#ProofInput').val(0);
+                    }
+                });
+
+                // Select BlendingId within "Create Record" pill
+                $('#BlendList').on('select', function (event) {
+                    var args = event.args;
+                    if (args) {
+                        var index = args.index;
+                        if ( blendingDataAdapter.records[index].Quantity !== undefined && blendingDataAdapter.records[index].VolumeByWeight !== undefined ) {
+                            initializeDialogs();
+                            usedMat.ID = blendingDataAdapter.records[index].ProductionId;
+                            usedMat.DistillableOrigin = blendingDataAdapter.records[index].DistillableOrigin;
+                            curRawMatIndex = index;
+                            if ( args.item.checked ) {
+                                // make burndown window visible and open it.
+                                $( "#MatBurnDwnDialog" ).css( 'visibility', 'visible' );
+                                $('#MatBurnDwnDialog').jqxWindow('open');
+                                $('#BlendList').jqxListBox({ disabled: true });
+                            } else {
+                                removeBurnDownMaterialRecord( curRawMatIndex );
+                            }
+                        }
+                        else {
+                            $( "#BlendList" ).jqxListBox( 'uncheckIndex', index );
+                            alert( "Both values for selected record are undefined, you can't burn down records with non existing quantities" );
+                        }
+
+                        $("#AlcoholInput").val(blendingDataAdapter.records[index].AlcoholContent); 
+                        // $("#ProofInput").val(blendingDataAdapter.records[index].ProofGallon);
+                        $( "#SpiritTypeInput" ).val( blendingDataAdapter.records[index].SpiritName );
+                        spiritId = blendingDataAdapter.records[index].SpiritId;
+                    }
+                });
+
+                // re-enables blending source batch listbox.
+                $('#MatBurnDwnDialog').on('close', function (event) {
+                    $('#BlendList').jqxListBox({ disabled: false });
+                })
+
+                // Select jqxDataTable row
+                $("#dataTable").on('rowDoubleClick', function (event) {
+                    var args = event.args;
+                    var index = args.index;
+                    var row = args.row;
+                    globals.prodId = row.ProductionId;
+                    // update the widgets inside jqxWindow.
+                    $( "#EditDialog" ).jqxWindow( 'setTitle', "Edit Bottling Record: #" + globals.prodId );
+                    $("#EditDialog").jqxWindow('open');
+                    $("#EditDialog").attr('data-row', index);
+                    $("#dataTable").jqxDataTable({ disabled: true });
+                    $("#EditDialogBatchNameInput").val(row.BatchName);
+                    $("#EditDialogStartDate").jqxDateTimeInput({ value: new Date(row.ProductionStart) });
+                    $("#EditDialogEndDate").jqxDateTimeInput({ value: new Date(row.ProductionEnd) });
+                    $("#EditDialogCaseCapacityInput").val(row.CaseCapacity),
+                    $("#EditDialogCaseQuantityInput").val(row.CaseQuantity),
+                    $("#EditDialogBottleQuantityInput").val(row.BottleQuantity),
+                    $("#EditDialogBottleCapacityInput").val(row.BottleCapacity),
+                    $("#EditDialogQuantityInput").val(row.Quantity);
+                    $("#EditDialogAlcoholInput").val(row.AlcoholContent);
+                    $("#EditDialogProofInput").val(row.ProofGallon);
+                    $( "#EditDialogNotesInput" ).val( row.Note );
+
+                    // initialize global variable as it will be used in other places in this workflow
+                    globals.editDialogTotalProofVal = row.ProofGallon;
+
+                    // Event listeners for dialog window 
+
+                    // Create Record Form: recalculate Bottle Quantity and Case Capacity upon user input of Case Quantity
+                    $('#EditDialogCaseQuantityInput').on('change', function (event) {
+                        distillCompInstance.caseQuantityUpdateEvent('#EditDialogBottleQuantityInput', '#EditDialogCaseCapacityInput', '#EditDialogCaseQuantityInput');
+                        // update total Quantity in Gallons
+                        $("#EditDialogQuantityInput").val(distillCompInstance.calculateTotalQuant($('#EditDialogBottleCapacityInput').val(), $('#EditDialogBottleQuantityInput').val()));
+                        var qty = $("#EditDialogBottleQuantityInput").val();
+                        var alc = $("#EditDialogAlcoholInput").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $( "#EditDialogProofInput" ).val( prf );
+                        globals.editDialogTotalProofVal = prf;
+                    });
+
+                    // Create Record Form: recalculate Bottle Quantity and Case Capacity upon user input of Case Quantity
+                    $('#EditDialogCaseCapacityInput').on('change', function (event) {
+                        distillCompInstance.caseQuantityUpdateEvent('#EditDialogBottleQuantityInput', '#EditDialogCaseCapacityInput', '#EditDialogCaseQuantityInput');
+                        // update total Quantity in Gallons
+                        $("#EditDialogQuantityInput").val(distillCompInstance.calculateTotalQuant($('#EditDialogBottleCapacityInput').val(), $('#EditDialogBottleQuantityInput').val()));
+                        var qty = $("#EditDialogBottleQuantityInput").val();
+                        var alc = $("#EditDialogAlcoholInput").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $( "#EditDialogProofInput" ).val( prf );
+                        globals.editDialogTotalProofVal = prf;
+                    });
+
+                    // Create Record Form: recalculate Case Quantity and Case Capacity upon user input of Bottle Quantity. Also, calculate total quantity
+                    $('#EditDialogBottleQuantityInput').on('change', function (event) {
+                        distillCompInstance.bottleQuantityUpdateEvent('#EditDialogCaseCapacityInput', '#EditDialogCaseQuantityInput', '#EditDialogBottleQuantityInput');
+                        // update total Quantity in Gallons
+                        $("#EditDialogQuantityInput").val(distillCompInstance.calculateTotalQuant($('#EditDialogBottleCapacityInput').val(), $('#EditDialogBottleQuantityInput').val()));
+                        var qty = $("#EditDialogBottleQuantityInput").val();
+                        var alc = $("#EditDialogAlcoholInput").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $( "#EditDialogProofInput" ).val( prf );
+                        globals.editDialogTotalProofVal = prf;
+                    });
+
+                    //  calculate total quantity
+                    $('#EditDialogBottleCapacityInput').on('change', function (event) {
+                        // update total Quantity in Gallons
+                        $("#EditDialogQuantityInput").val(distillCompInstance.calculateTotalQuant($('#EditDialogBottleCapacityInput').val(), $('#EditDialogBottleQuantityInput').val()));
+                        var qty = $("#EditDialogBottleQuantityInput").val();
+                        var alc = $("#EditDialogAlcoholInput").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $( "#EditDialogProofInput" ).val( prf );
+                        globals.editDialogTotalProofVal = prf;
+                    });
+
+                    $('#EditDialogAlcoholInput').on('change', function (e) {
+                        if (!($('#EditDialogAlcoholInput').val() == undefined || $('#EditDialogAlcoholInput').val() == "")) {
+                            var qty = $("#EditDialogBottleQuantityInput").val();
+                            var alc = $("#EditDialogAlcoholInput").val();
+                            var prf = distillCompInstance.calculateProof(qty, alc);
+                            $( "#EditDialogProofInput" ).val( prf );
+                            globals.editDialogTotalProofVal = prf;
+                        }
+                        else {
+                            $( '#EditDialogProofInput' ).val( 0 );
+                            globals.editDialogTotalProofVal = 0;
+                        }
+                    });
+
+                    $('#EditDialogQuantityInput').on('change', function (e) {
+                        if (!($('#EditDialogQuantityInput').val() == 'undefined' || $('#EditDialogQuantityInput').val() == "")) {
+                            var qty = $("#EditDialogBottleQuantityInput").val();
+                            var alc = $("#EditDialogAlcoholInput").val();
+                            var prf = distillCompInstance.calculateProof(qty, alc);
+                            $( "#EditDialogProofInput" ).val( prf );
+                            globals.editDialogTotalProofVal = prf;
+                        }
+                        else {
+                            $( '#EditDialogProofInput' ).val( 0 );
+                            globals.editDialogTotalProofVal = 0;
+                        }
+                    } );
+
+                    // Tax Withdrawn field change event listener. We need to do this in order to reduce Total Proof Amount for a given record.
+                    $( "#EditDialogTaxedProof" ).on( 'change', ( e ) => {
+
+                        $( "#EditDialogProofInput" ).val( globals.editDialogTotalProofVal );
+
+                        var taxedProof;
+
+                        if ( $( "#EditDialogTaxedProof" ).val() != 'undefined' ) {
+                            taxedProof = $( "#EditDialogTaxedProof" ).val() > $( '#EditDialogProofInput' ).val() ? $( '#EditDialogProofInput' ).val() : $( "#EditDialogTaxedProof" ).val();
+                            $( "#EditDialogTaxedProof" ).val( taxedProof );
+                        }
+                        else
+                        {
+                            taxedProof = 0
+                        }
+
+                        var currentTotalProof = $( '#EditDialogProofInput' ).val() != 'undefined' ? $( '#EditDialogProofInput' ).val() : 0;
+                        var updatedTotalProof = currentTotalProof >= taxedProof ? currentTotalProof - taxedProof : 0;
+
+                        $( "#EditDialogProofInput" ).val( updatedTotalProof );
+                    } );
+                });
+
+                // Save record within Edit Dialog
+                $("#EditDialogSaveRecordButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // update edited row.
+                    var editRow = parseInt($("#EditDialog").attr('data-row'));
+                    //var items = $("#EditDialogStorageNameInput").jqxListBox('getSelectedItems');
+
+                    var prodStartUtc = genericWorkflowHelper.convertUTC($("#EditDialogStartDate").jqxDateTimeInput('val'), true);
+                    var prodEndUtc = genericWorkflowHelper.convertUTC($("#EditDialogEndDate").jqxDateTimeInput('val'), true);
+                    var withDrawalDateUtc = genericWorkflowHelper.convertUTC( $( "#EditDialogTaxWithdrawalDate" ).jqxDateTimeInput( 'val' ), true );
+
+                    var rowData = {
+                        ProductionType: "Bottling",
+                        ProductionId: globals.prodId,
+                        BatchName: $('#EditDialogBatchNameInput').jqxInput('val'),
+                        ProductionDate: prodEndUtc,
+                        ProductionStart: prodStartUtc,
+                        ProductionEnd: prodEndUtc,
+                        CaseCapacity: $("#EditDialogCaseCapacityInput").jqxNumberInput('val'),
+                        CaseQuantity: $("#EditDialogCaseQuantityInput").jqxNumberInput('val'),
+                        BottleQuantity: $("#EditDialogBottleQuantityInput").jqxNumberInput('val'),
+                        BottleContentQty: $("#EditDialogBottleCapacityInput").jqxNumberInput('val'),
+                        Quantity: $("#EditDialogQuantityInput").jqxNumberInput('val'),
+                        AlcoholContent: $("#EditDialogAlcoholInput").jqxNumberInput('val'),
+                        ProofGallon: $("#EditDialogProofInput").jqxNumberInput('val'),
+                        TaxedProof: $( "#EditDialogTaxedProof" ).jqxNumberInput( 'val' ),
+                        WithdrawalDate: withDrawalDateUtc,
+                        Note: $('#EditDialogNotesInput').jqxTextArea('val')
+                    };
+                    $("#dataTable").jqxDataTable('updateRow', editRow, rowData);
+                    storageList = [];
+                });
+
+                $("#EditDialogClearInputElementsButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                });
+
+                $("#EditDialog").on('close', function () {
+                    // enable jqxDataTable.
+                    $("#dataTable").jqxDataTable({ disabled: false });
+                });
+
+                // Delete record within Edit Dialog
+                $("#EditDialogDeleteRecordButton").click(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // delete row from table.
+                    var deleteRow = parseInt($("#EditDialog").attr('data-row'));
+                    $("#dataTable").jqxDataTable('deleteRow', deleteRow);
+                });
+
+                // Select BlendingId within Editing Dialog
+                $('#EditDialogBlendList').on('select', function (event) {
+                    var args = event.args;
+                    if (args) {
+                        // index represents the item's index.
+                        var index = args.index;
+                        var item = args.item;
+                        // get item's label and value.
+                        var label = item.label;
+                        var value = item.value;
+                        var type = args.type; // keyboard, mouse or null depending on how the item was selected.
+                        $("#EditDialogQuantityInput").val(blendingDataAdapter.recordids[value].Quantity);
+                        $("#EditDialogAlcoholInput").val(blendingDataAdapter.recordids[value].AlcContent);
+                        $("#EditDialogProofInput").val(blendingDataAdapter.recordids[value].Proof);
+                    }
+                } );
+            }
+
+            // Clear input elements
+            function _clearInputElements() {
+
+                $("#BatchNameInput").jqxInput('val', '');
+                $("#BlendList").jqxDropDownList('clearSelection');
+                $('#ProductionEnd').jqxDateTimeInput('setDate', new Date());
+                $("#CaseQuantityInput").jqxNumberInput('val', '');
+                $("#BottleQuantityInput").jqxNumberInput('val', '');
+                $("#BottleCapacityInput").jqxNumberInput('val', '');
+                $("#QuantityInput").jqxNumberInput('val', '');
+                $("#AlcoholInput").jqxNumberInput('val', '');
+                $("#ProofInput").jqxNumberInput('val', '');
+                $('#NotesInput').jqxTextArea('val', '');
+            };
+
+            function _createElements() {
+
+                $("#SpiritTypeInput").jqxInput({ theme: 'bootstrap', height: '26px', width: '115px', disabled: true });
+
+                $("#BatchNameInput").jqxInput({
+                    theme: 'bootstrap', height: '26px', width: '200px', minLength: 0
+                });
+
+                $("#BlendList").jqxListBox({
+                    theme: 'bootstrap', source: blendingDataAdapter, displayMember: "BatchName", valueMember: "ProductionId", checkboxes: true, width: '100%',
+                });
+
+                $("#ProductionStart").jqxDateTimeInput({
+                    theme: 'bootstrap', textAlign: 'center', height: '26px', width: '180px', formatString: "MM/dd/yyyy HH:mm"
+                });
+
+                $("#ProductionEnd").jqxDateTimeInput({
+                    theme: 'bootstrap', textAlign: 'center', height: '26px', width: '180px', formatString: "MM/dd/yyyy HH:mm"
+                });
+
+                $("#CaseCapacityInput").jqxNumberInput({
+                    disabled: false, theme: 'bootstrap', decimal: 12, height: '26px', width: '75px', inputMode: 'simple', textAlign: 'center', digits: 5, decimalDigits: 2, min: 0
+                });
+
+                $("#CaseQuantityInput").jqxNumberInput({
+                    theme: 'bootstrap', height: '26px', width: '75px', inputMode: 'simple', textAlign: 'center', digits: 5, min: 0, decimalDigits: 2, min: 0
+                });
+
+                $("#BottleQuantityInput").jqxNumberInput({
+                    theme: 'bootstrap', height: '26px', width: '75px', inputMode: 'simple', textAlign: 'center', digits: 5, min: 0, decimalDigits: 0, min: 0
+                });
+
+                $("#BottleCapacityInput").jqxNumberInput({
+                    theme: 'bootstrap', height: '26px', width: '75px', inputMode: 'simple', textAlign: 'center', digits: 5, min: 0, decimalDigits: 0, min: 0
+                });
+
+                $("#QuantityInput").jqxNumberInput({
+                    theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                });
+
+                $("#AlcoholInput").jqxNumberInput({
+                    theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', symbol: '%', min: 0
+                });
+
+                $('#ProofInput').jqxNumberInput({
+                    theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                });
+
+                $('#NotesInput').jqxTextArea({
+                    theme: 'bootstrap', height: '100%', width: '100%', minLength: 1
+                });
+
+                $("#CreateRecordButton").jqxButton({
+                    theme: 'bootstrap', width: '220px', height: '28px'
+                });
+
+                $("#ClearInputElementsButton").jqxButton({
+                    theme: 'bootstrap', width: '220px', height: '28px'
+                });
+
+                $('#validationForm').jqxValidator({
+                    closeOnClick: true,
+                    onSuccess: function () {
+                        _createBottlingRecord();
+                        genericWorkflowHelper.emptyControls();
+                        $("#CaseCapacityInput").jqxNumberInput('setDecimal', 12); // resetting to default value after clearing
+                    },
+                    onError: function () {
+                        alert('Please complete filling out the form');
+                    },
+                    rules: [
+                        { input: '#BatchNameInput', message: 'Batch Name Required', action: 'blur', rule: 'required' },
+                        {
+                            input: "#BlendList", message: "Please Pick A Blend", action: 'click', rule: function (input, commit) {
+                                var index = $("#BlendList").jqxListBox('getSelectedIndex');
+                                return index != -1;
+                            }
+                        },
+                        {
+                            input: '#CaseQuantityInput', message: 'Please Enter Quantity', action: 'blur', rule: function () {
+                                var value = $("#CaseQuantityInput").val();
+                                return value > 0 ? true : false;
+                            }
+                        },
+                        {
+                            input: '#BottleCapacityInput', message: 'Please Enter Bottle Capacity', action: 'blur', rule: function () {
+                                var value = $('#BottleCapacityInput').val();
+                                return value > 0 ? true : false;
+                            }
+                        },
+                        {
+                            input: '#AlcoholInput', message: 'Please Enter Alcohol Content', action: 'blur', rule: function () {
+                                var value = $('#AlcoholInput').val();
+                                return value > 0 ? true : false;
+                            }
+                        }
+                    ]
+                });
+            };
+
+            function initializeDialogs() {
+                $( '#MatBurnDwnDialog' ).jqxWindow( {
+                    width: '30%',
+                    height: 'auto',
+                    minHeight: '90%',
+                    draggable: false,
+                    resizable: false,
+                    autoOpen: false,
+                    isModal: false,
+                    showCloseButton: false,
+                    initContent: function () {
+                        $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { checked: true, groupName: "Quanity" } );
+                        $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { groupName: "Quanity" } );
+                        $( '#MatBurnDwnDialogRadioBtnAll' ).jqxRadioButton( { checked: true, groupName: "Amount" } )
+                        $( '#MatBurnDwnDialogRadioBtnPartial' ).jqxRadioButton( { groupName: "Amount" } )
+                        $( "#MatBurnDwnDialogQuantityInput" ).jqxNumberInput( { height: '25px', width: '80px', inputMode: 'simple', textAlign: 'center' } );
+                        $( "#MatBurnDwnDialogQuantityInputOriginal" ).jqxNumberInput( { height: '25px', width: '80px', inputMode: 'simple', textAlign: 'center' } );
+                        $( '#MatBurnDwnDialogCancel' ).jqxButton( { height: '25px', width: '80px' } );
+                        $( '#MatBurnDwnDialogAdd' ).jqxButton( { height: '25px', width: '80px' } );
+                    }
+                } );
+            }
+
+            function _bindBlendingData() {
+                var source =
+                {
+                    dataType: "json",
+                    dataFields: [
+                        { name: 'ProductionId', type: 'number' },
+                        { name: 'BatchName', type: 'string' },
+                        { name: 'Quantity', type: 'float' },
+                        { name: 'AlcoholContent', type: 'float' },
+                        { name: 'ProofGallon', type: 'float' },
+                        { name: 'SpiritName', type: 'string' },
+                        { name: 'SpiritId', type: 'number' },
+                        { name: 'DistillableOrigin' },
+                        { name: 'VolumeByWeight' }
+                    ],
+                    id: 'ProductionId',
+                    url: '/Production/GetBlendingData',
+                    data: {prodType: "Bottling"},
+                    async: true
+                };
+
+                blendingDataAdapter = new $.jqx.dataAdapter( source,
+                    {
+                        autoBind: true,
+                        async: true
+                    });
+            }
+
+            function _bindSpiritTypeNameData() {
+                var source =
+                {
+                    dataType: "json",
+                    dataFields: [
+                        { name: 'SpiritName', type: 'string' },
+                        { name: 'SpiritId', type: 'number' }
+                    ],
+                    id: 'SpiritId',
+                    url: '/Production/GetSpiritTypes',
+                    async: true
+                };
+
+                spiritTypeDataAdapter = new $.jqx.dataAdapter(source);
+            }
+
+            function _createBottlingRecord() {
+
+                var bottlingInfo = {
+                    CaseCapacity: $("#CaseCapacityInput").jqxNumberInput('val'),
+                    CaseQuantity: $("#CaseQuantityInput").jqxNumberInput('val'),
+                    BottleQuantity: $("#BottleQuantityInput").jqxNumberInput('val'),
+                    BottleCapacity: $("#BottleCapacityInput").jqxNumberInput('val')
+                }
+
+                var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStart").jqxDateTimeInput('val'), true);
+                var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProductionEnd").jqxDateTimeInput('val'), true);
+
+                var ProductionObject = {
+                    ProductionId: "",
+                    ProductionType: "Bottling",
+                    BatchName: 'PROD-' + $("#BatchNameInput").jqxInput('val'),
+                    Quantity: $("#QuantityInput").jqxNumberInput('val'),
+                    ProductionDate: prodEndUtc,
+                    ProductionStart: prodStartUtc,
+                    ProductionEnd: prodEndUtc,
+                    AlcoholContent: $("#AlcoholInput").jqxNumberInput('val'),
+                    ProofGallon: $("#ProofInput").jqxNumberInput('val'),
+                    SpiritId: spiritId,
+                    SpiritName: $("#SpiritTypeInput").jqxInput('val'),
+                    Note: $('#NotesInput').jqxTextArea('val'),
+                    BottlingInfo: bottlingInfo,
+                    UsedMats: usedMatsList
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/CreateProductionRecord',
+                    data: JSON.stringify(ProductionObject),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    error: function (response) {
+                        alert(response.responseText)
+                    },
+                    success: function (result) {
+                        //on success will need to refresh the table and also empty the form
+                        alert(result);
+                        usedMatsList = [];
+                        $('#BlendList').jqxListBox('refresh');
+                        $("#dataTable").jqxDataTable('updateBoundData');
+                        //window.locationre = result.url;
+                    }
+                });
+            }
+
+            // this function is used to remove an item from the array of burndown material objects given a RecordId
+            function removeBurnDownMaterialRecord( index ) {
+                for ( var i = 0; i < usedMatsList.length; i++ ) {
+                    if ( usedMatsList[i].ID === blendingDataAdapter.records[index].ProductionId ) {
+                        var slice1 = usedMatsList.slice( 0, i );
+                        var slice2 = usedMatsList.slice( i + 1, usedMatsList.length + 1 );
+                        usedMatsList = slice1.concat( slice2 );
+                    }
+                }
+            }
+
+            function _bottlingRecordsViewFunction() {
+                // prepare the data
+                var source =
+                {
+                    dataType: "json",
+                    dataFields: [
+                        { name: 'ProductionId', type: 'number' },
+                        { name: 'BatchName', type: 'string' },
+                        { name: 'ProductionDate', type: 'date' },
+                        { name: 'ProductionStart', type: 'date' },
+                        { name: 'ProductionEnd', type: 'date' },
+                        { name: 'SpiritProductName', type: 'string' },
+                        { name: 'Quantity', type: 'float' },
+                        { name: 'AlcoholContent', type: 'float' },
+                        { name: 'ProofGallon', type: 'float' },
+                        { name: 'CaseCapacity', map: 'BottlingInfo>CaseCapacity', type: 'number' },
+                        { name: 'CaseQuantity', map: 'BottlingInfo>CaseQuantity', type: 'float' },
+                        { name: 'BottleQuantity', map: 'BottlingInfo>BottleQuantity', type: 'number' },
+                        { name: 'BottleCapacity', map: 'BottlingInfo>BottleCapacity', type: 'float' },
+                        { name: 'SpiritName', type: 'string' },
+                        { name: 'SpiritId', type: 'number' },
+                        { name: 'Note', type: 'string' }
+                    ],
+                    id: 'ProductionId',
+                    url: '/Production/GetProductionData',
+                    data: { prodType: "Bottling" },
+                    addRow: function (rowID, rowData, position, commit) {
+                        // synchronize with the server - send insert command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        // you can pass additional argument to the commit callback which represents the new ID if it is generated from a DB.
+                        commit(true);
+                    },
+                    updateRow: function (rowID, rowData, commit) {
+                        // synchronize with the server - send update command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+
+                        var bottlingInfo = {
+                            CaseCapacity: rowData.CaseCapacity,
+                            CaseQuantity: rowData.CaseQuantity,
+                            BottleQuantity: rowData.BottleQuantity,
+                            BottleCapacity: rowData.BottleContentQty
+                        }
+
+                        var productionObject = {
+                            ProductionId: rowData.ProductionId,
+                            BatchName: rowData.BatchName,
+                            ProductionDate: rowData.ProductionDate,
+                            ProductionStart: rowData.ProductionStart,
+                            ProductionEnd: rowData.ProductionEnd,
+                            Quantity: rowData.Quantity,
+                            AlcoholContent: rowData.AlcoholContent,
+                            ProofGallon: rowData.ProofGallon,
+                            Note: rowData.Note,
+                            BottlingInfo: bottlingInfo,
+                            TaxedProof: rowData.TaxedProof,
+                            WithdrawalDate: rowData.WithdrawalDate
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/UpdateProduction',
+                            data: JSON.stringify(productionObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                bottlingRecordsDataAdapter.dataBind();
+                                commit(true);
+                                //window.locationre = result.url;
+                            }
+                        });
+                    },
+                    deleteRow: function (rowID, commit) {
+                        // synchronize with the server - send delete command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var productionObject = {
+                            ProductionType: "Bottling",
+                            ProductionId: rowID
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/DeleteBottling',
+                            data: JSON.stringify(productionObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                commit(true);
+                                bottlingRecordsDataAdapter.dataBind();
+                                //window.locationre = result.url;
+                            }
+                        });
+                    }
+                };
+
+                var bottlingRecordsDataAdapter = new $.jqx.dataAdapter(source, {
+                    autoBind:true,
+                    beforeLoadComplete: function (records) {
+                        for (var i = 0; i < records.length; i++) {
+                            records[i].ProductionDate = genericWorkflowHelper.convertUTC(records[i].ProductionDate, false);
+                            records[i].ProductionStart = genericWorkflowHelper.convertUTC(records[i].ProductionStart, false);
+                            records[i].ProductionEnd = genericWorkflowHelper.convertUTC(records[i].ProductionEnd, false);
+                        }
+                    }
+                });
+
+                // create Table Grid
+                $("#dataTable").jqxDataTable(
+                {
+                    width: '100%',
+                    //height: 'auto',
+                    source: bottlingRecordsDataAdapter,
+                    theme: 'metro',
+                    pageSize: 15,
+                    sortable: true,
+                    //filterable: true,
+                    pageable: true,
+                    pagerPosition: 'top',
+                    autoRowHeight: false,
+                    ready: function () {
+
+                        $("#EditDialogBatchNameInput").jqxInput({
+                            theme: 'bootstrap', height: '26px', width: '100px', minLength: 0
+                        });
+
+                        $("#EditDialogStartDate").jqxDateTimeInput({
+                            theme: 'bootstrap', formatString: "MM/dd/yyyy HH:mm", width: 180, height: 30
+                        });
+
+                        $("#EditDialogEndDate").jqxDateTimeInput({
+                            theme: 'bootstrap', formatString: "MM/dd/yyyy HH:mm", width: 180, height: 30
+                        });
+
+                        $("#EditDialogCaseCapacityInput").jqxNumberInput({
+                            theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 3, min: 0, disabled: false, decimalDigits: 0, min: 0
+                        });
+
+                        $("#EditDialogCaseQuantityInput").jqxNumberInput({
+                            theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
+                        });
+
+                        $("#EditDialogBottleQuantityInput").jqxNumberInput({
+                            theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
+                        });
+
+                        $("#EditDialogBottleCapacityInput").jqxNumberInput({
+                            theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
+                        });
+
+                        $("#EditDialogBottleQuantityInput").jqxNumberInput({
+                            theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
+                        });
+
+                        $("#EditDialogQuantityInput").jqxNumberInput({
+                            theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                        });
+
+                        $("#EditDialogAlcoholInput").jqxNumberInput({
+                            theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', symbol: '%', min: 0
+                        });
+
+                        $('#EditDialogProofInput').jqxNumberInput({
+                            theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                        } );
+
+                        $( '#EditDialogTaxedProof' ).jqxNumberInput( {
+                            theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                        } );
+
+                        $( "#EditDialogTaxWithdrawalDate" ).jqxDateTimeInput( {
+                            theme: 'bootstrap', formatString: "MM/dd/yyyy", width: 180, height: 30
+                        } );
+
+                        $('#EditDialogNotesInput').jqxTextArea({
+                            theme: 'bootstrap', height: '50px', width: '200px', minLength: 1
+                        });
+
+                        $("#EditDialogSaveRecordButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+
+                        $("#EditDialogDeleteRecordButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+
+                        $("#EditDialogClearInputElementsButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+
+                        $("#EditDialog").jqxWindow({
+                            position: 'center',
+                            width: 'auto',
+                            height: '100%',
+                            modalOpacity: 0.5,
+                            autoOpen: false,
+                            isModal: false
+                        });
+                        $("#EditDialog").css('visibility', 'visible');
+                    },
+                    columns: [
+                        {
+                            text: 'Batch Name',
+                            dataField: 'BatchName',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '14%'
+                        },
+                        {
+                            text: 'Date/Time',
+                            dataField: 'ProductionDate',
+                            cellsFormat: 'MM/dd/yyyy hh:mm tt',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '10%'
+                        },
+                        {
+                            text: 'Case Capacity',
+                            dataField: 'CaseCapacity',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '7%'
+                        },
+                        {
+                            text: '# of Cases',
+                            dataField: 'CaseQuantity',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '7%'
+                        },
+                        {
+                            text: '# of Bottles',
+                            dataField: 'BottleQuantity',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '7%'
+                        },
+                        {
+                            text: 'Bottle Capacity (mL)',
+                            dataField: 'BottleCapacity',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '10%'
+                        },
+                        {
+                            text: 'Spirit Type',
+                            dataField: 'SpiritName',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '7%'
+                        },
+                        {
+                            text: 'Total Qty (gal)',
+                            dataField: 'Quantity',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '8%'
+                        },
+                        {
+                            text: 'Alcohol %',
+                            dataField: 'AlcoholContent',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '8%'
+                        },
+                        {
+                            text: 'Proof Gallons',
+                            dataField: 'ProofGallon',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '8%'
+                        },
+                        {
+                            text: 'Notes',
+                            dataField: 'Note',
+                            cellsAlign: 'center',
+                            align: 'center'
+                        }
+                    ]
+                });
+            }
+
+            return {
+                config: {
+                    dragArea: null
+                },
+                init: function () {
+                    //Populate BlendingId dropdowns
+                    _bindBlendingData();
+                    //Populate SpiritTypeName dropdown
+                    _bindSpiritTypeNameData();
+                    //Creating all jqxWindgets except the window
+                    _createElements();
+                    //Populate Table
+                    _bottlingRecordsViewFunction();
+                    //Attaching event listeners
+                    _addEventListeners();
+                }
+            };
+        }());
+
+        $(document).ready(function () {
+            bottlingCreationFunction.init();
+        });
+    </script>
+}
+
+<div class="container-fluid body-content">
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+                <ul class="nav nav-sidebar">
+                    <li>@Html.ActionLink("Fermentation", "Fermentation", "Production")</li>
+                    <li>@Html.ActionLink("Distillation", "Distillation", "Production")</li>
+                    <li>@Html.ActionLink("Blending", "Blending", "Production")</li>
+                    <li class="active">@Html.ActionLink("Bottling", "Bottling", "Production")</li>
+                </ul>
+            </div>
+            <h1>Production / Bottling</h1>
+            <div class="well">
+                <!-- Nav tabs -->
+                <ul class="nav nav-pills" role="tablist">
+                    <li role="presentation" class="active"><a href="#createRecord" aria-controls="createRecord" role="tab" data-toggle="pill">Enter Bottling Data</a></li>
+                    <li role="presentation"><a href="#viewRecord" aria-controls="viewRecord" role="tab" data-toggle="tab">View/Edit Bottling Data</a></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade in active" id="createRecord">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <label for="BatchNameInput" class="col-md-4 control-label">Bottling Batch Name</label>
+                                        <div class="col-md-8">
+                                            <p class="pull-left">PROD-</p>
+                                            <input type="text" class="form-control" id="BatchNameInput">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <p class="text-center">Please select blended batches to bottle</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12" text-center>
+                                            <div tabindex="2" id="BlendList"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProductionStart" class="col-md-6 control-label">Bottling Start Date</label>
+                                        <div class="col-md-6">
+                                            <div id="ProductionStart" tabindex="3"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProductionEnd" class="col-md-6 control-label">Bottling End Date</label>
+                                        <div class="col-md-6">
+                                            <div id="ProductionEnd" tabindex="3"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="CaseCapacityInput" class="col-md-6 control-label">Case Capacity (Bottles)</label>
+                                        <div class="col-md-6">
+                                            <div id="CaseCapacityInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="CaseQuantityInput" class="col-md-6 control-label">Case Quantity</label>
+                                        <div class="col-md-6">
+                                            <div id="CaseQuantityInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="BottleQuantityInput" class="col-md-6 control-label">Bottle Quantity</label>
+                                        <div class="col-md-6">
+                                            <div id="BottleQuantityInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="BottleCapacityInput" class="col-md-6 control-label">Bottle Capacity (mL)</label>
+                                        <div class="col-md-6">
+                                            <div id="BottleCapacityInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="SpiritTypeInput" class="col-md-6 control-label">Spirit Type</label>
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control" id="SpiritTypeInput">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="QuantityInput" class="col-sm-6 control-label">Volume (gal)</label>
+                                        <div class="col-sm-6">
+                                            <div id="QuantityInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="AlcoholInput" class="col-md-6 control-label">Alcohol Content</label>
+                                        <div class="col-md-6">
+                                            <div id="AlcoholInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProofInput" class="col-md-6 control-label">Total Proof Gallons</label>
+                                        <div class="col-md-6">
+                                            <div id="ProofInput"></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-6 note-column">
+                                <form class="text-center">
+                                    <div class="form-group">
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading">Notes</div>
+                                            <div class="panel-body">
+                                                <textarea class="form-control" id='NotesInput'></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-8">
+                                            <div id='validationForm'></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <button id="CreateRecordButton">Create Record</button>
+                                <button id="ClearInputElementsButton">Clear Form</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="viewRecord">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="dataTable"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @Html.Partial("_FooterPartial")
+    <!--This html is hidden. It is used for table editing dialog-->
+    <div style="visibility: hidden;" id="EditDialog">
+        <div style="overflow: hidden;">
+            <table style="table-layout: fixed; border-style: none;">
+                <tr>
+                    <td align="right">
+                        Bottling Batch Name:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogBatchNameInput" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Bottling Start Date:
+                    </td>
+                    <td align="left">
+                        <div id="EditDialogStartDate"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Bottling End Date:
+                    </td>
+                    <td align="left">
+                        <div id="EditDialogEndDate"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">Case Capacity:</td>
+                    <td align="left">
+                        <input id='EditDialogCaseCapacityInput' />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">Case Quantity:</td>
+                    <td align="left">
+                        <input id='EditDialogCaseQuantityInput' />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">Bottle Quantity:</td>
+                    <td align="left">
+                        <input id='EditDialogBottleQuantityInput' />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">Bottle Content Quantity (mL):</td>
+                    <td align="left">
+                        <input id="EditDialogBottleCapacityInput" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">Quantity (Gal):</td>
+                    <td align="left">
+                        <input id='EditDialogQuantityInput' />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">Alcohol Content:</td>
+                    <td align="left">
+                        <input id='EditDialogAlcoholInput' />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">Total Proof Gallons:</td>
+                    <td align="left">
+                        <input id='EditDialogProofInput' />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">Notes:</td>
+                    <td align="left">
+                        <textarea class="pull-left" id='EditDialogNotesInput'></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right" colspan="2" style="text-align:center"><br />Withdrawn Tax Determined</td>
+                </tr>
+                <tr>
+                    <td align="right" colspan="2" style="text-align:center"><br /></td>
+                </tr>
+                <tr>
+                    <td align="right">Proof Gallons Withdrawn:</td>
+                    <td align="left">
+                        <input id='EditDialogTaxedProof' />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right" colspan="2" style="text-align:center"><br /></td>
+                </tr>
+                <tr>
+                    <td align="right">Date Withdrawn:</td>
+                    <td align="left">
+                        <div id="EditDialogTaxWithdrawalDate"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right">
+                        <br />
+                        <button id="EditDialogSaveRecordButton">Save</button>
+                        <button id="EditDialogDeleteRecordButton">Delete</button>
+                        <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!--Hidden markup. Material Burndown dialog-->
+    <div id="MatBurnDwnDialog" style="visibility: hidden;">
+        <div id="MatBurnDwnDialogHeader">
+            <span>Material Quantity Burndown</span>
+        </div>
+        <div id="MatBurnDwnDialogContent" style="overflow:hidden">
+            <div class="panel-wrapper">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Step 1</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnGal" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnGal">Burndown By Volume</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnVBW" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnVBW">Burndown By Weight</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Step 2</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnAll" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnAll">Burndown All Amount</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnPartial" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnPartial">Burndown Partial Amount</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-body">
+                        <div id="inpRow1" style="visibility: hidden">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="text-center">Amount to Burndown</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="text-center">Amount Remaining</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="center-block" id="MatBurnDwnDialogQuantityInput"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="center-block" id="MatBurnDwnDialogQuantityInputOriginal"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="center-block" id="MatBurnDwnDialogAdd">Add</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="center-block" id="MatBurnDwnDialogCancel">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

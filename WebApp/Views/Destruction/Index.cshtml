@@ -1,0 +1,498 @@
+﻿@{
+    ViewBag.Title = "Batch Destruction";
+}
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            main();
+        });
+
+        var main = (function () {
+            displayPurchaseTable();
+            displayProductionTable();
+            displayDestroyedTable();
+            initEventListeners();
+            createWidgets();
+        });
+
+        function displayPurchaseTable() {
+            // prepare the data
+            var source =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'PurBatchName', type: 'string' },
+                    { name: 'PurchaseType', type: 'string' },
+                    { name: 'PurchaseId', type: 'number' },
+                    { name: 'PurchaseDate', type: 'date' },
+                    { name: 'Quantity', type: 'float' },
+                    { name: 'VolumeByWeight', type: 'float' },
+                    { name: 'AlcoholContent', type: 'float' },
+                    { name: 'ProofGallon', type: 'float' },
+                    { name: 'VendorName', type: 'string' },
+                    { name: 'Note', type: 'string' }
+                ],
+                sortcolumn: 'PurchaseDate',
+                sortdirection: 'desc',
+                id: 'PurchaseId',
+                url: '/Destruction/GetPurchaseData',
+                addRow: function (rowID, rowData, position, commit) {
+                    // synchronize with the server - send insert command
+                    // call commit with parameter true if the synchronization with the server is successful
+                    // and with parameter false if the synchronization failed.
+                    // you can pass additional argument to the commit callback which represents the new ID if it is generated from a DB.
+                    commit(true);
+                },
+                updateRow: function (rowID, rowData, commit) {
+                    // synchronize with the server - send update command
+                    // call commit with parameter true if the synchronization with the server is successful
+                    // and with parameter false if the synchronization failed.
+                    var DestructionObject = {
+                        RecordID: rowData.PurchaseId,
+                        WorkflowType: "Purchase",
+                        StartTime: rowData.StartTime,
+                        EndTime: rowData.EndTime,
+                        DestructionMethod: rowData.DestructionMethod,
+                        RepresentativeName: rowData.RepresentativeName,
+                        Withdrawn: rowData.Withdrawn,
+                        Note: rowData.Note
+                    };
+
+                    $.ajax({
+                        type: "POST",
+                        url: '/Destruction/DestroyBatch',
+                        data: JSON.stringify(DestructionObject),
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        error: function (response) {
+                            alert(response.responseText)
+                        },
+                        success: function (result) {
+                            //on success will need to refresh the table and also empty the form
+                            dataAdapter.dataBind();
+                            commit(true);
+                        }
+                    });
+                },
+                deleteRow: function (rowID, commit) {
+                    // synchronize with the server - send delete command
+                    // call commit with parameter true if the synchronization with the server is successful
+                    // and with parameter false if the synchronization failed.
+                }
+            };
+
+            var dataAdapter = new $.jqx.dataAdapter(source);
+
+            // create Tree Grid
+            $("#purchaseTable").jqxDataTable(
+            {
+                width: '100%',
+                source: dataAdapter,
+                theme: 'metro',
+                pageSize: 15,
+                sortable: true,
+                pageable: true,
+                pagerPosition: 'top',
+                autoRowHeight: false,
+                ready: function () {
+                },
+                columns: [
+                    { text: 'Batch Name', dataField: 'PurBatchName', align: 'center', width: '15%' },
+                    { text: 'Purchase Type', dataField: 'PurchaseType', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Purchase Date', dataField: 'PurchaseDate', cellsFormat: 'MM/dd/yyyy', cellsAlign: 'center', align: 'center', width: '10%' },
+                    { text: 'Vendor', dataField: 'VendorName', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Quantity (gal)', dataField: 'Quantity', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Volume By Weight', dataField: 'VolumeByWeight', cellsAlign: 'center', align: 'center', width: '10%' },
+                    { text: 'Alcohol (%)', dataField: 'AlcoholContent', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Proof Gallons', dataField: 'ProofGallon', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Notes', dataField: 'Note', align: 'center' }
+                ]
+            });
+        }
+
+        function displayProductionTable() {
+            // prepare the data
+            var source =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'BatchName', type: 'string' },
+                    { name: 'ProductionType', type: 'string' },
+                    { name: 'ProductionId', type: 'number' },
+                    { name: 'ProductionStart', type: 'date' },
+                    { name: 'ProductionEnd', type: 'date' },
+                    { name: 'SpiritCutName', type: 'string' },
+                    { name: 'Storage' },
+                    { name: 'Quantity', type: 'float' },
+                    { name: 'VolumeByWeight', type: 'float' },
+                    { name: 'AlcoholContent', type: 'float' },
+                    { name: 'ProofGallon', type: 'float' },
+                    { name: 'SpiritName', type: 'string' },
+                    { name: 'Note', type: 'string' }
+                ],
+                sortcolumn: 'ProdEndDate',
+                sortdirection: 'desc',
+                id: 'ProductionId',
+                url: '/Destruction/GetProductionData',
+                addRow: function (rowID, rowData, position, commit) {
+                    // synchronize with the server - send insert command
+                    // call commit with parameter true if the synchronization with the server is successful
+                    // and with parameter false if the synchronization failed.
+                    // you can pass additional argument to the commit callback which represents the new ID if it is generated from a DB.
+                    commit(true);
+                },
+                updateRow: function (rowID, rowData, commit) {
+                    // synchronize with the server - send update command
+                    // call commit with parameter true if the synchronization with the server is successful
+                    // and with parameter false if the synchronization failed.
+                    var DestructionObject = {
+                        RecordID: rowData.ProductionId,
+                        WorkflowType: "Production",
+                        StartTime: rowData.StartTime,
+                        EndTime: rowData.EndTime,
+                        DestructionMethod: rowData.DestructionMethod,
+                        RepresentativeName: rowData.RepresentativeName,
+                        Withdrawn: rowData.Withdrawn,
+                        Note: rowData.Note
+                    };
+
+                    $.ajax({
+                        type: "POST",
+                        url: '/Destruction/DestroyBatch',
+                        data: JSON.stringify(DestructionObject),
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        error: function (response) {
+                            alert(response.responseText)
+                        },
+                        success: function (result) {
+                            //on success will need to refresh the table and also empty the form
+                            dataAdapter.dataBind();
+                            commit(true);
+                        }
+                    });
+                },
+                deleteRow: function (rowID, commit) {
+                    // synchronize with the server - send delete command
+                    // call commit with parameter true if the synchronization with the server is successful
+                    // and with parameter false if the synchronization failed.
+                }
+            };
+
+            var dataAdapter = new $.jqx.dataAdapter(source);
+
+            // create Tree Grid
+            $("#productionTable").jqxDataTable(
+            {
+                width: '100%',
+                source: dataAdapter,
+                theme: 'metro',
+                pageSize: 15,
+                sortable: true,
+                pageable: true,
+                pagerPosition: 'top',
+                autoRowHeight: false,
+                ready: function () {
+                },
+                columns: [
+                    { text: 'Batch Name', dataField: 'BatchName', align: 'center', width: '15%' },
+                    { text: 'Production Type', dataField: 'ProductionType', cellsAlign: 'center', align: 'center', width: '10%' },
+                    { text: 'Production Date', dataField: 'ProductionEnd', cellsFormat: 'MM/dd/yyyy', cellsAlign: 'center', align: 'center', width: '10%' },
+                    { text: 'Spirit Cut Name', dataField: 'SpiritCutName', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Quantity (gal)', dataField: 'Quantity', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Volume By Weight', dataField: 'VolumeByWeight', cellsAlign: 'center', align: 'center', width: '10%' },
+                    { text: 'Alcohol (%)', dataField: 'AlcoholContent', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Proof Gallons', dataField: 'ProofGallon', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Spirit Type', dataField: 'SpiritName', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Notes', dataField: 'Note', align: 'center' }
+                ]
+            });
+        }
+
+        function displayDestroyedTable() {
+            // prepare the data
+            var source =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'DestructionID', type: 'number' },
+                    { name: 'RecordID', type: 'number' },
+                    { name: 'WorkflowType', type: 'string' },
+                    { name: 'BatchType', type: 'string' },
+                    { name: 'BatchName', type: 'string' },
+                    { name: 'StartTime', type: 'date' },
+                    { name: 'EndTime', type: 'date' },
+                    { name: 'DestructionMethod', type: 'string' },
+                    { name: 'Withdrawn', type: 'bool' },
+                    { name: 'RepresentativeName', type: 'string' },
+                    { name: 'Quantity', type: 'float' },
+                    { name: 'VolumeByWeight', type: 'float' },
+                    { name: 'AlcoholContent', type: 'float' },
+                    { name: 'ProofGallons', type: 'float' },
+                    { name: 'Note', type: 'string' }
+                ],
+                sortcolumn: 'EndTime',
+                sortdirection: 'desc',
+                id: 'DestructionID',
+                url: '/Destruction/GetDestroyedBatches',
+                addRow: function (rowID, rowData, position, commit) {
+                    // synchronize with the server - send insert command
+                    // call commit with parameter true if the synchronization with the server is successful
+                    // and with parameter false if the synchronization failed.
+                    // you can pass additional argument to the commit callback which represents the new ID if it is generated from a DB.
+                    commit(true);
+                },
+                updateRow: function (rowID, rowData, commit) {
+                    // synchronize with the server - send update command
+                    // call commit with parameter true if the synchronization with the server is successful
+                    // and with parameter false if the synchronization failed.
+                },
+                deleteRow: function (rowID, commit) {
+                    // synchronize with the server - send delete command
+                    // call commit with parameter true if the synchronization with the server is successful
+                    // and with parameter false if the synchronization failed.
+                }
+            };
+
+            var dataAdapter = new $.jqx.dataAdapter(source);
+
+            // create Tree Grid
+            $("#viewTable").jqxDataTable(
+            {
+                width: '100%',
+                source: dataAdapter,
+                theme: 'metro',
+                pageSize: 15,
+                sortable: true,
+                pageable: true,
+                pagerPosition: 'top',
+                autoRowHeight: false,
+                ready: function () {
+                },
+                columns: [
+                    { text: 'Batch Name', dataField: 'BatchName', align: 'center', width: '15%' },
+                    { text: 'Workflow', dataField: 'WorkflowType', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Batch Type', dataField: 'BatchType', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Start Time', dataField: 'StartTime', cellsFormat: 'MM/dd/yyyy, h:mm tt', align: 'center', width: '12%' },
+                    { text: 'End Time', dataField: 'EndTime', cellsFormat: 'MM/dd/yyyy, h:mm tt', align: 'center', width: '12%' },
+                    // Add RepresentativeName, doesn't fit within the table
+                    { text: 'Quantity (gal)', dataField: 'Quantity', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Volume By Weight', dataField: 'VolumeByWeight', cellsAlign: 'center', align: 'center', width: '10%' },
+                    { text: 'Alcohol (%)', dataField: 'AlcoholContent', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Proof Gallons', dataField: 'ProofGallons', cellsAlign: 'center', align: 'center', width: '8%' },
+                    { text: 'Notes', dataField: 'Note', align: 'center' }
+                ]
+            });
+        }
+
+        function initEventListeners() {
+            var purId = null;
+            var prodId = null;
+
+            // Active destruction table
+            var activeTable;
+            var tableEnum = {
+                Purchase: 1,
+                Production: 2
+            }
+
+            // Select purchase table row
+            $("#purchaseTable").on('rowDoubleClick', function (event) {
+                var args = event.args;
+                var index = args.index;
+                var row = args.row;
+                purId = row.PurchaseId;
+                // Update the widgets inside jqxWindow
+                $("#EditDialog").jqxWindow('setTitle', "Destroy Batch: #" + purId);
+                $("#EditDialog").jqxWindow('open');
+                $("#EditDialog").attr('data-row', index);
+                $("#purchaseTable").jqxDataTable({ disabled: true });
+                activeTable = tableEnum.Purchase;
+            });
+
+            // Select production table row
+            $("#productionTable").on('rowDoubleClick', function (event) {
+                var args = event.args;
+                var index = args.index;
+                var row = args.row;
+                prodId = row.ProductionId;
+                // Update the widgets inside jqxWindow
+                $("#EditDialog").jqxWindow('setTitle', "Destroy Batch: #" + prodId);
+                $("#EditDialog").jqxWindow('open');
+                $("#EditDialog").attr('data-row', index);
+                $("#productionTable").jqxDataTable({ disabled: true });
+                activeTable = tableEnum.Production;
+            });
+
+            // Save record within Edit Dialog
+            $("#EditDialogSubmitButton").click(function () {
+                // close jqxWindow.
+                $("#EditDialog").jqxWindow('close');
+                // update edited row.
+                var editRow = parseInt($("#EditDialog").attr('data-row'));
+
+                if (activeTable == tableEnum.Purchase)
+                {
+                    var rowData = {
+                        PurchaseId: purId,
+                        StartTime: $("#EditDialogStartDateInput").jqxDateTimeInput('val'),
+                        EndTime: $("#EditDialogEndDateInput").jqxDateTimeInput('val'),
+                        DestructionMethod: $("#EditDialogDestructionMethodInput").jqxInput('val'),
+                        RepresentativeName: $('#EditDialogRepresentativeNameInput').jqxInput('val'),
+                        Withdrawn: $("#EditDialogWithdrawnCheckBox").jqxCheckBox('val'),
+                        Note: $("#EditDialogNoteInput").jqxTextArea('val')
+                    };
+                    $("#purchaseTable").jqxDataTable('updateRow', editRow, rowData);
+                }
+                else if (activeTable == tableEnum.Production)
+                {
+                    var rowData = {
+                        ProductionId: prodId,
+                        StartTime: $("#EditDialogStartDateInput").jqxDateTimeInput('val'),
+                        EndTime: $("#EditDialogEndDateInput").jqxDateTimeInput('val'),
+                        DestructionMethod: $("#EditDialogDestructionMethodInput").jqxInput('val'),
+                        RepresentativeName: $('#EditDialogRepresentativeNameInput').jqxInput('val'),
+                        Withdrawn: $("#EditDialogWithdrawnCheckBox").jqxCheckBox('val'),
+                        Note: $("#EditDialogNoteInput").jqxTextArea('val')
+                    };
+                    $("#productionTable").jqxDataTable('updateRow', editRow, rowData);
+                }
+            });
+
+            // Close EditDialog
+            $("#EditDialog").on('close', function () {
+                if (activeTable == tableEnum.Purchase)
+                    // enable purchase table.
+                    $("#purchaseTable").jqxDataTable({ disabled: false });
+                else if (activeTable == tableEnum.Production)
+                    // enable production table.
+                    $("#productionTable").jqxDataTable({ disabled: false });
+            });
+        }
+
+        function createWidgets() {
+            $("#EditDialog").jqxWindow({
+                position: 'center',
+                maxHeight: '100%',
+                width: 'auto',
+                height: 'auto',
+                modalOpacity: 0.5,
+                autoOpen: false,
+                isModal: false
+            });
+
+            $("#EditDialog").css('visibility', 'visible');
+
+            $("#EditDialogEndDateInput").jqxDateTimeInput({
+                theme: 'bootstrap',
+                height: '26px',
+                width: '150px',
+                formatString: 'MM/dd/yyyy HH:mm'
+            });
+            $("#EditDialogStartDateInput").jqxDateTimeInput({
+                theme: 'bootstrap',
+                height: '26px',
+                width: '150px',
+                formatString: 'MM/dd/yyyy HH:mm'
+            });
+            $('#EditDialogWithdrawnCheckBox').jqxCheckBox({
+                theme: 'bootstrap',
+                height: '26px',
+                width: '26px'
+            });
+            $('#EditDialogDestructionMethodInput').jqxInput({
+                theme: 'bootstrap',
+                height: '26px',
+                width: '250px'
+            });
+            $('#EditDialogRepresentativeNameInput').jqxInput({
+                theme: 'bootstrap',
+                height: '26px',
+                width: '250px'
+            });
+            $('#EditDialogNoteInput').jqxTextArea({
+                theme: 'bootstrap',
+                height: '250px',
+                width: '100%',
+                minLength: 1
+            });
+            $("#EditDialogSubmitButton").jqxButton({
+                theme: 'bootstrap',
+                height: '26px',
+                width: '150px'
+            });
+        }
+    </script>
+}
+
+<div class="container body-content">
+    <div class="row">
+        <h1>Destruction</h1>
+        <!-- Nav tabs -->
+        <ul class="nav nav-pills" role="tablist">
+            <li role="presentation" class="active"><a href="#destroyPurchaseBatch" aria-controls="destroyPurchaseBatch" role="tab" data-toggle="tab">Destroy Purchase Batch</a></li>
+            <li role="presentation"><a href="#destroyProductionBatch" aria-controls="destroyProductionBatch" role="tab" data-toggle="tab">Destroy Production Batch</a></li>
+            <li role="presentation"><a href="#view" aria-controls="view" role="tab" data-toggle="tab">View Destroyed Batches</a></li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade in active" id="destroyPurchaseBatch">
+                <div class="row">
+                    <div class="well">
+                        <div id="purchaseTable"></div>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="destroyProductionBatch">
+                <div class="row">
+                    <div class="well">
+                        <div id="productionTable"></div>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="view">
+                <div class="row">
+                    <div id="viewTable"></div>
+                </div>
+            </div>
+        </div>
+        @Html.Partial("_FooterPartial")
+    </div>
+
+    <!--This html is hidden. It is used for table editing dialog-->
+    <div class="row" id="EditDialog">
+        <div class="editDialogWrapper">
+            <div class="well">
+                <form>
+                    <div class="form-group">
+                        <label for="EditDialogStartDateInput">Destruction Start Date/Time (Required)</label>
+                        <input id="EditDialogStartDateInput" />
+                    </div>
+                    <div class="form-group">
+                        <label for="EditDialogEndDateInput">Destruction End Date/Time (Required)</label>
+                        <input id="EditDialogEndDateInput" />
+                    </div>
+                    <div class="form-group">
+                        <label for="EditDialogWithdrawnCheckBox">Spirit withdrawn and returned to bond?</label>
+                        <div id="EditDialogWithdrawnCheckBox"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="EditDialogDestructionMethodInput">Method of Destruction (Required)</label>
+                        <input class="editDialogJqxInput" id="EditDialogDestructionMethodInput" />
+                    </div>
+                    <div class="form-group">
+                        <label for="EditDialogRepresentativeNameInput">Representative Name (Required)</label>
+                        <input class="editDialogJqxInput" id="EditDialogRepresentativeNameInput" />
+                    </div>
+                    <div class="form-group">
+                        <label for="EditDialogNoteInput">Note</label>
+                        <textarea id="EditDialogNoteInput"></textarea>
+                    </div>
+                    <button id="EditDialogSubmitButton">Destroy Batch</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

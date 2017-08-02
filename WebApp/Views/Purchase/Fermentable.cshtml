@@ -1,0 +1,819 @@
+﻿@{
+    ViewBag.Title = "Fermentable Purchase";
+}
+
+@section scripts {
+    <script type="text/javascript">
+        var main = (function () {
+
+            // shared classes
+            var genericWorkflowHelper = new genWHelpers();
+
+            var storageList = [];
+
+            var StorageObject = {};
+
+            // global PurchaseId variable
+            var purId = 0;
+
+            // data adapters.
+            var rawMaterialTypeAdapter;
+            var vendorAdapter;
+            var storageAdapter;
+
+            function _addEventListeners() {
+
+                $("#CreateRecordButton").click(function () {
+                    $('#validationForm').jqxValidator('validate');
+                });
+
+                $("#ClearInputElementsButton").click(function () {
+                    genericWorkflowHelper.emptyControls();
+                });
+
+                // Select jqxDataTable row
+                $("#dataTable").on('rowDoubleClick', function (event) {
+                    var args = event.args;
+                    var index = args.index;
+                    var row = args.row;
+                    purId = row.PurchaseId;
+                    // update the widgets inside jqxWindow.
+                    $("#EditDialog").jqxWindow('setTitle', "Edit Fermentable Purchase Record: #" + purId);
+                    $("#EditDialog").jqxWindow('open');
+                    $("#EditDialog").attr('data-row', index);
+                    $("#dataTable").jqxDataTable({ disabled: true });
+                    $("#EditDialogPurBatchNameInput").val(row.PurBatchName);
+                    //$("#EditDialogMaterialTypeInput").val(row.RecordName);
+                    $("#EditDialogPurchaseDateInput").val(row.PurchaseDate);
+                    $("#EditDialogQuantityInput").val(row.Quantity);
+                    $("#EditDialogVolumeByWeightInput").val(row.VolumeByWeight);
+                    $("#EditDialogPriceInput").val(row.Price);
+                    $("#EditDialogVendorInput").jqxDropDownList('selectItem', row.VendorName);
+
+                    $("#EditDialogStorageNameInput").jqxListBox('clearSelection');
+
+                    for (var k = 0; k < row.Storage.length; k++) {
+                        $("#EditDialogStorageNameInput").jqxListBox('selectItem', row.Storage[k].StorageName);
+                    }
+
+                    $("#EditDialogNotesInput").val(row.Note);
+                });
+
+                // Save record within Edit Dialog
+                $("#EditDialogSaveRecordButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // update edited row.
+                    var editRow = parseInt($("#EditDialog").attr('data-row'));
+                    var items = $("#EditDialogStorageNameInput").jqxListBox('getSelectedItems');
+
+                    if (items) {
+                        for (var i = 0; i < items.length; i++) {
+                            StorageObject = {};
+                            StorageObject.StorageId = items[i].originalItem.StorageId;
+                            StorageObject.StorageName = items[i].originalItem.StorageName;
+                            storageList.push(StorageObject);
+                        }
+                    }
+
+                    var utcDate = genericWorkflowHelper.convertUTC($("#EditDialogPurchaseDateInput").jqxDateTimeInput('val'), true);
+
+                    var rowData = {
+                        PurchaseType: "Fermented",
+                        PurchaseId: purId,
+                        PurBatchName: $('#EditDialogPurBatchNameInput').jqxInput('val'),
+                        PurchaseDate: utcDate,
+                        Quantity: $("#EditDialogQuantityInput").jqxNumberInput('val'),
+                        VolumeByWeight: $("#EditDialogVolumeByWeightInput").jqxNumberInput('val'),
+                        Price: $("#EditDialogPriceInput").jqxNumberInput('val'),
+                        VendorId: $("#EditDialogVendorInput").jqxDropDownList('getSelectedItem').originalItem.VendorId,
+                        VendorName: $("#EditDialogVendorInput").jqxDropDownList('getSelectedItem').label,
+                        Storage: storageList,
+                        Note: $('#EditDialogNotesInput').jqxTextArea('val')
+                    };
+                    $("#dataTable").jqxDataTable('updateRow', editRow, rowData);
+                    storageList = [];
+                });
+
+                // Delete record within Edit Dialog
+                $("#EditDialogDeleteRecordButton").click(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // delete row from table.
+                    var deleteRow = parseInt($("#EditDialog").attr('data-row'));
+                    $("#dataTable").jqxDataTable('deleteRow', deleteRow);
+                });
+
+                $("#EditDialogClearInputElementsButton").mousedown(function () {
+                    $("#EditDialogStorageNameInput").jqxListBox('refresh');
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                });
+
+                $("#EditDialog").on('close', function () {
+                    // enable jqxDataTable.
+                    $("#dataTable").jqxDataTable({ disabled: false });
+                });
+            };
+
+            function _createElements() {
+                //$("#splitter").jqxSplitter({ width: 350, height: 150, panels: [{ size: '40%' }] });
+                $("#PurchaseDateInput").jqxDateTimeInput({
+                    theme: 'bootstrap',
+                    textAlign: 'center',
+                    height: '26px',
+                    width: '130px',
+                    formatString: "MM/dd/yyyy"
+                }); 
+                $("#QuantityInput").jqxNumberInput({
+                    theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                });
+                $("#PurBatch").jqxInput({
+                    theme: 'bootstrap',
+                    height: '26px',
+                    width: '167px',
+                    minLength: 0
+                });
+                $("#VolumeByWeightInput").jqxNumberInput({
+                    theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                });
+                $("#PriceInput").jqxNumberInput({
+                    theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                });
+                $("#VendorInput").jqxDropDownList({
+                    source: vendorAdapter,
+                    displayMember: "VendorName",
+                    theme: 'bootstrap',
+                    height: '26px',
+                    width: '200px',
+                    autoDropDownHeight: true,
+                    autoOpen: false,
+                    placeHolder: ""
+                });
+                $("#StorageInput").jqxListBox({
+                    source: storageAdapter,
+                    displayMember: "StorageName",
+                    theme: 'bootstrap',
+                    multiple: true
+                });
+                $('#NotesInput').jqxTextArea({
+                    theme: 'bootstrap',
+                    height: '100%',
+                    width: '100%',
+                    minLength: 1
+                });
+                $("#CreateRecordButton").jqxButton({
+                    theme: 'bootstrap',
+                    width: '220px',
+                    height: '28px'
+                });
+                $("#ClearInputElementsButton").jqxButton({
+                    theme: 'bootstrap',
+                    width: '220px',
+                    height: '28px'
+                });
+                $("#MaterialTypeInput").jqxListBox({
+                    theme: 'bootstrap',
+                    source: rawMaterialTypeAdapter,
+                    displayMember: "RawMaterialName",
+                    valueMember: "RawMaterialId",
+                    width: '100%'
+                });
+                $('#validationForm').jqxValidator({
+                    closeOnClick: true,
+                    onSuccess: function () {
+                        _createRecord();
+                        genericWorkflowHelper.emptyControls();
+                    },
+                    onError: function () {
+                        alert('Please complete filling out the form');
+                    },
+                    rules: [
+                        {
+                            input: "#MaterialTypeInput", message: "Please Select Material Type", action: 'click', rule: function (input, commit) {
+                                var index = $("#MaterialTypeInput").jqxListBox('getSelectedIndex');
+                                return index != -1;
+                            }
+                        },
+                        { input: '#PurBatch', message: 'Batch Name Required', action: 'blur', rule: 'required' },
+                        {
+                            input: '#QuantityInput', message: 'Please Enter Quantity', action: 'blur', rule: function () {
+                                var quantityValue = $("#QuantityInput").val();
+                                var volumeValue = $('#VolumeByWeightInput').val();
+                                if (volumeValue != 0) {
+                                    return true;
+                                } else if (quantityValue > 0) {
+                                    $('#validationForm').jqxValidator('validateInput', '#VolumeByWeightInput');
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        {
+                            input: '#VolumeByWeightInput', message: 'Please Enter Volume', action: 'blur', rule: function () {
+                                var volumeValue = $('#VolumeByWeightInput').val();
+                                var quantityValue = $("#QuantityInput").val();
+                                if (quantityValue != 0) {
+                                    return true;
+                                } else if (volumeValue > 0) {
+                                    $('#validationForm').jqxValidator('validateInput', '#QuantityInput');
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        { 
+                            input: '#PriceInput', message: 'Please Enter Price', action: 'blur', rule: function () {
+                                var value = $('#PriceInput').val();
+                                return value > 0 ? true : false;
+                            }
+                        },
+                        {
+                            input: "#VendorInput", message: "Please Select Vendor", action: 'blur', rule: function (input, commit) {
+                                var index = $("#VendorInput").jqxDropDownList('getSelectedIndex');
+                                return index != -1;
+                            }
+                        },
+                        {
+                            input: "#StorageInput", message: "Please Select Storage", action: 'click', rule: function (input, commit) {
+                                var index = $("#StorageInput").jqxListBox('getSelectedIndex');
+                                return index != -1;
+                            }
+                        }
+                    ]
+                });
+            };
+
+            function _createRecord() {
+
+                var items = $("#StorageInput").jqxListBox('getSelectedItems');
+
+                if (items) {
+                    for (var i = 0; i < items.length; i++) {
+                        StorageObject = {};
+                        StorageObject.StorageId = items[i].originalItem.StorageId;
+                        StorageObject.StorageName = items[i].originalItem.StorageName;
+                        storageList.push(StorageObject);
+                    }
+                }
+
+                var utcDate = genericWorkflowHelper.convertUTC($("#PurchaseDateInput").jqxDateTimeInput('val'), true);
+
+                var purchaseObject =
+                {
+                    PurchaseType: "Fermentable",
+                    PurBatchName: 'PUR-' + $("#PurBatch").jqxInput('val'),
+                    RecordId: $("#MaterialTypeInput").jqxListBox('getSelectedItem').originalItem.RawMaterialId,
+                    RecordName: $("#MaterialTypeInput").jqxListBox('getSelectedItem').label,
+                    PurchaseDate: utcDate,
+                    Quantity: $("#QuantityInput").jqxNumberInput('val'),
+                    VolumeByWeight: $("#VolumeByWeightInput").jqxNumberInput('val'),
+                    Price: $("#PriceInput").jqxNumberInput('val'),
+                    VendorId: $("#VendorInput").jqxDropDownList('getSelectedItem').originalItem.VendorId,
+                    VendorName: $("#VendorInput").jqxDropDownList('getSelectedItem').label,
+                    Storage: storageList,
+                    Note: $('#NotesInput').jqxTextArea('val')
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: '/Purchase/CreatePurchaseRecord',
+                    data: JSON.stringify(purchaseObject),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    error: function (response) {
+                        alert(response.responseText)
+                    },
+                    success: function (result) {
+                        //on success will need to refresh the table and also empty the form
+                        alert(result);
+                        storageList = [];
+                        $("#dataTable").jqxDataTable('updateBoundData');
+                        //window.locationre = result.url;
+                    }
+                });
+            }
+
+            function _RecordsViewFunction() {
+                // prepare the data
+                var source =
+                {
+                    dataType: "json",
+                    dataFields: [
+                        { name: 'PurchaseId', type: 'number' },
+                        { name: 'PurBatchName', type: 'string' },
+                        { name: 'RecordId', type: 'number' },
+                        { name: 'RecordName', type: 'string' },
+                        { name: 'PurchaseDate', type: 'date' },
+                        { name: 'Quantity', type: 'float' },
+                        { name: 'VolumeByWeight', type: 'float' },
+                        { name: 'Price', type: 'float' },
+                        { name: 'VendorId', type: 'number' },
+                        { name: 'VendorName', type: 'string' },
+                        { name: 'Storage' },
+                        { name: 'Note', type: 'string' }
+                    ],
+                    sortcolumn: 'PurchaseId',
+                    sortdirection: 'desc',
+                    id: 'PurchaseId',
+                    url: '/Purchase/GetListOfPurchases',
+                    data: { purchaseType: "Fermentable" },
+                    addRow: function (rowID, rowData, position, commit) {
+                        // synchronize with the server - send insert command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        // you can pass additional argument to the commit callback which represents the new ID if it is generated from a DB.
+                        commit(true);
+                    },
+                    updateRow: function (rowID, rowData, commit) {
+                        // synchronize with the server - send update command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var purchaseObject = {
+                            PurchaseType: "Fermentable",
+                            PurchaseId: rowData.PurchaseId,
+                            PurBatchName: rowData.PurBatchName,
+                            RecordId: rowData.RecordId,
+                            RecordName: rowData.RecordName,
+                            PurchaseDate: rowData.PurchaseDate,
+                            Quantity: rowData.Quantity,
+                            VolumeByWeight: rowData.VolumeByWeight,
+                            Price: rowData.Price,
+                            VendorId: rowData.VendorId,
+                            VendorName: rowData.VendorName,
+                            Storage: rowData.Storage,
+                            Note: rowData.Note
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Purchase/UpdateFermentable',
+                            data: JSON.stringify(purchaseObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                recordsDataAdapter.dataBind();
+                                commit(true);
+                                //window.locationre = result.url;
+                            }
+                        });
+                    },
+                    deleteRow: function (rowID, commit) {
+                        // synchronize with the server - send delete command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var purchaseObject = {
+                            PurchaseType: "Fermentable",
+                            PurchaseId: rowID
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Purchase/DeleteFermentable',
+                            data: JSON.stringify(purchaseObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                commit(true);
+                                recordsDataAdapter.dataBind();
+                                //window.locationre = result.url;
+                            }
+                        });
+                    }
+                };
+
+                var recordsDataAdapter = new $.jqx.dataAdapter(source, {
+                    beforeLoadComplete: function (records) {
+                        for (var i = 0; i < records.length; i++) {
+                            records[i].PurchaseDate = genericWorkflowHelper.convertUTC(records[i].PurchaseDate, false);
+                        }
+                    }
+                });
+                // create Table Grid
+                $("#dataTable").jqxDataTable(
+                {
+                    width: '100%',
+                    source: recordsDataAdapter,
+                    theme: 'metro',
+                    pageSize: 15,
+                    sortable: true,
+                    pageable: true,
+                    pagerPosition: 'top',
+                    autoRowHeight: true,
+                    ready: function () {
+
+                        $("#EditDialogPurBatchNameInput").jqxInput({
+                            theme: 'bootstrap', height: '26px', width: '150px'
+                        });
+
+                        $("#EditDialogPurchaseDateInput").jqxDateTimeInput({
+                            theme: 'bootstrap', height: '26px', width: '150px', formatString: "MM/dd/yyyy HH:mm"
+                        });
+
+                        $("#EditDialogQuantityInput").jqxNumberInput({
+                            theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                        });
+
+                        $("#EditDialogVolumeByWeightInput").jqxNumberInput({
+                            theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                        });
+
+                        $("#EditDialogPriceInput").jqxNumberInput({
+                            theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                        });
+
+                        $("#EditDialogVendorInput").jqxDropDownList({
+                            source: vendorAdapter,
+                            displayMember: "VendorName",
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px'
+                        });
+
+                        $("#EditDialogStorageNameInput").jqxListBox({
+                            source: storageAdapter,
+                            displayMember: "StorageName",
+                            theme: 'bootstrap',
+                            multiple: true
+                        });
+
+                        $('#EditDialogNotesInput').jqxTextArea({
+                            theme: 'bootstrap', height: '150px', width: '150px', minLength: 1
+                        });
+
+                        $("#EditDialogSaveRecordButton").jqxButton({
+                            theme: 'bootstrap', height: '26px', width: '150px'
+                        });
+
+                        $("#EditDialogDeleteRecordButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+
+                        $("#EditDialogClearInputElementsButton").jqxButton({
+                            theme: 'bootstrap', height: '26px', width: '150px'
+                        });
+
+                        $("#EditDialog").jqxWindow({
+                            position: 'center',
+                            width: 'auto',
+                            height: 'auto',
+                            modalOpacity: 0.5,
+                            autoOpen: false,
+                            isModal: false
+                        });
+                        $("#EditDialog").css('visibility', 'visible');
+                    },
+                    columns: [
+                        {
+                            text: 'Batch Name',
+                            dataField: 'PurBatchName',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '20%'
+                        },
+                        {
+                            text: 'Material Type',
+                            dataField: 'RecordName',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '12%'
+                        },
+                        {
+                            text: 'Purchase Date/Time',
+                            dataField: 'PurchaseDate',
+                            cellsFormat: 'MM/dd/yyyy',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '12%'
+                        },
+                        {
+                            text: 'Vendor Name',
+                            dataField: 'VendorName',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '12%'
+                        },
+                        {
+                            text: 'Qty (gal)',
+                            dataField: 'Quantity',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '8%'
+                        },
+                        {
+                            text: 'Volume By Weight (lb)',
+                            dataField: 'VolumeByWeight',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '12%'
+                        },
+                        {
+                            text: 'Price',
+                            dataField: 'Price',
+                            cellsFormat: 'c2',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '8%'
+                        },
+                        {
+                            text: 'Notes',
+                            dataField: 'Note',
+                            cellsAlign: 'center',
+                            align: 'center'
+                        }
+                    ]
+                });
+            }
+
+            function _bindRawMaterialTypes() {
+                var url = '/Purchase/GetRawMaterialList';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'RawMaterialId' },
+                        { name: 'RawMaterialName' },
+                        { name: 'UnitType' },
+                        { name: 'Note' }
+                    ],
+                    id: 'RawMaterialId',
+                    url: url,
+                    data: { purchaseType: "Fermentable" }
+                }
+                rawMaterialTypeAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true,
+                        async: true
+                });
+            }
+
+            function _bindVendorData() {
+                var url = '/Purchase/GetVendorData';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'VendorId' },
+                        { name: 'VendorName' },
+                        { name: 'Note' }
+                    ],
+                    id: 'VendorId',
+                    url: url
+                }
+                vendorAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true
+                    });
+            }
+
+            function _bindStorageData() {
+                var url = '/Purchase/GetStorageData';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'StorageId' },
+                        { name: 'StorageName' },
+                        { name: 'Note' }
+                    ],
+                    id: 'StorageId',
+                    url: url
+                }
+                storageAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true
+                    });
+            }
+
+            return {
+                config: {
+                    dragArea: null
+                },
+                init: function () {
+                    // bind data to the listbox
+                    _bindRawMaterialTypes();
+                    _bindVendorData();
+                    _bindStorageData();
+                    //Creating all jqxWindgets except the window
+                    _createElements();
+                    //Populate Table
+                    _RecordsViewFunction();
+                    //Attaching event listeners
+                    _addEventListeners();
+                }
+            };
+        }());
+
+        $(document).ready(function () {
+            main.init();
+        });
+    </script>
+}
+
+<div class="container-fluid body-content">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li class="active">@Html.ActionLink("Fermentable", "Fermentable", "Purchase")</li>
+                <li>@Html.ActionLink("Fermented", "Fermented", "Purchase")</li>
+                <li>@Html.ActionLink("Distilled", "Distilled", "Purchase")</li>
+                <li>@Html.ActionLink("Supplies", "Supplies", "Purchase")</li>
+                <li>@Html.ActionLink("Additives", "Additives", "Purchase")</li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1>Purchase / Fermentable</h1>
+            <div class="well">
+                <!-- Nav tabs -->
+                <ul class="nav nav-pills" role="tablist">
+                    <li role="presentation" class="active"><a href="#createRecord" aria-controls="createRecord" role="tab" data-toggle="pill">Enter Fermentable Purchase</a></li>
+                    <li role="presentation"><a href="#viewRecord" aria-controls="viewRecord" role="tab" data-toggle="tab">View/Edit Fermentable Purchase Data</a></li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade in active" id="createRecord">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <p class="text-center">Please select fermentable material type</p>
+                                        </div>                                    
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12">
+                                            <div id="MaterialTypeInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="PurBatch" class="col-sm-6 control-label">Purchase Batch Name</label>
+                                        <div class="col-sm-6">
+                                            PUR -<input id="PurBatch" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="PurchaseDateInput" class="col-sm-6 control-label">Purchase Date</label>
+                                        <div class="col-sm-6">
+                                            <div id="PurchaseDateInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="QuantityInput" class="col-sm-6 control-label">Volume (gal)</label>
+                                        <div class="col-sm-6">
+                                            <div id="QuantityInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="VolumeByWeightInput" class="col-sm-6 control-label">Weight (lb)</label>
+                                        <div class="col-sm-6">
+                                            <div id="VolumeByWeightInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="PriceInput" class="col-sm-6 control-label">Price (Total)</label>
+                                        <div class="col-sm-6">
+                                            <div id="PriceInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="VendorInput" class="col-sm-6 control-label">Vendor</label>
+                                        <div class="col-sm-6">
+                                            <div id="VendorInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="StorageInput" class="col-sm-6 control-label">Storage</label>
+                                        <div class="col-sm-6">
+                                            <div id="StorageInput"></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-6 note-column">
+                                <form class="text-center">
+                                    <div class="form-group">
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading">Notes</div>
+                                            <div class="panel-body">
+                                                <textarea class="form-control" id='NotesInput'></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-8">
+                                            <div id='validationForm'></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <button id="CreateRecordButton">Create Record</button>
+                                <button id="ClearInputElementsButton">Clear Form</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="viewRecord">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="dataTable"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="visibility: hidden;" id="EditDialog">
+                <div style="overflow: hidden;">
+                    <table style="table-layout: fixed; border-style: none;">
+                        <tr>
+                            <td align="right">
+                                Batch Name:
+                            </td>
+                            <td align="left">
+                                <input id="EditDialogPurBatchNameInput" type="text" />
+                            </td>
+                        </tr>
+                        @*<tr>
+                                <td align="right">
+                                    Material Type:
+                                </td>
+                                <td align="left">
+                                    <div id="EditDialogMaterialTypeInput" type="text"></div>
+                                </td>
+                            </tr>*@
+                        <tr>
+                            <td align="right">
+                                Purchase Date:
+                            </td>
+                            <td align="left">
+                                <input id="EditDialogPurchaseDateInput" type="text" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                Quantity:
+                            </td>
+                            <td align="left">
+                                <div id="EditDialogQuantityInput" type="text"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                Volume By Weight:
+                            </td>
+                            <td align="left">
+                                <div id="EditDialogVolumeByWeightInput" type="text"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                Price:
+                            </td>
+                            <td align="left">
+                                <div id="EditDialogPriceInput" type="text"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                Vendor:
+                            </td>
+                            <td align="left">
+                                <div id="EditDialogVendorInput" type="text"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                Storage:
+                            </td>
+                            <td align="left">
+                                <div id="EditDialogStorageNameInput" type="text"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">Notes:</td>
+                            <td align="left">
+                                <textarea class="pull-left" id='EditDialogNotesInput'></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="right">
+                                <br />
+                                <button id="EditDialogSaveRecordButton">Save</button>
+                                <button id="EditDialogDeleteRecordButton">Delete</button>
+                                <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            @Html.Partial("_FooterPartial")
+        </div>
+    </div>
+</div>
+

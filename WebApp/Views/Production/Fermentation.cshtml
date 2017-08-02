@@ -1,0 +1,1237 @@
+﻿
+@{
+    ViewBag.Title = "Fermentation";
+}
+
+@section scripts {
+    <script>
+        var main = (function () {
+
+            // initialize helper classes
+            var distillCompInstance = new distillCompute();
+            var genericWorkflowHelper = new genWHelpers();
+
+            // declare an array that will be used to keep selected rawMateral Ids
+            var rawMaterialIdsSelected = []; // here we keep rawMaterial Ids of Raw Materials selected
+            var curRawMatIndex; // this index is used to keep index value of the current selected material that will be used in production
+            var usedMat = {}; // front-end representation of an object in Helpers.cs
+            // this is the structure of usedMat object
+            /*
+                var usedMat = {
+                    ID: "",
+                    OldVal: "",
+                    NewVal: "",
+                    DistillableOrigin: "", // whether it came from purchase or production
+                    BurningDownMethod: "" // are we burning down by Volume or by Weight? {volume, weight}
+                };
+            */
+
+            var usedMatsList = []; // this is a new arra of objects of type UsedMats. It is a replacement to PurchaseIdList.
+
+            var storageList = [];
+            var StorageObject = {};
+
+            // data adapters
+            var rawMaterialTypeAdapter;
+            var storageAdapter;
+            var ReportingSpiritKindAdapter;
+
+            // global ProductionId variable
+            var prodId = 0;
+
+            function _addEventListeners() {
+
+                // Check "Final Distillation Gauge" checkbox
+                $("#FinalGaugeCheckBox").on("checked", function (event) {
+                    $(".reporting-input-group").show();
+                });
+
+                // Uncheck "Final Distillation" Gauge checkbox
+                $("#FinalGaugeCheckBox").on("unchecked", function (event) {
+                    $(".reporting-input-group").hide();
+                    $("#ReportingSpiritTypeDropDown").jqxDropDownList("clearSelection");
+                    $("#ReportingMaterialKindDropDown").jqxDropDownList("clearSelection");
+                });
+
+                // Populates MaterialKindForReporting drop down when Spirit Type is chosen.
+                $('#ReportingSpiritTypeDropDown').on('select', function (event) {
+                    if (event.args) {
+                        var index = args.item.index;
+                        // Assumption: dropDownList index == dataAdapter index
+                        var adapterRecord = ReportingSpiritKindAdapter[index];
+                        var array = [];
+                        for (var i = 0; i < adapterRecord.MaterialKindObject.length; i++) {
+                            array.push(adapterRecord.MaterialKindObject[i]);
+                        }
+                        $('#ReportingMaterialKindDropDown').jqxDropDownList({
+                            source: array
+                        });
+                    }
+                });
+
+                // Material Burndown state machine
+                // on burndown open event
+                $( '#MatBurnDwnDialog' ).on( 'open', function ( e ) {
+                    if ( rawMaterialTypeAdapter.records[curRawMatIndex].BurningDownMethod === "volume" ) {
+                        $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { checked: true, disabled: true } );
+                        $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { disabled: true } );
+                    }
+                    else if ( rawMaterialTypeAdapter.records[curRawMatIndex].BurningDownMethod === "weight" ) {
+                        $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { checked: true, disabled: true } );
+                        $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { disabled: true } );
+                    }
+                    else {
+                        if (rawMaterialTypeAdapter.records[curRawMatIndex].QtyGal === 0) {
+                            $('#MatBurnDwnDialogRadioBtnVBW').jqxRadioButton({ checked: true });
+                            $('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton({ disabled: true });
+                        }
+                        else if (rawMaterialTypeAdapter.records[curRawMatIndex].VBW === 0) {
+                            $('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton({ checked: true });
+                            $('#MatBurnDwnDialogRadioBtnVBW').jqxRadioButton({ disabled: true })
+                        }
+                        else {
+                            $('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton({ checked: true });
+                            $('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton({ disabled: false });
+                            $('#MatBurnDwnDialogRadioBtnVBW').jqxRadioButton({ disabled: false });
+                        }
+                    }
+                    $('#MatBurnDwnDialogRadioBtnAll').jqxRadioButton({ checked: true });
+                    $("#MatBurnDwnDialogQuantityInput").val('');
+                });
+                // burndown type
+                $('#MatBurnDwnDialogRadioBtnGal').on('change', function (event) {
+                    var checked = event.args.checked;
+                    if (checked) {
+                        $("#MatBurnDwnDialogQuantityInputOriginal").val(rawMaterialTypeAdapter.records[curRawMatIndex].QtyGal);
+                        usedMat.OldVal = rawMaterialTypeAdapter.records[curRawMatIndex].QtyGal;
+                        usedMat.BurningDownMethod = "volume";
+                    }
+                });
+
+                $('#MatBurnDwnDialogRadioBtnVBW').on('change', function (event) {
+                    var checked = event.args.checked;
+                    if (checked) {
+                        //set the the burndown quantity type flag so it can be sent off to the respective record in purhase or production record and be written
+                        $("#MatBurnDwnDialogQuantityInputOriginal").val(rawMaterialTypeAdapter.records[curRawMatIndex].VBW);
+                        usedMat.OldVal = rawMaterialTypeAdapter.records[curRawMatIndex].VBW;
+                        usedMat.BurningDownMethod = "weight";
+                    }
+                });
+
+                // burndown amount radio button group
+                $('#MatBurnDwnDialogRadioBtnPartial').on('change', function (event) {
+                    var checked = event.args.checked;
+                    if (checked) {
+                        // make input field visible
+                        inpRow1.style.visibility = "visible";
+                    }
+                    else if (!checked) {
+                        // make input field invisible
+                        inpRow1.style.visibility = "hidden";
+                    }
+                });
+
+                // listen to blur event for burndown material input window so we can update original quantity in time before we close the dialog
+                // Otherwise, if user will click on add button right after updating burndown input field, without clicking anywhere else in the dialog
+                // we don't get an opportunity to update original amount field.
+                MatBurnDwnDialogQuantityInput.addEventListener("blur", () => {
+                    usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
+                });
+
+                // listen to add button click in burndown dialog
+                $("#MatBurnDwnDialogAdd").click(function () {
+                    if ($('#MatBurnDwnDialogRadioBtnPartial').jqxRadioButton('checked')) {
+                        if ($('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton('checked')) {
+                            // burning down by volume case
+                            usedMat.NewVal = $("#MatBurnDwnDialogQuantityInput").val();
+                            usedMat.BurningDownMethod = "volume";
+                        }
+                        // burning down by weight case
+                        else if ($('#MatBurnDwnDialogRadioBtnVBW').jqxRadioButton('checked')) {
+                            usedMat.NewVal = $("#MatBurnDwnDialogQuantityInput").val();
+                            usedMat.BurningDownMethod = "weight";
+                        }
+                        usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
+                    }
+                    else {
+                        if ( $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( 'checked' ) ) {
+                            // burning down by volume case
+                            usedMat.NewVal = usedMat.OldVal;
+                            usedMat.BurningDownMethod = "volume";
+                        }
+                        // burning down by weight case
+                        else if ( $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( 'checked' ) ) {
+                            usedMat.NewVal = usedMat.OldVal;
+                            usedMat.BurningDownMethod = "weight";
+                        }
+                        usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
+                    }
+
+                    usedMatsList.push(usedMat);
+                    usedMat = {};
+                    $("#MatBurnDwnDialog").jqxWindow('close');
+                });
+
+                // listen to cancel button click in burndown dialog
+                $("#MatBurnDwnDialogCancel").click(function () {
+                    // close dialog
+                    usedMat = {};
+                    $("#MatBurnDwnDialogQuantityInput").val('');
+                    $("#MatBurnDwnDialogQuantityInputOriginal").val('');
+                    $("#MatBurnDwnDialog").jqxWindow('close');
+                    $("#RawMaterialInput").jqxListBox('uncheckIndex', curRawMatIndex);
+                });
+
+                $('#MatBurnDwnDialogQuantityInput').on('change', function (e) {
+                    var newInpVal = $( "#MatBurnDwnDialogQuantityInput" ).val();
+
+                    if ( usedMat.BurningDownMethod === 'weight' ) {
+                        oldInpVal = rawMaterialTypeAdapter.records[curRawMatIndex].VBW;
+                    }
+                    if ( usedMat.BurningDownMethod === 'volume' ) {
+                        oldInpVal = rawMaterialTypeAdapter.records[curRawMatIndex].QtyGal;
+                    }
+
+                    $("#MatBurnDwnDialogQuantityInputOriginal").val(oldInpVal - newInpVal);
+                });
+
+                $('#RawMaterialInput').on('select', function (event) {
+                    var args = event.args;
+                    if (args) {
+                        var index = args.index;
+                        usedMat.ID = rawMaterialTypeAdapter.records[index].PurchaseId;
+                        usedMat.Origin = "pur";
+                        curRawMatIndex = index;
+                        var vbwValue = rawMaterialTypeAdapter.records[index].VBW;
+                        if (args.item.checked) {
+                            // make burndown window visible and open it-
+                            $("#MatBurnDwnDialog").css('visibility', 'visible');
+                            $('#MatBurnDwnDialog').jqxWindow('open');
+                            $('#RawMaterialInput').jqxListBox({ disabled: true });
+                        } else {
+                            removeBurnDownMaterialRecord(curRawMatIndex);
+                        }
+                    }
+                });
+
+                // re-enables material input listbox.
+                $('#MatBurnDwnDialog').on('close', function (event) {
+                    $('#RawMaterialInput').jqxListBox({ disabled: false });
+                })
+
+                $("#ProdCreateButton").click(function () {
+                    $('#validationForm').jqxValidator('validate');
+                });
+
+                $("#ClearInputElementsButton").click(function () {
+                    genericWorkflowHelper.emptyControls();
+                });
+
+                // adding event listeners for calculation of Proof Gallons when adding new record
+                $('#ProdQuantityInput').on('change', function (event) {
+                    if (!($('#ProdAlcoholContentInput').val() == undefined || $('#ProdAlcoholContentInput').val() == "")) {
+                        var qty = $("#ProdQuantityInput").val();
+                        var alc = $("#ProdAlcoholContentInput").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $("#ProdProofGallonsInput").val(prf);
+                    }
+                    else {
+                        $('#ProdProofGallonsInput').val(0);
+                    }
+                });
+
+                $('#ProdAlcoholContentInput').on('change', function (event) {
+                    if (!($('#ProdQuantityInput').val() == undefined || $('#ProdQuantityInput').val() == "")) {
+                        var qty = $("#ProdQuantityInput").val();
+                        var alc = $("#ProdAlcoholContentInput").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $("#ProdProofGallonsInput").val(prf);
+                    }
+                    else {
+                        $('#ProdProofGallonsInput').val(0);
+                    }
+                });
+
+                // Select jqxDataTable row
+                $("#dataTable").on('rowDoubleClick', function (event) {
+                    var args = event.args;
+                    var index = args.index;
+                    var row = args.row;
+                    prodId = row.ProductionId;
+                    // update the widgets inside jqxWindow.
+                    $("#EditDialog").jqxWindow('setTitle', "Edit Fermentation Record: #" + prodId);
+                    $("#EditDialog").jqxWindow('open');
+                    $("#EditDialog").attr('data-row', index);
+                    $("#dataTable").jqxDataTable({ disabled: true });
+                    $("#EditDialogPurBatchNameInput").val(row.BatchName);
+                    $("#EditDialogProductionStartDateInput").jqxDateTimeInput({ value: new Date(row.ProductionStart) });
+                    $("#EditDialogProductionEndDateInput").jqxDateTimeInput({ value: new Date(row.ProductionEnd) });
+                    $("#EditDialogQuantityInput").val(row.Quantity);
+                    $("#EditDialogVolumeByWeightInput").val(row.VolumeByWeight);
+                    $("#EditDialogAlcConInput").val(row.AlcoholContent);
+                    $("#EditDialogProofInput").val(row.ProofGallon);
+                    $("#EditDialogNotesInput").val(row.Note);
+
+                    $("#EditDialogStorageNameInput").jqxListBox('clearSelection');
+
+                    for (var k = 0; k < row.Storage.length; k++) {
+                        $("#EditDialogStorageNameInput").jqxListBox('selectItem', row.Storage[k].StorageName);
+                    }
+
+                    $('#EditDialogQuantityInput').on('change', function (event) {
+                        if (!($('#EditDialogAlcConInput').val() == undefined || $('#EditDialogAlcConInput').val() == "")) {
+                            var qty = $("#EditDialogQuantityInput").val();
+                            var alc = $("#EditDialogAlcConInput").val();
+                            var prf = distillCompInstance.calculateProof(qty, alc);
+                            $("#EditDialogProofInput").val(prf);
+                        }
+                        else {
+                            $('#EditDialogProofInput').val(0);
+                        }
+                    });
+
+                    $('#EditDialogAlcConInput').on('change', function (event) {
+                        if (!($('#EditDialogQuantityInput').val() == undefined || $('#EditDialogQuantityInput').val() == "")) {
+                            var qty = $("#EditDialogQuantityInput").val();
+                            var alc = $("#EditDialogAlcConInput").val();
+                            var prf = distillCompInstance.calculateProof(qty, alc);
+                            $("#EditDialogProofInput").val(prf);
+                        }
+                        else {
+                            $('#EditDialogProofInput').val(0);
+                        }
+                    });
+                });
+
+                // Save record within Edit Dialog
+                $("#EditDialogSaveRecordButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // update edited row.
+                    var editRow = parseInt($("#EditDialog").attr('data-row'));
+
+                    var items = $("#EditDialogStorageNameInput").jqxListBox('getSelectedItems');
+
+                    if (items.length != 0) {
+                        for (var i = 0; i < items.length; i++) {
+                            StorageObject = {};
+                            StorageObject.StorageId = items[i].originalItem.StorageId;
+                            StorageObject.StorageName = items[i].originalItem.StorageName;
+                            storageList.push(StorageObject);
+                        }
+                    }
+                    else {
+                        storageList = [];
+                    }
+
+                    var prodStartUtc = genericWorkflowHelper.convertUTC($("#EditDialogProductionStartDateInput").jqxDateTimeInput('val'), true);
+                    var prodEndUtc = genericWorkflowHelper.convertUTC($("#EditDialogProductionEndDateInput").jqxDateTimeInput('val'), true);
+
+                    var rowData = {
+                        ProductionType: "Fermentation",
+                        ProductionId: prodId,
+                        BatchName: $('#EditDialogPurBatchNameInput').jqxInput('val'),
+                        ProductionDate: prodEndUtc,
+                        ProductionStart: prodStartUtc,
+                        ProductionEnd: prodEndUtc,
+                        Quantity: $("#EditDialogQuantityInput").jqxNumberInput('val'),
+                        AlcoholContent: $("#EditDialogAlcConInput").jqxNumberInput('val'),
+                        VolumeByWeight: $("#EditDialogVolumeByWeightInput").jqxNumberInput('val'),
+                        ProofGallon: $("#EditDialogProofInput").jqxNumberInput('val'),
+                        Storage: storageList,
+                        Note: $('#EditDialogNotesInput').jqxTextArea('val')
+                    };
+                    $("#dataTable").jqxDataTable('updateRow', editRow, rowData);
+                    storageList = [];
+                });
+
+                // Delete record within Edit Dialog
+                $("#EditDialogDeleteRecordButton").click(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                    // delete row from table.
+                    var deleteRow = parseInt($("#EditDialog").attr('data-row'));
+                    $("#dataTable").jqxDataTable('deleteRow', deleteRow);
+                });
+
+                $("#EditDialogClearInputElementsButton").mousedown(function () {
+                    // close jqxWindow.
+                    $("#EditDialog").jqxWindow('close');
+                });
+
+                $("#EditDialog").on('close', function () {
+                    // enable jqxDataTable.
+                    $("#dataTable").jqxDataTable({ disabled: false });
+                });
+            }
+
+            // _createElements function creates a jqxwidgets elements that do not require any sort of data binding later
+            function _createElements() {
+                //todo: we need to add localization files
+                $("#ProdStartDate").jqxDateTimeInput({ textAlign: 'center', height: '25px', width: '180px', formatString: "MM/dd/yyyy HH:mm" });
+                $("#ProdEndDate").jqxDateTimeInput({ textAlign: 'center', height: '25px', width: '180px', formatString: "MM/dd/yyyy HH:mm" });
+                $("#ProdProofGallonsInput").jqxNumberInput({ height: '25px', width: '100px', disabled: true, inputMode: 'simple', textAlign: 'center', min: 0 });
+                $( "#ProdAlcoholContentInput" ).jqxNumberInput( { height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 } );
+                $( "#ProdQuantityInput" ).jqxNumberInput( { height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 } );
+                $( "#ProdVolumeByWeightInput" ).jqxNumberInput( { height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 } );
+                $('#ProdNotes').jqxTextArea({ height: '100%', width: '100%', minLength: 1 });
+                $("#BatchName").jqxInput({ height: '25px', width: '150px' });
+                $("#ProdCreateButton").jqxButton({ width: '220px', height: '40px' });
+                $("#ClearInputElementsButton").jqxButton({ width: '220px', height: '40px' });
+
+                $("#RawMaterialInput").jqxListBox({
+                    theme: 'bootstrap',
+                    source: rawMaterialTypeAdapter,
+                    displayMember: "PurchaseBatchName",
+                    valueMember: "RawMaterialId",
+                    checkboxes: true,
+                    width: '100%'
+                });
+
+                $("#ProdStorage").jqxListBox({
+                    source: storageAdapter, displayMember: "StorageName", multiple: true,
+                    theme: 'bootstrap'
+                });
+                $("#FinalGaugeCheckBox").jqxCheckBox({
+                    theme: "bootstrap",
+                    width: '26px',
+                    height: '26px',
+                    boxSize: '18px'
+                });
+                $("#ReportingSpiritTypeDropDown").jqxDropDownList({
+                    source: ReportingSpiritKindAdapter,
+                    displayMember: 'ProductTypeName',
+                    valueMember: 'SpiritTypeReportingID',
+                    theme: 'bootstrap',
+                    height: '26px',
+                    width: '175px',
+                    autoDropDownHeight: true,
+                    autoOpen: false,
+                    placeHolder: ""
+                });
+                $("#ReportingMaterialKindDropDown").jqxDropDownList({
+                    //source: assigned 'on select' function for Reporting Spirit dropdown 
+                    displayMember: 'MaterialKindName',
+                    valueMember: 'MaterialKindID',
+                    theme: 'bootstrap',
+                    height: '26px',
+                    width: '175px',
+                    autoDropDownHeight: true,
+                    autoOpen: false,
+                    placeHolder: ""
+                });
+                $('#MatBurnDwnDialog').jqxWindow({
+                    width: '30%',
+                    height: 'auto',
+                    minHeight: '90%',
+                    resizable: false,
+                    draggable: false,
+                    autoOpen: false,
+                    isModal: false,
+                    showCloseButton: false,
+                    initContent: function () {
+                        $('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton({ checked: true, groupName: "Quanity" });
+                        $('#MatBurnDwnDialogRadioBtnVBW').jqxRadioButton({ groupName: "Quanity" });
+                        $('#MatBurnDwnDialogRadioBtnAll').jqxRadioButton({ checked: true, groupName: "Amount" })
+                        $('#MatBurnDwnDialogRadioBtnPartial').jqxRadioButton({ groupName: "Amount" })
+                        $('#MatBurnDwnDialogQuantityInput').jqxNumberInput( { height: '25px', width: '80px', inputMode: 'simple', textAlign: 'center', min: 0 } );
+                        $('#MatBurnDwnDialogQuantityInputOriginal').jqxNumberInput( { height: '25px', width: '80px', inputMode: 'simple', textAlign: 'center', min: 0 } );
+                        $('#MatBurnDwnDialogCancel').jqxButton({ height: '25px', width: '80px' });
+                        $('#MatBurnDwnDialogAdd').jqxButton({ height: '25px', width: '80px' });
+                    }
+                });
+
+                $('#validationForm').jqxValidator({
+                    closeOnClick: true,
+                    onSuccess: function () {
+                        _createRecord();
+                        genericWorkflowHelper.emptyControls();
+                    },
+                    onError: function () {
+                        alert('Please complete filling out the form');
+                    },
+                    rules: [
+                        {
+                            input: "#RawMaterialInput", message: "Please Select A Batch", action: 'click', rule: function (input, commit) {
+                                var index = $("#RawMaterialInput").jqxListBox('getSelectedIndex');
+                                return index != -1;
+                            }
+                        },
+                        { input: '#BatchName', message: 'Batch Name Required', action: 'blur', rule: 'required' },
+                        {
+                            input: "#ProdStorage", message: "Please Select Storage", action: 'click', rule: function (input, commit) {
+                                var index = $("#ProdStorage").jqxListBox('getSelectedIndex');
+                                return index != -1;
+                            }
+                        },
+                        {
+                            input: '#ProdQuantityInput', message: 'Please Enter Quantity', action: 'blur', rule: function () {
+                                var quantityValue = $("#ProdQuantityInput").val();
+                                var volumeValue = $('#ProdVolumeByWeightInput').val();
+                                if (volumeValue != 0) {
+                                    return true;
+                                } else if (quantityValue > 0) {
+                                    $('#validationForm').jqxValidator('validateInput', '#ProdVolumeByWeightInput');
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        {
+                            input: '#ProdVolumeByWeightInput', message: 'Please Enter Volume', action: 'blur', rule: function () {
+                                var volumeValue = $('#ProdVolumeByWeightInput').val();
+                                var quantityValue = $("#ProdQuantityInput").val();
+                                if (quantityValue != 0) {
+                                    return true;
+                                } else if (volumeValue > 0) {
+                                    $('#validationForm').jqxValidator('validateInput', '#ProdQuantityInput');
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        {
+                            input: '#ProdAlcoholContentInput', message: 'Please Enter Alcohol Content', action: 'blur', rule: function () {
+                                var value = $('#ProdAlcoholContentInput').val();
+                                return value > 0 ? true : false;
+                            }
+                        },
+                        {
+                            input: "#ReportingSpiritTypeDropDown", message: "Please Select Spirit Type", action: 'blur', rule: function (input, commit) {
+                                var index = $("#ReportingSpiritTypeDropDown").jqxDropDownList('getSelectedIndex');
+                                var finalGauge = $("#FinalGaugeCheckBox").val();
+                                if (finalGauge == false || index != -1) {
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        {
+                            input: "#ReportingMaterialKindDropDown", message: "Please Select Material Kind", action: 'blur', rule: function (input, commit) {
+                                var index = $("#ReportingMaterialKindDropDown").jqxDropDownList('getSelectedIndex');
+                                var finalGauge = $("#FinalGaugeCheckBox").val();
+                                if (finalGauge == false || index != -1) {
+                                    return true;
+                                }
+                                return false;
+                            }
+                        }
+                    ]
+                });
+            }
+            
+            function _bindRawMaterialTypes() {
+                var url = '/Production/GetRawMaterialList';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'PurchaseId' },
+                        { name: 'RawMaterialId' },
+                        { name: 'PurchaseBatchName' },
+                        { name: 'MaterialName' },
+                        { name: 'Note' },
+                        { name: 'VBW' },
+                        { name: 'QtyGal' },
+						{ name: 'BurningDownMethod' }
+                    ],
+                    id: 'PurchaseId',
+                    url: url
+                }
+                rawMaterialTypeAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true
+                        , async: true
+                    });
+            }
+
+            function _bindStorageData() {
+                var url = '/Production/GetStorageData';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'Storage' },
+                        { name: 'StorageId' },
+                        { name: 'StorageName' },
+                        { name: 'Note' }
+                    ],
+                    id: 'StorageId',
+                    url: url
+                }
+                storageAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true
+                    });
+            }
+
+            // Data adapter for Reporting Spirit Type and Material Kind
+            function _bindReportingSpiritKind() {
+                var url = '/Production/GetSpiritToKindListData';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'SpiritTypeReportingID', type: 'number' },
+                        { name: 'ProductTypeName', type: 'string' },
+                        { name: 'MaterialKindID', map: 'MaterialKindObject>MaterialKindID' },
+                        { name: 'MaterialKindName', map: 'MaterialKindObject>MaterialKindName' }
+                    ],
+                    id: 'SpiritTypeReportingID',
+                    url: url,
+                    async: true
+                }
+                ReportingSpiritKindAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true,
+                        loadComplete: function (records) {
+                            ReportingSpiritKindAdapter = records;
+                        }
+                    });
+            }
+
+            function _createRecord() {
+
+                var items = $("#ProdStorage").jqxListBox('getSelectedItems');
+
+                if (items) {
+                    for (var i = 0; i < items.length; i++) {
+                        StorageObject = {};
+                        StorageObject.StorageId = items[i].originalItem.StorageId;
+                        StorageObject.StorageName = items[i].originalItem.StorageName;
+                        storageList.push(StorageObject);
+                    }
+                }
+
+                var prodStartUtc = genericWorkflowHelper.convertUTC( $( "#ProdStartDate" ).jqxDateTimeInput( 'val' ), true );
+                var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProdEndDate").jqxDateTimeInput('val'), true);
+
+                var productionObject = {
+                	ProductionType: "Fermentation",
+                    BatchName: 'PROD-' + $("#BatchName").jqxInput('val'),
+                    ProductionDate: prodEndUtc,
+                    ProductionStart: prodStartUtc,
+                    ProductionEnd: prodEndUtc,
+                    RecordId: rawMaterialIdsSelected, // this, I think needs to be removed too. Remove but make sure Controller and DataLayer are also cleaned up, carefully.
+                    Quantity: $("#ProdQuantityInput").jqxNumberInput('val'),
+                    AlcoholContent: $("#ProdAlcoholContentInput").jqxNumberInput('val'),
+                    VolumeByWeight: $("#ProdVolumeByWeightInput").jqxNumberInput('val'),
+                    ProofGallon: $("#ProdProofGallonsInput").jqxNumberInput('val'),
+                    Storage: storageList,
+                    Note: $('#ProdNotes').jqxTextArea('val'),
+                    UsedMats: usedMatsList
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: '/Production/CreateProductionRecord',
+                    data: JSON.stringify(productionObject),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    error: function (response) {
+                        alert(response.responseText)
+                    },
+                    success: function (result) {
+                        //on success will need to refresh the table and also empty the form
+                    	alert( result );
+                    	$("#RawMaterialInput").jqxListBox("refresh");
+                    	//_bindRawMaterialTypes();
+                        _RecordsViewFunction();
+                        usedMatsList = [];
+                        storageList = [];
+                    }
+                });
+            }
+
+            function _RecordsViewFunction() {
+                // prepare the data
+                var source =
+                {
+                    dataType: "json",
+                    dataFields: [
+                        { name: 'Storage' },
+                        { name: 'BatchName', type: 'string' },
+                        { name: 'ProductionId', type: 'number' },
+                        { name: 'ProductionDate', type: 'date' },
+                        { name: 'ProductionStart', type: 'date' },
+                        { name: 'ProductionEnd', type: 'date' },
+                        { name: 'Quantity', type: 'float' },
+                        { name: 'VolumeByWeight', type: 'float' },
+                        { name: 'AlcoholContent', type: 'float' },
+                        { name: 'ProofGallon', type: 'float' },
+                        { name: 'Note', type: 'string' }
+                    ],
+                    sortcolumn: 'ProdEndDate',
+                    sortdirection: 'desc',
+                    id: 'ProductionId',
+                    url: '/Production/GetProductionData',
+                    data: { prodType: "Fermentation" },
+                    addRow: function (rowID, rowData, position, commit) {
+                        // synchronize with the server - send insert command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        // you can pass additional argument to the commit callback which represents the new ID if it is generated from a DB.
+                        commit(true);
+                    },
+                    updateRow: function (rowID, rowData, commit) {
+                        // synchronize with the server - send update command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var productionObject = {
+                            ProductionType: "Fermentation",
+                            ProductionId: rowData.ProductionId,
+                            BatchName: rowData.BatchName,
+                            ProductionDate: rowData.ProductionEnd,
+                            ProductionStart: rowData.ProductionStart,
+                            ProductionEnd: rowData.ProductionEnd,
+                            Quantity: rowData.Quantity,
+                            VolumeByWeight: rowData.VolumeByWeight,
+                            AlcoholContent: rowData.AlcoholContent,
+                            ProofGallon: rowData.ProofGallon,
+                            Storage: storageList,
+                            Note: rowData.Note
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/UpdateProduction',
+                            data: JSON.stringify(productionObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                dataAdapter.dataBind();
+                                commit(true);
+                                storageList = [];
+                                //window.locationre = result.url;
+                            }
+                        });
+                    },
+                    deleteRow: function (rowID, commit) {
+                        // synchronize with the server - send delete command
+                        // call commit with parameter true if the synchronization with the server is successful
+                        // and with parameter false if the synchronization failed.
+                        var productionObject = {
+                            ProductionType: "Fermentation",
+                            ProductionId: rowID
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/Production/DeleteFermentation',
+                            data: JSON.stringify(productionObject),
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            error: function (response) {
+                                alert(response.responseText)
+                            },
+                            success: function (result) {
+                                //on success will need to refresh the table and also empty the form
+                                commit(true);
+                                dataAdapter.dataBind();
+                                //window.locationre = result.url;
+                            }
+                        });
+                    }
+                };
+                var dataAdapter = new $.jqx.dataAdapter(source, {
+                    beforeLoadComplete: function (records) {
+                        for (var i = 0; i < records.length; i++) {
+                            records[i].ProductionDate = genericWorkflowHelper.convertUTC(records[i].ProductionDate, false);
+                            records[i].ProductionStart = genericWorkflowHelper.convertUTC(records[i].ProductionStart, false);
+                            records[i].ProductionEnd = genericWorkflowHelper.convertUTC(records[i].ProductionEnd, false);
+                        }
+                    }
+                });
+
+                // create Tree Grid
+                $("#dataTable").jqxDataTable(
+                {
+                    editable: false,
+                    width: '100%',
+                    source: dataAdapter,
+                    theme: 'metro',
+                    pageSize: 15,
+                    sortable: true,
+                    pageable: true,
+                    pagerPosition: 'top',
+                    autoRowHeight: false,
+                    ready: function () {
+                        // called when the DataTable is loaded.
+                        // init jqxWindow widgets.
+                        $("#EditDialogPurBatchNameInput").jqxInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px'
+                        });
+                        $("#EditDialogProductionStartDateInput").jqxDateTimeInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            formatString: 'MM/dd/yyyy HH:mm'
+                        });
+                        $("#EditDialogProductionEndDateInput").jqxDateTimeInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            formatString: 'MM/dd/yyyy HH:mm'
+                        });
+                        $("#EditDialogQuantityInput").jqxNumberInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            inputMode: 'simple',
+                            textAlign: 'center',
+                            min: 0
+                        });
+                        $("#EditDialogVolumeByWeightInput").jqxNumberInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            inputMode: 'simple',
+                            textAlign: 'center',
+                            min: 0
+                        });
+                        $("#EditDialogAlcConInput").jqxNumberInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            inputMode: 'simple',
+                            textAlign: 'center',
+                            min: 0
+                        });
+                        $("#EditDialogProofInput").jqxNumberInput({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px',
+                            inputMode: 'simple',
+                            textAlign: 'center',
+                            min: 0
+                        });
+                        $("#EditDialogStorageNameInput").jqxListBox({
+                            source: storageAdapter,
+                            displayMember: "StorageName",
+                            theme: 'bootstrap',
+                            multiple: true
+                        });
+                        $('#EditDialogNotesInput').jqxTextArea({
+                            theme: 'bootstrap',
+                            height: '150px',
+                            width: '150px',
+                            minLength: 1
+                        });
+                        $("#EditDialogSaveRecordButton").jqxButton({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px'
+                        });
+                        $("#EditDialogDeleteRecordButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
+                        $("#EditDialogClearInputElementsButton").jqxButton({
+                            theme: 'bootstrap',
+                            height: '26px',
+                            width: '150px'
+                        });
+                        $("#EditDialog").jqxWindow({
+                            position: 'center',
+                            maxHeight: '100%',
+                            width: 'auto',
+                            height: 'auto',
+                            modalOpacity: 0.5,
+                            autoOpen: false,
+                            isModal: false
+                        });
+                        $("#EditDialog").css('visibility', 'visible');
+                    },
+                    columns: [
+                        {
+                            text: 'Batch Name',
+                            dataField: 'BatchName',
+                            width: '10%'
+                        },
+                        {
+                            text: 'Date/Time',
+                            dataField: 'ProductionDate',
+                            cellsFormat: 'MM/dd/yyyy hh:mm tt',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '12%'
+                        },
+                        {
+                            text: 'Qty (gal)',
+                            dataField: 'Quantity',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '8%'
+                        },
+                        {
+                            text: 'Volume By Weight (lb)',
+                            dataField: 'VolumeByWeight',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '14%'
+                        },
+                        {
+                            text: 'Alcohol %',
+                            dataField: 'AlcoholContent',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '10%'
+                        },
+                        {
+                            text: 'Proof Gallons',
+                            dataField: 'ProofGallon',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '10%'
+                        },
+                        {
+                            text: 'Notes',
+                            dataField: 'Note',
+                            cellsAlign: 'center',
+                            align: 'center'
+                        }
+                    ]
+                });
+            }
+
+            // this function is used to remove an item from the array of burndown material objects
+            function removeBurnDownMaterialRecord(index) {
+                for (var i = 0; i < usedMatsList.length; i++) {
+                    if (usedMatsList[i].iD === rawMaterialTypeAdapter.records[index].PurchaseId) {
+                        var slice1 = usedMatsList.slice(0,i);
+                        var slice2 = usedMatsList.slice( i + 1, usedMatsList.length + 1 );
+                        usedMatsList  = slice1.concat(slice2);
+                    }
+                }
+            }
+
+            return {
+                config: {
+                    dragArea: null
+                },
+                init: function () {
+                    // bind storage data
+                    _bindStorageData();
+                    // bind RawMaterialData
+                    _bindRawMaterialTypes();
+                    // bind Reporting Spirit Type and Material Kind
+                    _bindReportingSpiritKind()
+                    //createWidgets
+                    _createElements();
+                    //populate Table
+                    _RecordsViewFunction();
+                    _addEventListeners();
+                }
+            };
+        }());
+
+        $(document).ready(function () {
+            main.init();
+        });
+
+    </script>
+}
+
+<div class="container-fluid body-content">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li class="active">@Html.ActionLink("Fermentation", "Fermentation", "Production")</li>
+                <li>@Html.ActionLink("Distillation", "Distillation", "Production")</li>
+                <li>@Html.ActionLink("Blending", "Blending", "Production")</li>
+                <li>@Html.ActionLink("Bottling", "Bottling", "Production")</li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1>Production / Fermentation</h1>
+            <div class="well">
+                <!-- Nav tabs -->
+                <ul class="nav nav-pills" role="tablist">
+                    <li role="presentation" class="active"><a href="#createRecord" aria-controls="createRecord" role="tab" data-toggle="pill">Enter Fermentation Data</a></li>
+                    <li role="presentation"><a href="#viewRecord" aria-controls="viewRecord" role="tab" data-toggle="tab">View/Edit Fermentation Data</a></li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade in active" id="createRecord">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <p class="text-center">Please select fermentable batches to ferment</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12" text-center>
+                                            <div id='RawMaterialInput'></div>
+                                        </div>
+                                    </div>
+                                     <div class="form-group">
+                                        <label for="BatchName" class="col-sm-6 control-label">Batch Name</label>
+                                        <div class="col-sm-6">
+                                            PROD-<input id="BatchName"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProdStartDate" class="col-sm-6 control-label">Production Start Date</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProdStartDate"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProdEndDate" class="col-sm-6 control-label">Production End Date</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProdEndDate"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProdStorage" class="col-sm-6 control-label">Storage Name</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProdStorage"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProdQuantityInput" class="col-sm-6 control-label">Volume (gal)</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProdQuantityInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProdVolumeByWeightInput" class="col-sm-6 control-label">Weight (lb)</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProdVolumeByWeightInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProdAlcoholContentInput" class="col-sm-6 control-label">Alcohol Content</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProdAlcoholContentInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProdProofGallonsInput" class="col-sm-6 control-label">Proof Gallons</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProdProofGallonsInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="FinalGaugeCheckBox" class="col-sm-6 control-label">Final Distillation Gauge?</label>
+                                        <div class="col-sm-6">
+                                            <div id="FinalGaugeCheckBox"></div>
+                                        </div>
+                                    </div>
+                                    <div class="reporting-input-group">
+                                        <div class="form-group">
+                                            <label for="ReportingSpiritTypeDropDown" class="col-sm-6 control-label">Spirit Type for Reporting</label>
+                                            <div class="col-sm-6">
+                                                <div id="ReportingSpiritTypeDropDown"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="ReportingMaterialKindDropDown" class="col-sm-6 control-label">Material Kind for Reporting</label>
+                                            <div class="col-sm-6">
+                                                <div id="ReportingMaterialKindDropDown"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-6 note-column">
+                                <form class="text-center">
+                                    <div class="form-group">
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading">Notes</div>
+                                            <div class="panel-body">
+                                                <textarea class="form-control" id='ProdNotes'></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-8">
+                                            <div id='validationForm'></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <button id="ProdCreateButton">Create Record</button>
+                                <button id="ClearInputElementsButton">Clear Form</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="viewRecord">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="dataTable"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @Html.Partial("_FooterPartial")
+        </div>
+    </div>
+    <!--This html is hidden. It is used for table editing dialog-->
+    <div style="visibility: hidden;" id="EditDialog">
+        <div style="overflow: hidden;">
+            <table style="table-layout: fixed; border-style: none;">
+                <tr>
+                    <td align="right">
+                        Batch Name:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogPurBatchNameInput" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Production Start Date:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogProductionStartDateInput" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Production End Date:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogProductionEndDateInput" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Quantity:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogQuantityInput" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Volume By Weight:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogVolumeByWeightInput" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Alcohol Content:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogAlcConInput" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Proof Gallons:
+                    </td>
+                    <td align="left">
+                        <input id="EditDialogProofInput" type="text" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">
+                        Storage:
+                    </td>
+                    <td align="left">
+                        <div id="EditDialogStorageNameInput" type="text"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">Notes:</td>
+                    <td align="left">
+                        <textarea class="pull-left" id='EditDialogNotesInput'></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right">
+                        <br />
+                        <button id="EditDialogSaveRecordButton">Save</button>
+                        <button id="EditDialogDeleteRecordButton">Delete</button>
+                        <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!--Hidden markup. Material Burndown dialog-->
+    <div id="MatBurnDwnDialog" style="visibility: hidden;">
+        <div id="MatBurnDwnDialogHeader">
+            <span>Material Quantity Burndown</span>
+        </div>
+        <div id="MatBurnDwnDialogContent" style="overflow:hidden">
+            <div class="panel-wrapper">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Step 1</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnGal" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnGal">Burndown By Volume</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnVBW" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnVBW">Burndown By Weight</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Step 2</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnAll" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnAll">Burndown All Amount</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="MatBurnDwnDialogRadioBtnPartial" class="pull-left"></div>
+                                <label for="MatBurnDwnDialogRadioBtnPartial">Burndown Partial Amount</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-body">
+                        <div id="inpRow1" style="visibility: hidden">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="text-center">Amount to Burndown</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="text-center">Amount Remaining</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="center-block" id="MatBurnDwnDialogQuantityInput"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="center-block" id="MatBurnDwnDialogQuantityInputOriginal"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="center-block" id="MatBurnDwnDialogAdd">Add</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="center-block" id="MatBurnDwnDialogCancel">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

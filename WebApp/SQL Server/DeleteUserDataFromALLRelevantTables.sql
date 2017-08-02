@@ -1,0 +1,54 @@
+﻿-- Dictionaries
+DELETE FROM dbo.Spirit
+DELETE FROM dbo.RawMaterial
+DELETE FROM dbo.Storage
+DELETE FROM dbo.Supply
+DELETE FROM dbo.Vendor
+DELETE FROM dbo.AdditiveType
+
+
+-- other
+DELETE FROM dbo.invBlendable
+DELETE FROM dbo.invDistillable
+DELETE FROM dbo.Blended
+DELETE FROM dbo.BlendedComponent
+DELETE FROM dbo.BlendedToDistill
+DELETE FROM dbo.Blending
+DELETE FROM dbo.BottleCapacity
+DELETE FROM dbo.Bottled
+DELETE FROM dbo.BottledToBlending
+DELETE FROM dbo.BottleQuantity
+DELETE FROM dbo.Bottling
+DELETE FROM dbo.CaseCapacity
+DELETE FROM dbo.CaseQuantity
+DELETE FROM dbo.Distillation
+DELETE FROM dbo.DistillationToDistilled
+DELETE FROM dbo.Distilled
+DELETE FROM dbo.DistilledToPurchase
+DELETE FROM dbo.DistilledToSpiritCut
+DELETE FROM dbo.Fermentation
+DELETE FROM dbo.Fermented
+DELETE FROM dbo.FermentedToPurchase
+DELETE FROM dbo.Note
+DELETE FROM dbo.NoteHistory
+DELETE FROM dbo.Price
+DELETE FROM dbo.ProofGallon
+DELETE FROM dbo.Purchase
+DELETE FROM dbo.BottleCapacity
+DELETE FROM dbo.PurchaseMaterialTypeToPurchase
+DELETE FROM dbo.PurchaseMaterialTypeToRawMaterial
+DELETE FROM dbo.PurchaseToRawMaterial
+DELETE FROM dbo.PurchaseToVendor
+DELETE FROM dbo.Quantity
+DELETE FROM dbo.RecordItemToUnitOfMeasurement
+DELETE FROM dbo.RecordItemToUnitOfMeasurementHist
+DELETE FROM dbo.RecordToStorage
+DELETE FROM dbo.RecordToStorageHistory
+DELETE FROM dbo.StateToPurchase
+DELETE FROM dbo.StateToPurchaseHistory
+DELETE FROM dbo.StatusToPurchase
+DELETE FROM dbo.StatusToPurchaseHistory
+DELETE FROM dbo.SupplyPurchased
+DELETE FROM dbo.VolumeByWeight
+DELETE FROM dbo.AdditivePurchased
+DELETE FROM dbo.AlcoholContent

@@ -1,0 +1,20 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Distillery Management</title>
+    @Styles.Render("~/Content/css")
+
+</head>
+<body>
+    @Html.Partial("_NavBarPartial")
+    @RenderBody()
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jqwidgets")
+    @Scripts.Render("~/bundles/helpers")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
