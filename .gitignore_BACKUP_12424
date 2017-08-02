@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/config
+<<<<<<< HEAD
+/WebApp/bin
+/WebApp/obj/Debug
+/WebAppTests/obj/Debug
+=======
+>>>>>>> origin/dev
