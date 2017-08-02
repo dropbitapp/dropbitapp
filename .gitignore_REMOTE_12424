@@ -3,6 +3,3 @@
 ################################################################################
 
 /.vs/config
-/WebApp/bin
-/WebApp/obj/Debug
-/WebAppTests/obj/Debug
