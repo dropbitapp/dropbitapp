@@ -6,3 +6,4 @@
 /WebApp/bin
 /WebApp/obj/Debug
 /WebAppTests/obj/Debug
+*.suo
