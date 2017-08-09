@@ -344,7 +344,6 @@
                     VendorId: $("#VendorInput").jqxDropDownList('getSelectedItem').originalItem.VendorId,
                     VendorName: $("#VendorInput").jqxDropDownList('getSelectedItem').label,
                     Storage: storageList,
-                    SpiritTypeReportingID: spiritTypeReportingID,
                     Note: $('#NotesInput').jqxTextArea('val')
                 };
 
@@ -388,7 +387,7 @@
             }
 
             function _bindReportingSpiritKind() {
-                var url = '/Purchase/GetReportingSpiritTypes';
+                var url = '/Purchase/GetSpiritToKindListData';
                 var source = {
                     datatype: "json",
                     dataFields: [

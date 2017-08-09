@@ -445,9 +445,6 @@
                     }
                 }
 
-                var spiritTypeReportingID = $('#ReportingSpiritTypeDropDown').jqxDropDownList('getSelectedItem').originalItem.SpiritTypeReportingID != undefined ?
-                    $('#ReportingSpiritTypeDropDown').jqxDropDownList('getSelectedItem').originalItem.SpiritTypeReportingID : null;
-
                 var utcDate = genericWorkflowHelper.convertUTC($("#PurchaseDateInput").jqxDateTimeInput('val'), true);
 
                 var purchaseObject = {
@@ -465,7 +462,7 @@
                     VendorId: $("#VendorInput").jqxDropDownList('getSelectedItem').originalItem.VendorId,
                     VendorName: $("#VendorInput").jqxDropDownList('getSelectedItem').label,
                     Storage: storageList,
-                    SpiritTypeReportingID: spiritTypeReportingID,
+                    SpiritTypeReportingID: $('#ReportingSpiritTypeDropDown').jqxDropDownList('getSelectedItem').originalItem.SpiritTypeReportingID,
                     Note: $('#NotesInput').jqxTextArea('val')
                 };
 
@@ -501,6 +498,8 @@
                         { name: 'AlcoholContent', type: 'float' },
                         { name: 'VolumeByWeight', type: 'float' },
                         { name: 'ProofGallon', type: 'float' },
+                        //{ name: 'UnitOfMeasurementId', type: 'number' },
+                        //{ name: 'UnitOfMeasurementName', type: 'string' },
                         { name: 'Price', type: 'float' },
                         { name: 'VendorId', type: 'number' },
                         { name: 'VendorName', type: 'string' },

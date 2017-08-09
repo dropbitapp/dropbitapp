@@ -3339,7 +3339,7 @@ namespace WebApp.Helpers
 
                         db.SaveChanges();
 
-                        if (i.BurningDownMethod == "volume" && purch.VolumeID != 0)
+                        if (purch.VolumeID != 0)
                         {
                             var q =
                                 (from rec in db.Volume
@@ -3349,21 +3349,6 @@ namespace WebApp.Helpers
                             if (q != null)
                             {
                                 q.Value = i.OldVal;
-                            }
-
-                            // update proof value after it has been recalculated
-                            // on front-end using the new volume quantity
-                            if (purch.ProofID != 0 && i.Proof != 0)
-                            {
-                                var proof =
-                                    (from rec in db.Proof
-                                     where rec.ProofID == purch.ProofID
-                                     select rec).FirstOrDefault();
-
-                                if (proof != null)
-                                {
-                                    proof.Value = i.Proof;
-                                }
                             }
                         }
 
