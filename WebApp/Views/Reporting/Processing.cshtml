@@ -54,8 +54,7 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                 $('#h_5_EIN').text(result.Header.EIN);
                 $('#h_4_LocationOfPlant').text(result.Header.PlantAddress);
                 $('#h_3_NameOfProprietor').text(result.Header.ProprietorName);
-                var reportDate = new Date();
-                $('#h_2_MonthAndYear').text(normalizeDateToDashFormat(reportDate));
+                $('#h_2_MonthAndYear').text(result.Header.ReportDate);
 
                 // part 1 of the processing report
                 if (result.Part1.BulkIngredients === "wine") {

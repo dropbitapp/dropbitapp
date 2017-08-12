@@ -24,7 +24,7 @@ namespace WebApp.Helpers
     {
         public string ProprietorName { get; set; }
         public string EIN { get; set; }
-        public DateTime ReportDate { get; set; }
+        public string ReportDate { get; set; }
         public string PlantAddress { get; set; }
         public string DSP { get; set; }
     }

@@ -47,8 +47,7 @@
                 $('#H1_2').text(result.Header.EIN);
                 $('#H1_4').text(result.Header.PlantAddress);
                 $('#H1_1').text(result.Header.ProprietorName);
-                var reportDate = new Date();
-                $('#H1_3').text(normalizeDateToDashFormat(reportDate));
+                $('#H1_3').text(result.Header.ReportDate);
 
                 //Row Total Line 6
                 var row6Total = 0;

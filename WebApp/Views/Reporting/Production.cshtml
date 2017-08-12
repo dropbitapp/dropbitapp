@@ -4,7 +4,6 @@
         var main = (function () {
 
             var genericWorkflowHelper = new genWHelpers();
-
             var productionReportObject;
 
             function addEventListeners() {
@@ -66,8 +65,7 @@
                 $('#h_EIN').text(result.Header.EIN);
                 $('#h_LocationOfPlant').text(result.Header.PlantAddress);
                 $('#h_NameofProprietor').text(result.Header.ProprietorName);
-                var reportDate = new Date();
-                $('#h_MonthAndYear').text(normalizeDateToDashFormat(reportDate));
+                $('#h_MonthAndYear').text(result.Header.ReportDate);
 
                 // part 1 of the report
                 var producedTotal = 0;

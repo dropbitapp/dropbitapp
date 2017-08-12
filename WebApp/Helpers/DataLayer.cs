@@ -140,7 +140,8 @@ namespace WebApp.Helpers
             List<ProductionReportHelper> tempRepObjList = new List<ProductionReportHelper>();
 
             // get distiller information for header report
-            procRepObj.Header = GetDistillerInfoForReportHeader(1); //todo replace hardcoded 1 and use whatever distillerid is currently in use;
+            int distillerID = GetDistillerId(userId);
+            procRepObj.Header = GetDistillerInfoForReportHeader(distillerID, startOfReporting);
 
             // Processing Report Part 1 Section
             procRepP1.BulkIngredients = "spirit";
@@ -5132,7 +5133,8 @@ namespace WebApp.Helpers
             List<ProductionReportHelper> tempRepObjList = new List<ProductionReportHelper>();
 
             // get distiller information for header report
-            prodRepObj.Header = GetDistillerInfoForReportHeader(1); //todo replace hardcoded 1 and use whatever distillerid is currently in use;
+            int distillerID = GetDistillerId(userId);
+            prodRepObj.Header = GetDistillerInfoForReportHeader(distillerID, start);
 
             try
             {
@@ -5509,7 +5511,9 @@ namespace WebApp.Helpers
                 StorageReport storageReport = new StorageReport();
                 List<StorageReportCategory> storageReportBody = new List<StorageReportCategory>();
 
-                storageReport.Header = GetDistillerInfoForReportHeader(1); //todo replace hardcoded 1 and use whatever distillerid is currently in use
+                // get distiller information for header report
+                int distillerID = GetDistillerId(userId);
+                storageReport.Header = GetDistillerInfoForReportHeader(distillerID, startDate); 
 
                 GetProducedOnHandAtStart(startDate, endDate, userId, ref storageReportBody);
                 GetPurchasedOnHandAtStart(startDate, endDate, userId, ref storageReportBody);
@@ -5987,7 +5991,7 @@ namespace WebApp.Helpers
             }
         }
 
-        private ReportHeader GetDistillerInfoForReportHeader(int distillerID)
+        private ReportHeader GetDistillerInfoForReportHeader(int distillerID, DateTime startDate)
         {
             try
             {
@@ -6009,7 +6013,7 @@ namespace WebApp.Helpers
                 header.EIN = res.EIN;
                 header.DSP = res.DSP;
                 header.PlantAddress = res.Address;
-                header.ReportDate = DateTime.Today;
+                header.ReportDate = startDate.ToString("Y");
 
                 return header;
             }
