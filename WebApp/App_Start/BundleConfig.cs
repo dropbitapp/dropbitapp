@@ -73,7 +73,8 @@ namespace WebApp
                 "~/Scripts/Helpers/distillcompute.js",
                 "~/Scripts/Helpers/dictionaryManagement.js",
                 "~/Scripts/Helpers/genericWorkflowHelpers.js",
-                "~/Scripts/Helpers/Ajax.js"
+                "~/Scripts/Helpers/Ajax.js",
+                "~/Scripts/Helpers/DateModificationHelper.js"
             ));
         }
     }
