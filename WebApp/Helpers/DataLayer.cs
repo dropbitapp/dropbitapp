@@ -71,6 +71,7 @@ namespace WebApp.Helpers
         public float Proof { get; set; }
         public int SpiritTypeReportingID { get; set; }
         public int MaterialKindReportingID { get; set; }
+        public bool Gauged { get; internal set; }
     }
 
     public class DataLayer
@@ -3142,6 +3143,14 @@ namespace WebApp.Helpers
             prod.ProductionStartTime = prodObject.ProductionStart;
             prod.ProductionEndTime = prodObject.ProductionEnd;
             prod.Note = prodObject.Note;
+            if(prodObject.Gauged)
+            {
+                prod.Gauged = prodObject.Gauged;
+            }
+            else if(!prodObject.Gauged)
+            {
+                prod.Gauged = false;
+            }
 
             var pTypes =
                     (from rec in db.ProductionType
@@ -3401,7 +3410,6 @@ namespace WebApp.Helpers
                 // list of purchase ids of purchase records and ids associated with production records
                 // that are used in distillation process
                 List<int> purIdL = new List<int>();
-
                 try
                 {
                     // verify list of batches received from the front-end and used in distillation is not empty
@@ -3409,7 +3417,6 @@ namespace WebApp.Helpers
                     {
                         if (prodObject?.SpiritTypeReportingID != 0 && prodObject?.MaterialKindReportingID != 0 && prodObject?.SpiritTypeReportingID != null && prodObject?.MaterialKindReportingID != null)
                         {
-                            prod.Gauged = true;
                             ProductionToSpiritTypeReporting prodToSpirType = new ProductionToSpiritTypeReporting();
                             prodToSpirType.SpiritTypeReportingID = prodObject.SpiritTypeReportingID;
                             prodToSpirType.MaterialKindReportingID = prodObject.MaterialKindReportingID;
@@ -5136,236 +5143,88 @@ namespace WebApp.Helpers
             int distillerID = GetDistillerId(userId);
             prodRepObj.Header = GetDistillerInfoForReportHeader(distillerID, start);
 
-            try
+            // we need this of Part 1
+            GetSpiritsForProductionReport(userId, start, end, ref tempRepObjList);
+
+            // we need this for line 17(b) of Part 1
+            GetUnfinishedSpiritsForProductionReport(userId, start, end, ref tempRepObjList);
+
+            foreach (var rec in tempRepObjList)
             {
-                var ress =
-                 (from prod in db.Production
-                  join prodReport in db.Production4Reporting on prod.ProductionID equals prodReport.ProductionID into prodReport_join
-                  from prodReport in prodReport_join.DefaultIfEmpty()
-                  join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                  from distillers in distillers_join.DefaultIfEmpty()
-                  join prod2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals prod2SpiritType.ProductionID into prod2SpiritType_join
-                  from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
-                  join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
-                  from matKindRep in matKindRep_join.DefaultIfEmpty()
-                  join spiritTypeRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
-                  from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
-                  join prod2Purch in db.ProductionToPurchase on prod.ProductionID equals prod2Purch.ProductionID into prod2Purch_join
-                  from prod2Purch in prod2Purch_join.DefaultIfEmpty()
-                  join purch4Reprt in db.Purchase4Reporting on prod2Purch.PurchaseID equals purch4Reprt.PurchaseID into purch4Reprt_join
-                  from purch4Reprt in purch4Reprt_join.DefaultIfEmpty()
-                  join prodRepMatCat2MatKind in db.ProdRepMatCat2MaterialKind on matKindRep.MaterialKindReportingID equals prodRepMatCat2MatKind.MaterialKindReportingID into prodRepMatCat2MatKind_join
-                  from prodRepMatCat2MatKind in prodRepMatCat2MatKind_join.DefaultIfEmpty()
-                  join prodRepMatCat in db.ProductionReportMaterialCategory on prodRepMatCat2MatKind.ProductionReportMaterialCategoryID equals prodRepMatCat.ProductionReportMaterialCategoryID into prodRepMatCat_join
-                  from prodRepMatCat in prodRepMatCat_join.DefaultIfEmpty()
-                  where
-                    distillers.UserId == userId &&
-                    prod.Gauged == true &&
-                    (prod.StatusID == 1 ||
-                    prod.StatusID == 2) &&
-                    (new int[] { 3, 4, 5 }).Contains(prod.StateID) &&
-                    prod.ProductionEndTime >= start &&
-                    prod.ProductionEndTime <= end
-                  select new
-                  {
-                      prod.StateID,
-                      ProductionID = (int?)prod.ProductionID,
-                      SpiritTypeName = spiritTypeRep.ProductTypeName ?? "",
-                      Redistilled = (bool?)prodReport.Redistilled,
-                      MaterialKindName = matKindRep.MaterialKindName ?? "",
-                      Weight = (System.Single?)prodReport.Weight ?? (System.Single?)0,
-                      Volume = (System.Single?)prodReport.Volume ?? (System.Single?)0,
-                      Alcohol = (System.Single?)prodReport.Alcohol ?? (System.Single?)0,
-                      Proof = (System.Single?)prodReport.Proof ?? (System.Single?)0,
-                      SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
-                      MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID ?? (int?)0,
-                      MaterialCategoryName = prodRepMatCat.MaterialCategoryName ?? "",
-                      ProductionReportMaterialCategoryID = (int?)prodRepMatCat.ProductionReportMaterialCategoryID ?? (int?)0
-                  }).Distinct();
+                // Deal with part 1 Start
+                // Assign data for part 1
+                var spiritType = part1List.Find(x => x.SpiritTypeReportingID == rec.SpiritTypeReportingID);
 
-                // fill in temporary query results object so we can massage the data for further processing
-                foreach (var l in ress)
+                if (spiritType == null)
                 {
-                    ProductionReportHelper tempRepObj = new ProductionReportHelper();
-                    tempRepObj.StateID = l.StateID;
-                    tempRepObj.ProductionID = (int)l.ProductionID;
-                    tempRepObj.SpiritTypeReportName = l.SpiritTypeName;
-                    tempRepObj.Redistilled = (bool)l.Redistilled;
-                    tempRepObj.MaterialKindReportingName = l.MaterialKindName;
-                    tempRepObj.Weight = (float)l.Weight;
-                    tempRepObj.Volume = (float)l.Volume;
-                    tempRepObj.Alcohol = (float)l.Alcohol;
-                    tempRepObj.Proof = (float)l.Proof;
-                    tempRepObj.SpiritTypeReportingID = (int)l.SpiritTypeReportingID;
-                    tempRepObj.MaterialKindReportingID = (int)l.MaterialKindReportingID;
+                    ProdReportPart1 part1Obj = new ProdReportPart1();
+                    part1Obj.SpiritCatName = rec.SpiritTypeReportName;
+                    part1Obj.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
 
-                    tempRepObjList.Add(tempRepObj);
-                }
-                if (tempRepObjList != null)
-                {
-                    // first, we want to make sure that every record received from the db, has SpiritType and Material Kinds associated with it
-                    // because there are cases when Blending and Bottling may not have SpiritType in a reporting sense. Our current design allows it
-                    // but maybe worth changing it
-                    foreach(var i in tempRepObjList)
+                    if (!(bool)rec.Gauged)
                     {
-                        if(i.SpiritTypeReportingID == 0)
+                        part1Obj.UnfinishedSpiritsEndOfQuarter += (float)rec.Proof;
+                    }
+                    else if ((bool)rec.Redistilled == true)
+                    {
+                        part1Obj.Recd4Redistil += (float)rec.Proof;
+                    }
+                    else
+                    {
+                        if(rec.StateID == 3) // Distilled - Storage report case
                         {
-                            try
-                            {
-                              var k =
-                                    (from prodContent in db.ProductionContent
-                                     join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.RecordID equals prod2SpiritType.ProductionID into prod2SpiritType_join
-                                     from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
-                                     join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
-                                     from matKindRep in matKindRep_join.DefaultIfEmpty()
-                                     join spiritTRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTRep.SpiritTypeReportingID into spiritTRep_join
-                                     from spiritTRep in spiritTRep_join.DefaultIfEmpty()
-                                     where
-                                        prodContent.isProductionComponent == true &&
-                                        prodContent.ProductionID == i.ProductionID
-                                        select new
-                                        {
-                                            RecordID = (int?)prodContent.RecordID,
-                                            SpiritTypeReportingID = (int?)spiritTRep.SpiritTypeReportingID ?? (int ?)0,
-                                            SpiritTypeReportingName = spiritTRep.ProductTypeName,
-                                            MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID,
-                                            MaterialKindReportingName = matKindRep.MaterialKindName
-                                        }).FirstOrDefault();
-                                if (k != null)
-                                {
-                                    if((int)k.SpiritTypeReportingID == null || (int)k.SpiritTypeReportingID == 0)
-                                    {
-                                        bool spiritTypeFound = false;
-                                        var tempRecordID = k.RecordID;
-                                        while (!spiritTypeFound)
-                                        {
-                                            var t =
-                                                (from prodContent in db.ProductionContent
-                                                 join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.RecordID equals prod2SpiritType.ProductionID into prod2SpiritType_join
-                                                 from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
-                                                 join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
-                                                 from matKindRep in matKindRep_join.DefaultIfEmpty()
-                                                 join spiritTRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTRep.SpiritTypeReportingID into spiritTRep_join
-                                                 from spiritTRep in spiritTRep_join.DefaultIfEmpty()
-                                                 where
-                                                    prodContent.isProductionComponent == true &&
-                                                    prodContent.ProductionID == tempRecordID
-                                                 select new
-                                                 {
-                                                     RecordID = (int?)prodContent.RecordID,
-                                                     SpiritTypeReportingID = (int?)spiritTRep.SpiritTypeReportingID ?? (int?)0,
-                                                     SpiritTypeReportingName = spiritTRep.ProductTypeName,
-                                                     MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID,
-                                                     MaterialKindReportingName = matKindRep.MaterialKindName
-                                                 }).FirstOrDefault();
-                                            if(t != null)
-                                            {
-                                                if(t.SpiritTypeReportingID != null || t.SpiritTypeReportingID != 0)
-                                                {
-                                                    var record = tempRepObjList.Find(x => x.ProductionID == i.ProductionID);
-                                                    record.SpiritTypeReportingID = (int)t.SpiritTypeReportingID;
-                                                    record.SpiritTypeReportName = t.SpiritTypeReportingName;
-                                                    record.MaterialKindReportingID = (int)t.MaterialKindReportingID;
-                                                    record.MaterialKindReportingName = t.MaterialKindReportingName;
-                                                    spiritTypeFound = true;
-                                                }
-                                                else
-                                                {
-                                                    tempRecordID = t.RecordID;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        var record = tempRepObjList.Find(x => x.ProductionID == i.ProductionID);
-                                        record.SpiritTypeReportingID = (int)k.SpiritTypeReportingID;
-                                        record.SpiritTypeReportName = k.SpiritTypeReportingName;
-                                        record.MaterialKindReportingID = (int)k.MaterialKindReportingID;
-                                        record.MaterialKindReportingName = k.MaterialKindReportingName;
-                                    }
-                                }
-                            }
-                            catch(Exception e)
-                            {
-                                throw e;
-                            }
+                            part1Obj.SorageAcct += (float)rec.Proof;
+                        }
+                        else if(rec.StateID == 4 || rec.StateID == 5) // Blended or Bottled cases- Processing report case
+                        {
+                            part1Obj.ProccessingAcct += (float)rec.Proof;
                         }
                     }
-                    foreach (var rec in tempRepObjList)
+                    part1List.Add(part1Obj);
+                }
+                else
+                {
+                    if(!(bool)rec.Gauged)
                     {
-                        // Deal with part 1 Start
-                        // Assign data for part 1
-                        var spiritType = part1List.Find(x => x.SpiritTypeReportingID == rec.SpiritTypeReportingID);
-
-                        if (spiritType == null)
+                        spiritType.UnfinishedSpiritsEndOfQuarter += (float)rec.Proof;
+                    }
+                    else if ((bool)rec.Redistilled == true)
+                    {
+                        spiritType.Recd4Redistil += (float)rec.Proof;
+                    }
+                    else
+                    {
+                        if (rec.StateID == 3) // Distilled - Storage report case
                         {
-                            ProdReportPart1 part1Obj = new ProdReportPart1();
-                            part1Obj.SpiritCatName = rec.SpiritTypeReportName;
-                            part1Obj.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
-                            if ((bool)rec.Redistilled == true)
-                            {
-                                part1Obj.Recd4Redistil += (float)rec.Proof;
-                            }
-                            else
-                            {
-                                if(rec.StateID == 3) // Distilled - Storage report case
-                                {
-                                    part1Obj.SorageAcct += (float)rec.Proof;
-                                }
-                                else if(rec.StateID == 4 || rec.StateID == 5) // Blended or Bottled cases- Processing report case
-                                {
-                                    part1Obj.ProccessingAcct += (float)rec.Proof;
-                                }
-                                
-                            }
-                            part1List.Add(part1Obj);
+                            spiritType.SorageAcct += (float)rec.Proof;
                         }
-                        else
+                        else if (rec.StateID == 4 || rec.StateID == 5) // Blended or Bottled cases- Processing report case
                         {
-                            if ((bool)rec.Redistilled == true)
-                            {
-                                spiritType.Recd4Redistil += (float)rec.Proof;
-                            }
-                            else
-                            {
-                                if (rec.StateID == 3) // Distilled - Storage report case
-                                {
-                                    spiritType.SorageAcct += (float)rec.Proof;
-                                }
-                                else if (rec.StateID == 4 || rec.StateID == 5) // Blended or Bottled cases- Processing report case
-                                {
-                                    spiritType.ProccessingAcct += (float)rec.Proof;
-                                }
-                            }
-                        }
-
-                        // Deal with part 2 through 5 Start
-                        var materialKind = part2Thru5List.Find(x => x.MaterialKindReportingID == rec.MaterialKindReportingID);
-
-                        if (materialKind == null)
-                        {
-                            ProdReportParts2Through5 prodRP2T5 = new ProdReportParts2Through5();
-                            prodRP2T5.KindOfMaterial = rec.MaterialKindReportingName;
-                            prodRP2T5.MaterialKindReportingID = (int)rec.MaterialKindReportingID;
-                            prodRP2T5.ProofGallons = (float)rec.Proof;
-                            prodRP2T5.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
-                            part2Thru5List.Add(prodRP2T5);
-                        }
-                        else
-                        {
-                            materialKind.ProofGallons += (float)rec.Proof;
+                            spiritType.ProccessingAcct += (float)rec.Proof;
                         }
                     }
+                }
 
-                    prodRepObj.Part1 = part1List;
-                    prodRepObj.Part2Through5 = part2Thru5List;
+                // Deal with parts 2 through 5 Start
+                var materialKind = part2Thru5List.Find(x => x.MaterialKindReportingID == rec.MaterialKindReportingID);
+
+                if (materialKind == null)
+                {
+                    ProdReportParts2Through5 prodRP2T5 = new ProdReportParts2Through5();
+                    prodRP2T5.KindOfMaterial = rec.MaterialKindReportingName;
+                    prodRP2T5.MaterialKindReportingID = (int)rec.MaterialKindReportingID;
+                    prodRP2T5.ProofGallons = (float)rec.Proof;
+                    prodRP2T5.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
+                    part2Thru5List.Add(prodRP2T5);
+                }
+                else
+                {
+                    materialKind.ProofGallons += (float)rec.Proof;
                 }
             }
-            catch(Exception e)
-            {
-                throw e;
-            }
+
+            prodRepObj.Part1 = part1List;
+            prodRepObj.Part2Through5 = part2Thru5List;
 
             try
             {
@@ -5502,6 +5361,390 @@ namespace WebApp.Helpers
             prodRepObj.ProdReportPart6 = prodReportPart6List;
 
             return prodRepObj;
+        }
+
+        /// <summary>
+        /// GetSpiritsForProductionReport method gets the data for production report part 1
+        /// </summary>
+        /// <param name="userId">Distiller user id</param>
+        /// <param name="start">reporting start period</param>
+        /// <param name="end">reporting end period</param>
+        /// <param name="tempRepObjList">out parameter object list that needs to be populated</param>
+        public void GetSpiritsForProductionReport(int userId, DateTime start, DateTime end, ref List<ProductionReportHelper> tempRepObjList)
+        {
+            try
+            {
+                var ress =
+                (from prod in db.Production
+                 join prodReport in db.Production4Reporting on prod.ProductionID equals prodReport.ProductionID into prodReport_join
+                 from prodReport in prodReport_join.DefaultIfEmpty()
+                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 join prod2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals prod2SpiritType.ProductionID into prod2SpiritType_join
+                 from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
+                 join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
+                 from matKindRep in matKindRep_join.DefaultIfEmpty()
+                 join spiritTypeRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
+                 from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
+                 join prod2Purch in db.ProductionToPurchase on prod.ProductionID equals prod2Purch.ProductionID into prod2Purch_join
+                 from prod2Purch in prod2Purch_join.DefaultIfEmpty()
+                 join purch4Reprt in db.Purchase4Reporting on prod2Purch.PurchaseID equals purch4Reprt.PurchaseID into purch4Reprt_join
+                 from purch4Reprt in purch4Reprt_join.DefaultIfEmpty()
+                 join prodRepMatCat2MatKind in db.ProdRepMatCat2MaterialKind on matKindRep.MaterialKindReportingID equals prodRepMatCat2MatKind.MaterialKindReportingID into prodRepMatCat2MatKind_join
+                 from prodRepMatCat2MatKind in prodRepMatCat2MatKind_join.DefaultIfEmpty()
+                 join prodRepMatCat in db.ProductionReportMaterialCategory on prodRepMatCat2MatKind.ProductionReportMaterialCategoryID equals prodRepMatCat.ProductionReportMaterialCategoryID into prodRepMatCat_join
+                 from prodRepMatCat in prodRepMatCat_join.DefaultIfEmpty()
+                 where
+                   distillers.UserId == userId &&
+                   prod.Gauged == true &&
+                   (prod.StatusID == 1 ||
+                   prod.StatusID == 2) &&
+                   (new int[] { 3, 4, 5 }).Contains(prod.StateID) &&
+                   prod.ProductionEndTime >= start &&
+                   prod.ProductionEndTime <= end
+                 select new
+                 {
+                     prod.StateID,
+                     ProductionID = (int?)prod.ProductionID,
+                     SpiritTypeName = spiritTypeRep.ProductTypeName ?? "",
+                     Redistilled = (bool?)prodReport.Redistilled,
+                     MaterialKindName = matKindRep.MaterialKindName ?? "",
+                     Weight = (System.Single?)prodReport.Weight ?? (System.Single?)0,
+                     Volume = (System.Single?)prodReport.Volume ?? (System.Single?)0,
+                     Alcohol = (System.Single?)prodReport.Alcohol ?? (System.Single?)0,
+                     Proof = (System.Single?)prodReport.Proof ?? (System.Single?)0,
+                     SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
+                     MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID ?? (int?)0,
+                     MaterialCategoryName = prodRepMatCat.MaterialCategoryName ?? "",
+                     ProductionReportMaterialCategoryID = (int?)prodRepMatCat.ProductionReportMaterialCategoryID ?? (int?)0,
+                     Gauged = (bool?)prod.Gauged ?? false
+                 }).Distinct();
+
+                // fill in temporary query results object so we can massage the data for further processing
+                foreach (var l in ress)
+                {
+                    ProductionReportHelper tempRepObj = new ProductionReportHelper();
+                    tempRepObj.StateID = l.StateID;
+                    tempRepObj.ProductionID = (int)l.ProductionID;
+                    tempRepObj.SpiritTypeReportName = l.SpiritTypeName;
+                    tempRepObj.Redistilled = (bool)l.Redistilled;
+                    tempRepObj.MaterialKindReportingName = l.MaterialKindName;
+                    tempRepObj.Weight = (float)l.Weight;
+                    tempRepObj.Volume = (float)l.Volume;
+                    tempRepObj.Alcohol = (float)l.Alcohol;
+                    tempRepObj.Proof = (float)l.Proof;
+                    tempRepObj.SpiritTypeReportingID = (int)l.SpiritTypeReportingID;
+                    tempRepObj.MaterialKindReportingID = (int)l.MaterialKindReportingID;
+                    tempRepObj.Gauged = l.Gauged;
+
+                    tempRepObjList.Add(tempRepObj);
+                }
+
+                if (tempRepObjList != null)
+                {
+                    // first, we want to make sure that every record received from the db, has SpiritType and Material Kinds associated with it
+                    // because there are cases when Blending and Bottling may not have SpiritType in a reporting sense. Our current design allows it
+                    // but maybe worth changing it
+                    foreach (var i in tempRepObjList)
+                    {
+                        if (i.SpiritTypeReportingID == 0)
+                        {
+                            try
+                            {
+                                var k =
+                                      (from prodContent in db.ProductionContent
+                                       join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.RecordID equals prod2SpiritType.ProductionID into prod2SpiritType_join
+                                       from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
+                                       join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
+                                       from matKindRep in matKindRep_join.DefaultIfEmpty()
+                                       join spiritTRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTRep.SpiritTypeReportingID into spiritTRep_join
+                                       from spiritTRep in spiritTRep_join.DefaultIfEmpty()
+                                       where
+                                          prodContent.isProductionComponent == true &&
+                                          prodContent.ProductionID == i.ProductionID
+                                       select new
+                                       {
+                                           RecordID = (int?)prodContent.RecordID,
+                                           SpiritTypeReportingID = (int?)spiritTRep.SpiritTypeReportingID ?? (int?)0,
+                                           SpiritTypeReportingName = spiritTRep.ProductTypeName,
+                                           MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID,
+                                           MaterialKindReportingName = matKindRep.MaterialKindName
+                                       }).FirstOrDefault();
+                                if (k != null)
+                                {
+                                    if ((int)k.SpiritTypeReportingID == null || (int)k.SpiritTypeReportingID == 0)
+                                    {
+                                        bool spiritTypeFound = false;
+                                        var tempRecordID = k.RecordID;
+                                        while (!spiritTypeFound)
+                                        {
+                                            var t =
+                                                (from prodContent in db.ProductionContent
+                                                 join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.RecordID equals prod2SpiritType.ProductionID into prod2SpiritType_join
+                                                 from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
+                                                 join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
+                                                 from matKindRep in matKindRep_join.DefaultIfEmpty()
+                                                 join spiritTRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTRep.SpiritTypeReportingID into spiritTRep_join
+                                                 from spiritTRep in spiritTRep_join.DefaultIfEmpty()
+                                                 where
+                                                    prodContent.isProductionComponent == true &&
+                                                    prodContent.ProductionID == tempRecordID
+                                                 select new
+                                                 {
+                                                     RecordID = (int?)prodContent.RecordID,
+                                                     SpiritTypeReportingID = (int?)spiritTRep.SpiritTypeReportingID ?? (int?)0,
+                                                     SpiritTypeReportingName = spiritTRep.ProductTypeName,
+                                                     MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID,
+                                                     MaterialKindReportingName = matKindRep.MaterialKindName
+                                                 }).FirstOrDefault();
+                                            if (t != null)
+                                            {
+                                                if (t.SpiritTypeReportingID != null || t.SpiritTypeReportingID != 0)
+                                                {
+                                                    var record = tempRepObjList.Find(x => x.ProductionID == i.ProductionID);
+                                                    record.SpiritTypeReportingID = (int)t.SpiritTypeReportingID;
+                                                    record.SpiritTypeReportName = t.SpiritTypeReportingName;
+                                                    record.MaterialKindReportingID = (int)t.MaterialKindReportingID;
+                                                    record.MaterialKindReportingName = t.MaterialKindReportingName;
+                                                    spiritTypeFound = true;
+                                                }
+                                                else
+                                                {
+                                                    tempRecordID = t.RecordID;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var record = tempRepObjList.Find(x => x.ProductionID == i.ProductionID);
+                                        record.SpiritTypeReportingID = (int)k.SpiritTypeReportingID;
+                                        record.SpiritTypeReportName = k.SpiritTypeReportingName;
+                                        record.MaterialKindReportingID = (int)k.MaterialKindReportingID;
+                                        record.MaterialKindReportingName = k.MaterialKindReportingName;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                throw e;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        /// <summary>
+        /// GetUnfinishedSpiritsForProductionReport method gets quarterly unfinished spirits data
+        /// </summary>
+        /// <param name="userId">Distiller user id</param>
+        /// <param name="start">reporting start period</param>
+        /// <param name="end">reporting end period</param>
+        /// <param name="tempRepObjList">out parameter object list that needs to be populated</param>
+        public void GetUnfinishedSpiritsForProductionReport(int userId, DateTime start, DateTime end, ref List<ProductionReportHelper> tempRepObjList)
+        {
+            // this section of code checks the reporting month to determine whether we need to report
+            // line 17 of production report
+            // for February reporting
+            const int february = 2;
+            const int may = 5;
+            const int august = 8;
+            const int november = 11;
+            DateTime[] startAndEndDates = new DateTime[2]; // [startDate, endDate]
+            
+
+            if (end.Month == february)
+            {
+                start = new DateTime(end.Year - 1, 12, 1);
+            }
+            else if (end.Month == may)
+            {
+                start = new DateTime(end.Year, 3, 1);
+            }
+            else if (end.Month == august)
+            {
+                start = new DateTime(end.Year, 6, 1);
+            }
+            else if (end.Month == november)
+            {
+                start = new DateTime(end.Year, 9, 1);
+            }
+
+            try
+            {
+                var ress =
+                (from prod in db.Production
+                 join prodReport in db.Production4Reporting on prod.ProductionID equals prodReport.ProductionID into prodReport_join
+                 from prodReport in prodReport_join.DefaultIfEmpty()
+                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 join prod2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals prod2SpiritType.ProductionID into prod2SpiritType_join
+                 from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
+                 join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
+                 from matKindRep in matKindRep_join.DefaultIfEmpty()
+                 join spiritTypeRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
+                 from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
+                 join prod2Purch in db.ProductionToPurchase on prod.ProductionID equals prod2Purch.ProductionID into prod2Purch_join
+                 from prod2Purch in prod2Purch_join.DefaultIfEmpty()
+                 join purch4Reprt in db.Purchase4Reporting on prod2Purch.PurchaseID equals purch4Reprt.PurchaseID into purch4Reprt_join
+                 from purch4Reprt in purch4Reprt_join.DefaultIfEmpty()
+                 join prodRepMatCat2MatKind in db.ProdRepMatCat2MaterialKind on matKindRep.MaterialKindReportingID equals prodRepMatCat2MatKind.MaterialKindReportingID into prodRepMatCat2MatKind_join
+                 from prodRepMatCat2MatKind in prodRepMatCat2MatKind_join.DefaultIfEmpty()
+                 join prodRepMatCat in db.ProductionReportMaterialCategory on prodRepMatCat2MatKind.ProductionReportMaterialCategoryID equals prodRepMatCat.ProductionReportMaterialCategoryID into prodRepMatCat_join
+                 from prodRepMatCat in prodRepMatCat_join.DefaultIfEmpty()
+                 where
+                   distillers.UserId == userId &&
+                   prod.Gauged == false &&
+                   (prod.StatusID == 1 ||
+                   prod.StatusID == 2) &&
+                   (new int[] { 3, 4, 5 }).Contains(prod.StateID) &&
+                   prod.ProductionEndTime >= start &&
+                   prod.ProductionEndTime <= end
+                 select new
+                 {
+                     prod.StateID,
+                     ProductionID = (int?)prod.ProductionID,
+                     SpiritTypeName = spiritTypeRep.ProductTypeName ?? "",
+                     Redistilled = (bool?)prodReport.Redistilled,
+                     MaterialKindName = matKindRep.MaterialKindName ?? "",
+                     Weight = (System.Single?)prodReport.Weight ?? (System.Single?)0,
+                     Volume = (System.Single?)prodReport.Volume ?? (System.Single?)0,
+                     Alcohol = (System.Single?)prodReport.Alcohol ?? (System.Single?)0,
+                     Proof = (System.Single?)prodReport.Proof ?? (System.Single?)0,
+                     SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
+                     MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID ?? (int?)0,
+                     MaterialCategoryName = prodRepMatCat.MaterialCategoryName ?? "",
+                     ProductionReportMaterialCategoryID = (int?)prodRepMatCat.ProductionReportMaterialCategoryID ?? (int?)0,
+                     Gauged = (bool?)prod.Gauged ?? false
+                 }).Distinct();
+
+                // fill in temporary query results object so we can massage the data for further processing
+                foreach (var l in ress)
+                {
+                    ProductionReportHelper tempRepObj = new ProductionReportHelper();
+                    tempRepObj.StateID = l.StateID;
+                    tempRepObj.ProductionID = (int)l.ProductionID;
+                    tempRepObj.SpiritTypeReportName = l.SpiritTypeName;
+                    tempRepObj.Redistilled = (bool)l.Redistilled;
+                    tempRepObj.MaterialKindReportingName = l.MaterialKindName;
+                    tempRepObj.Weight = (float)l.Weight;
+                    tempRepObj.Volume = (float)l.Volume;
+                    tempRepObj.Alcohol = (float)l.Alcohol;
+                    tempRepObj.Proof = (float)l.Proof;
+                    tempRepObj.SpiritTypeReportingID = (int)l.SpiritTypeReportingID;
+                    tempRepObj.MaterialKindReportingID = (int)l.MaterialKindReportingID;
+                    tempRepObj.Gauged = l.Gauged;
+
+                    tempRepObjList.Add(tempRepObj);
+                }
+
+                if (tempRepObjList != null)
+                {
+                    // first, we want to make sure that every record received from the db, has SpiritType and Material Kinds associated with it
+                    // because there are cases when Blending and Bottling may not have SpiritType in a reporting sense. Our current design allows it
+                    // but maybe worth changing it
+                    foreach (var i in tempRepObjList)
+                    {
+                        if (i.SpiritTypeReportingID == 0)
+                        {
+                            try
+                            {
+                                var k =
+                                      (from prodContent in db.ProductionContent
+                                       join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.RecordID equals prod2SpiritType.ProductionID into prod2SpiritType_join
+                                       from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
+                                       join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
+                                       from matKindRep in matKindRep_join.DefaultIfEmpty()
+                                       join spiritTRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTRep.SpiritTypeReportingID into spiritTRep_join
+                                       from spiritTRep in spiritTRep_join.DefaultIfEmpty()
+                                       where
+                                          prodContent.isProductionComponent == true &&
+                                          prodContent.ProductionID == i.ProductionID
+                                       select new
+                                       {
+                                           RecordID = (int?)prodContent.RecordID,
+                                           SpiritTypeReportingID = (int?)spiritTRep.SpiritTypeReportingID ?? (int?)0,
+                                           SpiritTypeReportingName = spiritTRep.ProductTypeName,
+                                           MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID,
+                                           MaterialKindReportingName = matKindRep.MaterialKindName
+                                       }).FirstOrDefault();
+                                if (k != null)
+                                {
+                                    if ((int)k.SpiritTypeReportingID == null || (int)k.SpiritTypeReportingID == 0)
+                                    {
+                                        bool spiritTypeFound = false;
+                                        var tempRecordID = k.RecordID;
+                                        while (!spiritTypeFound)
+                                        {
+                                            var t =
+                                                (from prodContent in db.ProductionContent
+                                                 join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.RecordID equals prod2SpiritType.ProductionID into prod2SpiritType_join
+                                                 from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
+                                                 join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
+                                                 from matKindRep in matKindRep_join.DefaultIfEmpty()
+                                                 join spiritTRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTRep.SpiritTypeReportingID into spiritTRep_join
+                                                 from spiritTRep in spiritTRep_join.DefaultIfEmpty()
+                                                 where
+                                                    prodContent.isProductionComponent == true &&
+                                                    prodContent.ProductionID == tempRecordID
+                                                 select new
+                                                 {
+                                                     RecordID = (int?)prodContent.RecordID,
+                                                     SpiritTypeReportingID = (int?)spiritTRep.SpiritTypeReportingID ?? (int?)0,
+                                                     SpiritTypeReportingName = spiritTRep.ProductTypeName,
+                                                     MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID,
+                                                     MaterialKindReportingName = matKindRep.MaterialKindName
+                                                 }).FirstOrDefault();
+                                            if (t != null)
+                                            {
+                                                if (t.SpiritTypeReportingID != null || t.SpiritTypeReportingID != 0)
+                                                {
+                                                    var record = tempRepObjList.Find(x => x.ProductionID == i.ProductionID);
+                                                    record.SpiritTypeReportingID = (int)t.SpiritTypeReportingID;
+                                                    record.SpiritTypeReportName = t.SpiritTypeReportingName;
+                                                    record.MaterialKindReportingID = (int)t.MaterialKindReportingID;
+                                                    record.MaterialKindReportingName = t.MaterialKindReportingName;
+                                                    spiritTypeFound = true;
+                                                }
+                                                else
+                                                {
+                                                    tempRecordID = t.RecordID;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var record = tempRepObjList.Find(x => x.ProductionID == i.ProductionID);
+                                        record.SpiritTypeReportingID = (int)k.SpiritTypeReportingID;
+                                        record.SpiritTypeReportName = k.SpiritTypeReportingName;
+                                        record.MaterialKindReportingID = (int)k.MaterialKindReportingID;
+                                        record.MaterialKindReportingName = k.MaterialKindReportingName;
+                                    }
+                                }
+                                else
+                                {
+                                    // if there are no records in ProductionComponent with value isProductionComponent == 1 then we know that this material was made out of purchased material
+
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                throw e;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public StorageReport GetStorageReportData(DateTime startDate, DateTime endDate, int userId)

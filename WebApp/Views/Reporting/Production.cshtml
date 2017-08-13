@@ -70,103 +70,236 @@
                 // part 1 of the report
                 var producedTotal = 0;
                 var redistilledTotal = 0;
+                var producedTotals = 0; // line 14
+                var unfinishedTotal = 0; //line 17(b)
 
                 for ( var i = 0; i < result.Part1.length; i++ )
                 {
-                    // Whisky Under 160
-                    if ( result.Part1[i].SpiritTypeReportingID === 1 ) {
+                    if ( result.Part1[i].SpiritCatName === 'WhiskyUnder160' ) {
 
+                        // Line: 9 - update processing for a single SpiritType
                         $( '#p1_9b_WhiskyUnder160' ).val( result.Part1[i].ProccessingAcct );
+
+                        // Line: 11 - update storage for a single SpiritType
                         $( '#p1_11b_WhiskyUnder160' ).val( result.Part1[i].SorageAcct );
+
+                        // Line: 14 - update totals for line 14 for all applicable rows
                         $( '#p1_14b_WhiskyUnder160' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
-                        
+
+                        // Line: 15 - update Received for Redistillation for a single SpiritType
+                        $( '#p1_15b_WhiskyUnder160' ).val( result.Part1[i].Recd4Redistil );
+
+                        // Line: 17(b) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17b_b_WhiskyUnder160' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        // Column (L) - update processing totals across all Spirit Types
                         processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
                         processingAcct += parseFloat( result.Part1[i].ProccessingAcct );
                         $( '#p1_9l_Total' ).val( processingAcct );
 
+                        // Column (L) - update storages totals across all Spirit Types
                         storagegAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
                         storagegAcct += parseFloat( result.Part1[i].SorageAcct );
                         $( '#p1_11l_Total' ).val( storagegAcct );
 
-                        $( '#p1_14l_Total' ).val( processingAcct + storagegAcct );
+                        // Column (L) - update line 14 totals across all Spirit Types
+                        producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
+                        producedTotals += parseFloat( result.Part1[i].SorageAcct );
+                        $( '#p1_14l_Total' ).val( producedTotals );
 
-                        $( '#p1_15b_WhiskyUnder160' ).val( result.Part1[i].Recd4Redistil );
+                        // Column (L) - update Received for Redistillation for across all Spirit Types
                         redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
                         redistilledTotal += parseFloat( result.Part1[i].Recd4Redistil );
                         $( '#p1_15l_Total' ).val( redistilledTotal );
+
+                        // Column (L) - update Unfinished spirits across all Spirit Types
+                        unfinishedTotal = isNaN( parseFloat( $( '#p1_17b_l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17b_l_Total' ).val() );
+                        unfinishedTotal += parseFloat( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_l_Total' ).val( unfinishedTotal );
                     }
-
-                    // Whisky Over 160
-                    if ( result.Part1[i].SpiritTypeReportingID === 2 ) {
-
+                    else if ( result.Part1[i].SpiritCatName === 'WhiskyOver160' ) {
+                        // Line: 9 - update processing for a single SpiritType
                         $( '#p1_9c_WhiskyOver160' ).val( result.Part1[i].ProccessingAcct );
+
+                        // Line: 11 - update storage for a single SpiritType
                         $( '#p1_11c_WhiskyOver160' ).val( result.Part1[i].SorageAcct );
+
+                        // Line: 14 - update totals for line 14 for all applicable rows
                         $( '#p1_14c_WhiskyOver160' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
+                        // Line: 15 - update Received for Redistillation for a single SpiritType
+                        $( '#p1_15c_WhiskyUnder160' ).val( result.Part1[i].Recd4Redistil );
+
+                        // Line: 17(b) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17b_c_WhiskyOver160' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        // Column (L) - update processing totals across all Spirit Types
                         processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
                         processingAcct += parseFloat( result.Part1[i].ProccessingAcct );
                         $( '#p1_9l_Total' ).val( processingAcct );
 
+                        // Column (L) - update storages totals across all Spirit Types
                         storagegAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
                         storagegAcct += parseFloat( result.Part1[i].SorageAcct );
                         $( '#p1_11l_Total' ).val( storagegAcct );
 
-                        $( '#p1_14l_Total' ).val( processingAcct + storagegAcct );
+                        // Column (L) - update line 14 totals across all Spirit Types
+                        producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
+                        producedTotals += parseFloat( result.Part1[i].SorageAcct );
+                        $( '#p1_14l_Total' ).val( producedTotals );
 
-                        $( '#p1_15c_WhiskyOver160' ).val( result.Part1[i].Recd4Redistil );
+                        // Column (L) - update Received for Redistillation for across all Spirit Types
                         redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
                         redistilledTotal += parseFloat( result.Part1[i].Recd4Redistil );
                         $( '#p1_15l_Total' ).val( redistilledTotal );
+
+                        // Column (L) - update Unfinished spirits across all Spirit Types
+                        unfinishedTotal = isNaN( parseFloat( $( '#p1_17b_l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17b_l_Total' ).val() );
+                        unfinishedTotal += parseFloat( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_l_Total' ).val( unfinishedTotal );
                     }
-
-                    // Brandy Under 170
-                    if ( result.Part1[i].SpiritTypeReportingID === 3 ) {
-
+                    else if ( result.Part1[i].SpiritCatName === 'BrandyUnder170' ) {
+                        // Line: 9 - update processing for a single SpiritType
                         $( '#p1_9d_BrandyUnder170' ).val( result.Part1[i].ProccessingAcct );
+
+                        // Line: 11 - update storage for a single SpiritType
                         $( '#p1_11d_BrandyUnder170' ).val( result.Part1[i].SorageAcct );
+
+                        // Line: 14 - update totals for line 14 for all applicable rows
                         $( '#p1_14d_BrandyUnder170' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
+                        // Line: 15 - update Received for Redistillation for a single SpiritType
+                        $( '#p1_15d_BrandyUnder170' ).val( result.Part1[i].Recd4Redistil );
+
+                        // Line: 17(b) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17b_d_BrandyUnder170' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        // Column (L) - update processing totals across all Spirit Types
                         processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
                         processingAcct += parseFloat( result.Part1[i].ProccessingAcct );
                         $( '#p1_9l_Total' ).val( processingAcct );
 
+                        // Column (L) - update storages totals across all Spirit Types
                         storagegAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
                         storagegAcct += parseFloat( result.Part1[i].SorageAcct );
                         $( '#p1_11l_Total' ).val( storagegAcct );
-  
-                        $( '#p1_14l_Total' ).val( processingAcct + storagegAcct );
 
-                        $( '#p1_15d_BrandyUnder170' ).val( result.Part1[i].Recd4Redistil );
+                        // Column (L) - update line 14 totals across all Spirit Types
+                        producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
+                        producedTotals += parseFloat( result.Part1[i].SorageAcct );
+                        $( '#p1_14l_Total' ).val( producedTotals );
+
+                        // Column (L) - update Received for Redistillation for across all Spirit Types
                         redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
                         redistilledTotal += parseFloat( result.Part1[i].Recd4Redistil );
                         $( '#p1_15l_Total' ).val( redistilledTotal );
+
+                        // Column (L) - update Unfinished spirits across all Spirit Types
+                        unfinishedTotal = isNaN( parseFloat( $( '#p1_17b_l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17b_l_Total' ).val() );
+                        unfinishedTotal += parseFloat( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_l_Total' ).val( unfinishedTotal );
                     }
-
-                    // Brandy Over 170
-                    if ( result.Part1[i].SpiritTypeReportingID === 4 ) {
-
+                    else if ( result.Part1[i].SpiritCatName === 'BrandyOver170' ) {
+                        // Line: 9 - update processing for a single SpiritType
                         $( '#p1_9e_BrandyOver170' ).val( result.Part1[i].ProccessingAcct );
+
+                        // Line: 11 - update storage for a single SpiritType
                         $( '#p1_11e_BrandyOver170' ).val( result.Part1[i].SorageAcct );
+
+                        // Line: 14 - update totals for line 14 for all applicable rows
                         $( '#p1_14e_BrandyOver170' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
+                        // Line: 15 - update Received for Redistillation for a single SpiritType
+                        $( '#p1_15e_BrandyOver170' ).val( result.Part1[i].Recd4Redistil );
+
+                        // Line: 17(b) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17b_e_BrandyOver170' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        // Column (L) - update processing totals across all Spirit Types
                         processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
                         processingAcct += parseFloat( result.Part1[i].ProccessingAcct );
                         $( '#p1_9l_Total' ).val( processingAcct );
 
+                        // Column (L) - update storages totals across all Spirit Types
                         storagegAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
                         storagegAcct += parseFloat( result.Part1[i].SorageAcct );
                         $( '#p1_11l_Total' ).val( storagegAcct );
 
-                        $( '#p1_14l_Total' ).val( processingAcct + storagegAcct );
+                        // Column (L) - update line 14 totals across all Spirit Types
+                        producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
+                        producedTotals += parseFloat( result.Part1[i].SorageAcct );
+                        $( '#p1_14l_Total' ).val( producedTotals );
 
-                        $( '#p1_15e_BrandyOver170' ).val( result.Part1[i].Recd4Redistil );
+                        // Column (L) - update Received for Redistillation for across all Spirit Types
                         redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
                         redistilledTotal += parseFloat( result.Part1[i].Recd4Redistil );
                         $( '#p1_15l_Total' ).val( redistilledTotal );
+
+                        // Column (L) - update Unfinished spirits across all Spirit Types
+                        unfinishedTotal = isNaN( parseFloat( $( '#p1_17l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17l_Total' ).val() );
+                        unfinishedTotal += parseFloat( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17l_Total' ).val( unfinishedTotal );
+                    }
+                    else if ( result.Part1[i].SpiritCatName === 'Rum' ) {
+                        alert( 'Rum case not implemented' );
+                    }
+                    else if ( result.Part1[i].SpiritCatName === 'Gin' ) {
+                        alert( 'Gin case not implemented' );
+                    }
+                    else if ( result.Part1[i].SpiritCatName === 'Vodka' ) {
+                        alert( 'Vodka case not implemented' );
+                    }
+                    else if ( result.Part1[i].SpiritCatName === 'AlcoholUnder190' ) {
+                        alert( 'AlcoholUnder190 case not implemented' );
+                    }
+                    else if ( result.Part1[i].SpiritCatName === 'AlcoholOver190' ) {
+                        alert( 'AlcoholOver190 case not implemented' );
+                    }
+                    else
+                    {
+                        // Line: 9 - update processing for a single SpiritType
+                        $( '#p1_9k_Other' ).val( result.Part1[i].ProccessingAcct );
+
+                        // Line: 11 - update storage for a single SpiritType
+                        $( '#p1_11k_Other' ).val( result.Part1[i].SorageAcct );
+
+                        // Line: 14 - update totals for line 14 for all applicable rows
+                        $( '#p1_14k_Other' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+
+                        // Line: 15 - update Received for Redistillation for a single SpiritType
+                        $( '#p1_15k_Other' ).val( result.Part1[i].Recd4Redistil );
+
+                        // Line: 17(b) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17b_k_Other' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        // Column (L) - update processing totals across all Spirit Types
+                        processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
+                        processingAcct += parseFloat( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9l_Total' ).val( processingAcct );
+
+                        // Column (L) - update storages totals across all Spirit Types
+                        storagegAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
+                        storagegAcct += parseFloat( result.Part1[i].SorageAcct );
+                        $( '#p1_11l_Total' ).val( storagegAcct );
+
+                        // Column (L) - update line 14 totals across all Spirit Types
+                        producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
+                        producedTotals += parseFloat( result.Part1[i].SorageAcct );
+                        $( '#p1_14l_Total' ).val( producedTotals );
+
+                        // Column (L) - update Received for Redistillation for across all Spirit Types
+                        redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
+                        redistilledTotal += parseFloat( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15l_Total' ).val( redistilledTotal );
+
+                        // Column (L) - update Unfinished spirits across all Spirit Types
+                        unfinishedTotal = isNaN( parseFloat( $( '#p1_17b_l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17b_l_Total' ).val() );
+                        unfinishedTotal += parseFloat( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_l_Total' ).val( unfinishedTotal );
                     }
                 }
 
-                //grisha - todo: this could potentially be moved to the helper method
+                //grisha - todo: this could potentially be moved to a function method
                 for ( var i = 0; i < result.Part2Through5.length; i++ )
                 {
                     if ( result.Part2Through5[i].KindOfMaterial === "Grain" ) //grain
@@ -1293,7 +1426,7 @@
                 <p style="text-indent: 0pt;text-align: left;"><div id="p1_14j_AlcoholAndSpiritsUnder190"></div></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_14k_Other"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14k_Other" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14l_Total" readonly /></p>
@@ -1334,7 +1467,7 @@
                 <p style="text-indent: 0pt;text-align: left;"><div id="p1_15j_AlcoholAndSpiritsUnder190"></div></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_15k_Other"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15k_Other" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15l_Total" readonly /></p>
@@ -1427,37 +1560,37 @@
                 <p class="s4" style="padding-left: 2pt;text-indent: 0pt;line-height: 9pt;text-align: left;">(b) UNFINISHED SPIRITS</p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_b_WhiskyUnder160"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_b_WhiskyUnder160" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_c_WhiskyOver160"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_c_WhiskyOver160" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_d_BrandyUnder170"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_d_BrandyUnder170" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_e_BrandyOver170"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_e_BrandyOver170" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_f_Rum"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_f_Rum" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_g_Gin"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_g_Gin" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_h_Vodka"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_h_Vodka" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_i_AlcoholAndSpiritsOver190"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_i_AlcoholAndSpiritsOver190" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_j_AlcoholAndSpiritsUnder190"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_j_AlcoholAndSpiritsUnder190" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_k_Other"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_k_Other" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_17b_l_Total"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_l_Total" readonly=readonly /></p>
             </td>
         </tr>
         <!-- End PART I - TRANSACTIONS-->

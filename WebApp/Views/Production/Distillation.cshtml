@@ -38,23 +38,28 @@
             var storageAdapter;
             var ReportingSpiritKindAdapter;
 
-            // global ProductionId variable
-            var prodId = 0;
-
+            // this object is used to keep global variables values. In order to avoid slowly filling
+            // the code with multiple global variables, proposing creating an object that will keep track of globals Example:
+            /*
+            var globals ={};
+            globals.EditDialogTotalProofValue = x;
+            */
+            var globals = {
+                prodId: 0, //global ProductionId variable
+                gauged: 0 // {true, false}
+            };
             function _addEventListeners() {
 
                 // Material Burndown state machine
 
                 // Check "Final Distillation Gauge" checkbox
-                $("#FinalGaugeCheckBox").on("checked", function (event) {
-                    $(".reporting-input-group").show();
+                $( "#FinalGaugeCheckBox" ).on( "checked", function ( event ) {
+                    globals.gauged = true;
                 });
 
                 // Uncheck "Final Distillation" Gauge checkbox
                 $("#FinalGaugeCheckBox").on("unchecked", function (event) {
-                    $(".reporting-input-group").hide();
-                    $("#ReportingSpiritTypeDropDown").jqxDropDownList("clearSelection");
-                    $("#ReportingMaterialKindDropDown").jqxDropDownList("clearSelection");
+                    globals.gauged = false;
                 });
 
                 // on burndown open event
@@ -290,9 +295,9 @@
                         var args = event.args;
                         var index = args.index;
                         var row = args.row;
-                        prodId = row.ProductionId;
+                        globals.prodId = row.ProductionId;
                         // update the widgets inside jqxWindow.
-                        $("#EditDialog").jqxWindow('setTitle', "Edit Distillation Production Record: #" + prodId);
+                        $("#EditDialog").jqxWindow('setTitle', "Edit Distillation Production Record: #" + globals.prodId);
                         $("#EditDialog").jqxWindow('open');
                         $("#EditDialog").attr('data-row', index);
                         $("#dataTable").jqxDataTable({ disabled: true });
@@ -366,7 +371,7 @@
 
                         var rowData = {
                             ProductionType: "Distillation",
-                            ProductionId: prodId,
+                            ProductionId: globals.prodId,
                             BatchName: $('#EditDialogPurBatchNameInput').jqxInput('val'),
                             ProductionDate: prodEndUtc,
                             ProductionStart: prodStartUtc,
@@ -407,6 +412,7 @@
                 // _createElements function creates a jqxwidgets elements that do not require any sort of data binding later
                 function _createElements() {
                     //todo: we need to add localization files
+                    $(".reporting-input-group").show();
                     $("#ProdStartDateInput").jqxDateTimeInput({
                         textAlign: 'center',
                         height: '25px',
@@ -603,8 +609,7 @@
                             {
                                 input: "#ReportingSpiritTypeDropDown", message: "Please Select Spirit Type", action: 'blur', rule: function (input, commit) {
                                     var index = $("#ReportingSpiritTypeDropDown").jqxDropDownList('getSelectedIndex');
-                                    var finalGauge = $("#FinalGaugeCheckBox").val();
-                                    if (finalGauge == false || index != -1) {
+                                    if (index != -1) {
                                         return true;
                                     }
                                     return false;
@@ -613,8 +618,7 @@
                             {
                                 input: "#ReportingMaterialKindDropDown", message: "Please Select Material Kind", action: 'blur', rule: function (input, commit) {
                                     var index = $("#ReportingMaterialKindDropDown").jqxDropDownList('getSelectedIndex');
-                                    var finalGauge = $("#FinalGaugeCheckBox").val();
-                                    if (finalGauge == false || index != -1) {
+                                    if (index != -1) {
                                         return true;
                                     }
                                     return false;
@@ -756,7 +760,8 @@
                         SpiritTypeReportingID: spiritTypeReportingID,
                         MaterialKindReportingID: materialKindReportingID,
                         Note: $('#ProdNotes').jqxTextArea('val'),
-                        UsedMats: usedMatsList
+                        UsedMats: usedMatsList,
+                        Gauged: globals.gauged
                     };
 
                     $.ajax({

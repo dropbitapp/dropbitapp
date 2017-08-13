@@ -37,6 +37,8 @@ namespace WebApp.Helpers
         public float ProducedTotal { get; set; } // stands for Produced total (on report, lines 1 through 13) for 170 & Under
         public float Recd4Redistil { get; set; } // stands for Received for Re-Distillation(on report, for this period, invlcuding values from storage + processing) for 170 & Under
         public int SpiritTypeReportingID { get; set; }
+        public float UnfinishedSpiritsEndOfQuarter { get; set; }
+        public float RedistilledEndOfQuarter { get; set; }
     }
 
     public class ProdReportParts2Through5
@@ -230,6 +232,7 @@ namespace WebApp.Helpers
         public string Note { get; set; }
         public float TaxedProof { get; set; } // Proof value indicated as taxable. For now, it is used to enable reporting processing. In  other words, how much alcohol has been sold.
         public System.DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened
+        public bool Gauged { get; set; }
     }
 
     /// <summary>
@@ -323,6 +326,7 @@ namespace WebApp.Helpers
         public int StatusID { get; set; }
         public string Status { get; set; }
         public int SpiritTypeReportingID { get; set; }
+        public bool Gauged { get; set; }
     }
 
     /// <summary>

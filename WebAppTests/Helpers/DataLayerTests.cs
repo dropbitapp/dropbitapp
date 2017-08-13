@@ -239,6 +239,19 @@ namespace WebApp.Helpers.Tests
         [TestMethod()]
         public void GetStorageReportDataTest()
         {
+
+            // Arrange
+
+            // Act
+            //StorageReport result = dLayer.GetStorageReportData();
+
+            // Assert
+            //Assert.IsNotNull(result, "GetUnitList result returned is null");
+        }
+
+        [TestMethod()]
+        public void GetUnfinishedSpiritsForProductionReportTest()
+        {
             Assert.Fail();
         }
     }
