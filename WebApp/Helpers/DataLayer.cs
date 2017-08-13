@@ -3783,6 +3783,17 @@ namespace WebApp.Helpers
 
                 if (prodObject.UsedMats != null) // we need to makre sure that in Production workflow front-end we assign either raw materials or distil IDs to it
                 {
+                    if (prodObject?.SpiritTypeReportingID != 0 && prodObject?.MaterialKindReportingID != 0 && prodObject?.SpiritTypeReportingID != null && prodObject?.MaterialKindReportingID != null)
+                    {
+                        prod.Gauged = true;
+                        ProductionToSpiritTypeReporting prodToSpirType = new ProductionToSpiritTypeReporting();
+                        prodToSpirType.SpiritTypeReportingID = prodObject.SpiritTypeReportingID;
+                        prodToSpirType.MaterialKindReportingID = prodObject.MaterialKindReportingID;
+                        prodToSpirType.ProductionID = prod.ProductionID;
+                        db.ProductionToSpiritTypeReporting.Add(prodToSpirType);
+                        db.SaveChanges();
+                    }
+
                     if (prodObject?.SpiritId != null)
                     {
                         ProductionToSpirit prodToSpirit = new ProductionToSpirit();

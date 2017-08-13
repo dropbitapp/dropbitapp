@@ -17,6 +17,7 @@
             var distilsAdapter;
             var blendAddAdapter;
             var spiritTypeAdapter;
+            var reportingSpiritKindAdapter;
 
             var curRawMatIndex; // this index is used to keep index value of the current selected material that will be used in production
             var usedMat = {}; // front-end representation of an object in Helpers.cs
@@ -93,6 +94,22 @@
                     }
                     $( '#MatBurnDwnDialogRadioBtnAll' ).jqxRadioButton( { checked: true } );
                     $( "#MatBurnDwnDialogQuantityInput" ).val( '' );
+                });
+
+                // Populates MaterialKindForReporting drop down when Spirit Type is chosen.
+                $('#ReportingSpiritTypeDropDown').on('select', function (event) {
+                    if (event.args) {
+                        var index = args.item.index;
+                        // Assumption: dropDownList index == dataAdapter index
+                        var adapterRecord = reportingSpiritKindAdapter[index];
+                        var array = [];
+                        for (var i = 0; i < adapterRecord.MaterialKindObject.length; i++) {
+                            array.push(adapterRecord.MaterialKindObject[i]);
+                        }
+                        $('#ReportingMaterialKindDropDown').jqxDropDownList({
+                            source: array
+                        });
+                    }
                 });
 
                 // burndown type
@@ -479,6 +496,30 @@
                     theme: 'bootstrap', multiple: true, source: distilsAdapter, displayMember: "BatchName", valueMember: "ProductionId", checkboxes: true, width: '100%',
                 });
 
+                $("#ReportingSpiritTypeDropDown").jqxDropDownList({
+                    source: reportingSpiritKindAdapter,
+                    displayMember: 'ProductTypeName',
+                    valueMember: 'SpiritTypeReportingID',
+                    theme: 'bootstrap',
+                    height: '26px',
+                    width: '175px',
+                    autoDropDownHeight: true,
+                    autoOpen: false,
+                    placeHolder: ""
+                });
+
+                $("#ReportingMaterialKindDropDown").jqxDropDownList({
+                    //source: assigned 'on select' function for Reporting Spirit dropdown 
+                    displayMember: 'MaterialKindName',
+                    valueMember: 'MaterialKindID',
+                    theme: 'bootstrap',
+                    height: '26px',
+                    width: '175px',
+                    autoDropDownHeight: true,
+                    autoOpen: false,
+                    placeHolder: ""
+                });
+
                 $('#validationForm').jqxValidator({
                     closeOnClick: true,
                     onSuccess: function () {
@@ -545,6 +586,24 @@
                             input: '#BlendingAlcohol', message: 'Please Enter Price', action: 'blur', rule: function () {
                                 var value = $('#BlendingAlcohol').val();
                                 return value > 0 ? true : false;
+                            }
+                        },
+                        {
+                            input: "#ReportingSpiritTypeDropDown", message: "Please Select Spirit Type", action: 'blur', rule: function (input, commit) {
+                                var index = $("#ReportingSpiritTypeDropDown").jqxDropDownList('getSelectedIndex');
+                                if (index != -1) {
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        {
+                            input: "#ReportingMaterialKindDropDown", message: "Please Select Material Kind", action: 'blur', rule: function (input, commit) {
+                                var index = $("#ReportingMaterialKindDropDown").jqxDropDownList('getSelectedIndex');
+                                if (index != -1) {
+                                    return true;
+                                }
+                                return false;
                             }
                         }
                     ]
@@ -976,6 +1035,29 @@
                     });
             }
 
+            function _bindReportingSpiritKind() {
+                var url = '/Production/GetSpiritToKindListData';
+                var source = {
+                    datatype: "json",
+                    dataFields: [
+                        { name: 'SpiritTypeReportingID', type: 'number' },
+                        { name: 'ProductTypeName', type: 'string' },
+                        { name: 'MaterialKindID', map: 'MaterialKindObject>MaterialKindID' },
+                        { name: 'MaterialKindName', map: 'MaterialKindObject>MaterialKindName' }
+                    ],
+                    id: 'SpiritTypeReportingID',
+                    url: url,
+                    async: true
+                }
+                reportingSpiritKindAdapter = new $.jqx.dataAdapter(source,
+                    {
+                        autoBind: true,
+                        loadComplete: function (records) {
+                            reportingSpiritKindAdapter = records;
+                        }
+                    });
+            }
+
             function _createBlendingRecord() {
 
                 var items = $("#ProdStorage").jqxListBox('getSelectedItems');
@@ -987,6 +1069,20 @@
                         StorageObject.StorageName = items[i].originalItem.StorageName;
                         storageList.push(StorageObject);
                     }
+                }
+
+                // if no spiritType is selected, set the id to 0, to avoid null object exception
+                var spiritType = $("#ReportingSpiritTypeDropDown").jqxDropDownList("getSelectedItem");
+                var spiritTypeReportingID = null;
+                if (spiritType) {
+                    spiritTypeReportingID = spiritType.value;
+                }
+
+                // if no materialKind is selected, set the id to 0, to avoid null object exception
+                var materialKind = $("#ReportingMaterialKindDropDown").jqxDropDownList("getSelectedItem");
+                var materialKindReportingID = null;
+                if (materialKind) {
+                    materialKindReportingID = materialKind.value;
                 }
 
                 var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStartDate").jqxDateTimeInput('val'), true);
@@ -1007,6 +1103,8 @@
                     SpiritId: $("#SpiritType").jqxDropDownList('getSelectedItem').originalItem.SpiritId,
                     SpiritName: $("#SpiritType").jqxDropDownList('getSelectedItem').label,
                     Note: $('#BlendingNotes').jqxTextArea('val'),
+                    SpiritTypeReportingID: spiritTypeReportingID,
+                    MaterialKindReportingID: materialKindReportingID,
                     BlendingAdditives: additivesArray,
                     UsedMats: usedMatsList
                 };
@@ -1063,6 +1161,7 @@
                     _bindDistillData();
                     _bindProdData();
                     _bindSpiritTypeData();
+                    _bindReportingSpiritKind();
                     // create page elements
                     _createElements();
                     //Attaching event listeners
@@ -1193,6 +1292,18 @@
                                         <label for="BlendingProof" class="col-sm-6 control-label">Proof Gallons</label>
                                         <div class="col-sm-6">
                                             <div id="BlendingProof"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ReportingSpiritTypeDropDown" class="col-sm-6 control-label">Spirit Type for Reporting</label>
+                                        <div class="col-sm-6">
+                                            <div id="ReportingSpiritTypeDropDown"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ReportingMaterialKindDropDown" class="col-sm-6 control-label">Material Kind for Reporting</label>
+                                        <div class="col-sm-6">
+                                            <div id="ReportingMaterialKindDropDown"></div>
                                         </div>
                                     </div>
                                 </form>
