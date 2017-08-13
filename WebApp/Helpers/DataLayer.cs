@@ -349,6 +349,23 @@ namespace WebApp.Helpers
                 procRepP2.OnHandEndofMonth = (float)onHandEndOfMonthP2.OnHandEndOfMonth;
             }
 
+            // line 33 - Withdrawn for Tax Determined
+            var taxWithdrawn =
+            from tax in db.TaxWithdrawn
+            where tax.DateOfSale >= startOfReporting && tax.DateOfSale <= endOfReporting
+            select new
+            {
+                TaxPaid = (System.Single?)tax.Value ?? (System.Single?)0
+            };
+
+            if(taxWithdrawn != null)
+            {
+                foreach(var i in taxWithdrawn)
+                {
+                    procRepP2.TaxWithdrawn += (float)i.TaxPaid;
+                }
+            }
+
             // Processing Report Part 4
             try
             {

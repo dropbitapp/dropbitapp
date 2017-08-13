@@ -7,7 +7,9 @@ using System.Data.Entity.ModelConfiguration.Conventions;
 namespace WebApp.Models
 {
     /// <summary>
-    /// TaxWithdrawn table contains records of how much Proof Gallons have been sold for associated record
+    /// TaxWithdrawn table contains records of how much Proof Gallons have been sold for associated Production record.
+    /// One thing to note that the table may contain more than one Tax Withdrawal for a particular Production record
+    /// in cases when particular bottling record is not sold right away
     /// </summary>
     public class TaxWithdrawn
     {
@@ -16,8 +18,8 @@ namespace WebApp.Models
         [Column(Order =  1), ForeignKey ("Production")]
         public int ProductionID { get; set; }
         public float Value { get; set; }
-        public DateTime DateOfSale { get; set; }
-        public DateTime DateRecorded { get; set; }
+        public DateTime DateOfSale { get; set; } // date when the sale of the spirit has happened
+        public DateTime DateRecorded { get; set; } // date when tax witdrawal was entered in the system
         public virtual Production Production { get; set; }
     }
 

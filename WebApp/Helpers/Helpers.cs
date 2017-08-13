@@ -98,6 +98,7 @@ namespace WebApp.Helpers
         public float RecordedLosses { get; set; }
         public float InventoryShortage { get; set; }
         public float OnHandEndofMonth { get; set; }
+        public float TaxWithdrawn { get; set; }
     }
 
     public class ProcessReportingPart4
