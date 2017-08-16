@@ -18,7 +18,7 @@
             var rawMaterialTypeAdapter;
             var vendorAdapter;
             var storageAdapter;
-            var ReportingSpiritKindAdapter;
+            var reportingSpiritKindAdapter;
 
             function _addEventListeners() {
 
@@ -225,7 +225,7 @@
                     width: '100%'
                 });
                 $("#ReportingSpiritTypeDropDown").jqxDropDownList({
-                    source: ReportingSpiritKindAdapter,
+                    source: reportingSpiritKindAdapter,
                     displayMember: 'ProductTypeName',
                     valueMember: 'SpiritTypeReportingID',
                     theme: 'bootstrap',
@@ -399,11 +399,11 @@
                     url: url,
                     async: true
                 }
-                ReportingSpiritKindAdapter = new $.jqx.dataAdapter(source,
+                reportingSpiritKindAdapter = new $.jqx.dataAdapter(source,
                     {
                         autoBind: true,
                         loadComplete: function (records) {
-                            ReportingSpiritKindAdapter = records;
+                            reportingSpiritKindAdapter = records;
                         }
                     });
             }

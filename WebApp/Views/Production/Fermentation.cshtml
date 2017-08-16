@@ -34,7 +34,7 @@
             // data adapters
             var rawMaterialTypeAdapter;
             var storageAdapter;
-            var ReportingSpiritKindAdapter;
+            var reportingSpiritKindAdapter;
 
             // global ProductionId variable
             var prodId = 0;
@@ -58,7 +58,7 @@
                     if (event.args) {
                         var index = args.item.index;
                         // Assumption: dropDownList index == dataAdapter index
-                        var adapterRecord = ReportingSpiritKindAdapter[index];
+                        var adapterRecord = reportingSpiritKindAdapter[index];
                         var array = [];
                         for (var i = 0; i < adapterRecord.MaterialKindObject.length; i++) {
                             array.push(adapterRecord.MaterialKindObject[i]);
@@ -399,7 +399,7 @@
                     boxSize: '18px'
                 });
                 $("#ReportingSpiritTypeDropDown").jqxDropDownList({
-                    source: ReportingSpiritKindAdapter,
+                    source: reportingSpiritKindAdapter,
                     displayMember: 'ProductTypeName',
                     valueMember: 'SpiritTypeReportingID',
                     theme: 'bootstrap',
@@ -578,11 +578,11 @@
                     url: url,
                     async: true
                 }
-                ReportingSpiritKindAdapter = new $.jqx.dataAdapter(source,
+                reportingSpiritKindAdapter = new $.jqx.dataAdapter(source,
                     {
                         autoBind: true,
                         loadComplete: function (records) {
-                            ReportingSpiritKindAdapter = records;
+                            reportingSpiritKindAdapter = records;
                         }
                     });
             }
