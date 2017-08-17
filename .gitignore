@@ -14,3 +14,4 @@
 /WebApp/Properties/PublishProfiles
 /WebAppTests/bin/Debug
 /WebAppTests/obj/Release
+*.csproj

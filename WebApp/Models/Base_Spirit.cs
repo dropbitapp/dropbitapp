@@ -331,6 +331,31 @@ namespace WebApp.Models
     }
 
     /// <summary>
+    /// PurchaseHistory table is kept as a flat table to keep track of the changes for each Purchase record
+    /// </summary>
+    public class PurchaseHistory
+    {
+        [Key]
+        public int PurchaseHistoryID { get; set; }
+        public int PurchaseID { get; set; }
+        public string PurchaseName { get; set; } // purchase batch name
+        public float Price { get; set; }
+        public int VendorID { get; set; } 
+        public float Volume { get; set; }
+        public float Weight { get; set; }
+        public float Alcohol { get; set; }
+        public float Proof { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime PurchaseDate { get; set; }
+        [MaxLength(1024)]
+        public string Note { get; set; }
+        public int StateID { get; set; } 
+        public int StatusID { get; set; }
+        public bool Gauged { get; set; } // this value is showing whether the particular record has been gauged so it shows up in reporting
+        public int UserID { get; set; } // user that made the change
+        public DateTime UpdateDate { get; set; }
+    }
+    /// <summary>
     /// Production History table keeps track of changes that happen to a particular production record. 
     /// Trigger is doing the job of table updates
     /// </summary>
@@ -345,6 +370,32 @@ namespace WebApp.Models
         public DateTime UpdateDate { get; set; }
         [Timestamp]
         public byte[] RowVersion { get; set; }
+    }
+
+    /// <summary>
+    /// ProductionHistory tabe is a flat table that contains keeps track of changes to the production record
+    /// </summary>
+    public class ProductionHistory
+    {
+        [Key]
+        public int ProductionHistoryID { get; set; }
+        public int ProductionID { get; set; }
+        public DateTime UpdateDate { get; set; }
+        public string ProductionName { get; set; } // production batch name
+        [Column(TypeName = "datetime2")]
+        public DateTime ProductionStartTime { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime ProductionEndTime { get; set; }
+        public float Volume { get; set; }
+        public float Weight { get; set; }
+        public float Alcohol { get; set; }
+        public float Proof { get; set; }   
+        public int StatusID { get; set; }
+        public int StateID { get; set; }
+        [MaxLength(1024)]
+        public string Note { get; set; }
+        public int UserID { get; set; }
+        public bool Gauged { get; set; } // this value is showing whether the particular record has been gauged so it shows up in reporting
     }
 
     /// <summary>
@@ -751,8 +802,10 @@ namespace WebApp.Models
         public DbSet<Purchase> Purchase { get; set; }
         public DbSet<UnitOfMeasurement> UnitOfMeasurement { get; set; }
         public DbSet<ProductionToPurchase> ProductionToPurchase { get; set; }
-        public DbSet<PurchaseHist> PurchaseHist { get; set; }
-        public DbSet<ProductionHist> ProductionHist { get; set; }
+        public DbSet<PurchaseHist> PurchaseHist { get; set; } // todo: this needs to be removed after new purchase history is implemented and is working
+        public DbSet<PurchaseHistory> PurchaseHistory { get; set; }
+        public DbSet<ProductionHist> ProductionHist { get; set; } // todo: this needs to be removed after new production history is implemented and is working
+        public DbSet<ProductionHistory> ProductionHistory { get; set; }
         public DbSet<F2H> F2H { get; set; }
         public DbSet<State> State { get; set; }
         public DbSet<Status> Status { get; set; }
