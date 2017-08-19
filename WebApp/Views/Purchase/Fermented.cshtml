@@ -277,6 +277,8 @@
                     source: reportingSpiritKindAdapter,
                     displayMember: 'ProductTypeName',
                     valueMember: 'SpiritTypeReportingID',
+                    disabled: true,
+                    selectedIndex: 10,
                     theme: 'bootstrap',
                     height: '26px',
                     width: '175px',
@@ -377,12 +379,13 @@
                     }
                 }
 
-                // if no spiritType is selected, set the id to 0, to avoid null object exception
+                //if no spiritType is selected, set the id to 0, to avoid null object exception
                 var spiritType = $("#ReportingSpiritTypeDropDown").jqxDropDownList("getSelectedItem");
                 var spiritTypeReportingID = null;
                 if (spiritType) {
                     spiritTypeReportingID = spiritType.value;
                 }
+
                 var utcDate = genericWorkflowHelper.convertUTC($("#PurchaseDateInput").jqxDateTimeInput('val'), true);
 
                 var purchaseObject = {
