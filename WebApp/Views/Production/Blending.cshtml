@@ -190,7 +190,7 @@
                     usedMat.DistillableOrigin = distilsAdapter.records[curRawMatIndex].DistillableOrigin;
 
                     if ( ( usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight" ) || usedMat.BurningDownMethod == "volume" ) {
-                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.NewVal, distilsAdapter.records[curRawMatIndex].AlcoholContent );
+                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.OldVal, distilsAdapter.records[curRawMatIndex].AlcoholContent );
                     }
 
                     usedMatsList.push(usedMat);
@@ -823,6 +823,7 @@
                     }
                 } );
             }
+
             function _bindRawMaterialTypes() {
                 var url = '/Production/GetAdditivesList';
                 var source = {
@@ -1071,17 +1072,15 @@
                     }
                 }
 
-                // if no spiritType is selected, set the id to 0, to avoid null object exception
-                var spiritType = $("#ReportingSpiritTypeDropDown").jqxDropDownList("getSelectedItem");
-                var spiritTypeReportingID = null;
-                if (spiritType) {
+                var spiritTypeReportingID = 0;
+                var spiritType = $('#ReportingSpiritTypeDropDown').jqxDropDownList('getSelectedItem');
+                if (spiritType !== null && spiritType !== undefined && spiritType !== '') {
                     spiritTypeReportingID = spiritType.value;
                 }
 
-                // if no materialKind is selected, set the id to 0, to avoid null object exception
-                var materialKind = $("#ReportingMaterialKindDropDown").jqxDropDownList("getSelectedItem");
-                var materialKindReportingID = null;
-                if (materialKind) {
+                var materialKindReportingID = 0;
+                var materialKind = $('#ReportingMaterialKindDropDown').jqxDropDownList('getSelectedItem');
+                if (materialKind !== null & materialKind !== undefined && materialKind !== '') {
                     materialKindReportingID = materialKind.value;
                 }
 
@@ -1103,6 +1102,7 @@
                     SpiritId: $("#SpiritType").jqxDropDownList('getSelectedItem').originalItem.SpiritId,
                     SpiritName: $("#SpiritType").jqxDropDownList('getSelectedItem').label,
                     Note: $('#BlendingNotes').jqxTextArea('val'),
+                    Gauged: true,
                     SpiritTypeReportingID: spiritTypeReportingID,
                     MaterialKindReportingID: materialKindReportingID,
                     BlendingAdditives: additivesArray,

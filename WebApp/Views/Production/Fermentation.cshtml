@@ -42,15 +42,15 @@
             function _addEventListeners() {
 
                 // Check "Final Distillation Gauge" checkbox
-                $("#FinalGaugeCheckBox").on("checked", function (event) {
-                    $(".reporting-input-group").show();
+                $('#FinalGaugeCheckBox').on('checked', function (event) {
+                    $('.reporting-input-group').show();
                 });
 
                 // Uncheck "Final Distillation" Gauge checkbox
-                $("#FinalGaugeCheckBox").on("unchecked", function (event) {
-                    $(".reporting-input-group").hide();
-                    $("#ReportingSpiritTypeDropDown").jqxDropDownList("clearSelection");
-                    $("#ReportingMaterialKindDropDown").jqxDropDownList("clearSelection");
+                $('#FinalGaugeCheckBox').on('unchecked', function (event) {
+                    $('.reporting-input-group').hide();
+                    $('#ReportingSpiritTypeDropDown').jqxDropDownList('clearSelection');
+                    $('#ReportingMaterialKindDropDown').jqxDropDownList('clearSelection');
                 });
 
                 // Populates MaterialKindForReporting drop down when Spirit Type is chosen.
@@ -72,11 +72,11 @@
                 // Material Burndown state machine
                 // on burndown open event
                 $( '#MatBurnDwnDialog' ).on( 'open', function ( e ) {
-                    if ( rawMaterialTypeAdapter.records[curRawMatIndex].BurningDownMethod === "volume" ) {
+                    if ( rawMaterialTypeAdapter.records[curRawMatIndex].BurningDownMethod === 'volume' ) {
                         $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { checked: true, disabled: true } );
                         $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { disabled: true } );
                     }
-                    else if ( rawMaterialTypeAdapter.records[curRawMatIndex].BurningDownMethod === "weight" ) {
+                    else if ( rawMaterialTypeAdapter.records[curRawMatIndex].BurningDownMethod === 'weight' ) {
                         $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { checked: true, disabled: true } );
                         $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { disabled: true } );
                     }
@@ -96,15 +96,16 @@
                         }
                     }
                     $('#MatBurnDwnDialogRadioBtnAll').jqxRadioButton({ checked: true });
-                    $("#MatBurnDwnDialogQuantityInput").val('');
+                    $('#MatBurnDwnDialogQuantityInput').val('');
                 });
+
                 // burndown type
                 $('#MatBurnDwnDialogRadioBtnGal').on('change', function (event) {
                     var checked = event.args.checked;
                     if (checked) {
-                        $("#MatBurnDwnDialogQuantityInputOriginal").val(rawMaterialTypeAdapter.records[curRawMatIndex].QtyGal);
+                        $('#MatBurnDwnDialogQuantityInputOriginal').val(rawMaterialTypeAdapter.records[curRawMatIndex].QtyGal);
                         usedMat.OldVal = rawMaterialTypeAdapter.records[curRawMatIndex].QtyGal;
-                        usedMat.BurningDownMethod = "volume";
+                        usedMat.BurningDownMethod = 'volume';
                     }
                 });
 
@@ -112,9 +113,9 @@
                     var checked = event.args.checked;
                     if (checked) {
                         //set the the burndown quantity type flag so it can be sent off to the respective record in purhase or production record and be written
-                        $("#MatBurnDwnDialogQuantityInputOriginal").val(rawMaterialTypeAdapter.records[curRawMatIndex].VBW);
+                        $('#MatBurnDwnDialogQuantityInputOriginal').val(rawMaterialTypeAdapter.records[curRawMatIndex].VBW);
                         usedMat.OldVal = rawMaterialTypeAdapter.records[curRawMatIndex].VBW;
-                        usedMat.BurningDownMethod = "weight";
+                        usedMat.BurningDownMethod = 'weight';
                     }
                 });
 
@@ -123,33 +124,33 @@
                     var checked = event.args.checked;
                     if (checked) {
                         // make input field visible
-                        inpRow1.style.visibility = "visible";
+                        inpRow1.style.visibility = 'visible';
                     }
                     else if (!checked) {
                         // make input field invisible
-                        inpRow1.style.visibility = "hidden";
+                        inpRow1.style.visibility = 'hidden';
                     }
                 });
 
                 // listen to blur event for burndown material input window so we can update original quantity in time before we close the dialog
                 // Otherwise, if user will click on add button right after updating burndown input field, without clicking anywhere else in the dialog
                 // we don't get an opportunity to update original amount field.
-                MatBurnDwnDialogQuantityInput.addEventListener("blur", () => {
+                MatBurnDwnDialogQuantityInput.addEventListener('blur', () => {
                     usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
                 });
 
                 // listen to add button click in burndown dialog
-                $("#MatBurnDwnDialogAdd").click(function () {
+                $('#MatBurnDwnDialogAdd').click(function () {
                     if ($('#MatBurnDwnDialogRadioBtnPartial').jqxRadioButton('checked')) {
                         if ($('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton('checked')) {
                             // burning down by volume case
-                            usedMat.NewVal = $("#MatBurnDwnDialogQuantityInput").val();
-                            usedMat.BurningDownMethod = "volume";
+                            usedMat.NewVal = $('#MatBurnDwnDialogQuantityInput').val();
+                            usedMat.BurningDownMethod = 'volume';
                         }
-                        // burning down by weight case
+                            // burning down by weight case
                         else if ($('#MatBurnDwnDialogRadioBtnVBW').jqxRadioButton('checked')) {
-                            usedMat.NewVal = $("#MatBurnDwnDialogQuantityInput").val();
-                            usedMat.BurningDownMethod = "weight";
+                            usedMat.NewVal = $('#MatBurnDwnDialogQuantityInput').val();
+                            usedMat.BurningDownMethod = 'weight';
                         }
                         usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
                     }
@@ -157,33 +158,33 @@
                         if ( $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( 'checked' ) ) {
                             // burning down by volume case
                             usedMat.NewVal = usedMat.OldVal;
-                            usedMat.BurningDownMethod = "volume";
+                            usedMat.BurningDownMethod = 'volume';
                         }
-                        // burning down by weight case
+                            // burning down by weight case
                         else if ( $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( 'checked' ) ) {
                             usedMat.NewVal = usedMat.OldVal;
-                            usedMat.BurningDownMethod = "weight";
+                            usedMat.BurningDownMethod = 'weight';
                         }
                         usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
                     }
 
                     usedMatsList.push(usedMat);
                     usedMat = {};
-                    $("#MatBurnDwnDialog").jqxWindow('close');
+                    $('#MatBurnDwnDialog').jqxWindow('close');
                 });
 
                 // listen to cancel button click in burndown dialog
-                $("#MatBurnDwnDialogCancel").click(function () {
+                $('#MatBurnDwnDialogCancel').click(function () {
                     // close dialog
                     usedMat = {};
-                    $("#MatBurnDwnDialogQuantityInput").val('');
-                    $("#MatBurnDwnDialogQuantityInputOriginal").val('');
-                    $("#MatBurnDwnDialog").jqxWindow('close');
-                    $("#RawMaterialInput").jqxListBox('uncheckIndex', curRawMatIndex);
+                    $('#MatBurnDwnDialogQuantityInput').val('');
+                    $('#MatBurnDwnDialogQuantityInputOriginal').val('');
+                    $('#MatBurnDwnDialog').jqxWindow('close');
+                    $('#RawMaterialInput').jqxListBox('uncheckIndex', curRawMatIndex);
                 });
 
                 $('#MatBurnDwnDialogQuantityInput').on('change', function (e) {
-                    var newInpVal = $( "#MatBurnDwnDialogQuantityInput" ).val();
+                    var newInpVal = $( '#MatBurnDwnDialogQuantityInput' ).val();
 
                     if ( usedMat.BurningDownMethod === 'weight' ) {
                         oldInpVal = rawMaterialTypeAdapter.records[curRawMatIndex].VBW;
@@ -192,7 +193,7 @@
                         oldInpVal = rawMaterialTypeAdapter.records[curRawMatIndex].QtyGal;
                     }
 
-                    $("#MatBurnDwnDialogQuantityInputOriginal").val(oldInpVal - newInpVal);
+                    $('#MatBurnDwnDialogQuantityInputOriginal').val(oldInpVal - newInpVal);
                 });
 
                 $('#RawMaterialInput').on('select', function (event) {
@@ -200,12 +201,12 @@
                     if (args) {
                         var index = args.index;
                         usedMat.ID = rawMaterialTypeAdapter.records[index].PurchaseId;
-                        usedMat.Origin = "pur";
+                        usedMat.Origin = 'pur';
                         curRawMatIndex = index;
                         var vbwValue = rawMaterialTypeAdapter.records[index].VBW;
                         if (args.item.checked) {
                             // make burndown window visible and open it-
-                            $("#MatBurnDwnDialog").css('visibility', 'visible');
+                            $('#MatBurnDwnDialog').css('visibility', 'visible');
                             $('#MatBurnDwnDialog').jqxWindow('open');
                             $('#RawMaterialInput').jqxListBox({ disabled: true });
                         } else {
@@ -219,21 +220,21 @@
                     $('#RawMaterialInput').jqxListBox({ disabled: false });
                 })
 
-                $("#ProdCreateButton").click(function () {
+                $('#ProdCreateButton').click(function () {
                     $('#validationForm').jqxValidator('validate');
                 });
 
-                $("#ClearInputElementsButton").click(function () {
+                $('#ClearInputElementsButton').click(function () {
                     genericWorkflowHelper.emptyControls();
                 });
 
                 // adding event listeners for calculation of Proof Gallons when adding new record
                 $('#ProdQuantityInput').on('change', function (event) {
-                    if (!($('#ProdAlcoholContentInput').val() == undefined || $('#ProdAlcoholContentInput').val() == "")) {
-                        var qty = $("#ProdQuantityInput").val();
-                        var alc = $("#ProdAlcoholContentInput").val();
+                    if (!($('#ProdAlcoholContentInput').val() === undefined || $('#ProdAlcoholContentInput').val() === '' )) {
+                        var qty = $('#ProdQuantityInput').val();
+                        var alc = $('#ProdAlcoholContentInput').val();
                         var prf = distillCompInstance.calculateProof(qty, alc);
-                        $("#ProdProofGallonsInput").val(prf);
+                        $('#ProdProofGallonsInput').val(prf);
                     }
                     else {
                         $('#ProdProofGallonsInput').val(0);
@@ -241,11 +242,11 @@
                 });
 
                 $('#ProdAlcoholContentInput').on('change', function (event) {
-                    if (!($('#ProdQuantityInput').val() == undefined || $('#ProdQuantityInput').val() == "")) {
-                        var qty = $("#ProdQuantityInput").val();
-                        var alc = $("#ProdAlcoholContentInput").val();
+                    if (!($('#ProdQuantityInput').val() === undefined || $('#ProdQuantityInput').val() === '')) {
+                        var qty = $('#ProdQuantityInput').val();
+                        var alc = $('#ProdAlcoholContentInput').val();
                         var prf = distillCompInstance.calculateProof(qty, alc);
-                        $("#ProdProofGallonsInput").val(prf);
+                        $('#ProdProofGallonsInput').val(prf);
                     }
                     else {
                         $('#ProdProofGallonsInput').val(0);
@@ -253,37 +254,37 @@
                 });
 
                 // Select jqxDataTable row
-                $("#dataTable").on('rowDoubleClick', function (event) {
+                $('#dataTable').on('rowDoubleClick', function (event) {
                     var args = event.args;
                     var index = args.index;
                     var row = args.row;
                     prodId = row.ProductionId;
                     // update the widgets inside jqxWindow.
-                    $("#EditDialog").jqxWindow('setTitle', "Edit Fermentation Record: #" + prodId);
-                    $("#EditDialog").jqxWindow('open');
-                    $("#EditDialog").attr('data-row', index);
-                    $("#dataTable").jqxDataTable({ disabled: true });
-                    $("#EditDialogPurBatchNameInput").val(row.BatchName);
-                    $("#EditDialogProductionStartDateInput").jqxDateTimeInput({ value: new Date(row.ProductionStart) });
-                    $("#EditDialogProductionEndDateInput").jqxDateTimeInput({ value: new Date(row.ProductionEnd) });
-                    $("#EditDialogQuantityInput").val(row.Quantity);
-                    $("#EditDialogVolumeByWeightInput").val(row.VolumeByWeight);
-                    $("#EditDialogAlcConInput").val(row.AlcoholContent);
-                    $("#EditDialogProofInput").val(row.ProofGallon);
-                    $("#EditDialogNotesInput").val(row.Note);
+                    $('#EditDialog').jqxWindow('setTitle', 'Edit Fermentation Record: #' + prodId);
+                    $('#EditDialog').jqxWindow('open');
+                    $('#EditDialog').attr('data-row', index);
+                    $('#dataTable').jqxDataTable({ disabled: true });
+                    $('#EditDialogPurBatchNameInput').val(row.BatchName);
+                    $('#EditDialogProductionStartDateInput').jqxDateTimeInput({ value: new Date(row.ProductionStart) });
+                    $('#EditDialogProductionEndDateInput').jqxDateTimeInput({ value: new Date(row.ProductionEnd) });
+                    $('#EditDialogQuantityInput').val(row.Quantity);
+                    $('#EditDialogVolumeByWeightInput').val(row.VolumeByWeight);
+                    $('#EditDialogAlcConInput').val(row.AlcoholContent);
+                    $('#EditDialogProofInput').val(row.ProofGallon);
+                    $('#EditDialogNotesInput').val(row.Note);
 
-                    $("#EditDialogStorageNameInput").jqxListBox('clearSelection');
+                    $('#EditDialogStorageNameInput').jqxListBox('clearSelection');
 
                     for (var k = 0; k < row.Storage.length; k++) {
-                        $("#EditDialogStorageNameInput").jqxListBox('selectItem', row.Storage[k].StorageName);
+                        $('#EditDialogStorageNameInput').jqxListBox('selectItem', row.Storage[k].StorageName);
                     }
 
                     $('#EditDialogQuantityInput').on('change', function (event) {
-                        if (!($('#EditDialogAlcConInput').val() == undefined || $('#EditDialogAlcConInput').val() == "")) {
-                            var qty = $("#EditDialogQuantityInput").val();
-                            var alc = $("#EditDialogAlcConInput").val();
+                        if (!($('#EditDialogAlcConInput').val() === undefined || $('#EditDialogAlcConInput').val() === '')) {
+                            var qty = $('#EditDialogQuantityInput').val();
+                            var alc = $('#EditDialogAlcConInput').val();
                             var prf = distillCompInstance.calculateProof(qty, alc);
-                            $("#EditDialogProofInput").val(prf);
+                            $('#EditDialogProofInput').val(prf);
                         }
                         else {
                             $('#EditDialogProofInput').val(0);
@@ -291,11 +292,11 @@
                     });
 
                     $('#EditDialogAlcConInput').on('change', function (event) {
-                        if (!($('#EditDialogQuantityInput').val() == undefined || $('#EditDialogQuantityInput').val() == "")) {
-                            var qty = $("#EditDialogQuantityInput").val();
-                            var alc = $("#EditDialogAlcConInput").val();
+                        if (!($('#EditDialogQuantityInput').val() === undefined || $('#EditDialogQuantityInput').val() === '')) {
+                            var qty = $('#EditDialogQuantityInput').val();
+                            var alc = $('#EditDialogAlcConInput').val();
                             var prf = distillCompInstance.calculateProof(qty, alc);
-                            $("#EditDialogProofInput").val(prf);
+                            $('#EditDialogProofInput').val(prf);
                         }
                         else {
                             $('#EditDialogProofInput').val(0);
@@ -304,13 +305,13 @@
                 });
 
                 // Save record within Edit Dialog
-                $("#EditDialogSaveRecordButton").mousedown(function () {
+                $('#EditDialogSaveRecordButton').mousedown(function () {
                     // close jqxWindow.
-                    $("#EditDialog").jqxWindow('close');
+                    $('#EditDialog').jqxWindow('close');
                     // update edited row.
-                    var editRow = parseInt($("#EditDialog").attr('data-row'));
+                    var editRow = parseInt($('#EditDialog').attr('data-row'));
 
-                    var items = $("#EditDialogStorageNameInput").jqxListBox('getSelectedItems');
+                    var items = $('#EditDialogStorageNameInput').jqxListBox('getSelectedItems');
 
                     if (items.length != 0) {
                         for (var i = 0; i < items.length; i++) {
@@ -324,76 +325,77 @@
                         storageList = [];
                     }
 
-                    var prodStartUtc = genericWorkflowHelper.convertUTC($("#EditDialogProductionStartDateInput").jqxDateTimeInput('val'), true);
-                    var prodEndUtc = genericWorkflowHelper.convertUTC($("#EditDialogProductionEndDateInput").jqxDateTimeInput('val'), true);
+                    var prodStartUtc = genericWorkflowHelper.convertUTC($('#EditDialogProductionStartDateInput').jqxDateTimeInput('val'), true);
+                    var prodEndUtc = genericWorkflowHelper.convertUTC($('#EditDialogProductionEndDateInput').jqxDateTimeInput('val'), true);
 
                     var rowData = {
-                        ProductionType: "Fermentation",
+                        ProductionType: 'Fermentation',
                         ProductionId: prodId,
                         BatchName: $('#EditDialogPurBatchNameInput').jqxInput('val'),
                         ProductionDate: prodEndUtc,
                         ProductionStart: prodStartUtc,
                         ProductionEnd: prodEndUtc,
-                        Quantity: $("#EditDialogQuantityInput").jqxNumberInput('val'),
-                        AlcoholContent: $("#EditDialogAlcConInput").jqxNumberInput('val'),
-                        VolumeByWeight: $("#EditDialogVolumeByWeightInput").jqxNumberInput('val'),
-                        ProofGallon: $("#EditDialogProofInput").jqxNumberInput('val'),
+                        Quantity: $('#EditDialogQuantityInput').jqxNumberInput('val'),
+                        AlcoholContent: $('#EditDialogAlcConInput').jqxNumberInput('val'),
+                        VolumeByWeight: $('#EditDialogVolumeByWeightInput').jqxNumberInput('val'),
+                        ProofGallon: $('#EditDialogProofInput').jqxNumberInput('val'),
                         Storage: storageList,
                         Note: $('#EditDialogNotesInput').jqxTextArea('val')
                     };
-                    $("#dataTable").jqxDataTable('updateRow', editRow, rowData);
+
+                    $('#dataTable').jqxDataTable('updateRow', editRow, rowData);
                     storageList = [];
                 });
 
                 // Delete record within Edit Dialog
-                $("#EditDialogDeleteRecordButton").click(function () {
+                $('#EditDialogDeleteRecordButton').click(function () {
                     // close jqxWindow.
-                    $("#EditDialog").jqxWindow('close');
+                    $('#EditDialog').jqxWindow('close');
                     // delete row from table.
-                    var deleteRow = parseInt($("#EditDialog").attr('data-row'));
-                    $("#dataTable").jqxDataTable('deleteRow', deleteRow);
+                    var deleteRow = parseInt($('#EditDialog').attr('data-row'));
+                    $('#dataTable').jqxDataTable('deleteRow', deleteRow);
                 });
 
-                $("#EditDialogClearInputElementsButton").mousedown(function () {
+                $('#EditDialogClearInputElementsButton').mousedown(function () {
                     // close jqxWindow.
-                    $("#EditDialog").jqxWindow('close');
+                    $('#EditDialog').jqxWindow('close');
                 });
 
-                $("#EditDialog").on('close', function () {
+                $('#EditDialog').on('close', function () {
                     // enable jqxDataTable.
-                    $("#dataTable").jqxDataTable({ disabled: false });
+                    $('#dataTable').jqxDataTable({ disabled: false });
                 });
             }
 
             // _createElements function creates a jqxwidgets elements that do not require any sort of data binding later
             function _createElements() {
                 //todo: we need to add localization files
-                $("#ProdStartDate").jqxDateTimeInput({ textAlign: 'center', height: '25px', width: '180px', formatString: "MM/dd/yyyy HH:mm" });
-                $("#ProdEndDate").jqxDateTimeInput({ textAlign: 'center', height: '25px', width: '180px', formatString: "MM/dd/yyyy HH:mm" });
-                $("#ProdProofGallonsInput").jqxNumberInput({ height: '25px', width: '100px', disabled: true, inputMode: 'simple', textAlign: 'center', min: 0 });
-                $( "#ProdAlcoholContentInput" ).jqxNumberInput( { height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 } );
-                $( "#ProdQuantityInput" ).jqxNumberInput( { height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 } );
-                $( "#ProdVolumeByWeightInput" ).jqxNumberInput( { height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 } );
+                $('#ProdStartDate').jqxDateTimeInput({ textAlign: 'center', height: '25px', width: '180px', formatString: 'MM/dd/yyyy HH:mm' });
+                $('#ProdEndDate').jqxDateTimeInput({ textAlign: 'center', height: '25px', width: '180px', formatString: 'MM/dd/yyyy HH:mm' });
+                $('#ProdProofGallonsInput').jqxNumberInput({ height: '25px', width: '100px', disabled: true, inputMode: 'simple', textAlign: 'center', min: 0 });
+                $('#ProdAlcoholContentInput').jqxNumberInput( { height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 } );
+                $('#ProdQuantityInput').jqxNumberInput( { height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 } );
+                $('#ProdVolumeByWeightInput').jqxNumberInput( { height: '25px', width: '100px', inputMode: 'simple', textAlign: 'center', min: 0 } );
                 $('#ProdNotes').jqxTextArea({ height: '100%', width: '100%', minLength: 1 });
-                $("#BatchName").jqxInput({ height: '25px', width: '150px' });
-                $("#ProdCreateButton").jqxButton({ width: '220px', height: '40px' });
-                $("#ClearInputElementsButton").jqxButton({ width: '220px', height: '40px' });
+                $('#BatchName').jqxInput({ height: '25px', width: '150px' });
+                $('#ProdCreateButton').jqxButton({ width: '220px', height: '40px' });
+                $('#ClearInputElementsButton').jqxButton({ width: '220px', height: '40px' });
 
-                $("#RawMaterialInput").jqxListBox({
+                $('#RawMaterialInput').jqxListBox({
                     theme: 'bootstrap',
                     source: rawMaterialTypeAdapter,
-                    displayMember: "PurchaseBatchName",
-                    valueMember: "RawMaterialId",
+                    displayMember: 'PurchaseBatchName',
+                    valueMember: 'RawMaterialId',
                     checkboxes: true,
                     width: '100%'
                 });
 
-                $("#ProdStorage").jqxListBox({
-                    source: storageAdapter, displayMember: "StorageName", multiple: true,
+                $('#ProdStorage').jqxListBox({
+                    source: storageAdapter, displayMember: 'StorageName', multiple: true,
                     theme: 'bootstrap'
                 });
-                $("#FinalGaugeCheckBox").jqxCheckBox({
-                    theme: "bootstrap",
+                $('#FinalGaugeCheckBox').jqxCheckBox({
+                    theme: 'bootstrap',
                     width: '26px',
                     height: '26px',
                     boxSize: '18px'
@@ -407,9 +409,9 @@
                     width: '175px',
                     autoDropDownHeight: true,
                     autoOpen: false,
-                    placeHolder: ""
+                    placeHolder: ''
                 });
-                $("#ReportingMaterialKindDropDown").jqxDropDownList({
+                $('#ReportingMaterialKindDropDown').jqxDropDownList({
                     //source: assigned 'on select' function for Reporting Spirit dropdown 
                     displayMember: 'MaterialKindName',
                     valueMember: 'MaterialKindID',
@@ -418,7 +420,7 @@
                     width: '175px',
                     autoDropDownHeight: true,
                     autoOpen: false,
-                    placeHolder: ""
+                    placeHolder: ''
                 });
                 $('#MatBurnDwnDialog').jqxWindow({
                     width: '30%',
@@ -430,10 +432,10 @@
                     isModal: false,
                     showCloseButton: false,
                     initContent: function () {
-                        $('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton({ checked: true, groupName: "Quanity" });
-                        $('#MatBurnDwnDialogRadioBtnVBW').jqxRadioButton({ groupName: "Quanity" });
-                        $('#MatBurnDwnDialogRadioBtnAll').jqxRadioButton({ checked: true, groupName: "Amount" })
-                        $('#MatBurnDwnDialogRadioBtnPartial').jqxRadioButton({ groupName: "Amount" })
+                        $('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton({ checked: true, groupName: 'Quanity' });
+                        $('#MatBurnDwnDialogRadioBtnVBW').jqxRadioButton({ groupName: 'Quanity' });
+                        $('#MatBurnDwnDialogRadioBtnAll').jqxRadioButton({ checked: true, groupName: 'Amount' })
+                        $('#MatBurnDwnDialogRadioBtnPartial').jqxRadioButton({ groupName: 'Amount' })
                         $('#MatBurnDwnDialogQuantityInput').jqxNumberInput( { height: '25px', width: '80px', inputMode: 'simple', textAlign: 'center', min: 0 } );
                         $('#MatBurnDwnDialogQuantityInputOriginal').jqxNumberInput( { height: '25px', width: '80px', inputMode: 'simple', textAlign: 'center', min: 0 } );
                         $('#MatBurnDwnDialogCancel').jqxButton({ height: '25px', width: '80px' });
@@ -452,21 +454,21 @@
                     },
                     rules: [
                         {
-                            input: "#RawMaterialInput", message: "Please Select A Batch", action: 'click', rule: function (input, commit) {
-                                var index = $("#RawMaterialInput").jqxListBox('getSelectedIndex');
+                            input: '#RawMaterialInput', message: 'Please Select A Batch', action: 'click', rule: function (input, commit) {
+                                var index = $('#RawMaterialInput').jqxListBox('getSelectedIndex');
                                 return index != -1;
                             }
                         },
                         { input: '#BatchName', message: 'Batch Name Required', action: 'blur', rule: 'required' },
                         {
-                            input: "#ProdStorage", message: "Please Select Storage", action: 'click', rule: function (input, commit) {
-                                var index = $("#ProdStorage").jqxListBox('getSelectedIndex');
+                            input: '#ProdStorage', message: 'Please Select Storage', action: 'click', rule: function (input, commit) {
+                                var index = $('#ProdStorage').jqxListBox('getSelectedIndex');
                                 return index != -1;
                             }
                         },
                         {
                             input: '#ProdQuantityInput', message: 'Please Enter Quantity', action: 'blur', rule: function () {
-                                var quantityValue = $("#ProdQuantityInput").val();
+                                var quantityValue = $('#ProdQuantityInput').val();
                                 var volumeValue = $('#ProdVolumeByWeightInput').val();
                                 if (volumeValue != 0) {
                                     return true;
@@ -480,7 +482,7 @@
                         {
                             input: '#ProdVolumeByWeightInput', message: 'Please Enter Volume', action: 'blur', rule: function () {
                                 var volumeValue = $('#ProdVolumeByWeightInput').val();
-                                var quantityValue = $("#ProdQuantityInput").val();
+                                var quantityValue = $('#ProdQuantityInput').val();
                                 if (quantityValue != 0) {
                                     return true;
                                 } else if (volumeValue > 0) {
@@ -497,20 +499,20 @@
                             }
                         },
                         {
-                            input: "#ReportingSpiritTypeDropDown", message: "Please Select Spirit Type", action: 'blur', rule: function (input, commit) {
-                                var index = $("#ReportingSpiritTypeDropDown").jqxDropDownList('getSelectedIndex');
-                                var finalGauge = $("#FinalGaugeCheckBox").val();
-                                if (finalGauge == false || index != -1) {
+                            input: '#ReportingSpiritTypeDropDown', message: 'Please Select Spirit Type', action: 'blur', rule: function (input, commit) {
+                                var index = $('#ReportingSpiritTypeDropDown').jqxDropDownList('getSelectedIndex');
+                                var finalGauge = $('#FinalGaugeCheckBox').val();
+                                if (finalGauge === false || index != -1) {
                                     return true;
                                 }
                                 return false;
                             }
                         },
                         {
-                            input: "#ReportingMaterialKindDropDown", message: "Please Select Material Kind", action: 'blur', rule: function (input, commit) {
-                                var index = $("#ReportingMaterialKindDropDown").jqxDropDownList('getSelectedIndex');
-                                var finalGauge = $("#FinalGaugeCheckBox").val();
-                                if (finalGauge == false || index != -1) {
+                            input: '#ReportingMaterialKindDropDown', message: 'Please Select Material Kind', action: 'blur', rule: function (input, commit) {
+                                var index = $('#ReportingMaterialKindDropDown').jqxDropDownList('getSelectedIndex');
+                                var finalGauge = $('#FinalGaugeCheckBox').val();
+                                if (finalGauge === false || index != -1) {
                                     return true;
                                 }
                                 return false;
@@ -523,7 +525,7 @@
             function _bindRawMaterialTypes() {
                 var url = '/Production/GetRawMaterialList';
                 var source = {
-                    datatype: "json",
+                    datatype: 'json',
                     dataFields: [
                         { name: 'PurchaseId' },
                         { name: 'RawMaterialId' },
@@ -547,7 +549,7 @@
             function _bindStorageData() {
                 var url = '/Production/GetStorageData';
                 var source = {
-                    datatype: "json",
+                    datatype: 'json',
                     dataFields: [
                         { name: 'Storage' },
                         { name: 'StorageId' },
@@ -567,7 +569,7 @@
             function _bindReportingSpiritKind() {
                 var url = '/Production/GetSpiritToKindListData';
                 var source = {
-                    datatype: "json",
+                    datatype: 'json',
                     dataFields: [
                         { name: 'SpiritTypeReportingID', type: 'number' },
                         { name: 'ProductTypeName', type: 'string' },
@@ -589,7 +591,7 @@
 
             function _createRecord() {
 
-                var items = $("#ProdStorage").jqxListBox('getSelectedItems');
+                var items = $('#ProdStorage').jqxListBox('getSelectedItems');
 
                 if (items) {
                     for (var i = 0; i < items.length; i++) {
@@ -600,38 +602,54 @@
                     }
                 }
 
-                var prodStartUtc = genericWorkflowHelper.convertUTC( $( "#ProdStartDate" ).jqxDateTimeInput( 'val' ), true );
-                var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProdEndDate").jqxDateTimeInput('val'), true);
+                var spiritTypeReportingID = 0;
+                var spiritType = $('#ReportingSpiritTypeDropDown').jqxDropDownList('getSelectedItem');
+                if (spiritType !== null && spiritType !== undefined && spiritType !== '')
+                {
+                    spiritTypeReportingID = spiritType.value;
+                }
+
+                var materialKindReportingID = 0;
+                var materialKind = $('#ReportingMaterialKindDropDown').jqxDropDownList('getSelectedItem');
+                if (materialKind !== null & materialKind !== undefined && materialKind !== '')
+                {
+                   materialKindReportingID = materialKind.value;
+                }
+
+                var prodStartUtc = genericWorkflowHelper.convertUTC( $( '#ProdStartDate' ).jqxDateTimeInput( 'val' ), true );
+                var prodEndUtc = genericWorkflowHelper.convertUTC($('#ProdEndDate').jqxDateTimeInput('val'), true);
 
                 var productionObject = {
-                	ProductionType: "Fermentation",
-                    BatchName: 'PROD-' + $("#BatchName").jqxInput('val'),
+                	ProductionType: 'Fermentation',
+                    BatchName: 'PROD-' + $('#BatchName').jqxInput('val'),
                     ProductionDate: prodEndUtc,
                     ProductionStart: prodStartUtc,
                     ProductionEnd: prodEndUtc,
-                    RecordId: rawMaterialIdsSelected, // this, I think needs to be removed too. Remove but make sure Controller and DataLayer are also cleaned up, carefully.
-                    Quantity: $("#ProdQuantityInput").jqxNumberInput('val'),
-                    AlcoholContent: $("#ProdAlcoholContentInput").jqxNumberInput('val'),
-                    VolumeByWeight: $("#ProdVolumeByWeightInput").jqxNumberInput('val'),
-                    ProofGallon: $("#ProdProofGallonsInput").jqxNumberInput('val'),
+                    Quantity: $('#ProdQuantityInput').jqxNumberInput('val'),
+                    AlcoholContent: $('#ProdAlcoholContentInput').jqxNumberInput('val'),
+                    VolumeByWeight: $('#ProdVolumeByWeightInput').jqxNumberInput('val'),
+                    ProofGallon: $('#ProdProofGallonsInput').jqxNumberInput('val'),
                     Storage: storageList,
+                    Gauged: $('#FinalGaugeCheckBox').val(),
+                    SpiritTypeReportingID: spiritTypeReportingID,
+                    MaterialKindReportingID: materialKindReportingID,
                     Note: $('#ProdNotes').jqxTextArea('val'),
                     UsedMats: usedMatsList
                 };
 
                 $.ajax({
-                    type: "POST",
+                    type: 'POST',
                     url: '/Production/CreateProductionRecord',
                     data: JSON.stringify(productionObject),
-                    dataType: "json",
-                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
                     error: function (response) {
                         alert(response.responseText)
                     },
                     success: function (result) {
                         //on success will need to refresh the table and also empty the form
                     	alert( result );
-                    	$("#RawMaterialInput").jqxListBox("refresh");
+                    	$('#RawMaterialInput').jqxListBox('refresh');
                     	//_bindRawMaterialTypes();
                         _RecordsViewFunction();
                         usedMatsList = [];
@@ -644,7 +662,7 @@
                 // prepare the data
                 var source =
                 {
-                    dataType: "json",
+                    dataType: 'json',
                     dataFields: [
                         { name: 'Storage' },
                         { name: 'BatchName', type: 'string' },
@@ -662,7 +680,7 @@
                     sortdirection: 'desc',
                     id: 'ProductionId',
                     url: '/Production/GetProductionData',
-                    data: { prodType: "Fermentation" },
+                    data: { prodType: 'Fermentation' },
                     addRow: function (rowID, rowData, position, commit) {
                         // synchronize with the server - send insert command
                         // call commit with parameter true if the synchronization with the server is successful
@@ -675,7 +693,7 @@
                         // call commit with parameter true if the synchronization with the server is successful
                         // and with parameter false if the synchronization failed.
                         var productionObject = {
-                            ProductionType: "Fermentation",
+                            ProductionType: 'Fermentation',
                             ProductionId: rowData.ProductionId,
                             BatchName: rowData.BatchName,
                             ProductionDate: rowData.ProductionEnd,
@@ -690,11 +708,11 @@
                         };
 
                         $.ajax({
-                            type: "POST",
+                            type: 'POST',
                             url: '/Production/UpdateProduction',
                             data: JSON.stringify(productionObject),
-                            dataType: "json",
-                            contentType: "application/json; charset=utf-8",
+                            dataType: 'json',
+                            contentType: 'application/json; charset=utf-8',
                             error: function (response) {
                                 alert(response.responseText)
                             },
@@ -712,16 +730,16 @@
                         // call commit with parameter true if the synchronization with the server is successful
                         // and with parameter false if the synchronization failed.
                         var productionObject = {
-                            ProductionType: "Fermentation",
+                            ProductionType: 'Fermentation',
                             ProductionId: rowID
                         };
 
                         $.ajax({
-                            type: "POST",
+                            type: 'POST',
                             url: '/Production/DeleteFermentation',
                             data: JSON.stringify(productionObject),
-                            dataType: "json",
-                            contentType: "application/json; charset=utf-8",
+                            dataType: 'json',
+                            contentType: 'application/json; charset=utf-8',
                             error: function (response) {
                                 alert(response.responseText)
                             },
@@ -745,7 +763,7 @@
                 });
 
                 // create Tree Grid
-                $("#dataTable").jqxDataTable(
+                $('#dataTable').jqxDataTable(
                 {
                     editable: false,
                     width: '100%',
@@ -759,24 +777,24 @@
                     ready: function () {
                         // called when the DataTable is loaded.
                         // init jqxWindow widgets.
-                        $("#EditDialogPurBatchNameInput").jqxInput({
+                        $('#EditDialogPurBatchNameInput').jqxInput({
                             theme: 'bootstrap',
                             height: '26px',
                             width: '150px'
                         });
-                        $("#EditDialogProductionStartDateInput").jqxDateTimeInput({
+                        $('#EditDialogProductionStartDateInput').jqxDateTimeInput({
                             theme: 'bootstrap',
                             height: '26px',
                             width: '150px',
                             formatString: 'MM/dd/yyyy HH:mm'
                         });
-                        $("#EditDialogProductionEndDateInput").jqxDateTimeInput({
+                        $('#EditDialogProductionEndDateInput').jqxDateTimeInput({
                             theme: 'bootstrap',
                             height: '26px',
                             width: '150px',
                             formatString: 'MM/dd/yyyy HH:mm'
                         });
-                        $("#EditDialogQuantityInput").jqxNumberInput({
+                        $('#EditDialogQuantityInput').jqxNumberInput({
                             theme: 'bootstrap',
                             height: '26px',
                             width: '150px',
@@ -784,7 +802,7 @@
                             textAlign: 'center',
                             min: 0
                         });
-                        $("#EditDialogVolumeByWeightInput").jqxNumberInput({
+                        $('#EditDialogVolumeByWeightInput').jqxNumberInput({
                             theme: 'bootstrap',
                             height: '26px',
                             width: '150px',
@@ -792,7 +810,7 @@
                             textAlign: 'center',
                             min: 0
                         });
-                        $("#EditDialogAlcConInput").jqxNumberInput({
+                        $('#EditDialogAlcConInput').jqxNumberInput({
                             theme: 'bootstrap',
                             height: '26px',
                             width: '150px',
@@ -800,7 +818,7 @@
                             textAlign: 'center',
                             min: 0
                         });
-                        $("#EditDialogProofInput").jqxNumberInput({
+                        $('#EditDialogProofInput').jqxNumberInput({
                             theme: 'bootstrap',
                             height: '26px',
                             width: '150px',
@@ -808,9 +826,9 @@
                             textAlign: 'center',
                             min: 0
                         });
-                        $("#EditDialogStorageNameInput").jqxListBox({
+                        $('#EditDialogStorageNameInput').jqxListBox({
                             source: storageAdapter,
-                            displayMember: "StorageName",
+                            displayMember: 'StorageName',
                             theme: 'bootstrap',
                             multiple: true
                         });
@@ -820,20 +838,20 @@
                             width: '150px',
                             minLength: 1
                         });
-                        $("#EditDialogSaveRecordButton").jqxButton({
+                        $('#EditDialogSaveRecordButton').jqxButton({
                             theme: 'bootstrap',
                             height: '26px',
                             width: '150px'
                         });
-                        $("#EditDialogDeleteRecordButton").jqxButton({
+                        $('#EditDialogDeleteRecordButton').jqxButton({
                             theme: 'bootstrap', height: 30, width: 80
                         });
-                        $("#EditDialogClearInputElementsButton").jqxButton({
+                        $('#EditDialogClearInputElementsButton').jqxButton({
                             theme: 'bootstrap',
                             height: '26px',
                             width: '150px'
                         });
-                        $("#EditDialog").jqxWindow({
+                        $('#EditDialog').jqxWindow({
                             position: 'center',
                             maxHeight: '100%',
                             width: 'auto',
@@ -842,7 +860,7 @@
                             autoOpen: false,
                             isModal: false
                         });
-                        $("#EditDialog").css('visibility', 'visible');
+                        $('#EditDialog').css('visibility', 'visible');
                     },
                     columns: [
                         {
@@ -1017,7 +1035,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="FinalGaugeCheckBox" class="col-sm-6 control-label">Final Distillation Gauge?</label>
+                                        <label for="FinalGaugeCheckBox" class="col-sm-6 control-label">Gauge</label>
                                         <div class="col-sm-6">
                                             <div id="FinalGaugeCheckBox"></div>
                                         </div>

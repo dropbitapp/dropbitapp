@@ -3224,6 +3224,7 @@ namespace WebApp.Helpers
             prod.ProductionStartTime = prodObject.ProductionStart;
             prod.ProductionEndTime = prodObject.ProductionEnd;
             prod.Note = prodObject.Note;
+
             if(prodObject.Gauged)
             {
                 prod.Gauged = prodObject.Gauged;
@@ -3352,6 +3353,16 @@ namespace WebApp.Helpers
                 }
             }
 
+            if (prodObject?.SpiritTypeReportingID > 0 && prodObject?.MaterialKindReportingID > 0)
+            {
+                ProductionToSpiritTypeReporting prodToSpirType = new ProductionToSpiritTypeReporting();
+                prodToSpirType.SpiritTypeReportingID = prodObject.SpiritTypeReportingID;
+                prodToSpirType.MaterialKindReportingID = prodObject.MaterialKindReportingID;
+                prodToSpirType.ProductionID = prod.ProductionID;
+                db.ProductionToSpiritTypeReporting.Add(prodToSpirType);
+                db.SaveChanges();
+            }
+
             if (prodObject.ProductionType == "Fermentation")
             {
                 var statusString = "";
@@ -3359,17 +3370,6 @@ namespace WebApp.Helpers
                 // in this section, we need to handle used materials. update its statuses, values, states
                 if (prodObject.UsedMats != null)
                 {
-                    if (prodObject?.SpiritTypeReportingID != 0 && prodObject?.MaterialKindReportingID != 0 && prodObject?.SpiritTypeReportingID != null && prodObject?.MaterialKindReportingID != null)
-                    {
-                        prod.Gauged = true;
-                        ProductionToSpiritTypeReporting prodToSpirType = new ProductionToSpiritTypeReporting();
-                        prodToSpirType.SpiritTypeReportingID = prodObject.SpiritTypeReportingID;
-                        prodToSpirType.MaterialKindReportingID = prodObject.MaterialKindReportingID;
-                        prodToSpirType.ProductionID = prod.ProductionID;
-                        db.ProductionToSpiritTypeReporting.Add(prodToSpirType);
-                        db.SaveChanges();
-                    }
-
                     foreach (var i in prodObject.UsedMats)
                     {
                         var purch =
@@ -3394,7 +3394,6 @@ namespace WebApp.Helpers
 
                         purch.StatusID = status.StatusID;
 
-    
                         // we need to make sure that if the purchased used material is being partially used, we need to create 
                         // a new production fermentation record in Purchase4Reporting table with the same Purchase ID but with different Volume/Weight value.
                         if (i.BurningDownMethod != null)
@@ -3409,17 +3408,16 @@ namespace WebApp.Helpers
                         ProductionContent prodContent = new ProductionContent();
                         prodContent.ProductionID = prod.ProductionID;
                         prodContent.RecordID = i.ID;
-                        
-                        if (i.BurningDownMethod == "weight")
-                        {
-                            purch4Rep.Weight = i.OldVal;
-                            prodContent.ContentFieldID = 2; // PurFermentableWeight in ContentField table
-                        }
 
                         if (i.BurningDownMethod == "volume")
                         {
                             purch4Rep.Volume = i.OldVal;
                             prodContent.ContentFieldID = 1; // PurFermentableVolume in ContentField table
+                        }
+                        else if (i.BurningDownMethod == "weight")
+                        {
+                            purch4Rep.Weight = i.OldVal;
+                            prodContent.ContentFieldID = 2; // PurFermentableWeight in ContentField table
                         }
 
                         prodContent.ContentValue = i.NewVal;
@@ -3430,35 +3428,20 @@ namespace WebApp.Helpers
 
                         db.SaveChanges();
 
-                        if (i.BurningDownMethod == "volume" && purch.VolumeID != 0)
+                        if (i.BurningDownMethod == "volume" && purch.VolumeID > 0)
                         {
                             var q =
                                 (from rec in db.Volume
-                                 where purch.VolumeID == rec.VolumeID
+                                 where rec.VolumeID == purch.VolumeID
                                  select rec).FirstOrDefault();
 
                             if (q != null)
                             {
                                 q.Value = i.OldVal;
                             }
-
-                            // update proof value after it has been recalculated
-                            // on front-end using the new volume quantity
-                            if (purch.ProofID != 0 && i.Proof != 0)
-                            {
-                                var proof =
-                                    (from rec in db.Proof
-                                     where rec.ProofID == purch.ProofID
-                                     select rec).FirstOrDefault();
-
-                                if (proof != null)
-                                {
-                                    proof.Value = i.Proof;
-                                }
-                            }
                         }
 
-                        if (purch.WeightID != 0)
+                        if (purch.WeightID > 0)
                         {
                             var vBW =
                                 (from rec in db.Weight
@@ -3496,16 +3479,6 @@ namespace WebApp.Helpers
                     // verify list of batches received from the front-end and used in distillation is not empty
                     if (prodObject.UsedMats != null)
                     {
-                        if (prodObject?.SpiritTypeReportingID != 0 && prodObject?.MaterialKindReportingID != 0 && prodObject?.SpiritTypeReportingID != null && prodObject?.MaterialKindReportingID != null)
-                        {
-                            ProductionToSpiritTypeReporting prodToSpirType = new ProductionToSpiritTypeReporting();
-                            prodToSpirType.SpiritTypeReportingID = prodObject.SpiritTypeReportingID;
-                            prodToSpirType.MaterialKindReportingID = prodObject.MaterialKindReportingID;
-                            prodToSpirType.ProductionID = prod.ProductionID;
-                            db.ProductionToSpiritTypeReporting.Add(prodToSpirType);
-                            db.SaveChanges();
-                        }
-
                         if (prodObject?.SpiritCutId != null)
                         {
                             ProductionToSpiritCut prodToSCut = new ProductionToSpiritCut();
@@ -3576,11 +3549,11 @@ namespace WebApp.Helpers
                                             purch4Rep.PurchaseID = k.ID;
                                             purch4Rep.Proof = k.Proof;
 
-                                            if (k.BurningDownMethod == "weight" && purch.WeightID != 0)
+                                            if (k.BurningDownMethod == "weight" && purch.WeightID > 0)
                                             {
                                                 purch4Rep.Weight = k.OldVal;
                                             }
-                                            if (k.BurningDownMethod == "volume" && purch.VolumeID != 0)
+                                            if (k.BurningDownMethod == "volume" && purch.VolumeID > 0)
                                             {
                                                 purch4Rep.Volume = k.OldVal;
                                             }
@@ -3588,6 +3561,23 @@ namespace WebApp.Helpers
                                             db.Purchase4Reporting.Add(purch4Rep);
                                             db.SaveChanges();
                                         }
+                                    }
+
+                                    // update proof value after it has been recalculated
+                                    // on front-end using the new volume quantity.
+                                    // Update only if purchased batch is distilled, since fermented purchase proof is not stored
+                                    if (purch.ProofID > 0 && k.Proof >= 0)
+                                    {
+                                        var proof =
+                                            (from rec in db.Proof
+                                             where rec.ProofID == purch.ProofID
+                                             select rec).FirstOrDefault();
+
+                                        if (proof != null)
+                                        {
+                                            proof.Value = k.Proof;
+                                        }
+                                        db.SaveChanges();
                                     }
                                 }
 
@@ -3597,7 +3587,7 @@ namespace WebApp.Helpers
                                     purch.StatusID = statusId;
                                 }
 
-                                if (k.BurningDownMethod == "volume" && purch.VolumeID != 0)
+                                if (k.BurningDownMethod == "volume" && purch.VolumeID > 0)
                                 {
                                     var q =
                                         (from rec in db.Volume
@@ -3609,24 +3599,18 @@ namespace WebApp.Helpers
                                         q.Value = k.OldVal;
                                     }
 
-                                    // update proof value after it has been recalculated
-                                    // on front-end using the new volume quantity
-                                    if (purch.ProofID != 0 && k.Proof != 0)
+                                    try
                                     {
-                                        var proof =
-                                            (from rec in db.Proof
-                                             where rec.ProofID == purch.ProofID
-                                             select rec).FirstOrDefault();
-
-                                        if (proof != null)
-                                        {
-                                            proof.Value = k.Proof;
-                                        }
+                                        // Update proof recalculated on the front-end for a batch used in production 
+                                        UpdateProof(purch.ProofID, k.Proof);
                                     }
-                                    db.SaveChanges();
+                                    catch(ArgumentOutOfRangeException ex)
+                                    {
+                                        Debug.WriteLine(ex.Message);
+                                    }
                                 }
 
-                                if (k.BurningDownMethod == "weight" && purch.WeightID != 0)
+                                if (k.BurningDownMethod == "weight" && purch.WeightID > 0)
                                 {
                                     var vBW =
                                         (from rec in db.Weight
@@ -3723,11 +3707,11 @@ namespace WebApp.Helpers
                                             prod4Rep.ProductionID = k.ID;
                                             prod4Rep.Proof = k.Proof;
 
-                                            if (k.BurningDownMethod == "weight" && prodRec.WeightID != 0)
+                                            if (k.BurningDownMethod == "weight" && prodRec.WeightID > 0)
                                             {
                                                 prod4Rep.Weight = k.OldVal;
                                             }
-                                            if (k.BurningDownMethod == "volume" && prodRec.VolumeID != 0)
+                                            if (k.BurningDownMethod == "volume" && prodRec.VolumeID > 0)
                                             {
                                                 prod4Rep.Volume = k.OldVal;
                                             }
@@ -3751,7 +3735,7 @@ namespace WebApp.Helpers
                                     prodRec.StatusID = statusId;
                                 }
 
-                                if (k.BurningDownMethod == "volume" && prodRec.VolumeID != 0)
+                                if (k.BurningDownMethod == "volume" && prodRec.VolumeID > 0)
                                 {
                                     var q =
                                         (from rec in db.Volume
@@ -3762,9 +3746,19 @@ namespace WebApp.Helpers
                                     {
                                         q.Value = k.OldVal;
                                     }
+
+                                    try
+                                    {
+                                        // Update proof recalculated on the front-end for a batch used in production 
+                                        UpdateProof(prodRec.ProofID, k.Proof);
+                                    }
+                                    catch (ArgumentOutOfRangeException ex)
+                                    {
+                                        Debug.WriteLine(ex.Message);
+                                    }
                                 }
 
-                                if (k.BurningDownMethod == "weight" && prodRec.WeightID != 0)
+                                if (k.BurningDownMethod == "weight" && prodRec.WeightID > 0)
                                 {
                                     var vBW =
                                         (from rec in db.Weight
@@ -3774,21 +3768,6 @@ namespace WebApp.Helpers
                                     if (vBW != null)
                                     {
                                         vBW.Value = k.OldVal;
-                                    }
-                                }
-
-                                // update proof value after it has been recalculated
-                                // on front-end using the new volume quantity
-                                if (prodRec.ProofID != 0 && k.Proof > 0)
-                                {
-                                    var proof =
-                                        (from rec in db.Proof
-                                         where rec.ProofID == prodRec.ProofID
-                                         select rec).FirstOrDefault();
-
-                                    if (proof != null)
-                                    {
-                                        proof.Value = k.Proof;
                                     }
                                 }
 
@@ -3864,17 +3843,6 @@ namespace WebApp.Helpers
 
                 if (prodObject.UsedMats != null) // we need to makre sure that in Production workflow front-end we assign either raw materials or distil IDs to it
                 {
-                    if (prodObject?.SpiritTypeReportingID != 0 && prodObject?.MaterialKindReportingID != 0 && prodObject?.SpiritTypeReportingID != null && prodObject?.MaterialKindReportingID != null)
-                    {
-                        prod.Gauged = true;
-                        ProductionToSpiritTypeReporting prodToSpirType = new ProductionToSpiritTypeReporting();
-                        prodToSpirType.SpiritTypeReportingID = prodObject.SpiritTypeReportingID;
-                        prodToSpirType.MaterialKindReportingID = prodObject.MaterialKindReportingID;
-                        prodToSpirType.ProductionID = prod.ProductionID;
-                        db.ProductionToSpiritTypeReporting.Add(prodToSpirType);
-                        db.SaveChanges();
-                    }
-
                     if (prodObject?.SpiritId != null)
                     {
                         ProductionToSpirit prodToSpirit = new ProductionToSpirit();
@@ -3938,11 +3906,11 @@ namespace WebApp.Helpers
                                         purch4Rep.PurchaseID = k.ID;
                                         purch4Rep.Proof = k.Proof;
 
-                                        if (k.BurningDownMethod == "weight" && purch.WeightID != 0)
+                                        if (k.BurningDownMethod == "weight" && purch.WeightID > 0)
                                         {
                                             purch4Rep.Weight = k.OldVal;
                                         }
-                                        if (k.BurningDownMethod == "volume" && purch.VolumeID != 0)
+                                        if (k.BurningDownMethod == "volume" && purch.VolumeID > 0)
                                         {
                                             purch4Rep.Volume = k.OldVal;
                                         }
@@ -3953,7 +3921,7 @@ namespace WebApp.Helpers
                                 }
                             }
 
-                            if (purch.VolumeID != 0 && k.BurningDownMethod == "volume")
+                            if (purch.VolumeID > 0 && k.BurningDownMethod == "volume")
                             {
                                 var q =
                                     (from rec in db.Volume
@@ -3964,9 +3932,19 @@ namespace WebApp.Helpers
                                 {
                                     q.Value = k.OldVal;
                                 }
+
+                                try
+                                {
+                                    // Update proof recalculated on the front-end for a batch used in production 
+                                    UpdateProof(purch.ProofID, k.Proof);
+                                }
+                                catch (ArgumentOutOfRangeException ex)
+                                {
+                                    Debug.WriteLine(ex.Message);
+                                }
                             }
 
-                            if (purch.WeightID != 0 && k.BurningDownMethod == "weight")
+                            if (purch.WeightID > 0 && k.BurningDownMethod == "weight")
                             {
                                 var vBW =
                                     (from rec in db.Weight
@@ -3976,21 +3954,6 @@ namespace WebApp.Helpers
                                 if (vBW != null)
                                 {
                                     vBW.Value = k.OldVal;
-                                }
-                            }
-
-                            // update proof value after it has been recalculated
-                            // on front-end using the new volume quantity
-                            if (purch.ProofID != 0 && k.Proof > 0)
-                            {
-                                var proof =
-                                    (from rec in db.Proof
-                                     where rec.ProofID == purch.ProofID
-                                     select rec).FirstOrDefault();
-
-                                if (proof != null)
-                                {
-                                    proof.Value = k.Proof;
                                 }
                             }
 
@@ -4061,11 +4024,11 @@ namespace WebApp.Helpers
                                         prod4Rep.ProductionID = k.ID;
                                         prod4Rep.Proof = k.Proof;
 
-                                        if (k.BurningDownMethod == "weight" && prodd.WeightID != 0)
+                                        if (k.BurningDownMethod == "weight" && prodd.WeightID > 0)
                                         {
                                             prod4Rep.Weight = k.OldVal;
                                         }
-                                        if (k.BurningDownMethod == "volume" && prodd.VolumeID != 0)
+                                        if (k.BurningDownMethod == "volume" && prodd.VolumeID > 0)
                                         {
                                             prod4Rep.Volume = k.OldVal;
                                         }
@@ -4076,7 +4039,7 @@ namespace WebApp.Helpers
                                 }
                             }
 
-                            if (prodd.VolumeID != 0 && k.BurningDownMethod == "volume")
+                            if (prodd.VolumeID > 0 && k.BurningDownMethod == "volume")
                             {
                                 var q =
                                     (from rec in db.Volume
@@ -4087,9 +4050,19 @@ namespace WebApp.Helpers
                                 {
                                     q.Value = k.OldVal;
                                 }
+
+                                try
+                                {
+                                    // Update proof recalculated on the front-end for a batch used in production
+                                    UpdateProof(prodd.ProofID, k.Proof);
+                                }
+                                catch (ArgumentOutOfRangeException ex)
+                                {
+                                    Debug.WriteLine(ex.Message);
+                                }
                             }
 
-                            if (prodd.WeightID != 0 && k.BurningDownMethod == "weight")
+                            if (prodd.WeightID > 0 && k.BurningDownMethod == "weight")
                             {
                                 var vBW =
                                     (from rec in db.Weight
@@ -4099,21 +4072,6 @@ namespace WebApp.Helpers
                                 if (vBW != null)
                                 {
                                     vBW.Value = k.OldVal;
-                                }
-                            }
-
-                            // update proof value after it has been recalculated
-                            // on front-end using the new volume quantity
-                            if (prodd.ProofID != 0 && k.Proof > 0)
-                            {
-                                var proof =
-                                    (from rec in db.Proof
-                                     where rec.ProofID == prodd.ProofID
-                                     select rec).FirstOrDefault();
-
-                                if (proof != null)
-                                {
-                                    proof.Value = k.Proof;
                                 }
                             }
 
@@ -4241,7 +4199,7 @@ namespace WebApp.Helpers
                                 prodd.BurningDownMethod = k.BurningDownMethod;
                             }
 
-                            if (prodd.VolumeID != 0 && k.BurningDownMethod == "volume")
+                            if (prodd.VolumeID > 0 && k.BurningDownMethod == "volume")
                             {
                                 var q =
                                     (from rec in db.Volume
@@ -4252,9 +4210,15 @@ namespace WebApp.Helpers
                                 {
                                     q.Value = k.OldVal;
                                 }
+
+                                float oldProof = UpdateProof(prodd.ProofID, k.Proof);
+
+                                // todo: grisha: I am not sure how calculating gain/loss is going be relevant when we add mutliple blends during bottling though.
+                                // but we can leave this for a later discussion.
+                                cumulativeGainLoss += prodObject.ProofGallon - oldProof; // negative means loss and positive means true
                             }
 
-                            if (prodd.WeightID != 0 && k.BurningDownMethod == "weight")
+                            if (prodd.WeightID > 0 && k.BurningDownMethod == "weight")
                             {
                                 var vBW =
                                     (from rec in db.Weight
@@ -4264,24 +4228,6 @@ namespace WebApp.Helpers
                                 if (vBW != null)
                                 {
                                     vBW.Value = k.OldVal;
-                                }
-                            }
-
-                            // update proof value after it has been recalculated
-                            // on front-end using the new volume quantity. And figure out gain/loss. 
-                            // todo: grisha: I am not sure how calculating gain/loss is going be relevant when we add mutliple blends during bottling though.
-                            // but we can leave this for a later discussion.
-                            if (prodd.ProofID != 0 && k.Proof > 0)
-                            {
-                                var proof =
-                                    (from rec in db.Proof
-                                     where rec.ProofID == prodd.ProofID
-                                     select rec).FirstOrDefault();
-
-                                if (proof != null)
-                                {
-                                    proof.Value = k.Proof;
-                                    cumulativeGainLoss += prodObject.ProofGallon - proof.Value; // negative means loss and positive means true
                                 }
                             }
 
@@ -4407,6 +4353,38 @@ namespace WebApp.Helpers
             }
 
             return retMthdExecResult;
+        }
+
+        /// <returns>Returns original proof value</returns>
+        public float UpdateProof(int proofId, float newProof)
+        {
+            float oldProof = 0.0F;
+
+            if (!(proofId > 0 && newProof >= 0))
+            {
+                throw new ArgumentOutOfRangeException("ProofId must be more than 0 and proof value must be more or equal to 0");
+            }
+            else
+            {
+                var res =
+                    (from rec in db.Proof
+                     where rec.ProofID == proofId
+                     select rec).FirstOrDefault();
+
+                if (res == null)
+                {
+                    throw new NullReferenceException("Unable to locate proof record with supplied ProofID");
+                }
+                else
+                {
+                    oldProof = res.Value;
+                    res.Value = newProof;
+                }
+
+                db.SaveChanges();
+
+                return oldProof;
+            }
         }
 
         internal bool DeleteProduction(ProductionObject productionObject, int userId)

@@ -45,22 +45,11 @@
             globals.EditDialogTotalProofValue = x;
             */
             var globals = {
-                prodId: 0, //global ProductionId variable
-                gauged: 0 // {true, false}
+                prodId: 0 //global ProductionId variable
             };
             function _addEventListeners() {
 
                 // Material Burndown state machine
-
-                // Check "Final Distillation Gauge" checkbox
-                $( "#FinalGaugeCheckBox" ).on( "checked", function ( event ) {
-                    globals.gauged = true;
-                });
-
-                // Uncheck "Final Distillation" Gauge checkbox
-                $("#FinalGaugeCheckBox").on("unchecked", function (event) {
-                    globals.gauged = false;
-                });
 
                 // on burndown open event
                 $('#MatBurnDwnDialog').on('open', function (e) {
@@ -170,7 +159,7 @@
 
                     if ( ( usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight" ) || usedMat.BurningDownMethod == "volume" )
                     {
-                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.NewVal, distillationSourceBatchAdapter.records[curRawMatIndex].AlcoholContent );
+                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.OldVal, distillationSourceBatchAdapter.records[curRawMatIndex].AlcoholContent );
                     }
 
                     usedMatsList.push(usedMat);
@@ -725,25 +714,21 @@
                         }
                     }
                     
+                    var spiritTypeReportingID = 0;
+                    var spiritType = $('#ReportingSpiritTypeDropDown').jqxDropDownList('getSelectedItem');
+                    if (spiritType !== null && spiritType !== undefined && spiritType !== '') {
+                        spiritTypeReportingID = spiritType.value;
+                    }
+
+                    var materialKindReportingID = 0;
+                    var materialKind = $('#ReportingMaterialKindDropDown').jqxDropDownList('getSelectedItem');
+                    if (materialKind !== null & materialKind !== undefined && materialKind !== '') {
+                        materialKindReportingID = materialKind.value;
+                    }
+
                     // convert time to UTC format
                     var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProdStartDateInput").jqxDateTimeInput('val'), true);
                     var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProdEndDateInput").jqxDateTimeInput('val'), true);
-                    
-                    // if no spiritType is selected, set the id to 0, to avoid null object exception
-                    var spiritType = $("#ReportingSpiritTypeDropDown").jqxDropDownList("getSelectedItem");
-                    var spiritTypeReportingID = null;
-                    if (spiritType)
-                    {
-                        spiritTypeReportingID = spiritType.value;
-                    }
-                    
-                    // if no materialKind is selected, set the id to 0, to avoid null object exception
-                    var materialKind = $("#ReportingMaterialKindDropDown").jqxDropDownList("getSelectedItem");
-                    var materialKindReportingID = null;
-                    if (materialKind)
-                    {
-                        materialKindReportingID = materialKind.value;
-                    }
 
                     var productionObject = {
                         ProductionType: "Distillation",
@@ -757,11 +742,11 @@
                         VolumeByWeight: $("#ProdVolumeByWeightInput").jqxNumberInput('val'),
                         ProofGallon: $("#ProdProofGallonsInput").jqxNumberInput('val'),
                         Storage: storageList,
+                        Gauged: $("#FinalGaugeCheckBox").val(),
                         SpiritTypeReportingID: spiritTypeReportingID,
                         MaterialKindReportingID: materialKindReportingID,
                         Note: $('#ProdNotes').jqxTextArea('val'),
-                        UsedMats: usedMatsList,
-                        Gauged: globals.gauged
+                        UsedMats: usedMatsList
                     };
 
                     $.ajax({

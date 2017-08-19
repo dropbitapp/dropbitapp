@@ -162,6 +162,37 @@ namespace WebApp.Helpers.Tests
         }
 
         [TestMethod()]
+        public void UpdateProofTest()
+        {
+            // Arrange
+            float newProof = 20.0F;
+            float oldProof = 10.0F;
+
+            Proof proof = new Proof()
+            {
+                Value = 10.0F
+            };
+
+            db.Proof.Add(proof);
+            db.SaveChanges();
+
+            // Act
+            float result = dLayer.UpdateProof(proof.ProofID, newProof);
+            var proofRec =
+                    (from res in db.Proof
+                     where res.ProofID == proof.ProofID &&
+                           res.Value == newProof
+                     select res).FirstOrDefault();
+
+            db.Proof.Remove(proofRec);
+            db.SaveChanges();
+
+            // Assert
+            Assert.AreEqual(oldProof, result, 0.1F);
+            Assert.IsNotNull(proofRec);
+        }
+
+        [TestMethod()]
         public void UpdateSpiritTest()
         {
             Assert.Fail();
@@ -315,7 +346,6 @@ namespace WebApp.Helpers.Tests
         [TestMethod()]
         public void GetStorageReportDataTest()
         {
-
             // Arrange
 
             // Act

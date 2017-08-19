@@ -162,7 +162,7 @@
 
                     if ( ( usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight" ) || usedMat.BurningDownMethod == "volume" )
                     {
-                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.NewVal, blendingDataAdapter.records[curRawMatIndex].AlcoholContent );
+                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.OldVal, blendingDataAdapter.records[curRawMatIndex].AlcoholContent );
                     }
 
                     usedMatsList.push( usedMat );
