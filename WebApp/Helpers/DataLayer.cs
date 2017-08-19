@@ -5820,9 +5820,7 @@ namespace WebApp.Helpers
                 from str in str_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    // ProductionType == Distillation
                     rec.ProductionTypeID == 2 &&
-                    // Status == Active & Processing
                     (rec.StatusID == 1 ||
                     rec.StatusID == 2 ||
                     rec.StateID == 3) &&
@@ -5872,9 +5870,8 @@ namespace WebApp.Helpers
                 from str in str_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    // ProductionType == Distillation
+                    rec.PurchaseTypeID == 2 &&
                     rec.PurchaseTypeID == 3 &&
-                    // Status == Active & Processing
                     (rec.StatusID == 1 ||
                     rec.StatusID == 2 ||
                     rec.StatusID == 3) &&
@@ -5923,9 +5920,7 @@ namespace WebApp.Helpers
                 from str in str_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    // ProductionType == Distillation
                     rec.ProductionTypeID == 2 &&
-                    // Status == Active & Processing
                     (rec.StatusID == 1 ||
                     rec.StatusID == 2) &&
                     rec.ProductionEndTime >= startDate &&
@@ -5975,9 +5970,8 @@ namespace WebApp.Helpers
                 from str in str_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    // ProductionType == Distillation
+                    rec.PurchaseTypeID == 2 &&
                     rec.PurchaseTypeID == 3 &&
-                    // Status == Active & Processing
                     (rec.StatusID == 1 ||
                     rec.StatusID == 2) &&
                     rec.PurchaseDate >= startDate &&
@@ -6034,10 +6028,8 @@ namespace WebApp.Helpers
                 from str in str_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    // ProductionType == Distillation
                     sourceProductionRecord.ProductionTypeID == 2 &&
                     outputProductionRecord.ProductionTypeID == 2 &&
-                    // Status == Active & Processing
                     (sourceProductionRecord.StatusID == 1 ||
                     sourceProductionRecord.StatusID == 2 ||
                     sourceProductionRecord.StatusID == 3) &&
@@ -6098,10 +6090,9 @@ namespace WebApp.Helpers
                 from str in str_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    // ProductionType == Distillation
+                    sourcePurchaseRecord.PurchaseTypeID == 2 &&
                     sourcePurchaseRecord.PurchaseTypeID == 3 &&
                     outputProductionRecord.ProductionTypeID == 2 &&
-                    // Status == Active & Processing
                     (sourcePurchaseRecord.StatusID == 1 ||
                     sourcePurchaseRecord.StatusID == 2 ||
                     sourcePurchaseRecord.StatusID == 3) &&
@@ -6160,10 +6151,8 @@ namespace WebApp.Helpers
                 from str in str_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    // ProductionType == Distillation
                     sourceProductionRecord.ProductionTypeID == 2 &&
                     outputProductionRecord.ProductionTypeID == 3 &&
-                    // Status == Active & Processing
                     (sourceProductionRecord.StatusID == 1 ||
                     sourceProductionRecord.StatusID == 2 ||
                     sourceProductionRecord.StatusID == 3) &&
@@ -6223,10 +6212,8 @@ namespace WebApp.Helpers
                 from str in str_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    // ProductionType == Distillation
                     sourcePurchaseRecord.PurchaseTypeID == 3 &&
                     outputProductionRecord.ProductionTypeID == 3 &&
-                    // Status == Active & Processing
                     (sourcePurchaseRecord.StatusID == 1 ||
                     sourcePurchaseRecord.StatusID == 2 ||
                     sourcePurchaseRecord.StatusID == 3) &&
