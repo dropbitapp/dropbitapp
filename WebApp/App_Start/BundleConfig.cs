@@ -74,7 +74,7 @@ namespace WebApp
                 "~/Scripts/Helpers/dictionaryManagement.js",
                 "~/Scripts/Helpers/genericWorkflowHelpers.js",
                 "~/Scripts/Helpers/Ajax.js",
-                "~/Scripts/Helpers/DateModificationHelper.js"
+                "~/Scripts/Helpers/dateModificationHelper.js"
             ));
         }
     }

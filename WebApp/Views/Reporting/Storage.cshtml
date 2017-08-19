@@ -6,15 +6,19 @@
         var main = (function () {
 
             var genericWorkflowHelper = new genWHelpers();
-
             var storageReport;
+            var dateModificationHelper = new dateHelper();
 
             function addEventListeners() {
                 $("#GenerateReportBtn").click(function () {
-                    // get starting date
-                    var startDate = normalizeDateToDashFormat($('#ReportingPeriodStartDate').jqxDateTimeInput('getDate'));
-                    // get ending date
-                    var endDate = normalizeDateToDashFormat($('#ReportingPeriodEndDate').jqxDateTimeInput('getDate'));
+                    // get starting year
+                    var reportingYear = $("#ReportingYear").jqxDropDownList('getSelectedItem');
+                    // get starting month
+                    var reportingMonth = $("#ReportingMonth").jqxDropDownList('getSelectedItem');
+                    // converting to date object and getting starting/ending date
+                    var reportingDate = dateModificationHelper.getReportingMonthAndYear(reportingYear, reportingMonth);
+                    var startDate = reportingDate[0];
+                    var endDate = reportingDate[1];
 
                 $.ajax({
                         type: "GET",
@@ -193,35 +197,21 @@
                 return parsedDate;
             }
 
-            // normalizeDateToDashFormat function converts JS date object into yyyy-mm-dd format
-            function normalizeDateToDashFormat(dateObj) {
-
-                var yearObj = dateObj.getFullYear();
-
-                var monthObj = dateObj.getMonth() + 1;
-
-                if (monthObj < 10) {
-                    monthObj = 0 + '' + monthObj;
-                }
-
-                var dayObj = dateObj.getDate();
-
-                if (dayObj < 10) {
-                    dayObj = 0 + '' + dayObj;
-                }
-
-                var normalizedDate = yearObj + '-' + monthObj + '-' + dayObj;
-
-                return normalizedDate;
-            }
-
             function createElements() {
-                $("#ReportingPeriodStartDate").jqxDateTimeInput({
-                    theme: 'bootstrap', textAlign: 'center', height: '26px', width: '130px', formatString: "MM/dd/yyyy"
+
+                var monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                $("#ReportingMonth").jqxDropDownList({
+                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList
                 });
 
-                $("#ReportingPeriodEndDate").jqxDateTimeInput({
-                    theme: 'bootstrap', textAlign: 'center', height: '26px', width: '130px', formatString: "MM/dd/yyyy"
+                var yearList = [];
+                var date = new Date();
+                var year = date.getFullYear();
+                for (i = 0; i < (year - 1900) ; i++) {
+                    yearList.push(year - i);
+                }
+                $("#ReportingYear").jqxDropDownList({
+                    theme: 'bootstrap', height: '26px', width: '130px', source: yearList
                 });
 
                 $("#GenerateReportBtn").jqxButton({ theme: 'bootstrap' });
@@ -423,12 +413,12 @@
             <div class="panel-body">
                 <form class="form-inline">
                     <div class="form-group">
-                        <label class="pull-left" for="ReportingPeriodStartDate" style="padding-left: 10pt; padding-right: 10pt">Reporting Period Start Date</label>
-                        <div id="ReportingPeriodStartDate"></div>
+                        <label class="pull-left" for="ReportingYear" style="padding-left: 10pt; padding-right: 10pt">Reporting Year</label>
+                        <div id="ReportingYear"></div>
                     </div>
                     <div class="form-group">
-                        <label class="pull-left" for="ReportingPeriodEndDate" style="padding-left: 10pt; padding-right: 10pt">Reporting Period End Date</label>
-                        <div id="ReportingPeriodEndDate"></div>
+                        <label class="pull-left" for="ReportingMonth" style="padding-left: 10pt; padding-right: 10pt">Reporting Month</label>
+                        <div id="ReportingMonth"></div>
                     </div>
                     <input type="button" value="Generate Report" id="GenerateReportBtn" />
                 </form>

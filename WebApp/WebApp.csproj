@@ -1027,6 +1027,7 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\globalize.js" />
     <Content Include="Scripts\Helpers\Ajax.js" />
+    <Content Include="Scripts\Helpers\dateModificationHelper.js" />
     <Content Include="Scripts\Helpers\distillcompute.js" />
     <Content Include="Scripts\Helpers\genericWorkflowHelpers.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
