@@ -7,6 +7,7 @@
         var Main = (function () {
 
             var genericWorkflowHelper = new genWHelpers();
+            var distillCompInstance = new distillCompute();
 
             var purId = 0; // purId is used as a global FermentedPurchase page variable 
 
@@ -25,8 +26,34 @@
                 $("#CreateRecordButton").click(function () {
                     $('#validationForm').jqxValidator('validate');
                 });
+
                 $("#ClearInputElementsButton").click(function () {
                     genericWorkflowHelper.emptyControls();
+                });
+
+                // adding event listeners for calculation of Proof Gallons when adding new record
+                $('#QuantityInput').on('change', function (event) {
+                    if (!($('#AlcoholContentInput').val() == undefined || $('#AlcoholContentInput').val() == "")) {
+                        var qty = $("#QuantityInput").val();
+                        var alc = $("#AlcoholContentInput").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $("#ProofGallonsInput").val(prf);
+                    }
+                    else {
+                        $('#ProofGallonsInput').val(0);
+                    }
+                });
+
+                $('#AlcoholContentInput').on('change', function (event) {
+                    if (!($('#QuantityInput').val() == undefined || $('#QuantityInput').val() == "")) {
+                        var qty = $("#QuantityInput").val();
+                        var alc = $("#AlcoholContentInput").val();
+                        var prf = distillCompInstance.calculateProof(qty, alc);
+                        $("#ProofGallonsInput").val(prf);
+                    }
+                    else {
+                        $('#ProofGallonsInput').val(0);
+                    }
                 });
 
                 // Select jqxDataTable row
@@ -46,6 +73,7 @@
                     $("#EditDialogNotesInput").val(row.Note);
                     $("#EditDialogPrice").val(row.Price);
                     $("#EditDialogVBW").val(row.VolumeByWeight);
+                    $("#EditDialogProof").val(row.ProofGallon);
                     $("#EditDialogQuantity").val(row.Quantity);
 
                     $("#EditDialogStorage").jqxListBox('clearSelection');
@@ -81,6 +109,7 @@
                         Quantity: $("#EditDialogQuantity").jqxNumberInput('val'),
                         AlcoholContent: "",
                         VolumeByWeight: $("#EditDialogVBW").jqxNumberInput('val'),
+                        ProofGallon: $("#EditDialogProof").jqxNumberInput('val'),
                         Price: $("#EditDialogPrice").jqxNumberInput('val'),
                         VendorId: $("#EditDialogVendorInput").jqxDropDownList('getSelectedItem').originalItem.VendorId,
                         VendorName: $("#EditDialogVendorInput").jqxDropDownList('getSelectedItem').label,
@@ -177,6 +206,26 @@
                     textAlign: 'center',
                     min: 0
                 });
+
+                $("#AlcoholContentInput").jqxNumberInput({
+                    theme: 'bootstrap',
+                    height: '26px',
+                    width: '200px',
+                    inputMode: 'simple',
+                    textAlign: 'center',
+                    min: 0
+                });
+
+                $("#ProofGallonsInput").jqxNumberInput({
+                    theme: 'bootstrap',
+                    height: '26px',
+                    width: '200px',
+                    disabled: true,
+                    inputMode: 'simple',
+                    textAlign: 'center',
+                    min: 0
+                });
+
                 $("#PriceInput").jqxNumberInput({
                     theme: 'bootstrap',
                     height: '26px',
@@ -279,6 +328,12 @@
                             }
                         },
                         {
+                            input: '#AlcoholContentInput', message: 'Please Enter Alcohol Content', action: 'blur', rule: function () {
+                                var value = $('#AlcoholContentInput').val();
+                                return value > 0 ? true : false;
+                            }
+                        },
+                        {
                             input: '#PriceInput', message: 'Please Enter Price', action: 'blur', rule: function () {
                                 var value = $('#PriceInput').val();
                                 return value > 0 ? true : false;
@@ -338,7 +393,8 @@
                     RecordName: $("#MaterialTypeInput").jqxListBox('getSelectedItem').label,
                     PurchaseDate: utcDate,
                     Quantity: $("#QuantityInput").jqxNumberInput('val'),
-                    AlcoholContent: "",
+                    AlcoholContent: $("#AlcoholContentInput").jqxNumberInput('val'),
+                    ProofGallon: $("#ProofGallonsInput").jqxNumberInput('val'),
                     VolumeByWeight: $("#VolumeByWeightInput").jqxNumberInput('val'),
                     Price: $("#PriceInput").jqxNumberInput('val'),
                     VendorId: $("#VendorInput").jqxDropDownList('getSelectedItem').originalItem.VendorId,
@@ -549,6 +605,10 @@
                             theme: 'bootstrap', height: '26px', width: '200px', inputMode: 'simple', textAlign: 'center', min: 0
                         });
 
+                        $("#EditDialogProof").jqxNumberInput({
+                            theme: 'bootstrap', height: '26px', width: '200px', inputMode: 'simple', textAlign: 'center', min: 0, disabled: true
+                        });
+
                         $("#EditDialogPrice").jqxNumberInput({
                             theme: 'bootstrap', height: '26px', width: '200px', inputMode: 'simple', textAlign: 'center', min: 0
                         });
@@ -616,6 +676,13 @@
                         {
                             text: 'Volume by Weight (lb)',
                             datafield: 'VolumeByWeight',
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '12%'
+                        },
+                        {
+                            text: 'Proof Gallons',
+                            datafield: 'ProofGallon',
                             cellsAlign: 'center',
                             align: 'center',
                             width: '12%'
@@ -725,6 +792,18 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
+                                        <label for="AlcoholContentInput" class="col-sm-6 control-label">Alcohol Content</label>
+                                        <div class="col-sm-6">
+                                            <div id="AlcoholContentInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ProofGallonsInput" class="col-sm-6 control-label">Proof Gallons</label>
+                                        <div class="col-sm-6">
+                                            <div id="ProofGallonsInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
                                         <label for="PriceInput" class="col-sm-6 control-label">Price (Total)</label>
                                         <div class="col-sm-6">
                                             <div id="PriceInput"></div>
@@ -827,6 +906,14 @@
                             </td>
                             <td align="left">
                                 <div id="EditDialogVBW"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                Proof:
+                            </td>
+                            <td align="left">
+                                <div id="EditDialogProof"></div>
                             </td>
                         </tr>
                         <tr>
