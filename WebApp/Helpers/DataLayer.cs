@@ -2841,7 +2841,7 @@ namespace WebApp.Helpers
         /// <summary>
         /// GetDistillerID retrieves DistillerId for given UserId
         /// </summary>
-        private int GetDistillerId(int userId)
+        public int GetDistillerId(int userId)
         {
             int distillerId = (from rec in db.AspNetUserToDistiller
                                 where rec.UserId == userId

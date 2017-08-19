@@ -13,6 +13,7 @@ namespace WebApp.Helpers.Tests
     public class DataLayerTests
     {
         DataLayer dLayer = new DataLayer();
+        DistilDBContext db = new DistilDBContext();
 
         [TestMethod()]
         public void GetUnitListTest()
@@ -107,7 +108,7 @@ namespace WebApp.Helpers.Tests
             List<SpiritToKindListObject> result = dLayer.GetReportingSpiritTypes();
 
             // Assert
-            Assert.IsNotNull(result, "GetUnitList result returned is null");
+            Assert.IsNotNull(result, "GetReportingSpiritTypesTest result returned is null");
         }
 
         [TestMethod()]
@@ -125,7 +126,33 @@ namespace WebApp.Helpers.Tests
         [TestMethod()]
         public void CreateStorageTest()
         {
-            Assert.Fail();
+            // Arrange
+            StorageObject storage = new StorageObject();
+            storage.StorageName = "TestStorage";
+            storage.SerialNumber = "123";
+            storage.Capacity = 100;
+            storage.Note = "TestNote";
+
+            // Act
+            bool result = dLayer.CreateStorage(1, storage);
+
+            var rec =
+                (
+                    from res in db.Storage
+                    where res.Note == storage.Note &&
+                          res.Name == storage.StorageName &&
+                          res.SerialNumber == storage.SerialNumber &&
+                          res.Capacity == storage.Capacity
+                    select res).FirstOrDefault();
+
+            var queryRes = rec;
+
+            db.Storage.Remove(rec);
+            db.SaveChanges();
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.IsNotNull(queryRes);
         }
 
         [TestMethod()]
@@ -149,7 +176,50 @@ namespace WebApp.Helpers.Tests
         [TestMethod()]
         public void UpdateStorageTest()
         {
-            Assert.Fail();
+            // Arrange
+            int distillerId = dLayer.GetDistillerId(1);
+
+            Storage storage = new Storage()
+            {
+                Name = "TestStorage",
+                Capacity = 500,
+                SerialNumber = "123",
+                Note = "TestNote",
+                DistillerID = distillerId
+            };
+
+            db.Storage.Add(storage);
+            db.SaveChanges();
+
+            StorageObject storageObject = new StorageObject();
+            storageObject.StorageId = storage.StorageID;
+            storageObject.Capacity = storage.Capacity;
+            storageObject.SerialNumber = storage.SerialNumber;
+            storageObject.Note = storage.Note;
+            storageObject.StorageName = storage.Name;
+
+            // Act
+            bool result = dLayer.UpdateStorage(1, storageObject);
+
+            var rec =
+                (
+                    from res in db.Storage
+                    where res.StorageID == storage.StorageID &&
+                          res.Name == storage.Name &&
+                          res.DistillerID == storage.DistillerID &&
+                          res.Capacity == storage.Capacity &&
+                          res.Note == storage.Note &&
+                          res.SerialNumber == storage.SerialNumber
+                    select res).FirstOrDefault();
+
+            var queryRes = rec;
+
+            db.Storage.Remove(rec);
+            db.SaveChanges();
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.IsNotNull(queryRes);
         }
 
         [TestMethod()]
@@ -173,7 +243,13 @@ namespace WebApp.Helpers.Tests
         [TestMethod()]
         public void GetStorageListTest()
         {
-            Assert.Fail();
+            // Arrange
+
+            // Act
+            List<StorageObject> result = dLayer.GetStorageList(1);
+
+            // Assert
+            Assert.IsNotNull(result, "GetStorageListTest result returned is null");
         }
 
         [TestMethod()]
