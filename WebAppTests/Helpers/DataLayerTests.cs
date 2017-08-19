@@ -40,66 +40,6 @@ namespace WebApp.Helpers.Tests
         }
 
         [TestMethod()]
-        public void GetRawMaterialList4FermentationTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetMaterialListForProductionTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetAdditivesListForProductionTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetRawMaterialListForPurchaseTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetRawMaterialListDictTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetSpiritTypeListTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetUnitListTest1()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetVendorDataTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetStorageDataTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetSpiritCutDataTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
         public void GetReportingSpiritTypesTest()
         {
             // Arrange
@@ -114,7 +54,30 @@ namespace WebApp.Helpers.Tests
         [TestMethod()]
         public void CreateSpiritTest()
         {
-            Assert.Fail();
+            // Arrange
+            Guid name = Guid.NewGuid();
+            Guid note = Guid.NewGuid();
+            SpiritObject spirit = new SpiritObject();
+            spirit.SpiritName = name.ToString();
+            spirit.Note = note.ToString();
+
+            //Act
+            bool result = dLayer.CreateSpirit(1, spirit);
+
+            var rec =
+                (from res in db.Spirit
+                 where res.Name == spirit.SpiritName &&
+                       res.Note == spirit.Note
+                 select res).FirstOrDefault();
+
+            var queryRes = rec;
+
+            db.Spirit.Remove(rec);
+            db.SaveChanges();
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.IsNotNull(queryRes);
         }
 
         [TestMethod()]
@@ -156,12 +119,6 @@ namespace WebApp.Helpers.Tests
         }
 
         [TestMethod()]
-        public void CreateRawMaterialTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
         public void UpdateProofTest()
         {
             // Arrange
@@ -192,19 +149,6 @@ namespace WebApp.Helpers.Tests
             Assert.IsNotNull(proofRec);
         }
 
-        [TestMethod()]
-        public void UpdateSpiritTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void UpdateVendorTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
         public void UpdateStorageTest()
         {
             // Arrange
@@ -254,24 +198,6 @@ namespace WebApp.Helpers.Tests
         }
 
         [TestMethod()]
-        public void UpdateRawMaterialTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetSpiritListTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetVendorListTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
         public void GetStorageListTest()
         {
             // Arrange
@@ -281,84 +207,6 @@ namespace WebApp.Helpers.Tests
 
             // Assert
             Assert.IsNotNull(result, "GetStorageListTest result returned is null");
-        }
-
-        [TestMethod()]
-        public void CreatePurchaseTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetPurchasesListTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void CreateProductionTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetProductionListTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetSpiritToKindListDataTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void DestroyBatchTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetPurchaseDataForDestructionTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetProductionDataForDestructionTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetDestroyedBatchesTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetMaterialCategoryListTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetStorageReportDataTest()
-        {
-            // Arrange
-
-            // Act
-            //StorageReport result = dLayer.GetStorageReportData();
-
-            // Assert
-            //Assert.IsNotNull(result, "GetUnitList result returned is null");
-        }
-
-        [TestMethod()]
-        public void GetUnfinishedSpiritsForProductionReportTest()
-        {
-            Assert.Fail();
         }
     }
 }
