@@ -330,7 +330,7 @@ namespace WebApp.Helpers
         public bool Gauged { get; set; }
     }
 
-    /// <summary>
+     /// <summary>
     /// BlendingAdditive is the object that contains Additive information for 
     /// a given Blending record that we are either creating or viewing
     /// </summary>

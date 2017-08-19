@@ -499,7 +499,7 @@ namespace WebApp.Helpers
                             }
                             catch (Exception e)
                             {
-                                throw e;
+                                throw;
                             }
                         }
                     }
@@ -612,7 +612,7 @@ namespace WebApp.Helpers
             }
             catch(Exception e)
             {
-                throw e;
+                throw;
             }
 
             procRepObj.Part1 = procRepP1;
@@ -908,7 +908,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
             return retMthdExecResult;
         }
@@ -987,7 +987,7 @@ namespace WebApp.Helpers
                     (from rec in db.Purchase
                         join dslrs in db.AspNetUserToDistiller on rec.DistillerID equals dslrs.DistillerID into dslrs_join
                         from dslrs in dslrs_join.DefaultIfEmpty()
-                        where rec.PurchaseID == purchaseObject.PurchaseId && //&& rec.DistillerID == DistillerID
+                        where rec.PurchaseID == purchaseObject.PurchaseId &&
                         dslrs.UserId == userId
                         select rec).FirstOrDefault();
 
@@ -1018,12 +1018,12 @@ namespace WebApp.Helpers
                         purchT.Note = purchaseObject.Note;
                     }
 
-                    //todo: need tp be able to add update for storages and Material Type(even though, updating material type might be difficult)
+                    //todo: need to be able to add update for storages and Material Type(even though, updating material type might be difficult)
 
                     db.SaveChanges();
 
                     // Quantity
-                    if (purchT.VolumeID != 0 && purchaseObject.Quantity != null)
+                    if (purchT.VolumeID > 0 && purchaseObject.Quantity != null)
                     {
                         //update quantity record
                         var qtyRec =
@@ -1123,7 +1123,6 @@ namespace WebApp.Helpers
                             db.SaveChanges();
                             purchT.ProofID = newPrfRec.ProofID;
                         }
-
                     }
 
                     // update storages
@@ -1144,6 +1143,7 @@ namespace WebApp.Helpers
 
                     if (purchaseObject.Storage != null)
                     {
+                        string storagesString = "";
                         // write new records to StorageToRecord table
                         foreach (var k in purchaseObject.Storage)
                         {
@@ -1153,18 +1153,30 @@ namespace WebApp.Helpers
                             stoR.TableIdentifier = "pur";
                             db.StorageToRecord.Add(stoR);
                             db.SaveChanges();
+                            storagesString += k.StorageName + "; ";
                         }
+                        purchaseObject.StorageName = storagesString;
                     }
                 }
                 else
                 {
                     return false;
                 }
+
                 retMthdExecResult = true;
+
+                try
+                {
+                    SavePurchaseHistory(purchaseObject, userId);
+                }
+                catch(Exception e)
+                {
+                    throw;
+                }
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
 
             return retMthdExecResult;
@@ -1792,7 +1804,7 @@ namespace WebApp.Helpers
             catch (Exception e)
             {
                 Debug.WriteLine("Error getting Vendor list : " + e);
-                throw e;
+                throw;
             }
 
             return vendorList;
@@ -1831,7 +1843,7 @@ namespace WebApp.Helpers
             catch (Exception e)
             {
                 Debug.WriteLine("Error getting storage data: " + e);
-                throw e;
+                throw;
             }
 
             return storageList;
@@ -2122,7 +2134,7 @@ namespace WebApp.Helpers
                         }
                         catch(Exception e)
                         {
-                            throw e;
+                            throw;
                         }
                     }
 
@@ -2152,7 +2164,7 @@ namespace WebApp.Helpers
                         }
                         catch (Exception e)
                         {
-                            throw e;
+                            throw;
                         }
                     }
 
@@ -2997,12 +3009,64 @@ namespace WebApp.Helpers
                 }
 
                 retMthdExecResult = true;
+
+                // now, lets' try to save to history table
+                try
+                {
+                    purchaseObject.PurchaseId = purchT.PurchaseID;
+                    SavePurchaseHistory(purchaseObject, userId);
+                }
+                catch (Exception e)
+                {
+                    throw;
+                }
+                
             }
             catch (Exception e)
             {
                 retMthdExecResult = false;
                 return retMthdExecResult;
-                throw e;
+                throw;
+            }
+
+            return retMthdExecResult;
+        }
+
+        /// <summary>
+        /// SavePurchaseHistory method executes an insertion into PurchaseHistorty table for audit purposes
+        /// </summary>
+        /// <param name="purObject"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        internal bool SavePurchaseHistory(PurchaseObject purObject, int userId)
+        {
+            bool retMthdExecResult = false;
+            try
+            {
+                PurchaseHistory purH = new PurchaseHistory();
+                purH.Alcohol = purObject.AlcoholContent;
+                purH.Gauged = purObject.Gauged;
+                purH.Note = purObject.Note;
+                purH.Price = purObject.Price;
+                purH.Proof = purObject.ProofGallon;
+                purH.PurchaseDate = purObject.PurchaseDate;
+                purH.PurchaseID = purObject.PurchaseId;
+                purH.State = purObject.State;
+                purH.Status = purObject.Status;
+                purH.UserID = userId;
+                purH.PurchaseName = purObject.PurBatchName;
+                purH.UpdateDate = DateTime.Today;
+                purH.Vendor = purObject.VendorName;
+                purH.Volume = purObject.Quantity;
+                purH.Weight = purObject.VolumeByWeight;
+                purH.Storage = purObject.StorageName;
+
+                db.PurchaseHistory.Add(purH);
+                db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw;
             }
 
             return retMthdExecResult;
@@ -4925,7 +4989,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
             return retMthdExecResult;
         }
@@ -4955,7 +5019,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
         }
 
@@ -5005,7 +5069,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
         }
 
@@ -5383,7 +5447,7 @@ namespace WebApp.Helpers
             }
             catch(Exception e)
             {
-                throw e;
+                throw;
             }
 
             prodRepObj.ProdReportPart6 = prodReportPart6List;
@@ -5555,7 +5619,7 @@ namespace WebApp.Helpers
                             }
                             catch (Exception e)
                             {
-                                throw e;
+                                throw;
                             }
                         }
                     }
@@ -5563,7 +5627,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
         }
 
@@ -5763,7 +5827,7 @@ namespace WebApp.Helpers
                             }
                             catch (Exception e)
                             {
-                                throw e;
+                                throw;
                             }
                         }
                     }
@@ -5771,7 +5835,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
         }
 
@@ -5801,7 +5865,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
         }
 
@@ -6277,7 +6341,7 @@ namespace WebApp.Helpers
             }
             catch(Exception e)
             {
-                throw e;
+                throw;
             }
         }
 

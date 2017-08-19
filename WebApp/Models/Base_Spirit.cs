@@ -340,7 +340,7 @@ namespace WebApp.Models
         public int PurchaseID { get; set; }
         public string PurchaseName { get; set; } // purchase batch name
         public float Price { get; set; }
-        public int VendorID { get; set; } 
+        public string Vendor { get; set; } 
         public float Volume { get; set; }
         public float Weight { get; set; }
         public float Alcohol { get; set; }
@@ -349,11 +349,13 @@ namespace WebApp.Models
         public DateTime PurchaseDate { get; set; }
         [MaxLength(1024)]
         public string Note { get; set; }
-        public int StateID { get; set; } 
-        public int StatusID { get; set; }
+        public string State { get; set; } 
+        public string Status { get; set; }
         public bool Gauged { get; set; } // this value is showing whether the particular record has been gauged so it shows up in reporting
         public int UserID { get; set; } // user that made the change
+        [Column(TypeName = "datetime2")]
         public DateTime UpdateDate { get; set; }
+        public string Storage { get; set; }
     }
     /// <summary>
     /// Production History table keeps track of changes that happen to a particular production record. 
@@ -380,6 +382,7 @@ namespace WebApp.Models
         [Key]
         public int ProductionHistoryID { get; set; }
         public int ProductionID { get; set; }
+        [Column(TypeName = "datetime2")]
         public DateTime UpdateDate { get; set; }
         public string ProductionName { get; set; } // production batch name
         [Column(TypeName = "datetime2")]
@@ -390,12 +393,13 @@ namespace WebApp.Models
         public float Weight { get; set; }
         public float Alcohol { get; set; }
         public float Proof { get; set; }   
-        public int StatusID { get; set; }
-        public int StateID { get; set; }
+        public string Status { get; set; }
+        public string State { get; set; }
         [MaxLength(1024)]
         public string Note { get; set; }
         public int UserID { get; set; }
         public bool Gauged { get; set; } // this value is showing whether the particular record has been gauged so it shows up in reporting
+        public string Storage { get; set; }
     }
 
     /// <summary>
