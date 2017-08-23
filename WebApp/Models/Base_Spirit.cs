@@ -356,7 +356,10 @@ namespace WebApp.Models
         [Column(TypeName = "datetime2")]
         public DateTime UpdateDate { get; set; }
         public string Storage { get; set; }
+        public string RecordName { get; set; } // name of raw material used in this purchase
+        public int SpiritTypeReportingID { get; set; }
     }
+
     /// <summary>
     /// Production History table keeps track of changes that happen to a particular production record. 
     /// Trigger is doing the job of table updates
@@ -400,6 +403,15 @@ namespace WebApp.Models
         public int UserID { get; set; }
         public bool Gauged { get; set; } // this value is showing whether the particular record has been gauged so it shows up in reporting
         public string Storage { get; set; }
+        public string BurningDownMethod { get; set; } // this is used in distillation when at the time of burning down used materials. Currently, possible values are {"weight", "volume"}
+        public string UsedMats { get; set; } // this field contains record ids that went into production id in question. Blueprint of value to be inserted: {ID, NewVal, Proof, DistillableOrigin, BurningDownMethod}{ID, NewVal, Proof, DistillableOrigin, BurningDownMethod}
+        public string SpiritCutName { get; set; }
+        public string BlendingAdditives { get; set; } // this field contains blending additives that go into production (for now, we only do this for Blending). Blueprint for value to be inserted: {RawMaterialId, RawMaterialName, RawMaterialQuantity, UnitOfMeasurement}
+        public string BottlingInfo { get; set; } // this field contains botlling information that go into production. Blueprint for value to be inserted: {CaseCapacity, BottleCapacity, CaseQuantity, BottleQuantity}
+        public int SpiritTypeReportingID { get; set; }
+        public int MaterialKindReportingID { get; set; }
+        public float TaxedProof { get; set; } // Proof value indicated as taxable. For now, it is used to enable reporting processing. In  other words, how much alcohol has been sold.
+        public System.DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened
     }
 
     /// <summary>

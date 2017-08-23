@@ -246,8 +246,6 @@ namespace WebApp.Helpers
         public float BottleCapacity { get; set; }
         public float CaseQuantity { get; set; }
         public int BottleQuantity { get; set; }
-        //public string SpiritName { get; set; }
-        //public int SpiritId { get; set; }
     }
 
     /// <summary>
