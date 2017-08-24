@@ -791,6 +791,21 @@ namespace WebApp.Models
     }
 
     /// <summary>
+    /// BottlingFillTest table contains bottling fill test proof records associated with bottling production ID
+    /// </summary>
+    public class FillTest
+    {
+        [Key]
+        public int FillTestID { get; set; }
+        [Column(Order = 1), ForeignKey("Production")]
+        public int ProductionID { get; set; }
+        public float ProofGallons { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime FillTestDate { get; set; }
+
+        public virtual Production Production { get; set; }
+    }
+    /// <summary>
     /// ProductionType table maps production ID with the type of production
     /// </summary>
     public class ProductionType
@@ -852,7 +867,7 @@ namespace WebApp.Models
         public DbSet<MaterialKindReporting> MaterialKindReporting { get; set; }
         public DbSet<SpiritType2MaterialKindReporting> SpiritType2MaterialKindReporting { get; set; }
         public DbSet<MaterialDict2MaterialCategory> MaterialDict2MaterialCategory { get; set; }
-        
+        public DbSet<FillTest> FillTest { get; set; }
 
         // Remove table name pluralization before context(table) creation. Called only once when context(table) is created.
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
