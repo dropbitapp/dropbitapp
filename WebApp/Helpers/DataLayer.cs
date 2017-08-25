@@ -9,6 +9,8 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Collections;
 using Microsoft.AspNet.Identity;
+using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Validation;
 
 namespace WebApp.Helpers
 {
@@ -6352,6 +6354,280 @@ namespace WebApp.Helpers
                 throw;
             }
             return materialCatList;
+        }
+
+        internal bool RemoveRecordsFromDBForUser(int userId)
+        {
+            bool retMthdExecResult = false;
+            try
+            {
+                #region Production Tables 
+                IEnumerable<ProductionToPurchase> queryProductionToPurchase =
+                from prod2Purch in db.ProductionToPurchase
+                join prod in db.Production on prod2Purch.ProductionID equals prod.ProductionID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select prod2Purch;
+
+                db.ProductionToPurchase.RemoveRange(queryProductionToPurchase);
+
+                IEnumerable<ProductionToSpiritTypeReporting> queryProd2SpiritTypeReporting =
+                from prod2SpirRepo in db.ProductionToSpiritTypeReporting
+                join prod in db.Production on prod2SpirRepo.ProductionID equals prod.ProductionID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select prod2SpirRepo;
+
+                db.ProductionToSpiritTypeReporting.RemoveRange(queryProd2SpiritTypeReporting);
+
+                IEnumerable<Weight> queryWeight =
+                from vbw in db.Weight
+                join prod in db.Production on vbw.WeightID equals prod.WeightID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select vbw;
+
+                db.Weight.RemoveRange(queryWeight);
+
+                IEnumerable<Volume> queryVolume =
+                from volume in db.Volume
+                join prod in db.Production on volume.VolumeID equals prod.VolumeID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select volume;
+
+                db.Volume.RemoveRange(queryVolume);
+
+                IEnumerable<StorageToRecord> queryStorag2Record =
+               from sto2Rec in db.StorageToRecord
+               join prod in db.Production on sto2Rec.RecordId equals prod.ProductionID
+               join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+               from us2Distills in us2Distills_join.DefaultIfEmpty()
+               where us2Distills.UserId == userId &&
+               sto2Rec.TableIdentifier == "prod" 
+               select sto2Rec;
+
+                db.StorageToRecord.RemoveRange(queryStorag2Record);
+
+                IEnumerable<Alcohol> queryAlcohol =
+                from alc in db.Alcohol
+                join prod in db.Production on alc.AlcoholID equals prod.AlcoholID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select alc;
+
+                db.Alcohol.RemoveRange(queryAlcohol);
+
+                IEnumerable<Proof> queryProof =
+                from proof in db.Proof
+                join prod in db.Production on proof.ProofID equals prod.ProofID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select proof;
+
+                db.Proof.RemoveRange(queryProof);
+
+                IEnumerable<ProductionToSpirit> queryProductionToSpirit =
+                from prod2Spirit in db.ProductionToSpirit
+                join prod in db.Production on prod2Spirit.ProductionID equals prod.ProductionID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select prod2Spirit;
+
+                db.ProductionToSpirit.RemoveRange(queryProductionToSpirit);
+
+                IEnumerable<ProductionToSpiritCut> queryProductionToSpiritCut =
+                from prod2SpiritCut in db.ProductionToSpiritCut
+                join prod in db.Production on prod2SpiritCut.ProductionID equals prod.ProductionID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select prod2SpiritCut;
+
+                db.ProductionToSpiritCut.RemoveRange(queryProductionToSpiritCut);
+
+                IEnumerable<BlendedComponent> queryBlendedComponent =
+                from blendComponent in db.BlendedComponent
+                join prod in db.Production on blendComponent.ProductionID equals prod.ProductionID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select blendComponent;
+
+                db.BlendedComponent.RemoveRange(queryBlendedComponent);
+
+                IEnumerable<BottlingInfo> queryBottlingInfo =
+                from bottlingInfo in db.BottlingInfo
+                join prod in db.Production on bottlingInfo.ProductionID equals prod.ProductionID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select bottlingInfo;
+
+                db.BottlingInfo.RemoveRange(queryBottlingInfo);
+
+                IEnumerable<Production4Reporting> queryProduction4Reporting =
+                from prod4Reporting in db.Production4Reporting
+                join prod in db.Production on prod4Reporting.ProductionID equals prod.ProductionID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select prod4Reporting;
+
+                db.Production4Reporting.RemoveRange(queryProduction4Reporting);
+
+                IEnumerable<ProductionContent> queryProductionContent =
+                from prodCont in db.ProductionContent
+                join prod in db.Production on prodCont.ProductionID equals prod.ProductionID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select prodCont;
+
+                db.ProductionContent.RemoveRange(queryProductionContent);
+
+                IEnumerable<GainLoss> queryGainLoss =
+                from gainloss in db.GainLoss
+                join prod in db.Production on new { BlendedRecordId = gainloss.BlendedRecordId } equals new { BlendedRecordId = prod.ProductionID }
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select gainloss;
+
+                db.GainLoss.RemoveRange(queryGainLoss);
+
+                IEnumerable<TaxWithdrawn> queryTaxWithdrawn =
+                from taxW in db.TaxWithdrawn
+                join prod in db.Production on taxW.ProductionID equals prod.ProductionID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select taxW;
+
+                db.TaxWithdrawn.RemoveRange(queryTaxWithdrawn);
+
+                IEnumerable< Production> queryProduction =
+                from Production in db.Production
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = Production.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select Production;
+
+                db.Production.RemoveRange(queryProduction);
+
+                #endregion // end of production tables deletion
+
+                #region Purchase Tables
+                IEnumerable<StorageToRecord> queryStorageToRecord =
+                from sto2Rec in db.StorageToRecord
+                join purch in db.Purchase on new { RecordId = sto2Rec.RecordId } equals new { RecordId = purch.PurchaseID }
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = purch.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId &&
+                  sto2Rec.TableIdentifier == "pur"
+                select sto2Rec;
+
+                db.StorageToRecord.RemoveRange(queryStorageToRecord);
+
+                IEnumerable<ProductionToPurchase> queryProductionToPurchase4Purchase =
+                from prod2Purch in db.ProductionToPurchase
+                join purch in db.Purchase on prod2Purch.ProductionID equals purch.PurchaseID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = purch.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select prod2Purch;
+                db.ProductionToPurchase.RemoveRange(queryProductionToPurchase4Purchase);
+
+                IEnumerable<Weight> queryWeight4Purchase =
+               from vbw in db.Weight
+               join purch in db.Purchase on vbw.WeightID equals purch.WeightID
+               join us2Distills in db.AspNetUserToDistiller on new { DistillerID = purch.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+               from us2Distills in us2Distills_join.DefaultIfEmpty()
+               where us2Distills.UserId == userId
+               select vbw;
+
+                db.Weight.RemoveRange(queryWeight4Purchase);
+
+                IEnumerable<Volume> queryVolume4Purchase =
+                from volume in db.Volume
+                join purch in db.Production on volume.VolumeID equals purch.VolumeID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = purch.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select volume;
+
+                db.Volume.RemoveRange(queryVolume4Purchase);
+
+                IEnumerable<Alcohol> queryAlcohol4Purchase =
+                from alc in db.Alcohol
+                join purch in db.Purchase on alc.AlcoholID equals purch.AlcoholID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = purch.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select alc;
+
+                db.Alcohol.RemoveRange(queryAlcohol4Purchase);
+
+                IEnumerable<Proof> queryProof4Purchase =
+                from proof in db.Proof
+                join purch in db.Purchase on proof.ProofID equals purch.ProofID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = purch.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select proof;
+
+                db.Proof.RemoveRange(queryProof4Purchase);
+
+                IEnumerable<Purchase4Reporting> queryPurchase4Reporting =
+                from purch4Reporting in db.Purchase4Reporting
+                join purch in db.Purchase on purch4Reporting.PurchaseID equals purch.PurchaseID
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = purch.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select purch4Reporting;
+
+                db.Purchase4Reporting.RemoveRange(queryPurchase4Reporting);
+
+                IEnumerable<Purchase> queryPurchase =
+                from purch in db.Purchase
+                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = purch.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
+                from us2Distills in us2Distills_join.DefaultIfEmpty()
+                where us2Distills.UserId == userId
+                select purch;
+
+                db.Purchase.RemoveRange(queryPurchase);
+                #endregion
+
+                db.SaveChanges();
+            }
+            catch (DbUpdateException e)
+            {
+                throw e;
+            }
+            catch (DbEntityValidationException e)
+            {
+                throw e;
+            }
+            catch (NotSupportedException e)
+            {
+                throw e;
+            }
+            catch (ObjectDisposedException e)
+            {
+                throw e;
+            }
+            catch (InvalidOperationException e)
+            {
+                throw e;
+            }
+            return retMthdExecResult;
         }
         #endregion
     }
