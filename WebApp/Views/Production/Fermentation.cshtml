@@ -41,18 +41,6 @@
 
             function _addEventListeners() {
 
-                // Check "Final Distillation Gauge" checkbox
-                $('#FinalGaugeCheckBox').on('checked', function (event) {
-                    $('.reporting-input-group').show();
-                });
-
-                // Uncheck "Final Distillation" Gauge checkbox
-                $('#FinalGaugeCheckBox').on('unchecked', function (event) {
-                    $('.reporting-input-group').hide();
-                    $('#ReportingSpiritTypeDropDown').jqxDropDownList('clearSelection');
-                    $('#ReportingMaterialKindDropDown').jqxDropDownList('clearSelection');
-                });
-
                 // Populates MaterialKindForReporting drop down when Spirit Type is chosen.
                 $('#ReportingSpiritTypeDropDown').on('select', function (event) {
                     if (event.args) {
@@ -394,12 +382,6 @@
                     source: storageAdapter, displayMember: 'StorageName', multiple: true,
                     theme: 'bootstrap'
                 });
-                $('#FinalGaugeCheckBox').jqxCheckBox({
-                    theme: 'bootstrap',
-                    width: '26px',
-                    height: '26px',
-                    boxSize: '18px'
-                });
                 $("#ReportingSpiritTypeDropDown").jqxDropDownList({
                     source: reportingSpiritKindAdapter,
                     displayMember: 'ProductTypeName',
@@ -409,18 +391,10 @@
                     width: '175px',
                     autoDropDownHeight: true,
                     autoOpen: false,
-                    placeHolder: ''
-                });
-                $('#ReportingMaterialKindDropDown').jqxDropDownList({
-                    //source: assigned 'on select' function for Reporting Spirit dropdown 
-                    displayMember: 'MaterialKindName',
-                    valueMember: 'MaterialKindID',
-                    theme: 'bootstrap',
-                    height: '26px',
-                    width: '175px',
-                    autoDropDownHeight: true,
-                    autoOpen: false,
-                    placeHolder: ''
+                    placeHolder: '',
+                    disabled: true,
+                    selectedIndex: 10
+
                 });
                 $('#MatBurnDwnDialog').jqxWindow({
                     width: '30%',
@@ -497,26 +471,6 @@
                                 var value = $('#ProdAlcoholContentInput').val();
                                 return value > 0 ? true : false;
                             }
-                        },
-                        {
-                            input: '#ReportingSpiritTypeDropDown', message: 'Please Select Spirit Type', action: 'blur', rule: function (input, commit) {
-                                var index = $('#ReportingSpiritTypeDropDown').jqxDropDownList('getSelectedIndex');
-                                var finalGauge = $('#FinalGaugeCheckBox').val();
-                                if (finalGauge === false || index != -1) {
-                                    return true;
-                                }
-                                return false;
-                            }
-                        },
-                        {
-                            input: '#ReportingMaterialKindDropDown', message: 'Please Select Material Kind', action: 'blur', rule: function (input, commit) {
-                                var index = $('#ReportingMaterialKindDropDown').jqxDropDownList('getSelectedIndex');
-                                var finalGauge = $('#FinalGaugeCheckBox').val();
-                                if (finalGauge === false || index != -1) {
-                                    return true;
-                                }
-                                return false;
-                            }
                         }
                     ]
                 });
@@ -567,14 +521,12 @@
 
             // Data adapter for Reporting Spirit Type and Material Kind
             function _bindReportingSpiritKind() {
-                var url = '/Production/GetSpiritToKindListData';
+                var url = '/Purchase/GetReportingSpiritTypes';
                 var source = {
-                    datatype: 'json',
+                    datatype: "json",
                     dataFields: [
                         { name: 'SpiritTypeReportingID', type: 'number' },
-                        { name: 'ProductTypeName', type: 'string' },
-                        { name: 'MaterialKindID', map: 'MaterialKindObject>MaterialKindID' },
-                        { name: 'MaterialKindName', map: 'MaterialKindObject>MaterialKindName' }
+                        { name: 'ProductTypeName', type: 'string' }
                     ],
                     id: 'SpiritTypeReportingID',
                     url: url,
@@ -609,13 +561,6 @@
                     spiritTypeReportingID = spiritType.value;
                 }
 
-                var materialKindReportingID = 0;
-                var materialKind = $('#ReportingMaterialKindDropDown').jqxDropDownList('getSelectedItem');
-                if (materialKind !== null & materialKind !== undefined && materialKind !== '')
-                {
-                   materialKindReportingID = materialKind.value;
-                }
-
                 var prodStartUtc = genericWorkflowHelper.convertUTC( $( '#ProdStartDate' ).jqxDateTimeInput( 'val' ), true );
                 var prodEndUtc = genericWorkflowHelper.convertUTC($('#ProdEndDate').jqxDateTimeInput('val'), true);
 
@@ -630,9 +575,8 @@
                     VolumeByWeight: $('#ProdVolumeByWeightInput').jqxNumberInput('val'),
                     ProofGallon: $('#ProdProofGallonsInput').jqxNumberInput('val'),
                     Storage: storageList,
-                    Gauged: $('#FinalGaugeCheckBox').val(),
+                    Gauged: true,
                     SpiritTypeReportingID: spiritTypeReportingID,
-                    MaterialKindReportingID: materialKindReportingID,
                     Note: $('#ProdNotes').jqxTextArea('val'),
                     UsedMats: usedMatsList
                 };
@@ -1035,23 +979,9 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="FinalGaugeCheckBox" class="col-sm-6 control-label">Gauge</label>
+                                        <label for="ReportingSpiritTypeDropDown" class="col-sm-6 control-label">Spirit Type for Reporting</label>
                                         <div class="col-sm-6">
-                                            <div id="FinalGaugeCheckBox"></div>
-                                        </div>
-                                    </div>
-                                    <div class="reporting-input-group">
-                                        <div class="form-group">
-                                            <label for="ReportingSpiritTypeDropDown" class="col-sm-6 control-label">Spirit Type for Reporting</label>
-                                            <div class="col-sm-6">
-                                                <div id="ReportingSpiritTypeDropDown"></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="ReportingMaterialKindDropDown" class="col-sm-6 control-label">Material Kind for Reporting</label>
-                                            <div class="col-sm-6">
-                                                <div id="ReportingMaterialKindDropDown"></div>
-                                            </div>
+                                            <div id="ReportingSpiritTypeDropDown"></div>
                                         </div>
                                     </div>
                                 </form>
