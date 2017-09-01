@@ -109,7 +109,7 @@
 
                         // Column (L) - update line 14 totals across all Spirit Types
                         producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                        producedTotals += parseFloat( result.Part1[i].SorageAcct );
+                        producedTotals += parseFloat(result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct);
                         $( '#p1_14l_Total' ).val( producedTotals );
 
                         // Column (L) - update Received for Redistillation for across all Spirit Types
@@ -150,7 +150,7 @@
 
                         // Column (L) - update line 14 totals across all Spirit Types
                         producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                        producedTotals += parseFloat( result.Part1[i].SorageAcct );
+                        producedTotals += parseFloat( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
                         $( '#p1_14l_Total' ).val( producedTotals );
 
                         // Column (L) - update Received for Redistillation for across all Spirit Types
@@ -191,7 +191,7 @@
 
                         // Column (L) - update line 14 totals across all Spirit Types
                         producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                        producedTotals += parseFloat( result.Part1[i].SorageAcct );
+                        producedTotals += parseFloat( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
                         $( '#p1_14l_Total' ).val( producedTotals );
 
                         // Column (L) - update Received for Redistillation for across all Spirit Types
@@ -232,7 +232,7 @@
 
                         // Column (L) - update line 14 totals across all Spirit Types
                         producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                        producedTotals += parseFloat( result.Part1[i].SorageAcct );
+                        producedTotals += parseFloat( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
                         $( '#p1_14l_Total' ).val( producedTotals );
 
                         // Column (L) - update Received for Redistillation for across all Spirit Types
@@ -289,7 +289,7 @@
 
                         // Column (L) - update line 14 totals across all Spirit Types
                         producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                        producedTotals += parseFloat( result.Part1[i].SorageAcct );
+                        producedTotals += parseFloat( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
                         $( '#p1_14l_Total' ).val( producedTotals );
 
                         // Column (L) - update Received for Redistillation for across all Spirit Types
@@ -303,6 +303,8 @@
                         $( '#p1_17b_l_Total' ).val( unfinishedTotal );
                     }
                 }
+
+                // update totals for line 14 column "l"
 
                 //grisha - todo: this could potentially be moved to a function method
                 for ( var i = 0; i < result.Part2Through5.length; i++ )

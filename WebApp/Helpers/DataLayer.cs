@@ -4357,7 +4357,12 @@ namespace WebApp.Helpers
             return retMthdExecResult;
         }
 
-        /// <returns>Returns original proof value</returns>
+        /// <summary>
+        /// <returns>Returns original proof value
+        /// </summary>
+        /// <param name="proofId"></param>
+        /// <param name="newProof"></param>
+        /// <returns></returns>
         public float UpdateProof(int proofId, float newProof)
         {
             float oldProof = 0.0F;
