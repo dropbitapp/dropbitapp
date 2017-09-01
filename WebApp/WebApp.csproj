@@ -234,6 +234,10 @@
     <Compile Include="Migrations\201708240433250_creatingFillTestTableUpdate.Designer.cs">
       <DependentUpon>201708240433250_creatingFillTestTableUpdate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201708302352532_GaugeSerialGeneration.cs" />
+    <Compile Include="Migrations\201708302352532_GaugeSerialGeneration.Designer.cs">
+      <DependentUpon>201708302352532_GaugeSerialGeneration.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
@@ -1186,6 +1190,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201708240433250_creatingFillTestTableUpdate.resx">
       <DependentUpon>201708240433250_creatingFillTestTableUpdate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201708302352532_GaugeSerialGeneration.resx">
+      <DependentUpon>201708302352532_GaugeSerialGeneration.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

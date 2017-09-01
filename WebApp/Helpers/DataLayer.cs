@@ -55,6 +55,12 @@ namespace WebApp.Helpers
 
     }
 
+    public enum RecordType
+    {
+        Purchase = 1,
+        Production
+    }
+
     /// <summary>
     /// This object is needed as a temporary storage to keep initial query results for 
     /// production report. Not ideal but since I can't(not can't - don't want to waste my time on this) come up with a decent query that 
@@ -82,6 +88,121 @@ namespace WebApp.Helpers
         private DistilDBContext db = new DistilDBContext();
 
         #region Shared Methods
+
+        /// <summary>
+        /// Generate gauge serial number starting with 1 at the beginning of the year.
+        /// </summary>
+        /// <param name="recordId"></param>
+        /// <param name="recordType"></param>
+        public void GenerateGaugeSerial(int recordId, int recordType)
+        {
+            string newSerial = string.Empty;
+            var currentYear = DateTime.Now.Year;
+
+            // Find last GaugeSerial record and get it's serial string
+            // Sample serial string format: 12017, 23452017(last four digits represent a year)
+            var last = (from rec in db.GaugeSerial
+                       orderby rec.GaugeSerialID descending
+                       select rec.Serial).FirstOrDefault();
+
+            if (last != null)
+            {
+                // Parse serial and year from serial string
+                int serial;
+                short year;
+                bool isSerial = int.TryParse((last.Substring(0, last.Length - 4)), out serial);
+                bool isYear = short.TryParse((last.Substring(last.Length - 4, 4)), out year);
+
+                if (isSerial && isYear)
+                {
+                    // If the last record in table was created in the last year, reset new serial to 1
+                    if (year < currentYear)
+                    {
+                        newSerial = "1" + currentYear.ToString();
+                    }
+                    // If the last record in table was created in the same year, increment new serial by 1
+                    else if (year == currentYear)
+                    {
+                        // Increment last serial before generating new serial string
+                        newSerial = (++serial) + currentYear.ToString();
+                    }
+                }
+                else
+                {
+                    throw new Exception("TryParse failed to parse serial.");
+                }
+            }
+            else // Create a new serial record if table is empty, start serial at 1
+            {
+                newSerial = "1" + currentYear.ToString();
+            }
+
+            // Create new gauge serial database record
+            GaugeSerial serialRec = new GaugeSerial();
+            serialRec.RecordID = recordId;
+            serialRec.RecordType = recordType;
+            serialRec.Serial = newSerial;
+            db.GaugeSerial.Add(serialRec);
+            db.SaveChanges();
+        }
+
+        /// <summary>
+        /// Get gauge serial number records falling within specified time period.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        public List<GaugeSerial> GetGaugeSerial(DateTime start, DateTime end)
+        {
+            List<GaugeSerial> records;
+
+            // Find all serial records that are associated with purchase/production record whose date falls within supplied range
+            var res = (from rec in db.GaugeSerial
+                        join production in db.Production on rec.RecordID equals production.ProductionID into production_join
+                        from production in production_join.DefaultIfEmpty()
+                        join purchase in db.Purchase on rec.RecordID equals purchase.PurchaseID into purchase_join
+                        from purchase in purchase_join.DefaultIfEmpty()
+                        where (rec.RecordType == 1 &&
+                              purchase.PurchaseDate > start &&
+                              purchase.PurchaseDate < end)
+                              || (rec.RecordType == 2 &&
+                              production.ProductionDate > start &&
+                              production.ProductionDate < end)
+                        select rec).DefaultIfEmpty();
+
+            if (res != null)
+            {
+                records = new List<GaugeSerial>(res.Count());
+                records.AddRange(res);
+            }
+            else
+            {
+                records = null;
+            }
+            return records;
+        }
+
+        /// <summary>
+        /// Get gauge serial number record matching supplied recordId and recordType.
+        /// </summary>
+        /// <param name="recordId"></param>
+        /// <param name="recordType"></param>
+        public int GetGaugeSerial(int recordId, int recordType)
+        {
+            var res = (from rec in db.GaugeSerial
+                       where rec.RecordID == recordId && 
+                             rec.RecordType == recordType
+                       select rec.Serial).FirstOrDefault();
+
+            if (res != null)
+            {
+                return int.Parse(res);
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
         // here we are keeping methods that are used through out the application workflows. 
         public List<PurMatObject> GetRawMaterialList4Fermentation(int userId)
         {

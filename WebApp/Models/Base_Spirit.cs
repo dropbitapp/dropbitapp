@@ -7,6 +7,21 @@ using System.Data.Entity.ModelConfiguration.Conventions;
 namespace WebApp.Models
 {
     /// <summary>
+    /// Stores serial numbers that are assigned to a purchase or production record at the time of gauging
+    /// </summary>
+    public class GaugeSerial
+    {
+        [Key]
+        public int GaugeSerialID { get; set; }
+        [Required]
+        public string Serial { get; set; }
+        [Required]
+        public int RecordID { get; set; }
+        [Required]
+        public int RecordType { get; set; } // Possible values: 1 for purchase or 2 for Production
+    }
+
+    /// <summary>
     /// TaxWithdrawn table contains records of how much Proof Gallons have been sold for associated Production record.
     /// One thing to note that the table may contain more than one Tax Withdrawal for a particular Production record
     /// in cases when particular bottling record is not sold right away
@@ -817,6 +832,7 @@ namespace WebApp.Models
 
     public class DistilDBContext : DbContext
     {
+        public DbSet<GaugeSerial> GaugeSerial { get; set; }
         public DbSet<TaxWithdrawn> TaxWithdrawn { get; set; }
         public DbSet<ProductionContent> ProductionContent { get; set; }
         public DbSet<ContentField> ContentField { get; set; }

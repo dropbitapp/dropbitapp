@@ -12,9 +12,23 @@ namespace WebApp.Controllers
     {
         private DataLayer dl = new DataLayer();
 
+        public void Test()
+        {
+            #if DEBUG
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = User.Identity.GetUserId<int>();
+                if (userId > 0)
+                {
+                    // Test code goes here
+                }
+            }
+            #endif
+        }
+
         public void NukeRecords()
         {
-#if DEBUG
+            #if DEBUG
             if (User.Identity.IsAuthenticated)
             {
                 var userId = User.Identity.GetUserId<int>();
@@ -30,7 +44,7 @@ namespace WebApp.Controllers
                     }
                 }
             }
-#endif
+            #endif
         }
     }
 }
