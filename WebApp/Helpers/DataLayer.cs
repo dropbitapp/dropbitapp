@@ -5979,7 +5979,7 @@ namespace WebApp.Helpers
         {
             // Query distilled production records transferred to storage account
             var records =
-                from rec in db.Production
+                (from rec in db.Production
                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
                 from proof in proof_join.DefaultIfEmpty()
                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
@@ -5998,11 +5998,11 @@ namespace WebApp.Helpers
                     rec.Gauged == true
                 select new
                 {
-                    reportingCategoryName = str.ProductTypeName,
-                    proof = proof.Value
-                };
+                    reportingCategoryName = str.ProductTypeName ?? "",
+                    proof = (System.Single?)proof.Value ?? (System.Single?)0
+                }).DefaultIfEmpty();
 
-            if (records != null)
+            if (records.First() != null)
             {
                 foreach (var rec in records)
                 {
@@ -6029,7 +6029,7 @@ namespace WebApp.Helpers
         {
             // Query distilled purchase records transferred to storage account
             var records =
-                from rec in db.Purchase
+                (from rec in db.Purchase
                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
                 from proof in proof_join.DefaultIfEmpty()
                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
@@ -6040,19 +6040,19 @@ namespace WebApp.Helpers
                 from str in str_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    rec.PurchaseTypeID == 2 &&
-                    rec.PurchaseTypeID == 3 &&
+                    (rec.PurchaseTypeID == 2 ||
+                    rec.PurchaseTypeID == 3) &&
                     (rec.StatusID == 1 ||
                     rec.StatusID == 2 ||
                     rec.StatusID == 3) &&
                     rec.PurchaseDate < startDate
                 select new
                 {
-                    reportingCategoryName = str.ProductTypeName,
-                    proof = proof.Value
-                };
+                    reportingCategoryName = str.ProductTypeName ?? "",
+                    proof = (System.Single?)proof.Value ?? (System.Single?)0
+                }).DefaultIfEmpty();
 
-            if (records != null)
+            if (records.First() != null)
             {
                 foreach (var rec in records)
                 {
@@ -6079,7 +6079,7 @@ namespace WebApp.Helpers
         {
             // Query distilled production records transferred to storage account
             var records =
-                from rec in db.Production
+                (from rec in db.Production
                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
                 from proof in proof_join.DefaultIfEmpty()
                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
@@ -6098,11 +6098,11 @@ namespace WebApp.Helpers
                     rec.Gauged == true
                 select new
                 {
-                    reportingCategoryName = str.ProductTypeName,
-                    proof = proof.Value
-                };
+                    reportingCategoryName = str.ProductTypeName ?? "",
+                    proof = (System.Single?)proof.Value ?? (System.Single?)0
+                }).DefaultIfEmpty();
 
-            if (records != null)
+            if (records.First() != null)
             {
                 foreach (var rec in records)
                 {
@@ -6129,7 +6129,7 @@ namespace WebApp.Helpers
         {
             // Query distilled purchase records transferred to storage account
             var records =
-                from rec in db.Purchase
+                (from rec in db.Purchase
                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
                 from proof in proof_join.DefaultIfEmpty()
                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
@@ -6140,19 +6140,19 @@ namespace WebApp.Helpers
                 from str in str_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    rec.PurchaseTypeID == 2 &&
-                    rec.PurchaseTypeID == 3 &&
+                    (rec.PurchaseTypeID == 2 ||
+                    rec.PurchaseTypeID == 3) &&
                     (rec.StatusID == 1 ||
                     rec.StatusID == 2) &&
                     rec.PurchaseDate >= startDate &&
                     rec.PurchaseDate <= endDate
                 select new
                 {
-                    reportingCategoryName = str.ProductTypeName,
-                    proof = proof.Value
-                };
+                    reportingCategoryName = str.ProductTypeName ?? "",
+                    proof = (System.Single?)proof.Value ?? (System.Single?)0
+                }).DefaultIfEmpty();
 
-            if (records != null)
+            if (records.First() != null)
             {
                 foreach (var rec in records)
                 {
@@ -6179,7 +6179,7 @@ namespace WebApp.Helpers
         {
             // Query distilled production records transferred from storage account to production account
             var prodRes =
-                from sourceProductionRecord in db.Production
+                (from sourceProductionRecord in db.Production
                 join alcohol in db.Alcohol on sourceProductionRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
                 from alcohol in alcohol_join.DefaultIfEmpty()
                 join productionContent in db.ProductionContent on sourceProductionRecord.ProductionID equals productionContent.RecordID into productionContent_join
@@ -6210,11 +6210,11 @@ namespace WebApp.Helpers
                     sourceProductionRecord.Gauged == true
                 select new
                 {
-                    reportingCategoryName = str.ProductTypeName,
-                    proofGal = (float)(productionContent.ContentValue * alcohol.Value * 2) / 100
-                };
+                    reportingCategoryName = str.ProductTypeName ?? "",
+                    proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                }).DefaultIfEmpty();
 
-            if (prodRes != null)
+            if (prodRes.First() != null)
             {
                 foreach (var rec in prodRes)
                 {
@@ -6241,41 +6241,41 @@ namespace WebApp.Helpers
         {
             // Query distilled purchase records to transfer from storage account to production account
             var purRes =
-                from sourcePurchaseRecord in db.Purchase
-                join alcohol in db.Alcohol on sourcePurchaseRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
-                from alcohol in alcohol_join.DefaultIfEmpty()
-                join productionContent in db.ProductionContent on sourcePurchaseRecord.PurchaseID equals productionContent.RecordID into productionContent_join
-                from productionContent in productionContent_join.DefaultIfEmpty()
-                join contentField in db.ContentField on productionContent.ContentFieldID equals contentField.ContentFieldID into contentField_join
-                from contentField in contentField_join.DefaultIfEmpty()
-                join outputProductionRecord in db.Production on productionContent.ProductionID equals outputProductionRecord.ProductionID into outputProductionRecord_join
-                from outputProductionRecord in outputProductionRecord_join.DefaultIfEmpty()
-                join productionType in db.ProductionType on outputProductionRecord.ProductionTypeID equals productionType.ProductionTypeID into productionType_join
-                from productionType in productionType_join.DefaultIfEmpty()
-                join distiller in db.AspNetUserToDistiller on sourcePurchaseRecord.DistillerID equals distiller.DistillerID into distiller_join
-                from distiller in distiller_join.DefaultIfEmpty()
-                join p2str in db.PurchaseToSpiritTypeReporting on sourcePurchaseRecord.PurchaseID equals p2str.PurchaseID into p2str_join
-                from p2str in p2str_join.DefaultIfEmpty()
-                join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                from str in str_join.DefaultIfEmpty()
-                where
-                    distiller.UserId == userId &&
-                    sourcePurchaseRecord.PurchaseTypeID == 2 &&
-                    sourcePurchaseRecord.PurchaseTypeID == 3 &&
-                    outputProductionRecord.ProductionTypeID == 2 &&
-                    (sourcePurchaseRecord.StatusID == 1 ||
-                    sourcePurchaseRecord.StatusID == 2 ||
-                    sourcePurchaseRecord.StatusID == 3) &&
-                    sourcePurchaseRecord.PurchaseDate < startDate &&
-                    outputProductionRecord.ProductionEndTime >= startDate &&
-                    outputProductionRecord.ProductionEndTime <= endDate
-                select new
-                {
-                    reportingCategoryName = str.ProductTypeName,
-                    proofGal = (float)(productionContent.ContentValue * alcohol.Value * 2) / 100
-                };
+                (from sourcePurchaseRecord in db.Purchase
+                 join alcohol in db.Alcohol on sourcePurchaseRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
+                 from alcohol in alcohol_join.DefaultIfEmpty()
+                 join productionContent in db.ProductionContent on sourcePurchaseRecord.PurchaseID equals productionContent.RecordID into productionContent_join
+                 from productionContent in productionContent_join.DefaultIfEmpty()
+                 join contentField in db.ContentField on productionContent.ContentFieldID equals contentField.ContentFieldID into contentField_join
+                 from contentField in contentField_join.DefaultIfEmpty()
+                 join outputProductionRecord in db.Production on productionContent.ProductionID equals outputProductionRecord.ProductionID into outputProductionRecord_join
+                 from outputProductionRecord in outputProductionRecord_join.DefaultIfEmpty()
+                 join productionType in db.ProductionType on outputProductionRecord.ProductionTypeID equals productionType.ProductionTypeID into productionType_join
+                 from productionType in productionType_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on sourcePurchaseRecord.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.PurchaseToSpiritTypeReporting on sourcePurchaseRecord.PurchaseID equals p2str.PurchaseID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId &&
+                     (sourcePurchaseRecord.PurchaseTypeID == 2 ||
+                     sourcePurchaseRecord.PurchaseTypeID == 3) &&
+                     outputProductionRecord.ProductionTypeID == 2 &&
+                     (sourcePurchaseRecord.StatusID == 1 ||
+                     sourcePurchaseRecord.StatusID == 2 ||
+                     sourcePurchaseRecord.StatusID == 3) &&
+                     sourcePurchaseRecord.PurchaseDate < startDate &&
+                     outputProductionRecord.ProductionEndTime >= startDate &&
+                     outputProductionRecord.ProductionEndTime <= endDate
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? "",
+                     proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                }).DefaultIfEmpty();
 
-            if (purRes != null)
+            if (purRes.First() != null)
             {
                 foreach (var rec in purRes)
                 {
@@ -6302,7 +6302,7 @@ namespace WebApp.Helpers
         {
             // Query distilled production records transferred from storage account to processing account
             var prodRes =
-                from sourceProductionRecord in db.Production
+                (from sourceProductionRecord in db.Production
                 join alcohol in db.Alcohol on sourceProductionRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
                 from alcohol in alcohol_join.DefaultIfEmpty()
                 join productionContent in db.ProductionContent on sourceProductionRecord.ProductionID equals productionContent.RecordID into productionContent_join
@@ -6332,11 +6332,11 @@ namespace WebApp.Helpers
                     outputProductionRecord.ProductionEndTime <= endDate
                 select new
                 {
-                    reportingCategoryName = str.ProductTypeName,
-                    proofGal = (float)(productionContent.ContentValue * alcohol.Value * 2) / 100
-                };
+                    reportingCategoryName = str.ProductTypeName ?? "",
+                    proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                }).DefaultIfEmpty();
 
-            if (prodRes != null)
+            if (prodRes.First() != null)
             {
                 foreach (var rec in prodRes)
                 {
@@ -6363,7 +6363,7 @@ namespace WebApp.Helpers
         {
             // Query distilled purchase records transferred from storage account to processing account
             var purRes =
-                from sourcePurchaseRecord in db.Purchase
+                (from sourcePurchaseRecord in db.Purchase
                 join alcohol in db.Alcohol on sourcePurchaseRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
                 from alcohol in alcohol_join.DefaultIfEmpty()
                 join productionContent in db.ProductionContent on sourcePurchaseRecord.PurchaseID equals productionContent.RecordID into productionContent_join
@@ -6392,11 +6392,11 @@ namespace WebApp.Helpers
                     outputProductionRecord.ProductionEndTime <= endDate
                 select new
                 {
-                    reportingCategoryName = str.ProductTypeName,
-                    proofGal = (float)(productionContent.ContentValue * alcohol.Value * 2) / 100
-                };
+                    reportingCategoryName = str.ProductTypeName ?? "",
+                    proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                }).DefaultIfEmpty();
 
-            if (purRes != null)
+            if (purRes.First() != null)
             {
                 foreach (var rec in purRes)
                 {
