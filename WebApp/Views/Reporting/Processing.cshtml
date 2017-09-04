@@ -128,74 +128,77 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                         result.Part2.RecordedLosses + result.Part2.InventoryShortage + result.Part2.OnHandEndofMonth);
                 }
                 // part 4 of the processing report 
-                if ( result.Part4List[1].ProcessingSpirits === "bulkSpiritDumped" ) {
-                    $( '#p4_49b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].AlcoholNeutral );
-                    $( '#p4_50b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].BlendedStraightWhiskey );
-                    $( '#p4_51a_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].BlendedWhiskeyWithNeutral );
-                    $( '#p4_51b_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].BlendedWhiskeyWithLight );
-                    $( '#p4_52b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].BlendedLightWhiskey );
-                    $( '#p4_53b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].BlendedOtherWhiskey );
-                    $( '#p4_54a_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].ImportedWhiskeyScotch );
-                    $( '#p4_54b_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].ImportedWhiskeyCanadian );
-                    $( '#p4_54c_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].ImportedWhiskeyIrish );
-                    $( '#p4_55b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].DomesticWhiskey160Under );
-                    $( '#p4_56b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].DomesticWhiskeyOver160 );
-                    $( '#p4_57b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].Brandy170Under );
-                    $( '#p4_58b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].BrandyOver170 );
-                    $( '#p4_61b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].Gin );
-                    $( '#p4_62b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].Vodka );
-                    $( '#p4_63b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].Tequila );
-                    $( '#p4_67b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[1].AlcoholNeutral
-                        + result.Part4List[1].BlendedStraightWhiskey
-                        + result.Part4List[1].BlendedWhiskeyWithNeutral
-                        + result.Part4List[1].BlendedWhiskeyWithLight
-                        + result.Part4List[1].BlendedLightWhiskey
-                        + result.Part4List[1].BlendedOtherWhiskey
-                        + result.Part4List[1].ImportedWhiskeyScotch
-                        + result.Part4List[1].ImportedWhiskeyCanadian
-                        + result.Part4List[1].ImportedWhiskeyIrish
-                        + result.Part4List[1].DomesticWhiskey160Under
-                        + result.Part4List[1].DomesticWhiskeyOver160
-                        + result.Part4List[1].Brandy170Under
-                        + result.Part4List[1].BrandyOver170
-                        + result.Part4List[1].Gin
-                        + result.Part4List[1].Vodka
-                        + result.Part4List[1].Tequila );
-                }
-                if ( result.Part4List[0].ProcessingSpirits === "bottled" ) {
-                    $( '#p4_49d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].AlcoholNeutral );
-                    $( '#p4_50d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].BlendedStraightWhiskey );
-                    $( '#p4_51a_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].BlendedWhiskeyWithNeutral );
-                    $( '#p4_51b_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].BlendedWhiskeyWithLight );
-                    $( '#p4_52d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].BlendedLightWhiskey );
-                    $( '#p4_53d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].BlendedOtherWhiskey );
-                    $( '#p4_54a_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].ImportedWhiskeyScotch );
-                    $( '#p4_54b_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].ImportedWhiskeyCanadian );
-                    $( '#p4_54c_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].ImportedWhiskeyIrish );
-                    $( '#p4_55d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].DomesticWhiskey160Under );
-                    $( '#p4_56d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].DomesticWhiskeyOver160 );
-                    $( '#p4_57d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].Brandy170Under );
-                    $( '#p4_58d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].BrandyOver170 );
-                    $( '#p4_61d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].Gin );
-                    $( '#p4_62d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].Vodka );
-                    $( '#p4_63d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].Tequila );
-                    $( '#p4_67d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[0].AlcoholNeutral
-                        + result.Part4List[0].BlendedStraightWhiskey
-                        + result.Part4List[0].BlendedWhiskeyWithNeutral
-                        + result.Part4List[0].BlendedLightWhiskey
-                        + result.Part4List[0].BlendedOtherWhiskey
-                        + result.Part4List[0].BlendedWhiskeyWithLight
-                        + result.Part4List[0].ImportedWhiskeyScotch
-                        + result.Part4List[0].ImportedWhiskeyCanadian
-                        + result.Part4List[0].ImportedWhiskeyIrish
-                        + result.Part4List[0].DomesticWhiskey160Under
-                        + result.Part4List[0].DomesticWhiskeyOver160
-                        + result.Part4List[0].Brandy170Under
-                        + result.Part4List[0].BrandyOver170
-                        + result.Part4List[0].Gin
-                        + result.Part4List[0].Vodka
-                        + result.Part4List[0].Tequila
-                        );
+                for ( var t = 0; t <= result.Part4List.length; t++ )
+                {
+                    if ( result.Part4List[t].ProcessingSpirits === "bulkSpiritDumped" ) {
+                        $( '#p4_49b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].AlcoholNeutral );
+                        $( '#p4_50b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedStraightWhiskey );
+                        $( '#p4_51a_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedWhiskeyWithNeutral );
+                        $( '#p4_51b_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedWhiskeyWithLight );
+                        $( '#p4_52b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedLightWhiskey );
+                        $( '#p4_53b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedOtherWhiskey );
+                        $( '#p4_54a_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].ImportedWhiskeyScotch );
+                        $( '#p4_54b_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].ImportedWhiskeyCanadian );
+                        $( '#p4_54c_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].ImportedWhiskeyIrish );
+                        $( '#p4_55b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].DomesticWhiskey160Under );
+                        $( '#p4_56b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].DomesticWhiskeyOver160 );
+                        $( '#p4_57b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Brandy170Under );
+                        $( '#p4_58b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BrandyOver170 );
+                        $( '#p4_61b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Gin );
+                        $( '#p4_62b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Vodka );
+                        $( '#p4_63b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Tequila );
+                        $( '#p4_67b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].AlcoholNeutral
+                            + result.Part4List[t].BlendedStraightWhiskey
+                            + result.Part4List[t].BlendedWhiskeyWithNeutral
+                            + result.Part4List[t].BlendedWhiskeyWithLight
+                            + result.Part4List[t].BlendedLightWhiskey
+                            + result.Part4List[t].BlendedOtherWhiskey
+                            + result.Part4List[t].ImportedWhiskeyScotch
+                            + result.Part4List[t].ImportedWhiskeyCanadian
+                            + result.Part4List[t].ImportedWhiskeyIrish
+                            + result.Part4List[t].DomesticWhiskey160Under
+                            + result.Part4List[t].DomesticWhiskeyOver160
+                            + result.Part4List[t].Brandy170Under
+                            + result.Part4List[t].BrandyOver170
+                            + result.Part4List[t].Gin
+                            + result.Part4List[t].Vodka
+                            + result.Part4List[t].Tequila );
+                    }
+                    if ( result.Part4List[t].ProcessingSpirits === "bottled" ) {
+                        $( '#p4_49d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].AlcoholNeutral );
+                        $( '#p4_50d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedStraightWhiskey );
+                        $( '#p4_51a_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedWhiskeyWithNeutral );
+                        $( '#p4_51b_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedWhiskeyWithLight );
+                        $( '#p4_52d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedLightWhiskey );
+                        $( '#p4_53d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedOtherWhiskey );
+                        $( '#p4_54a_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].ImportedWhiskeyScotch );
+                        $( '#p4_54b_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].ImportedWhiskeyCanadian );
+                        $( '#p4_54c_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].ImportedWhiskeyIrish );
+                        $( '#p4_55d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].DomesticWhiskey160Under );
+                        $( '#p4_56d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].DomesticWhiskeyOver160 );
+                        $( '#p4_57d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Brandy170Under );
+                        $( '#p4_58d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BrandyOver170 );
+                        $( '#p4_61d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Gin );
+                        $( '#p4_62d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Vodka );
+                        $( '#p4_63d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Tequila );
+                        $( '#p4_67d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].AlcoholNeutral
+                            + result.Part4List[t].BlendedStraightWhiskey
+                            + result.Part4List[t].BlendedWhiskeyWithNeutral
+                            + result.Part4List[t].BlendedLightWhiskey
+                            + result.Part4List[t].BlendedOtherWhiskey
+                            + result.Part4List[t].BlendedWhiskeyWithLight
+                            + result.Part4List[t].ImportedWhiskeyScotch
+                            + result.Part4List[t].ImportedWhiskeyCanadian
+                            + result.Part4List[t].ImportedWhiskeyIrish
+                            + result.Part4List[t].DomesticWhiskey160Under
+                            + result.Part4List[t].DomesticWhiskeyOver160
+                            + result.Part4List[t].Brandy170Under
+                            + result.Part4List[t].BrandyOver170
+                            + result.Part4List[t].Gin
+                            + result.Part4List[t].Vodka
+                            + result.Part4List[t].Tequila
+                            );
+                    }
                 }
             }
 
