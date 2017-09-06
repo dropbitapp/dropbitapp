@@ -313,7 +313,6 @@ namespace WebApp.Helpers
                      where
                        distillers.UserId == userId &&
                        prod.Gauged == true &&
-                       prod.ProductionTypeID == 3 &&
                        prod.ProductionEndTime >= startOfReporting &&
                        prod.ProductionEndTime <= endOfReporting &&
                        (prod.StatusID == 1 ||
