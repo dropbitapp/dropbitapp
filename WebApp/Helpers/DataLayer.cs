@@ -11,6 +11,7 @@ using System.Collections;
 using Microsoft.AspNet.Identity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
+using System.Text;
 
 namespace WebApp.Helpers
 {
@@ -923,7 +924,7 @@ namespace WebApp.Helpers
                     // Widrawn For Tax update:
                     TaxWithdrawn taxes = new TaxWithdrawn();
                     taxes.DateOfSale = pObj.WithdrawalDate;
-                    taxes.DateRecorded = DateTime.Today;
+                    taxes.DateRecorded = DateTime.UtcNow;
                     taxes.ProductionID = pObj.ProductionId;
                     taxes.Value = pObj.TaxedProof;
 
@@ -1287,14 +1288,7 @@ namespace WebApp.Helpers
 
                 retMthdExecResult = true;
 
-                try
-                {
-                    SavePurchaseHistory(purchaseObject, userId);
-                }
-                catch(Exception e)
-                {
-                    throw;
-                }
+                SavePurchaseHistory(purchaseObject, userId);
             }
             catch (Exception e)
             {
@@ -3133,16 +3127,9 @@ namespace WebApp.Helpers
                 retMthdExecResult = true;
 
                 // now, lets' try to save to history table
-                try
-                {
-                    purchaseObject.PurchaseId = purchT.PurchaseID;
-                    SavePurchaseHistory(purchaseObject, userId);
-                }
-                catch (Exception e)
-                {
-                    throw;
-                }
-                
+                purchaseObject.PurchaseId = purchT.PurchaseID;
+                purchaseObject.Status = "Active";
+                SavePurchaseHistory(purchaseObject, userId);
             }
             catch (Exception e)
             {
@@ -3166,29 +3153,59 @@ namespace WebApp.Helpers
             try
             {
                 PurchaseHistory purH = new PurchaseHistory();
-                purH.Alcohol = purObject.AlcoholContent;
-                purH.Gauged = purObject.Gauged;
-                purH.Note = purObject.Note;
-                purH.Price = purObject.Price;
-                purH.Proof = purObject.ProofGallon;
-                purH.PurchaseDate = purObject.PurchaseDate;
                 purH.PurchaseID = purObject.PurchaseId;
-                purH.State = purObject.State;
-                purH.Status = purObject.Status;
-                purH.UserID = userId;
                 purH.PurchaseName = purObject.PurBatchName;
-                purH.UpdateDate = DateTime.Today;
+                purH.Price = purObject.Price;
                 purH.Vendor = purObject.VendorName;
                 purH.Volume = purObject.Quantity;
                 purH.Weight = purObject.VolumeByWeight;
-                purH.Storage = purObject.StorageName;
+                purH.Alcohol = purObject.AlcoholContent;
+                purH.Proof = purObject.ProofGallon;
+                purH.PurchaseDate = purObject.PurchaseDate;
+                purH.Note = purObject.Note;
+                purH.State = purObject.PurchaseType;
+                purH.Status = purObject.Status;
+                purH.Gauged = purObject.Gauged;
+                purH.UserID = userId;
+                purH.UpdateDate = DateTime.UtcNow;
+
+
+                if(purObject.Storage != null)
+                {
+                    StringBuilder storageStr = new StringBuilder();
+                    foreach (var k in purObject.Storage)
+                    {
+                        storageStr.Append(k.StorageName)
+                            .Append(";");
+                    }
+                    purH.Storage = storageStr.ToString();
+                }
+
+                purH.RecordName = purObject.RecordName;
+                purH.SpiritTypeReportingID = purH.SpiritTypeReportingID;
 
                 db.PurchaseHistory.Add(purH);
                 db.SaveChangesAsync();
             }
-            catch (Exception e)
+            catch (DbUpdateException e)
             {
-                throw;
+                throw e;
+            }
+            catch (DbEntityValidationException e)
+            {
+                throw e;
+            }
+            catch (NotSupportedException e)
+            {
+                throw e;
+            }
+            catch (ObjectDisposedException e)
+            {
+                throw e;
+            }
+            catch (InvalidOperationException e)
+            {
+                throw e;
             }
 
             return retMthdExecResult;
@@ -3317,19 +3334,6 @@ namespace WebApp.Helpers
         /// </summary>
         /// <param name="prodObject"></param>
         /// <returns>int</returns> 
-        /* algorithm:
-        * Example with Production type Fermentation
-        * if productionType == "Fermentation"
-        *   Insert into Fermented table
-        *   Insert into Fermentation table
-        *   Insert into FermentedToPurchase table
-        *   Insert into Quantity table
-        *   Insert into VolumeByWeight table
-        *   Insert into Notes table
-        *   Insert into RecordToStorage table
-        *   Insert into StatusToPurchase table
-        *   Insert into StateToPurchase 
-        */
         public bool CreateProduction(ProductionObject prodObject, int userId)
         {
             //define method execution return value to be false by default
@@ -3487,105 +3491,11 @@ namespace WebApp.Helpers
 
             if (prodObject.ProductionType == "Fermentation")
             {
-                var statusString = "";
-
                 // in this section, we need to handle used materials. update its statuses, values, states
                 if (prodObject.UsedMats != null)
                 {
-                    foreach (var i in prodObject.UsedMats)
-                    {
-                        var purch =
-                            (from rec in db.Purchase
-                             where rec.PurchaseID == i.ID
-                             select rec).FirstOrDefault();
-
-                        // we need to determine the status of used material. It could be either "Processing" or "Processed" - depending on if we burnt down all or partial of used material
-                        if (i.OldVal <= 0)
-                        {
-                            statusString = "Processed";
-                        }
-                        else if (i.OldVal >= 0)
-                        {
-                            statusString = "Processing";
-                        }
-
-                        var status =
-                            (from rec in db.Status
-                             where rec.Name == statusString
-                             select rec).FirstOrDefault();
-
-                        purch.StatusID = status.StatusID;
-
-                        // we need to make sure that if the purchased used material is being partially used, we need to create 
-                        // a new production fermentation record in Purchase4Reporting table with the same Purchase ID but with different Volume/Weight value.
-                        if (i.BurningDownMethod != null)
-                        {
-                            purch.BurningDownMethod = i.BurningDownMethod;
-                        }
-
-                        Purchase4Reporting purch4Rep = new Purchase4Reporting();
-                        purch4Rep.PurchaseID = i.ID;
-
-                        // save to the ProductionContent table
-                        ProductionContent prodContent = new ProductionContent();
-                        prodContent.ProductionID = prod.ProductionID;
-                        prodContent.RecordID = i.ID;
-
-                        if (i.BurningDownMethod == "volume")
-                        {
-                            purch4Rep.Volume = i.OldVal;
-                            prodContent.ContentFieldID = 1; // PurFermentableVolume in ContentField table
-                        }
-                        else if (i.BurningDownMethod == "weight")
-                        {
-                            purch4Rep.Weight = i.OldVal;
-                            prodContent.ContentFieldID = 2; // PurFermentableWeight in ContentField table
-                        }
-
-                        prodContent.ContentValue = i.NewVal;
-                        prodContent.isProductionComponent = false;
-
-                        db.ProductionContent.Add(prodContent);
-                        db.Purchase4Reporting.Add(purch4Rep);
-
-                        db.SaveChanges();
-
-                        if (i.BurningDownMethod == "volume" && purch.VolumeID > 0)
-                        {
-                            var q =
-                                (from rec in db.Volume
-                                 where rec.VolumeID == purch.VolumeID
-                                 select rec).FirstOrDefault();
-
-                            if (q != null)
-                            {
-                                q.Value = i.OldVal;
-                            }
-                        }
-
-                        if (purch.WeightID > 0)
-                        {
-                            var vBW =
-                                (from rec in db.Weight
-                                 where purch.WeightID == rec.WeightID
-                                 select rec).FirstOrDefault();
-
-                            if (vBW != null)
-                            {
-                                vBW.Value = i.OldVal;
-                            }
-                        }
-
-                        // save purchase table after we've updated State, Status, Burndown method and Quantities of Materials just used
-                        db.SaveChanges();
-
-                        // we need to update this table because we need to associate production records with IDs of materials used for those production records.
-                        ProductionToPurchase prodToPur = new ProductionToPurchase();
-                        prodToPur.ProductionID = prod.ProductionID;
-                        prodToPur.PurchaseID = i.ID;
-                        db.ProductionToPurchase.Add(prodToPur);
-                        db.SaveChanges();
-                    }
+                    // handle updating records that are being used for creating this production record
+                    UpdateRecordsUsedInProductionWorkflow(prodObject.UsedMats, prod.ProductionID, userId);
                 }
 
                 retMthdExecResult = true;
@@ -3593,14 +3503,14 @@ namespace WebApp.Helpers
 
             else if (prodObject.ProductionType == "Distillation")
             {
-                // list of purchase ids of purchase records and ids associated with production records
-                // that are used in distillation process
-                List<int> purIdL = new List<int>();
                 try
                 {
                     // verify list of batches received from the front-end and used in distillation is not empty
                     if (prodObject.UsedMats != null)
                     {
+                        // handle updating records that are being used for creating this production record
+                        UpdateRecordsUsedInProductionWorkflow(prodObject.UsedMats, prod.ProductionID, userId);
+
                         if (prodObject?.SpiritCutId != null)
                         {
                             ProductionToSpiritCut prodToSCut = new ProductionToSpiritCut();
@@ -3610,344 +3520,6 @@ namespace WebApp.Helpers
                             db.SaveChanges();
                         }
 
-                        // iterate through purchased and produced batches used in distillation
-                        foreach (var k in prodObject.UsedMats)
-                        {
-                            var status = string.Empty;
-
-                            // all of the batch volume/weight used in the distillation
-                            if (k.OldVal <= 0)
-                            {
-                                status = "Processed";
-                            }
-                            // only a part of the batch volume/weight used in the distillation
-                            else if (k.OldVal >= 0)
-                            {
-                                status = "Processing";
-                            }
-
-                            var statusId =
-                                (from rec in db.Status
-                                 where rec.Name == status
-                                 select rec.StatusID).FirstOrDefault();
-
-                            // purchase batch used in the distillation
-                            if (k.DistillableOrigin == "pur")
-                            {
-                                purIdL.Add(k.ID);
-
-                                var purch =
-                                    (from rec in db.Purchase
-                                     where rec.PurchaseID == k.ID
-                                     select rec).FirstOrDefault();
-
-                                // set burning down method for the batch used in distillation,
-                                // if it hasn't been done yet, to "volume" or "weight"
-                                if (purch.BurningDownMethod == null && k.BurningDownMethod != null)
-                                {
-                                    purch.BurningDownMethod = k.BurningDownMethod;
-                                }
-
-                                // we need to make sure that if the purchased used material is being partially distilled, we need to create 
-                                // a new distilate record in Purchase4Reporting table with the same Purchase ID but with different Proof value.
-                                // else, the same record in Purchase4Reporting needs to be marked as redistilled for reporting purposes.
-
-                                if (purch.PurchaseTypeID == 3)
-                                {
-                                    var p =
-                                        (from rec in db.Purchase4Reporting
-                                         where purch.PurchaseID == rec.PurchaseID
-                                         select rec).FirstOrDefault();
-                                    if (p != null)
-                                    {
-                                        if (p.Proof == k.Proof && p.PurchaseID == k.ID)
-                                        {
-                                            p.Redistilled = true;
-                                            db.SaveChanges();
-                                        }
-                                        else if (p.Proof != k.Proof && p.PurchaseID == k.ID)
-                                        {
-                                            Purchase4Reporting purch4Rep = new Purchase4Reporting();
-                                            purch4Rep.PurchaseID = k.ID;
-                                            purch4Rep.Proof = k.Proof;
-
-                                            if (k.BurningDownMethod == "weight" && purch.WeightID > 0)
-                                            {
-                                                purch4Rep.Weight = k.OldVal;
-                                            }
-                                            if (k.BurningDownMethod == "volume" && purch.VolumeID > 0)
-                                            {
-                                                purch4Rep.Volume = k.OldVal;
-                                            }
-                                            purch4Rep.Redistilled = true;
-                                            db.Purchase4Reporting.Add(purch4Rep);
-                                            db.SaveChanges();
-                                        }
-                                    }
-
-                                    // update proof value after it has been recalculated
-                                    // on front-end using the new volume quantity.
-                                    // Update only if purchased batch is distilled, since fermented purchase proof is not stored
-                                    if (purch.ProofID > 0 && k.Proof >= 0)
-                                    {
-                                        var proof =
-                                            (from rec in db.Proof
-                                             where rec.ProofID == purch.ProofID
-                                             select rec).FirstOrDefault();
-
-                                        if (proof != null)
-                                        {
-                                            proof.Value = k.Proof;
-                                        }
-                                        db.SaveChanges();
-                                    }
-                                }
-
-                                // update status to "Processing" or "Processed"
-                                if (statusId > 0 && purch != null)
-                                {
-                                    purch.StatusID = statusId;
-                                }
-
-                                if (k.BurningDownMethod == "volume" && purch.VolumeID > 0)
-                                {
-                                    var q =
-                                        (from rec in db.Volume
-                                         where purch.VolumeID == rec.VolumeID
-                                         select rec).FirstOrDefault();
-
-                                    if (q != null)
-                                    {
-                                        q.Value = k.OldVal;
-                                    }
-
-                                    try
-                                    {
-                                        // Update proof recalculated on the front-end for a batch used in production 
-                                        UpdateProof(purch.ProofID, k.Proof);
-                                    }
-                                    catch(ArgumentOutOfRangeException ex)
-                                    {
-                                        Debug.WriteLine(ex.Message);
-                                    }
-                                }
-
-                                if (k.BurningDownMethod == "weight" && purch.WeightID > 0)
-                                {
-                                    var vBW =
-                                        (from rec in db.Weight
-                                         where rec.WeightID == purch.WeightID
-                                         select rec).FirstOrDefault();
-
-                                    if (vBW != null)
-                                    {
-                                        vBW.Value = k.OldVal;
-                                    }
-                                    db.SaveChanges();
-                                }
-
-                                // save to the ProductionContent table
-                                ProductionContent prodContent = new ProductionContent();
-                                prodContent.ProductionID = prod.ProductionID;
-                                prodContent.RecordID = k.ID;
-                                if (k.BurningDownMethod == "weight")
-                                {
-                                    if(purch.PurchaseTypeID == 2)
-                                    {
-                                        prodContent.ContentFieldID = 4; // PurFermentedWeight in ContentField table
-                                    }
-
-                                    if (purch.PurchaseTypeID == 3)
-                                    {
-                                        prodContent.ContentFieldID = 10; // PurDistilledWeight in ContentField table
-                                    }
-                                }
-
-                                if (k.BurningDownMethod == "volume")
-                                {
-                                    if (purch.PurchaseTypeID == 2)
-                                    {
-                                        prodContent.ContentFieldID = 3; // PurFermentedVolume in ContentField table
-                                    }
-
-                                    if (purch.PurchaseTypeID == 3)
-                                    {
-                                        prodContent.ContentFieldID = 9; // PurDistilledVolume in ContentField table
-                                    }
-                                }
-
-                                prodContent.ContentValue = k.NewVal;
-                                prodContent.isProductionComponent = false;
-
-                                db.ProductionContent.Add(prodContent);
-
-                                db.SaveChanges();
-
-                            }
-                            // production batch used in the distillation
-                            else if (k.DistillableOrigin == "prod")
-                            {
-                                // query for purchaseIds associated with production record
-                                // that is being used in the distillation
-                                var prod2PurIds =
-                                    (from rec in db.ProductionToPurchase
-                                     where rec.ProductionID == k.ID
-                                     select rec.PurchaseID);
-                                // add these purchaseIds to the list
-                                if (prod2PurIds != null)
-                                {
-                                    foreach (var i in prod2PurIds)
-                                    {
-                                        purIdL.Add(i);
-                                    }
-                                }
-
-                                var prodRec =
-                                    (from rec in db.Production
-                                     where rec.ProductionID == k.ID
-                                     select rec).FirstOrDefault();
-
-                                // we need to make sure that if the used material that was produced by us is a distilate and being re-distiled again,
-                                // it needs to be marked as redistilled for reporting purposes if all of the proof gallons are used. Else, we need to insert
-                                // another record into Production4Reporting with the same ProductionID but with different Proof and volume/weight values.
-                                if (prodRec.ProductionTypeID == 2)
-                                {
-                                    var p =
-                                        (from rec in db.Production4Reporting
-                                         where prodRec.ProductionID == rec.ProductionID
-                                         select rec).FirstOrDefault();
-                                    if (p != null)
-                                    {
-                                        if (p.Proof == k.Proof && p.ProductionID == k.ID)
-                                        {
-                                            p.Redistilled = true;
-                                            db.SaveChanges();
-                                        }
-                                        else if (p.Proof != k.Proof && p.ProductionID == k.ID)
-                                        {
-                                            Production4Reporting prod4Rep = new Production4Reporting();
-                                            prod4Rep.ProductionID = k.ID;
-                                            prod4Rep.Proof = k.Proof;
-
-                                            if (k.BurningDownMethod == "weight" && prodRec.WeightID > 0)
-                                            {
-                                                prod4Rep.Weight = k.OldVal;
-                                            }
-                                            if (k.BurningDownMethod == "volume" && prodRec.VolumeID > 0)
-                                            {
-                                                prod4Rep.Volume = k.OldVal;
-                                            }
-                                            prod4Rep.Redistilled = true;
-                                            db.Production4Reporting.Add(prod4Rep);
-                                            db.SaveChanges();
-                                        }
-                                    }
-                                }
-
-                                // set burning down method for the batch used in distillation,
-                                // if it hasn't been done yet, to "volume" or "weight"
-                                if (prodRec.BurningDownMethod == null && k.BurningDownMethod != null)
-                                {
-                                    prodRec.BurningDownMethod = k.BurningDownMethod;
-                                }
-
-                                // update status to "Processing" or "Processed"
-                                if (statusId > 0 && prodRec != null)
-                                {
-                                    prodRec.StatusID = statusId;
-                                }
-
-                                if (k.BurningDownMethod == "volume" && prodRec.VolumeID > 0)
-                                {
-                                    var q =
-                                        (from rec in db.Volume
-                                         where prodRec.VolumeID == rec.VolumeID
-                                         select rec).FirstOrDefault();
-
-                                    if (q != null)
-                                    {
-                                        q.Value = k.OldVal;
-                                    }
-
-                                    try
-                                    {
-                                        // Update proof recalculated on the front-end for a batch used in production 
-                                        UpdateProof(prodRec.ProofID, k.Proof);
-                                    }
-                                    catch (ArgumentOutOfRangeException ex)
-                                    {
-                                        Debug.WriteLine(ex.Message);
-                                    }
-                                }
-
-                                if (k.BurningDownMethod == "weight" && prodRec.WeightID > 0)
-                                {
-                                    var vBW =
-                                        (from rec in db.Weight
-                                         where prodRec.WeightID == rec.WeightID
-                                         select rec).FirstOrDefault();
-
-                                    if (vBW != null)
-                                    {
-                                        vBW.Value = k.OldVal;
-                                    }
-                                }
-
-                                db.SaveChanges();
-
-                                // save to the ProductionContent table
-                                ProductionContent prodContent = new ProductionContent();
-                                prodContent.ProductionID = prod.ProductionID;
-                                prodContent.RecordID = k.ID;
-                                if (k.BurningDownMethod == "weight")
-                                {
-                                    if (prodRec.ProductionTypeID == 1)
-                                    {
-                                        prodContent.ContentFieldID = 6; // ProdFermentedWeight in ContentField table
-                                    }
-
-                                    if (prodRec.ProductionTypeID == 2)
-                                    {
-                                        prodContent.ContentFieldID = 12; // ProdDistilledWeight in ContentField table
-                                    }
-                                }
-
-                                if (k.BurningDownMethod == "volume")
-                                {
-                                    if (prodRec.ProductionTypeID == 1)
-                                    {
-                                        prodContent.ContentFieldID = 5; // ProdFermentedVolume in ContentField table
-                                    }
-
-                                    if (prodRec.ProductionTypeID == 2)
-                                    {
-                                        prodContent.ContentFieldID = 11; // ProdDistilledVolume in ContentField table
-                                    }
-                                }
-
-                                prodContent.ContentValue = k.NewVal;
-                                prodContent.isProductionComponent = true;
-
-                                db.ProductionContent.Add(prodContent);
-
-                                db.SaveChanges();
-                            }
-
-                            if (purIdL != null)
-                            {
-                                // iterate through list of purchaseIds of purchase records
-                                // and purchase records associated with production records
-                                // used in the distillation
-                                foreach (var i in purIdL)
-                                {
-                                    ProductionToPurchase prodToPur = new ProductionToPurchase();
-                                    prodToPur.ProductionID = prod.ProductionID;
-                                    prodToPur.PurchaseID = i;
-                                    db.ProductionToPurchase.Add(prodToPur);
-                                    db.SaveChanges();
-                                }
-                            }
-                        }
                         retMthdExecResult = true;
                     }
                 }
@@ -3960,11 +3532,11 @@ namespace WebApp.Helpers
 
             else if (prodObject.ProductionType == "Blending")
             {
-                string statusString = string.Empty;
-                List<int> purIdL = new List<int>(); // this is used as a temp holder for purchase ids
-
-                if (prodObject.UsedMats != null) // we need to makre sure that in Production workflow front-end we assign either raw materials or distil IDs to it
+                if (prodObject.UsedMats != null) // todo: we need to makre sure that in Production workflow front-end we assign either raw materials or distil IDs to it
                 {
+                    // handle updating records that are being used for creating this production record
+                    UpdateRecordsUsedInProductionWorkflow(prodObject.UsedMats, prod.ProductionID, userId);
+
                     if (prodObject?.SpiritId != null)
                     {
                         ProductionToSpirit prodToSpirit = new ProductionToSpirit();
@@ -3974,302 +3546,20 @@ namespace WebApp.Helpers
                         db.SaveChanges();
                     }
 
-                    foreach (var k in prodObject.UsedMats) // this scope is used to address materials that come from  purchase
+                    // update Blended Components related information
+                    if (prodObject.BlendingAdditives != null)
                     {
-                        // we need to determine the status of used material. It could be either "Processing" or "Processed" - depending on if we burnt down all or partial of used material
-                        if (k.OldVal <= 0)
+                        foreach (var i in prodObject.BlendingAdditives)
                         {
-                            statusString = "Processed";
-                        }
-                        else if (k.OldVal >= 0)
-                        {
-                            statusString = "Processing";
-                        }
-
-                        var status =
-                        (from rec in db.Status
-                         where rec.Name == statusString
-                         select rec).FirstOrDefault();
-
-                        if (k.DistillableOrigin == "pur")
-                        {
-                            purIdL.Add(k.ID);
-
-                            var purch =
-                                (from rec in db.Purchase
-                                 where rec.PurchaseID == k.ID
-                                 select rec).FirstOrDefault();
-
-                            if (purch.BurningDownMethod == null && k.BurningDownMethod != null)
-                            {
-                                purch.BurningDownMethod = k.BurningDownMethod;
-                            }
-
-                            // we need to make sure that if the purchased used material is being partially distilled, we need to create 
-                            // a new distilate record in Purchase4Reporting table with the same Purchase ID but with different Proof value.
-                            // else, the same record in Purchase4Reporting needs to be marked as redistilled for reporting purposes.
-
-                            if (purch.PurchaseTypeID == 3) // gl - why are we checking for PurchaseType here. Wouldn't we want to burn down anything and save it to Purchase4Reporting table?
-                            {
-                                var p =
-                                    (from rec in db.Purchase4Reporting
-                                     where purch.PurchaseID == rec.PurchaseID
-                                     select rec).FirstOrDefault();
-                                if (p != null)
-                                {
-                                    if (p.Proof == k.Proof && p.PurchaseID == k.ID)
-                                    {
-                                        p.Redistilled = true;
-                                        db.SaveChanges();
-                                    }
-                                    else if (p.Proof != k.Proof && p.PurchaseID == k.ID)
-                                    {
-                                        Purchase4Reporting purch4Rep = new Purchase4Reporting();
-                                        purch4Rep.PurchaseID = k.ID;
-                                        purch4Rep.Proof = k.Proof;
-
-                                        if (k.BurningDownMethod == "weight" && purch.WeightID > 0)
-                                        {
-                                            purch4Rep.Weight = k.OldVal;
-                                        }
-                                        if (k.BurningDownMethod == "volume" && purch.VolumeID > 0)
-                                        {
-                                            purch4Rep.Volume = k.OldVal;
-                                        }
-                                        purch4Rep.Redistilled = true;
-                                        db.Purchase4Reporting.Add(purch4Rep);
-                                        db.SaveChanges();
-                                    }
-                                }
-                            }
-
-                            if (purch.VolumeID > 0 && k.BurningDownMethod == "volume")
-                            {
-                                var q =
-                                    (from rec in db.Volume
-                                     where purch.VolumeID == rec.VolumeID
-                                     select rec).FirstOrDefault();
-
-                                if (q != null)
-                                {
-                                    q.Value = k.OldVal;
-                                }
-
-                                try
-                                {
-                                    // Update proof recalculated on the front-end for a batch used in production 
-                                    UpdateProof(purch.ProofID, k.Proof);
-                                }
-                                catch (ArgumentOutOfRangeException ex)
-                                {
-                                    Debug.WriteLine(ex.Message);
-                                }
-                            }
-
-                            if (purch.WeightID > 0 && k.BurningDownMethod == "weight")
-                            {
-                                var vBW =
-                                    (from rec in db.Weight
-                                     where purch.WeightID == rec.WeightID
-                                     select rec).FirstOrDefault();
-
-                                if (vBW != null)
-                                {
-                                    vBW.Value = k.OldVal;
-                                }
-                            }
-
-                            purch.StatusID = status.StatusID;
-
-                            db.SaveChanges();
-
-                            // save to the ProductionContent table
-                            ProductionContent prodContent = new ProductionContent();
-                            prodContent.ProductionID = prod.ProductionID;
-                            prodContent.RecordID = k.ID;
-                            if (k.BurningDownMethod == "weight")
-                            {
-                                if (purch.PurchaseTypeID == 3)
-                                {
-                                    prodContent.ContentFieldID = 10; // PurDistilledWeight in ContentField table
-                                }
-                            }
-
-                            if (k.BurningDownMethod == "volume")
-                            {
-                                if (purch.PurchaseTypeID == 3)
-                                {
-                                    prodContent.ContentFieldID = 9; // PurDistilledVolume in ContentField table
-                                }
-                            }
-
-                            prodContent.ContentValue = k.NewVal;
-                            prodContent.isProductionComponent = false;
-
-                            db.ProductionContent.Add(prodContent);
-
-                            db.SaveChanges();
-                        }
-                        else if (k.DistillableOrigin == "prod")
-                        {
-                            purIdL.Add(k.ID);
-
-                            var prodd =
-                                    (from rec in db.Production
-                                     where rec.ProductionID == k.ID
-                                     select rec).FirstOrDefault();
-
-                            if (prodd.BurningDownMethod == null && k.BurningDownMethod != null)
-                            {
-                                prodd.BurningDownMethod = k.BurningDownMethod;
-                            }
-
-                            // we need to make sure that if the used material that was produced by us is a distilate and being re-distiled again,
-                            // it needs to be marked as redistilled for reporting purposes if all of the proof gallons are used. Else, we need to insert
-                            // another record into Production4Reporting with the same ProductionID but with different Proof and volume/weight values.
-                            if (prodd.ProductionTypeID == 2)
-                            {
-                                var p =
-                                    (from rec in db.Production4Reporting
-                                     where prodd.ProductionID == rec.ProductionID
-                                     select rec).FirstOrDefault();
-                                if (p != null)
-                                {
-                                    if (p.Proof == k.Proof && p.ProductionID == k.ID)
-                                    {
-                                        p.Redistilled = true;
-                                        db.SaveChanges();
-                                    }
-                                    else if (p.Proof != k.Proof && p.ProductionID == k.ID)
-                                    {
-                                        Production4Reporting prod4Rep = new Production4Reporting();
-                                        prod4Rep.ProductionID = k.ID;
-                                        prod4Rep.Proof = k.Proof;
-
-                                        if (k.BurningDownMethod == "weight" && prodd.WeightID > 0)
-                                        {
-                                            prod4Rep.Weight = k.OldVal;
-                                        }
-                                        if (k.BurningDownMethod == "volume" && prodd.VolumeID > 0)
-                                        {
-                                            prod4Rep.Volume = k.OldVal;
-                                        }
-                                        prod4Rep.Redistilled = true;
-                                        db.Production4Reporting.Add(prod4Rep);
-                                        db.SaveChanges();
-                                    }
-                                }
-                            }
-
-                            if (prodd.VolumeID > 0 && k.BurningDownMethod == "volume")
-                            {
-                                var q =
-                                    (from rec in db.Volume
-                                     where prodd.VolumeID == rec.VolumeID
-                                     select rec).FirstOrDefault();
-
-                                if (q != null)
-                                {
-                                    q.Value = k.OldVal;
-                                }
-
-                                try
-                                {
-                                    // Update proof recalculated on the front-end for a batch used in production
-                                    UpdateProof(prodd.ProofID, k.Proof);
-                                }
-                                catch (ArgumentOutOfRangeException ex)
-                                {
-                                    Debug.WriteLine(ex.Message);
-                                }
-                            }
-
-                            if (prodd.WeightID > 0 && k.BurningDownMethod == "weight")
-                            {
-                                var vBW =
-                                    (from rec in db.Weight
-                                     where prodd.WeightID == rec.WeightID
-                                     select rec).FirstOrDefault();
-
-                                if (vBW != null)
-                                {
-                                    vBW.Value = k.OldVal;
-                                }
-                            }
-
-                            prodd.StatusID = status.StatusID;
-
-                            db.SaveChanges();
-
-                            // now, let's get PurchaseIds from ProductionToPurchase table for later update of ProductionToPurchase table
-                            var prod2Purch =
-                                (from rec in db.ProductionToPurchase
-                                    where rec.ProductionID == k.ID
-                                    select rec.PurchaseID);
-
-                            if (prod2Purch != null)
-                            {
-                                purIdL.AddRange(prod2Purch);
-                            }
-
-                            // save to the ProductionContent table
-                            ProductionContent prodContent = new ProductionContent();
-                            prodContent.ProductionID = prod.ProductionID;
-                            prodContent.RecordID = k.ID;
-                            if (k.BurningDownMethod == "weight")
-                            {
-                                if (prodd.ProductionTypeID == 2)
-                                {
-                                    prodContent.ContentFieldID = 12; // ProdDistilledWeight in ContentField table
-                                }
-                            }
-
-                            if (k.BurningDownMethod == "volume")
-                            {
-                                if (prodd.ProductionTypeID == 2)
-                                {
-                                    prodContent.ContentFieldID = 11; // ProdDistilledVolume in ContentField table
-                                }
-                            }
-
-                            prodContent.ContentValue = k.NewVal;
-                            prodContent.isProductionComponent = true;
-
-                            db.ProductionContent.Add(prodContent);
-
-                            db.SaveChanges();
-                        }
-
-                        // update Blended Components related information
-                        if (prodObject.BlendingAdditives != null)
-                        {
-                            foreach (var i in prodObject.BlendingAdditives)
-                            {
-                                BlendedComponent bC = new BlendedComponent();
-                                bC.ProductionID = prod.ProductionID;
-                                bC.RecordId = i.RawMaterialId;
-                                bC.Quantity = i.RawMaterialQuantity;
-                                bC.UnitOfMeasurement = i.UnitOfMeasurement;
-                                db.BlendedComponent.Add(bC);
-                                db.SaveChanges();
-                            }
-                        }
-                    }
-
-                    // update ProductionToPurchase table
-                    if (purIdL != null)
-                    {
-                        foreach (var i in purIdL)
-                        {
-                            ProductionToPurchase prodToPur = new ProductionToPurchase();
-                            prodToPur.ProductionID = prod.ProductionID;
-                            prodToPur.PurchaseID = i;
-                            db.ProductionToPurchase.Add(prodToPur);
-
+                            BlendedComponent bC = new BlendedComponent();
+                            bC.ProductionID = prod.ProductionID;
+                            bC.RecordId = i.RawMaterialId;
+                            bC.Quantity = i.RawMaterialQuantity;
+                            bC.UnitOfMeasurement = i.UnitOfMeasurement;
+                            db.BlendedComponent.Add(bC);
                             db.SaveChanges();
                         }
                     }
-
                     retMthdExecResult = true;
                 }
             }
@@ -4282,132 +3572,15 @@ namespace WebApp.Helpers
 
                 if (prodObject.UsedMats != null) // we need to makre sure that in Production workflow front-end we assign either raw materials or distil IDs to it
                 {
+                    // handle updating records that are being used for creating this production record
+                    UpdateRecordsUsedInProductionWorkflow(prodObject.UsedMats, prod.ProductionID, userId);
+
                     if (prodObject?.SpiritId != null)
                     {
                         ProductionToSpirit prodToSpirit = new ProductionToSpirit();
                         prodToSpirit.SpiritID = prodObject.SpiritId;
                         prodToSpirit.ProductionID = prod.ProductionID;
                         db.ProductionToSpirit.Add(prodToSpirit);
-                    }
-
-                    foreach (var k in prodObject.UsedMats) // this scope is used to address materials that come from  purchase
-                    {
-                        // we need to determine the status of used material. It could be either "Processing" or "Processed" - depending on if we burnt down all or partial of used material
-                        if (k.OldVal <= 0)
-                        {
-                            statusString = "Processed";
-                        }
-                        else if (k.OldVal >= 0)
-                        {
-                            statusString = "Processing";
-                        }
-
-                        var status =
-                        (from rec in db.Status
-                         where rec.Name == statusString
-                         select rec).FirstOrDefault();
-
-                        if (k.DistillableOrigin == "prod")
-                        {
-                            purIdL.Add(k.ID);
-
-                            var prodd =
-                                    (from rec in db.Production
-                                     where rec.ProductionID == k.ID
-                                     select rec).FirstOrDefault();
-
-                            if (prodd.BurningDownMethod == null && k.BurningDownMethod != null)
-                            {
-                                prodd.BurningDownMethod = k.BurningDownMethod;
-                            }
-
-                            if (prodd.VolumeID > 0 && k.BurningDownMethod == "volume")
-                            {
-                                var q =
-                                    (from rec in db.Volume
-                                     where prodd.VolumeID == rec.VolumeID
-                                     select rec).FirstOrDefault();
-
-                                if (q != null)
-                                {
-                                    q.Value = k.OldVal;
-                                }
-
-                                float oldProof = UpdateProof(prodd.ProofID, k.Proof);
-
-                                // todo: grisha: I am not sure how calculating gain/loss is going be relevant when we add mutliple blends during bottling though.
-                                // but we can leave this for a later discussion.
-                                cumulativeGainLoss += prodObject.ProofGallon - oldProof; // negative means loss and positive means true
-                            }
-
-                            if (prodd.WeightID > 0 && k.BurningDownMethod == "weight")
-                            {
-                                var vBW =
-                                    (from rec in db.Weight
-                                     where prodd.WeightID == rec.WeightID
-                                     select rec).FirstOrDefault();
-
-                                if (vBW != null)
-                                {
-                                    vBW.Value = k.OldVal;
-                                }
-                            }
-
-                            prodd.StatusID = status.StatusID;
-
-                            db.SaveChanges();
-
-                            // now, let's get PurchaseIds from ProductionToPurchase table for later update of ProductionToPurchase table
-                            var prod2Purch =
-                                (from rec in db.ProductionToPurchase
-                                 where rec.ProductionID == k.ID
-                                 select rec.PurchaseID);
-
-                            if (prod2Purch != null)
-                            {
-                                purIdL.AddRange(prod2Purch);
-                            }
-
-                            // save to the ProductionContent table
-                            ProductionContent prodContent = new ProductionContent();
-                            prodContent.ProductionID = prod.ProductionID;
-                            prodContent.RecordID = k.ID;
-                            if (k.BurningDownMethod == "weight")
-                            {
-                                if (prodd.ProductionTypeID == 3)
-                                {
-                                    prodContent.ContentFieldID = 12; // ProdDistilledWeight in ContentField table
-                                }
-                            }
-
-                            if (k.BurningDownMethod == "volume")
-                            {
-                                if (prodd.ProductionTypeID == 3)
-                                {
-                                    prodContent.ContentFieldID = 11; // ProdDistilledVolume in ContentField table
-                                }
-                            }
-
-                            prodContent.ContentValue = k.NewVal;
-                            prodContent.isProductionComponent = true;
-
-                            db.ProductionContent.Add(prodContent);
-
-                            db.SaveChanges();
-                        }
-                    }
-                    // update ProductionToPurchase table
-                    if (purIdL != null)
-                    {
-                        foreach (var i in purIdL)
-                        {
-                            ProductionToPurchase prodToPur = new ProductionToPurchase();
-                            prodToPur.ProductionID = prod.ProductionID;
-                            prodToPur.PurchaseID = i;
-                            db.ProductionToPurchase.Add(prodToPur);
-
-                            db.SaveChanges();
-                        }
                     }
 
                     // now, lets register gains/losses
@@ -4417,7 +3590,7 @@ namespace WebApp.Helpers
                         GainLoss glt = new GainLoss();
                         glt.Type = true;
                         glt.Quantity = cumulativeGainLoss;
-                        glt.DateRecorded = DateTime.Today;
+                        glt.DateRecorded = DateTime.UtcNow;
                         glt.BlendedRecordId = currentProdId;
                         glt.BottledRecordId = prod.ProductionID;
                         //glt.DistillerID = DistillerID;
@@ -4430,7 +3603,7 @@ namespace WebApp.Helpers
                         GainLoss glt = new GainLoss();
                         glt.Type = false;
                         glt.Quantity = Math.Abs(cumulativeGainLoss); // since cumulativeGainLoss is negative, making it to be positive
-                        glt.DateRecorded = DateTime.Today;
+                        glt.DateRecorded = DateTime.UtcNow;
                         glt.BlendedRecordId = currentProdId;
                         glt.BottledRecordId = prod.ProductionID;
                         db.GainLoss.Add(glt);
@@ -4472,6 +3645,509 @@ namespace WebApp.Helpers
             {
                 Debug.WriteLine("Exception creating an entry in Production4Reporting: ", e);
                 retMthdExecResult = false;
+            }
+
+            // insert a record in the history table
+            prodObject.ProductionId = prod.ProductionID;
+            SaveProductionHistory(prodObject, userId);
+
+            return retMthdExecResult;
+        }
+
+        internal void UpdateRecordsUsedInProductionWorkflow(List<ObjInfo4Burndwn> usedMats, int productionIDBeingCreated, int userId)
+        {
+            // list of purchase ids of purchase records and ids associated with production records
+            // that are used in distillation process
+            List<int> purIdL = new List<int>();
+
+            try
+            {
+                // iterate through purchased and produced batches used in distillation
+                foreach (var k in usedMats)
+                {
+                    var status = string.Empty;
+
+                    // purchase batch used in the distillation
+                    if (k.DistillableOrigin == "pur")
+                    {
+
+                        // update PurchaseHistory table
+                        PurchaseObject purObj = new PurchaseObject();
+
+                        purIdL.Add(k.ID);
+
+                        var purch =
+                            (from rec in db.Purchase
+                             where rec.PurchaseID == k.ID
+                             select rec).FirstOrDefault();
+
+                        // all of the batch volume/weight used in the distillation
+                        if (k.OldVal <= 0)
+                        {
+                            status = "Processed";
+                            var statusId =
+                                (from rec in db.Status
+                                 where rec.Name == status
+                                 select rec.StatusID).FirstOrDefault();
+
+                            purch.StatusID = statusId;
+                            purObj.Status = status;
+                        }
+
+                        // set burning down method for the batch used in distillation,
+                        // if it hasn't been done yet, to "volume" or "weight"
+                        if (purch.BurningDownMethod == null && k.BurningDownMethod != null)
+                        {
+                            purch.BurningDownMethod = k.BurningDownMethod;
+                        }
+
+                        // we need to make sure that if the purchased used material is being partially distilled, we need to create 
+                        // a new distilate record in Purchase4Reporting table with the same Purchase ID but with different Proof/Volume/Weight value.
+                        // else, the same record in Purchase4Reporting needs to be marked as redistilled for reporting purposes.
+                        var p =
+                            (from rec in db.Purchase4Reporting
+                                where purch.PurchaseID == rec.PurchaseID
+                                select rec).FirstOrDefault();
+
+                        if (p != null)
+                        {
+                            if (p.Proof == k.Proof && p.PurchaseID == k.ID)
+                            {
+                                p.Redistilled = true;
+                                db.SaveChanges();
+                            }
+                            else if (p.Proof != k.Proof && p.PurchaseID == k.ID)
+                            {
+                                Purchase4Reporting purch4Rep = new Purchase4Reporting();
+                                purch4Rep.PurchaseID = k.ID;
+                                purch4Rep.Proof = k.Proof;
+
+                                if (k.BurningDownMethod == "weight" && purch.WeightID > 0)
+                                {
+                                    purch4Rep.Weight = k.OldVal;
+                                }
+                                if (k.BurningDownMethod == "volume" && purch.VolumeID > 0)
+                                {
+                                    purch4Rep.Volume = k.OldVal;
+                                }
+                                purch4Rep.Redistilled = true;
+
+                                db.Purchase4Reporting.Add(purch4Rep);
+                                db.SaveChanges();
+                            }
+                        }
+
+                        // update proof value after it has been recalculated
+                        // on front-end using the new volume quantity.
+                        if (purch.ProofID > 0 && k.Proof >= 0)
+                        {
+                            var proof =
+                                (from rec in db.Proof
+                                    where rec.ProofID == purch.ProofID
+                                    select rec).FirstOrDefault();
+
+                            if (proof != null)
+                            {
+                                proof.Value = k.Proof;
+                            }
+                            db.SaveChanges();
+
+                            purObj.ProofGallon = proof.Value;
+                        }
+
+                        //todo: perhaps, we can re-use Production content workflow below to record Blending additives as well
+                        // save to the ProductionContent table
+                        ProductionContent prodContent = new ProductionContent();
+                        prodContent.ProductionID = productionIDBeingCreated;
+                        prodContent.RecordID = k.ID;
+
+                        if (k.BurningDownMethod == "volume" && purch.VolumeID > 0)
+                        {
+                            if (purch.PurchaseTypeID == 1)
+                            {
+                                prodContent.ContentFieldID = 1; // PurFermentableVolume in ContentField table
+                            }
+
+                            if (purch.PurchaseTypeID == 2)
+                            {
+                                prodContent.ContentFieldID = 3; // PurFermentedVolume in ContentField table
+                            }
+
+                            if (purch.PurchaseTypeID == 3)
+                            {
+                                prodContent.ContentFieldID = 9; // PurDistilledVolume in ContentField table
+                            }
+
+                            prodContent.ContentValue = k.NewVal;
+                            prodContent.isProductionComponent = false;
+
+                            db.ProductionContent.Add(prodContent);
+
+                            var q =
+                                (from rec in db.Volume
+                                 where purch.VolumeID == rec.VolumeID
+                                 select rec).FirstOrDefault();
+
+                            if (q != null)
+                            {
+                                q.Value = k.OldVal;
+                            }
+
+                            purObj.Quantity = q.Value;
+
+                            try
+                            {
+                                // Update proof recalculated on the front-end for a batch used in production 
+                                UpdateProof(purch.ProofID, k.Proof);
+                            }
+                            catch (ArgumentOutOfRangeException ex)
+                            {
+                                Debug.WriteLine(ex.Message);
+                            }
+                        }
+
+                        if (k.BurningDownMethod == "weight" && purch.WeightID > 0)
+                        {
+                            if (purch.PurchaseTypeID == 1)
+                            {
+                                prodContent.ContentFieldID = 2; // PurFermentableWeight in ContentField table
+                            }
+
+                            if (purch.PurchaseTypeID == 2)
+                            {
+                                prodContent.ContentFieldID = 4; // PurFermentedWeight in ContentField table
+                            }
+
+                            if (purch.PurchaseTypeID == 3)
+                            {
+                                prodContent.ContentFieldID = 10; // PurDistilledWeight in ContentField table
+                            }
+
+                            prodContent.ContentValue = k.NewVal;
+                            prodContent.isProductionComponent = false;
+
+                            db.ProductionContent.Add(prodContent);
+
+                            var vBW =
+                                (from rec in db.Weight
+                                 where rec.WeightID == purch.WeightID
+                                 select rec).FirstOrDefault();
+
+                            if (vBW != null)
+                            {
+                                vBW.Value = k.OldVal;
+                            }
+
+                            purObj.VolumeByWeight = k.OldVal;
+                        }
+                        db.SaveChangesAsync();
+
+                        SavePurchaseHistory(purObj, userId);
+                    }
+                    // production batch used in the distillation
+                    else if (k.DistillableOrigin == "prod")
+                    {
+                        ProductionObject prodObj = new ProductionObject();
+
+                        // query for purchaseIds associated with production record
+                        // that is being used in the distillation
+                        var prod2PurIds =
+                            (from rec in db.ProductionToPurchase
+                             where rec.ProductionID == k.ID
+                             select rec.PurchaseID);
+
+                        // add these purchaseIds to the list
+                        if (prod2PurIds != null)
+                        {
+                            foreach (var i in prod2PurIds)
+                            {
+                                purIdL.Add(i);
+                            }
+                        }
+
+                        var prodRec =
+                            (from rec in db.Production
+                             where rec.ProductionID == k.ID
+                             select rec).FirstOrDefault();
+
+                        // all of the batch volume/weight used in the distillation
+                        if (k.OldVal <= 0)
+                        {
+                            status = "Processed";
+                            var statusId =
+                                (from rec in db.Status
+                                 where rec.Name == status
+                                 select rec.StatusID).FirstOrDefault();
+
+                            prodRec.StatusID = statusId;
+
+                            prodObj.StatusName = status;
+                        }
+
+                        // we need to make sure that if the used material that was produced by us is a distilate and being re-distiled again,
+                        // it needs to be marked as redistilled for reporting purposes if all of the proof gallons are used. Else, we need to insert
+                        // another record into Production4Reporting with the same ProductionID but with different Proof and volume/weight values.
+                        var p =
+                            (from rec in db.Production4Reporting
+                                where prodRec.ProductionID == rec.ProductionID
+                                select rec).FirstOrDefault();
+                        if (p != null)
+                        {
+                            if (p.Proof == k.Proof && p.ProductionID == k.ID)
+                            {
+                                p.Redistilled = true;
+                                db.SaveChanges();
+                            }
+                            else if (p.Proof != k.Proof && p.ProductionID == k.ID)
+                            {
+                                Production4Reporting prod4Rep = new Production4Reporting();
+                                prod4Rep.ProductionID = k.ID;
+                                prod4Rep.Proof = k.Proof;
+
+                                if (k.BurningDownMethod == "weight" && prodRec.WeightID > 0)
+                                {
+                                    prod4Rep.Weight = k.OldVal;
+                                }
+                                if (k.BurningDownMethod == "volume" && prodRec.VolumeID > 0)
+                                {
+                                    prod4Rep.Volume = k.OldVal;
+                                }
+                                prod4Rep.Redistilled = true;
+                                db.Production4Reporting.Add(prod4Rep);
+                                db.SaveChanges();
+                            }
+                        }
+
+                        // set burning down method for the batch used in distillation,
+                        // if it hasn't been done yet, to "volume" or "weight"
+                        if (prodRec.BurningDownMethod == null && k.BurningDownMethod != null)
+                        {
+                            prodRec.BurningDownMethod = k.BurningDownMethod;
+                        }
+
+                        // save to the ProductionContent table
+                        ProductionContent prodContent = new ProductionContent();
+                        prodContent.ProductionID = productionIDBeingCreated;
+                        prodContent.RecordID = k.ID;
+
+                        if (k.BurningDownMethod == "volume" && prodRec.VolumeID > 0)
+                        {
+                            if (prodRec.ProductionTypeID == 1)
+                            {
+                                prodContent.ContentFieldID = 5; // ProdFermentedVolume in ContentField table
+                            }
+
+                            if (prodRec.ProductionTypeID == 2)
+                            {
+                                prodContent.ContentFieldID = 11; // ProdDistilledVolume in ContentField table
+                            }
+
+                            prodContent.ContentValue = k.NewVal;
+                            prodContent.isProductionComponent = true;
+
+                            db.ProductionContent.Add(prodContent);
+
+                            var q =
+                                (from rec in db.Volume
+                                 where prodRec.VolumeID == rec.VolumeID
+                                 select rec).FirstOrDefault();
+
+                            if (q != null)
+                            {
+                                q.Value = k.OldVal;
+                            }
+
+                            prodObj.Quantity = k.OldVal;
+
+                            try
+                            {
+                                // Update proof recalculated on the front-end for a batch used in production 
+                                UpdateProof(prodRec.ProofID, k.Proof);
+                            }
+                            catch (ArgumentOutOfRangeException ex)
+                            {
+                                Debug.WriteLine(ex.Message);
+                            }
+                        }
+
+                        if (k.BurningDownMethod == "weight" && prodRec.WeightID > 0)
+                        {
+                            if (prodRec.ProductionTypeID == 1)
+                            {
+                                prodContent.ContentFieldID = 6; // ProdFermentedWeight in ContentField table
+                            }
+
+                            if (prodRec.ProductionTypeID == 2)
+                            {
+                                prodContent.ContentFieldID = 12; // ProdDistilledWeight in ContentField table
+                            }
+
+                            prodContent.ContentValue = k.NewVal;
+                            prodContent.isProductionComponent = true;
+
+                            db.ProductionContent.Add(prodContent);
+
+                            var vBW =
+                            (from rec in db.Weight
+                                where prodRec.WeightID == rec.WeightID
+                                select rec).FirstOrDefault();
+
+                            if (vBW != null)
+                            {
+                                vBW.Value = k.OldVal;
+                            }
+
+                            prodObj.VolumeByWeight = k.OldVal;
+                        }
+
+                        SaveProductionHistory(prodObj, userId);
+                    }
+                    db.SaveChangesAsync();
+
+                    if (purIdL != null)
+                    {
+                        // iterate through list of purchaseIds of purchase records
+                        // and purchase records associated with production records
+                        // used in the distillation
+                        foreach (var i in purIdL)
+                        {
+                            ProductionToPurchase prodToPur = new ProductionToPurchase();
+                            prodToPur.ProductionID = productionIDBeingCreated;
+                            prodToPur.PurchaseID = i;
+                            db.ProductionToPurchase.Add(prodToPur);
+                            db.SaveChanges();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal bool SaveProductionHistory(ProductionObject prodObject, int userId)
+        {
+            bool retMthdExecResult = false;
+
+            try
+            {
+                ProductionHistory histTable = new ProductionHistory();
+                histTable.ProductionID = prodObject.ProductionId;
+                histTable.UpdateDate = DateTime.UtcNow;
+                histTable.ProductionName = prodObject.BatchName;
+                histTable.ProductionStartTime = prodObject.ProductionStart;
+                histTable.ProductionEndTime = prodObject.ProductionEnd;
+                histTable.Volume = prodObject.Quantity;
+                histTable.Weight = prodObject.VolumeByWeight;
+                histTable.Alcohol = prodObject.AlcoholContent;
+                histTable.Proof = prodObject.ProofGallon;
+                histTable.Status = prodObject.StatusName;
+                histTable.State = prodObject.ProductionType;
+                histTable.Note = prodObject.Note;
+                histTable.UserID = userId;
+                histTable.Gauged = prodObject.Gauged;
+
+                if(prodObject.Storage != null)
+                {
+                    StringBuilder storageString = new StringBuilder();
+
+                    foreach (var k in prodObject.Storage)
+                    {
+                        storageString.Append(k.StorageName)
+                            .Append("; ");
+                    }
+
+                    histTable.Storage = storageString.ToString();
+                }
+
+                if(prodObject.UsedMats != null)
+                {
+                    StringBuilder usedMats = new StringBuilder();
+
+                    foreach (var t in prodObject.UsedMats)
+                    {
+                        usedMats.Append("{")
+                            .Append(t.ID)
+                            .Append(",")
+                            .Append(t.NewVal)
+                            .Append(",")
+                            .Append(t.Proof)
+                            .Append(",")
+                            .Append(t.DistillableOrigin)
+                            .Append(",")
+                            .Append(t.BurningDownMethod)
+                            .Append("}");
+                    }
+
+                    histTable.UsedMats = usedMats.ToString();
+                }
+
+                histTable.SpiritCutName = prodObject.SpiritCutName;
+
+                if(prodObject.BlendingAdditives != null)
+                {
+                    StringBuilder blendingAdditives = new StringBuilder();
+
+                    foreach (var l in prodObject.BlendingAdditives)
+                    {
+                        blendingAdditives.Append("{")
+                            .Append(l.RawMaterialId)
+                            .Append(",")
+                            .Append(l.RawMaterialName)
+                            .Append(",") 
+                            .Append(l.RawMaterialQuantity)
+                            .Append(",")
+                            .Append(l.UnitOfMeasurement)
+                            .Append("}");
+                    }
+                }
+
+                if(prodObject.BottlingInfo != null)
+                {
+                    StringBuilder bottInforStrBuilder = new StringBuilder();
+                    bottInforStrBuilder.Append("{")
+                        .Append(prodObject.BottlingInfo.CaseCapacity)
+                        .Append(",")
+                        .Append(prodObject.BottlingInfo.BottleCapacity)
+                        .Append(",")
+                        .Append(prodObject.BottlingInfo.CaseQuantity)
+                        .Append(",")
+                        .Append(prodObject.BottlingInfo.BottleQuantity)
+                        .Append("}");
+                    histTable.BottlingInfo = bottInforStrBuilder.ToString();
+                }
+
+                histTable.SpiritTypeReportingID = prodObject.SpiritTypeReportingID;
+
+                histTable.MaterialKindReportingID = prodObject.MaterialKindReportingID;
+
+                histTable.TaxedProof = prodObject.TaxedProof;
+
+                histTable.WithdrawalDate = prodObject.WithdrawalDate;
+
+                db.ProductionHistory.Add(histTable);
+                db.SaveChangesAsync();
+            }
+            catch (DbUpdateException e)
+            {
+                throw e;
+            }
+            catch(DbEntityValidationException e)
+            {
+                throw e;
+            }
+            catch(NotSupportedException e)
+            {
+                throw e;
+            }
+            catch(ObjectDisposedException e)
+            {
+                throw e;
+            }
+            catch(InvalidOperationException e)
+            {
+                throw e;
             }
 
             return retMthdExecResult;

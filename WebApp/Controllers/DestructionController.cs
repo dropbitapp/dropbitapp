@@ -9,8 +9,6 @@ namespace WebApp.Controllers
     {
         private DataLayer dl = new DataLayer();
 
-        private bool v3 = true;
-
         // GET: Destruction
         public ActionResult Index()
         {

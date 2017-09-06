@@ -369,7 +369,7 @@ namespace WebApp.Models
         public bool Gauged { get; set; } // this value is showing whether the particular record has been gauged so it shows up in reporting
         public int UserID { get; set; } // user that made the change
         [Column(TypeName = "datetime2")]
-        public DateTime UpdateDate { get; set; }
+        public DateTime UpdateDate { get; set; } // stored in UTC
         public string Storage { get; set; }
         public string RecordName { get; set; } // name of raw material used in this purchase
         public int SpiritTypeReportingID { get; set; }
@@ -401,7 +401,7 @@ namespace WebApp.Models
         public int ProductionHistoryID { get; set; }
         public int ProductionID { get; set; }
         [Column(TypeName = "datetime2")]
-        public DateTime UpdateDate { get; set; }
+        public DateTime UpdateDate { get; set; } // stored in UTC time
         public string ProductionName { get; set; } // production batch name
         [Column(TypeName = "datetime2")]
         public DateTime ProductionStartTime { get; set; }
@@ -426,7 +426,7 @@ namespace WebApp.Models
         public int SpiritTypeReportingID { get; set; }
         public int MaterialKindReportingID { get; set; }
         public float TaxedProof { get; set; } // Proof value indicated as taxable. For now, it is used to enable reporting processing. In  other words, how much alcohol has been sold.
-        public System.DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened
+        public System.DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened for Taxed Proof.
     }
 
     /// <summary>
