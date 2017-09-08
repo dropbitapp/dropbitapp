@@ -33,8 +33,11 @@ namespace WebApp.Models
         [Column(Order =  1), ForeignKey ("Production")]
         public int ProductionID { get; set; }
         public float Value { get; set; }
+        [Column(TypeName = "datetime2")]
         public DateTime DateOfSale { get; set; } // date when the sale of the spirit has happened
+        [Column(TypeName = "datetime2")]
         public DateTime DateRecorded { get; set; } // date when tax witdrawal was entered in the system
+
         public virtual Production Production { get; set; }
     }
 
@@ -426,7 +429,8 @@ namespace WebApp.Models
         public int SpiritTypeReportingID { get; set; }
         public int MaterialKindReportingID { get; set; }
         public float TaxedProof { get; set; } // Proof value indicated as taxable. For now, it is used to enable reporting processing. In  other words, how much alcohol has been sold.
-        public System.DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened for Taxed Proof.
+        [Column(TypeName = "datetime2")]
+        public DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened for Taxed Proof.
     }
 
     /// <summary>
