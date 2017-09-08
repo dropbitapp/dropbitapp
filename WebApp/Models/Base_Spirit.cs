@@ -426,6 +426,7 @@ namespace WebApp.Models
         public int SpiritTypeReportingID { get; set; }
         public int MaterialKindReportingID { get; set; }
         public float TaxedProof { get; set; } // Proof value indicated as taxable. For now, it is used to enable reporting processing. In  other words, how much alcohol has been sold.
+        [Column(TypeName = "datetime2")]
         public System.DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened for Taxed Proof.
     }
 
