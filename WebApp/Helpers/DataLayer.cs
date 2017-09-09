@@ -3161,7 +3161,11 @@ namespace WebApp.Helpers
                 purH.Weight = purObject.VolumeByWeight;
                 purH.Alcohol = purObject.AlcoholContent;
                 purH.Proof = purObject.ProofGallon;
-                purH.PurchaseDate = purObject.PurchaseDate;
+
+                if(purObject.PurchaseDate != DateTime.MinValue)
+                {
+                    purH.PurchaseDate = purObject.PurchaseDate;
+                }
                 purH.Note = purObject.Note;
                 purH.State = purObject.PurchaseType;
                 purH.Status = purObject.Status;
@@ -3185,26 +3189,11 @@ namespace WebApp.Helpers
                 purH.SpiritTypeReportingID = purH.SpiritTypeReportingID;
 
                 db.PurchaseHistory.Add(purH);
-                db.SaveChangesAsync();
+                db.SaveChanges();
             }
-            catch (DbUpdateException e)
+            catch (Exception e)
             {
-                throw e;
-            }
-            catch (DbEntityValidationException e)
-            {
-                throw e;
-            }
-            catch (NotSupportedException e)
-            {
-                throw e;
-            }
-            catch (ObjectDisposedException e)
-            {
-                throw e;
-            }
-            catch (InvalidOperationException e)
-            {
+                retMthdExecResult = false;
                 throw e;
             }
 
@@ -3342,6 +3331,8 @@ namespace WebApp.Helpers
             int currentProdId = 0;
 
             var distillerId = GetDistillerId(userId);
+
+            prodObject.StatusName = "Active";
 
             Production prod = new Production();
             prod.ProductionName = prodObject.BatchName;
@@ -3649,7 +3640,7 @@ namespace WebApp.Helpers
 
             // insert a record in the history table
             prodObject.ProductionId = prod.ProductionID;
-            SaveProductionHistory(prodObject, userId);
+            retMthdExecResult = SaveProductionHistory(prodObject, userId);
 
             return retMthdExecResult;
         }
@@ -3840,7 +3831,7 @@ namespace WebApp.Helpers
 
                             purObj.VolumeByWeight = k.OldVal;
                         }
-                        db.SaveChangesAsync();
+                        db.SaveChanges();
 
                         SavePurchaseHistory(purObj, userId);
                     }
@@ -3848,6 +3839,8 @@ namespace WebApp.Helpers
                     else if (k.DistillableOrigin == "prod")
                     {
                         ProductionObject prodObj = new ProductionObject();
+
+                        prodObj.ProductionId = k.ID;
 
                         // query for purchaseIds associated with production record
                         // that is being used in the distillation
@@ -4002,7 +3995,7 @@ namespace WebApp.Helpers
 
                         SaveProductionHistory(prodObj, userId);
                     }
-                    db.SaveChangesAsync();
+                    db.SaveChanges();
 
                     if (purIdL != null)
                     {
@@ -4036,8 +4029,17 @@ namespace WebApp.Helpers
                 histTable.ProductionID = prodObject.ProductionId;
                 histTable.UpdateDate = DateTime.UtcNow;
                 histTable.ProductionName = prodObject.BatchName;
-                histTable.ProductionStartTime = prodObject.ProductionStart;
-                histTable.ProductionEndTime = prodObject.ProductionEnd;
+
+                if (prodObject.ProductionStart != DateTime.MinValue)
+                {
+                    histTable.ProductionStartTime = prodObject.ProductionStart;
+                }
+
+                if (prodObject.ProductionEnd != DateTime.MinValue)
+                {
+                    histTable.ProductionEndTime = prodObject.ProductionEnd;
+                }
+
                 histTable.Volume = prodObject.Quantity;
                 histTable.Weight = prodObject.VolumeByWeight;
                 histTable.Alcohol = prodObject.AlcoholContent;
@@ -4124,28 +4126,17 @@ namespace WebApp.Helpers
 
                 histTable.TaxedProof = prodObject.TaxedProof;
 
-                histTable.WithdrawalDate = prodObject.WithdrawalDate;
+                if(prodObject.WithdrawalDate != DateTime.MinValue)
+                {
+                    histTable.WithdrawalDate = prodObject.WithdrawalDate;
+                }
 
                 db.ProductionHistory.Add(histTable);
-                db.SaveChangesAsync();
+                db.SaveChanges();
+
+                retMthdExecResult = true;
             }
-            catch (DbUpdateException e)
-            {
-                throw e;
-            }
-            catch(DbEntityValidationException e)
-            {
-                throw e;
-            }
-            catch(NotSupportedException e)
-            {
-                throw e;
-            }
-            catch(ObjectDisposedException e)
-            {
-                throw e;
-            }
-            catch(InvalidOperationException e)
+            catch (Exception e)
             {
                 throw e;
             }
