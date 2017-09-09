@@ -1,7 +1,6 @@
 ﻿var dateHelper = function () {
     //dateHelper - Helpers for various data conversion/modification use cases. 
     this.getReportingMonthAndYear = function (reportingYear, reportingMonth) {
-
         var monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         var year = reportingYear.value;
         var month = monthList.indexOf(reportingMonth.value);
@@ -9,6 +8,7 @@
         var lastDay = this.normalizeDateToDashFormat(new Date(year, month + 1, 0));
         return [firstDay, lastDay];
     }
+
     // normalizeDateToDashFormat function converts JS date object into yyyy-mm-dd format
     this.normalizeDateToDashFormat = function (dateObj) {
         var yearObj = dateObj.getFullYear();

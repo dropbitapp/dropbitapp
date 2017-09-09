@@ -5011,7 +5011,11 @@ namespace WebApp.Helpers
             GetSpiritsForProductionReport(userId, start, end, ref tempRepObjList);
 
             // we need this for line 17(b) of Part 1
-            GetUnfinishedSpiritsForProductionReport(userId, start, end, ref tempRepObjList);
+            // we only need to get Unfinished Spirit during the quartely returns so doing the check here. Months could change from year to year. Need to check with TTB every year
+            if (start.Month == 1 && end.Month == 1 || start.Month == 4 && end.Month == 4 || start.Month == 7 && end.Month == 7 || start.Month == 10 && end.Month == 10)
+            {
+                GetUnfinishedSpiritsForProductionReport(userId, start, end, ref tempRepObjList);
+            }
 
             foreach (var rec in tempRepObjList)
             {
