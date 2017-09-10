@@ -449,7 +449,7 @@ namespace WebApp.Helpers
                      join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
                      from distillers in distillers_join.DefaultIfEmpty()
                      where
-                       distillers.UserId == 1 &&
+                       distillers.UserId == userId &&
                        prod.ProductionTypeID == 4 &&
                        prod.ProductionEndTime <= endOfReporting &&
                        prod.Gauged == true &&
