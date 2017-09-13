@@ -138,7 +138,7 @@
                         }
                         usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
                     }
-
+                    usedMat.DistillableOrigin = "pur";
                     usedMatsList.push(usedMat);
                     usedMat = {};
                     $('#MatBurnDwnDialog').jqxWindow('close');
@@ -172,7 +172,7 @@
                     if (args) {
                         var index = args.index;
                         usedMat.ID = rawMaterialTypeAdapter.records[index].PurchaseId;
-                        usedMat.Origin = 'pur';
+                        usedMat.DistillableOrigin = rawMaterialTypeAdapter.records[index].DistillableOrigin;
                         curRawMatIndex = index;
                         var vbwValue = rawMaterialTypeAdapter.records[index].VBW;
                         if (args.item.checked) {

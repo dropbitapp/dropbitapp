@@ -156,6 +156,7 @@ namespace WebApp.Helpers
         public float VBW { get; set; }
         public float QtyGal { get; set; }
         public string BurningDownMethod { get; set; }
+        public string DistillableOrigin { get; set; }
     }
 
     /// <summary>

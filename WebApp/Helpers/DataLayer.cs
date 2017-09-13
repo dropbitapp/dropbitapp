@@ -233,7 +233,7 @@ namespace WebApp.Helpers
                     MaterialDictID = ((System.Int32?)matDic.MaterialDictID ?? (System.Int32?)0),
                     Quantity = ((System.Single?)quant.Value ?? (System.Single?)0),
                     VolumeByWeight = ((System.Single?)vbw.Value ?? (System.Single?)0),
-                    BurningDownMethod = purch.BurningDownMethod ?? null,
+                    BurningDownMethod = purch.BurningDownMethod ?? null
                 };
             
             if (fermentables != null)
@@ -248,6 +248,7 @@ namespace WebApp.Helpers
                     obj.QtyGal = (float)i.Quantity;
                     obj.VBW = (float)i.VolumeByWeight;
                     obj.BurningDownMethod = i.BurningDownMethod;
+                    obj.DistillableOrigin = "pur";
                     rawMList.Add(obj);
                 }
             }
