@@ -3662,7 +3662,6 @@ namespace WebApp.Helpers
                     // purchase batch used in the distillation
                     if (k.DistillableOrigin == "pur")
                     {
-
                         // update PurchaseHistory table
                         PurchaseObject purObj = new PurchaseObject();
 
@@ -3774,6 +3773,7 @@ namespace WebApp.Helpers
                             prodContent.isProductionComponent = false;
 
                             db.ProductionContent.Add(prodContent);
+                            db.SaveChanges();
 
                             var q =
                                 (from rec in db.Volume
@@ -3819,6 +3819,7 @@ namespace WebApp.Helpers
                             prodContent.isProductionComponent = false;
 
                             db.ProductionContent.Add(prodContent);
+                            db.SaveChanges();
 
                             var vBW =
                                 (from rec in db.Weight
@@ -3832,7 +3833,6 @@ namespace WebApp.Helpers
 
                             purObj.VolumeByWeight = k.OldVal;
                         }
-                        db.SaveChanges();
 
                         SavePurchaseHistory(purObj, userId);
                     }
@@ -3936,10 +3936,16 @@ namespace WebApp.Helpers
                                 prodContent.ContentFieldID = 11; // ProdDistilledVolume in ContentField table
                             }
 
+                            if (prodRec.ProductionTypeID == 3)
+                            {
+                                prodContent.ContentFieldID = 13; // ProdBlendedVolume in ContentField table
+                            }
+
                             prodContent.ContentValue = k.NewVal;
                             prodContent.isProductionComponent = true;
 
                             db.ProductionContent.Add(prodContent);
+                            db.SaveChanges();
 
                             var q =
                                 (from rec in db.Volume
@@ -3976,10 +3982,16 @@ namespace WebApp.Helpers
                                 prodContent.ContentFieldID = 12; // ProdDistilledWeight in ContentField table
                             }
 
+                            if (prodRec.ProductionTypeID == 3)
+                            {
+                                prodContent.ContentFieldID = 14; // ProdBlendedWeight in ContentField table
+                            }
+
                             prodContent.ContentValue = k.NewVal;
                             prodContent.isProductionComponent = true;
 
                             db.ProductionContent.Add(prodContent);
+                            db.SaveChanges();
 
                             var vBW =
                             (from rec in db.Weight
@@ -3996,7 +4008,6 @@ namespace WebApp.Helpers
 
                         SaveProductionHistory(prodObj, userId);
                     }
-                    db.SaveChanges();
 
                     if (purIdL != null)
                     {
