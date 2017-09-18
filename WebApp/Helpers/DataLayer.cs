@@ -5674,8 +5674,7 @@ namespace WebApp.Helpers
                     distiller.UserId == userId &&
                     rec.ProductionTypeID == 2 &&
                     (rec.StatusID == 1 ||
-                    rec.StatusID == 2 ||
-                    rec.StateID == 3) &&
+                    rec.StatusID == 2) &&
                     rec.ProductionEndTime < startDate &&
                     rec.Gauged == true
                 select new
@@ -5725,8 +5724,7 @@ namespace WebApp.Helpers
                     (rec.PurchaseTypeID == 2 ||
                     rec.PurchaseTypeID == 3) &&
                     (rec.StatusID == 1 ||
-                    rec.StatusID == 2 ||
-                    rec.StatusID == 3) &&
+                    rec.StatusID == 2) &&
                     rec.PurchaseDate < startDate
                 select new
                 {
@@ -5809,30 +5807,42 @@ namespace WebApp.Helpers
 
         private void GetPurchasedDepositedToStorage(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
-            // Query distilled purchase records transferred to storage account
+            // Query fermented and distilled purchase records transferred to storage account
             var records =
-                (from rec in db.Purchase
-                join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
-                from proof in proof_join.DefaultIfEmpty()
-                join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
-                from distiller in distiller_join.DefaultIfEmpty()
-                join p2str in db.PurchaseToSpiritTypeReporting on rec.PurchaseID equals p2str.PurchaseID into p2str_join
-                from p2str in p2str_join.DefaultIfEmpty()
-                join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                from str in str_join.DefaultIfEmpty()
-                where
-                    distiller.UserId == userId &&
-                    (rec.PurchaseTypeID == 2 ||
-                    rec.PurchaseTypeID == 3) &&
-                    (rec.StatusID == 1 ||
-                    rec.StatusID == 2) &&
-                    rec.PurchaseDate >= startDate &&
-                    rec.PurchaseDate <= endDate
-                select new
-                {
-                    reportingCategoryName = str.ProductTypeName ?? "",
-                    proof = (System.Single?)proof.Value ?? (System.Single?)0
-                }).DefaultIfEmpty();
+                (from purchase in db.Purchase
+                 join alcohol in db.Alcohol on purchase.AlcoholID equals alcohol.AlcoholID into alcohol_join
+                 from alcohol in alcohol_join.DefaultIfEmpty()
+                 join productionContent in db.ProductionContent on purchase.PurchaseID equals productionContent.RecordID into productionContent_join
+                 from productionContent in productionContent_join.DefaultIfEmpty()
+                 join contentField in db.ContentField on productionContent.ContentFieldID equals contentField.ContentFieldID into contentField_join
+                 from contentField in contentField_join.DefaultIfEmpty()
+                 join production in db.Production on productionContent.ProductionID equals production.ProductionID into production_join
+                 from production in production_join.DefaultIfEmpty()
+                 join productionType in db.ProductionType on production.ProductionTypeID equals productionType.ProductionTypeID into productionType_join
+                 from productionType in productionType_join.DefaultIfEmpty()
+                 join proof in db.Proof on purchase.ProofID equals proof.ProofID into proof_join
+                 from proof in proof_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on purchase.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.PurchaseToSpiritTypeReporting on purchase.PurchaseID equals p2str.PurchaseID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId &&
+                     (purchase.PurchaseTypeID == 2 ||
+                     purchase.PurchaseTypeID == 3) &&
+                     (purchase.StatusID == 1 ||
+                     purchase.StatusID == 2 ||
+                     purchase.StatusID == 3) &&
+                     purchase.PurchaseDate >= startDate &&
+                     purchase.PurchaseDate <= endDate
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? "",
+                     purchaseProof = (System.Single?)proof.Value ?? (System.Single?)0,
+                     productionProof = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                 }).DefaultIfEmpty();
 
             if (records.First() != null)
             {
@@ -5846,12 +5856,12 @@ namespace WebApp.Helpers
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r2_DepositedInBulkStorage += (float)rec.proof;
+                        cat.r2_DepositedInBulkStorage += (float)rec.purchaseProof + (float)rec.productionProof;
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r2_DepositedInBulkStorage += (float)rec.proof;
+                        category.r2_DepositedInBulkStorage += (float)rec.purchaseProof + (float)rec.productionProof;
                     }
                 }
             }
@@ -5948,7 +5958,7 @@ namespace WebApp.Helpers
                      (sourcePurchaseRecord.StatusID == 1 ||
                      sourcePurchaseRecord.StatusID == 2 ||
                      sourcePurchaseRecord.StatusID == 3) &&
-                     sourcePurchaseRecord.PurchaseDate < startDate &&
+                     sourcePurchaseRecord.PurchaseDate < endDate &&
                      outputProductionRecord.ProductionEndTime >= startDate &&
                      outputProductionRecord.ProductionEndTime <= endDate
                  select new
@@ -6069,7 +6079,7 @@ namespace WebApp.Helpers
                     (sourcePurchaseRecord.StatusID == 1 ||
                     sourcePurchaseRecord.StatusID == 2 ||
                     sourcePurchaseRecord.StatusID == 3) &&
-                    sourcePurchaseRecord.PurchaseDate < startDate &&
+                    sourcePurchaseRecord.PurchaseDate < endDate &&
                     outputProductionRecord.ProductionEndTime >= startDate &&
                     outputProductionRecord.ProductionEndTime <= endDate
                 select new
