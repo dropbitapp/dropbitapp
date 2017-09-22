@@ -1,5 +1,5 @@
 ﻿@section scripts {
-    
+
     <script>
         var main = (function () {
 
@@ -9,7 +9,7 @@
 
             function addEventListeners() {
                 $( "#GenerateReportBtn" ).click( function () {
-                    removeAllTotals();
+                    clearFields();
                     // get starting year
                     var reportingYear = $("#ReportingYear").jqxDropDownList('getSelectedItem');
                     // get starting month
@@ -18,7 +18,7 @@
                     var reportingDate = dateModificationHelper.getReportingMonthAndYear(reportingYear, reportingMonth);
                     var startDate = reportingDate[0];
                     var endDate = reportingDate[1];
-                    
+
                 $.ajax({
                         type: "GET",
                         url: '/Reporting/GetProductionReport',
@@ -42,35 +42,118 @@
                 });
             }
 
-            function removeAllTotals() {
-                $( '#p1_1l_Total' ).val( 0 );
-                $( '#p1_2l_Total' ).val( 0 );
-                $( '#p1_3l_Total' ).val( 0 );
-                $( '#p1_4l_Total' ).val( 0 );
-                $( '#p1_5l_Total' ).val( 0 );
-                $( '#p1_6l_Total' ).val( 0 );
-                $( '#p1_7l_Total' ).val( 0 );
-                $( '#p1_8l_Total' ).val( 0 );
-                $( '#p1_9l_Total' ).val( 0 );
-                $( '#p1_10l_Total' ).val( 0 );
-                $( '#p1_11l_Total' ).val( 0 );
-                $( '#p1_12l_Total' ).val( 0 );
-                $( '#p1_13l_Total' ).val( 0 );
-                $( '#p1_14l_Total' ).val( 0 );
-                $( '#p1_15l_Total' ).val( 0 );
-                $( '#p1_16l_Total' ).val( 0 );
-                $( '#p1_17a_l_Total' ).val( 0 );
-                $( '#p1_17b_l_Total' ).val( 0 );
+            function clearFields() {
+
+                /*PART 1*/
+                // column L pf Part 1
+                $( '[id*=p1_][id*=l_Total]' ).val( 0 );
+
+                // column B of Part 1
+                // todo  there is a bumber of rows that are of the workflows that we don't support in our yet so they still need to be done
+                $( '[id*=_WhiskyUnder160]' ).val( 0 );
+
+                // column C of Part 1
+                // todo  there is a bumber of rows that are of the workflows that we don't support in our yet so they still need to be done
+                $( '[id*=_WhiskyOver160]' ).val( 0 );
+
+                // column D of Part 1
+                // todo  there is a bumber of rows that are of the workflows that we don't support in our yet so they still need to be done
+                $( '[id*=_BrandyUnder170]' ).val( 0 );
+
+                // column E of Part 1
+                // todo  there is a bumber of rows that are of the workflows that we don't support in our yet so they still need to be done
+                $( '[id*=_BrandyOver170]' ).val( 0 );
+
+                // column F of Part 1
+                // todo  there is a bumber of rows that are of the workflows that we don't support in our yet so they still need to be done
+                $( '[id*=_Rum]' ).val( 0 );
+
+                // column G of Part 1
+                // todo  there is a bumber of rows that are of the workflows that we don't support in our yet so they still need to be done
+                $( '[id*=_Gin]' ).val( 0 );
+
+                // column H of Part 1
+                // todo  there is a bumber of rows that are of the workflows that we don't support in our yet so they still need to be done
+                $( '[id*=_Vodka]' ).val( 0 );
+
+                // column I of Part 1
+                // todo  there is a bumber of rows that are of the workflows that we don't support in our yet so they still need to be done
+                $( '[id*=_AlcoholAndSpiritsOver190]' ).val( 0 );
+
+                // column J of Part 1
+                // todo  there is a bumber of rows that are of the workflows that we don't support in our yet so they still need to be done
+                $( '[id*=_AlcoholAndSpiritsUnder190]' ).val( 0 );
+
+                // column K of Part 1
+                // todo  there is a bumber of rows that are of the workflows that we don't support in our yet so they still need to be done
+                $( '[id*=p1_][id*=_Other]' ).val( 0 );
+
+                /*PART 2*/
+                // column B of Part 2
+                $( '[id*=p2_][id*=b_]' ).val( 0 );
+
+                /*PART 3*/
+                // column B of Part 3
+                $( '[id*=NewCooperage]' ).val( 0 );
+
+                // column C of Part 3
+                $( '[id*=UsedCooperage]' ).val( 0 );
+
+                // column D of Part 3
+                $( '[id*=ProofDepositedInTanks]' ).val( 0 );
+
+                /*PART 4*/
+                // column B of Part 4
+                $( '[id*=p4_][id*=b_]' ).val( 0 );
+
+                /*PART 5*/
+                // column B of Part 2
+                $( '[id*=p5_][id*=b_]' ).val( 0 );
+
+                /*PART 6*/
+                // column B of Part 6
+                $( '[id*=p6_][id*=b_]' ).val( 0 );
+
+                // column C of Part 6
+                $( '[id*=p6_][id*=c_]' ).val( 0 );
+            }
+
+            function computeColLTotals(reportObject)
+            {
+                // Column (L) - update processing totals across all Spirit Types
+                processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
+                processingAcct += parseFloat( reportObject.ProccessingAcct );
+                $( '#p1_9l_Total' ).val( processingAcct );
+
+                // Column (L) - update storages totals across all Spirit Types
+                storageAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
+                storageAcct += parseFloat( reportObject.SorageAcct );
+                $( '#p1_11l_Total' ).val( storageAcct );
+
+                // Column (L) - update line 14 totals across all Spirit Types
+                producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
+                producedTotals += parseFloat( reportObject.SorageAcct + reportObject.ProccessingAcct );
+                $( '#p1_14l_Total' ).val( producedTotals );
+
+                // Column (L) - update Received for Redistillation for across all Spirit Types
+                redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
+                redistilledTotal += parseFloat( reportObject.Recd4Redistil );
+                $( '#p1_15l_Total' ).val( redistilledTotal );
+
+                // Column (L) - update Unfinished spirits across all Spirit Types
+                unfinishedTotal = isNaN( parseFloat( $( '#p1_17b_l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17b_l_Total' ).val() );
+                unfinishedTotal += parseFloat( reportObject.UnfinishedSpiritsEndOfQuarter );
+                $( '#p1_17b_l_Total' ).val( unfinishedTotal );
             }
 
             // populate the form
-            function bindReportData(result) {
+            function bindReportData( result ) {
                 // Report header section
-                $('#h_PlantNumber').text(result.Header.DSP);
-                $('#h_EIN').text(result.Header.EIN);
-                $('#h_LocationOfPlant').text(result.Header.PlantAddress);
-                $('#h_NameofProprietor').text(result.Header.ProprietorName);
-                $('#h_MonthAndYear').text(result.Header.ReportDate);
+                $( '#h_PlantNumber' ).text( result.Header.DSP );
+                $( '#h_EIN' ).text( result.Header.EIN );
+                $( '#h_LocationOfPlant' ).text( result.Header.PlantAddress );
+                $( '#h_NameofProprietor' ).text( result.Header.ProprietorName );
+                $( '#h_MonthAndYear' ).text( result.Header.ReportDate );
 
                 // part 1 of the report
                 var producedTotal = 0;
@@ -78,8 +161,13 @@
                 var producedTotals = 0; // line 14
                 var unfinishedTotal = 0; //line 17(b)
 
-                for ( var i = 0; i < result.Part1.length; i++ )
-                {
+                var isUnknownMaterial = false; // this variable tracks whether RAw Material Used is not on the list of existing item in the Production Report, Part 6.
+
+                var unknownMaterialsList = []; // this array temporarily holds the list of unknown materials to go over through again.
+
+                var alreadyInUnknownMatsArray = false; // this variable is used durnig determination of whether to push new unknown material in unknownMaterialList
+
+                for ( var i = 0; i < result.Part1.length; i++ ) {
                     if ( result.Part1[i].SpiritCatName === 'WhiskyUnder160' ) {
 
                         // Line: 9 - update processing for a single SpiritType
@@ -97,30 +185,7 @@
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_b_WhiskyUnder160' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
 
-                        // Column (L) - update processing totals across all Spirit Types
-                        processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
-                        processingAcct += parseFloat( result.Part1[i].ProccessingAcct );
-                        $( '#p1_9l_Total' ).val( processingAcct );
-
-                        // Column (L) - update storages totals across all Spirit Types
-                        storagegAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
-                        storagegAcct += parseFloat( result.Part1[i].SorageAcct );
-                        $( '#p1_11l_Total' ).val( storagegAcct );
-
-                        // Column (L) - update line 14 totals across all Spirit Types
-                        producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                        producedTotals += parseFloat(result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct);
-                        $( '#p1_14l_Total' ).val( producedTotals );
-
-                        // Column (L) - update Received for Redistillation for across all Spirit Types
-                        redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
-                        redistilledTotal += parseFloat( result.Part1[i].Recd4Redistil );
-                        $( '#p1_15l_Total' ).val( redistilledTotal );
-
-                        // Column (L) - update Unfinished spirits across all Spirit Types
-                        unfinishedTotal = isNaN( parseFloat( $( '#p1_17b_l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17b_l_Total' ).val() );
-                        unfinishedTotal += parseFloat( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
-                        $( '#p1_17b_l_Total' ).val( unfinishedTotal );
+                        computeColLTotals( result.Part1[i] );
                     }
                     else if ( result.Part1[i].SpiritCatName === 'WhiskyOver160' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -138,30 +203,7 @@
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_c_WhiskyOver160' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
 
-                        // Column (L) - update processing totals across all Spirit Types
-                        processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
-                        processingAcct += parseFloat( result.Part1[i].ProccessingAcct );
-                        $( '#p1_9l_Total' ).val( processingAcct );
-
-                        // Column (L) - update storages totals across all Spirit Types
-                        storagegAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
-                        storagegAcct += parseFloat( result.Part1[i].SorageAcct );
-                        $( '#p1_11l_Total' ).val( storagegAcct );
-
-                        // Column (L) - update line 14 totals across all Spirit Types
-                        producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                        producedTotals += parseFloat( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
-                        $( '#p1_14l_Total' ).val( producedTotals );
-
-                        // Column (L) - update Received for Redistillation for across all Spirit Types
-                        redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
-                        redistilledTotal += parseFloat( result.Part1[i].Recd4Redistil );
-                        $( '#p1_15l_Total' ).val( redistilledTotal );
-
-                        // Column (L) - update Unfinished spirits across all Spirit Types
-                        unfinishedTotal = isNaN( parseFloat( $( '#p1_17b_l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17b_l_Total' ).val() );
-                        unfinishedTotal += parseFloat( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
-                        $( '#p1_17b_l_Total' ).val( unfinishedTotal );
+                        computeColLTotals( result.Part1[i] );
                     }
                     else if ( result.Part1[i].SpiritCatName === 'BrandyUnder170' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -179,30 +221,7 @@
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_d_BrandyUnder170' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
 
-                        // Column (L) - update processing totals across all Spirit Types
-                        processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
-                        processingAcct += parseFloat( result.Part1[i].ProccessingAcct );
-                        $( '#p1_9l_Total' ).val( processingAcct );
-
-                        // Column (L) - update storages totals across all Spirit Types
-                        storagegAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
-                        storagegAcct += parseFloat( result.Part1[i].SorageAcct );
-                        $( '#p1_11l_Total' ).val( storagegAcct );
-
-                        // Column (L) - update line 14 totals across all Spirit Types
-                        producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                        producedTotals += parseFloat( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
-                        $( '#p1_14l_Total' ).val( producedTotals );
-
-                        // Column (L) - update Received for Redistillation for across all Spirit Types
-                        redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
-                        redistilledTotal += parseFloat( result.Part1[i].Recd4Redistil );
-                        $( '#p1_15l_Total' ).val( redistilledTotal );
-
-                        // Column (L) - update Unfinished spirits across all Spirit Types
-                        unfinishedTotal = isNaN( parseFloat( $( '#p1_17b_l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17b_l_Total' ).val() );
-                        unfinishedTotal += parseFloat( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
-                        $( '#p1_17b_l_Total' ).val( unfinishedTotal );
+                        computeColLTotals( result.Part1[i] );
                     }
                     else if ( result.Part1[i].SpiritCatName === 'BrandyOver170' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -220,48 +239,114 @@
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_e_BrandyOver170' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
 
-                        // Column (L) - update processing totals across all Spirit Types
-                        processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
-                        processingAcct += parseFloat( result.Part1[i].ProccessingAcct );
-                        $( '#p1_9l_Total' ).val( processingAcct );
-
-                        // Column (L) - update storages totals across all Spirit Types
-                        storagegAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
-                        storagegAcct += parseFloat( result.Part1[i].SorageAcct );
-                        $( '#p1_11l_Total' ).val( storagegAcct );
-
-                        // Column (L) - update line 14 totals across all Spirit Types
-                        producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                        producedTotals += parseFloat( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
-                        $( '#p1_14l_Total' ).val( producedTotals );
-
-                        // Column (L) - update Received for Redistillation for across all Spirit Types
-                        redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
-                        redistilledTotal += parseFloat( result.Part1[i].Recd4Redistil );
-                        $( '#p1_15l_Total' ).val( redistilledTotal );
-
-                        // Column (L) - update Unfinished spirits across all Spirit Types
-                        unfinishedTotal = isNaN( parseFloat( $( '#p1_17l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17l_Total' ).val() );
-                        unfinishedTotal += parseFloat( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
-                        $( '#p1_17l_Total' ).val( unfinishedTotal );
+                        computeColLTotals( result.Part1[i] );
                     }
                     else if ( result.Part1[i].SpiritCatName === 'Rum' ) {
-                        alert( 'Rum case not implemented' );
+                        // Line: 9 - update processing for a single SpiritType
+                        $( '#p1_9f_Rum' ).val( result.Part1[i].ProccessingAcct );
+
+                        // Line: 11 - update storage for a single SpiritType
+                        $( '#p1_11f_Rum' ).val( result.Part1[i].SorageAcct );
+
+                        // Line: 14 - update totals for line 14 for all applicable rows
+                        $( '#p1_14f_Rum' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+
+                        // Line: 15 - update Received for Redistillation for a single SpiritType
+                        $( '#p1_15f_Rum' ).val( result.Part1[i].Recd4Redistil );
+
+                        // Line: 17(a) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17a_f_Rum' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        // Line: 17(b) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17b_f_Rum' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        computeColLTotals( result.Part1[i] );
                     }
                     else if ( result.Part1[i].SpiritCatName === 'Gin' ) {
-                        alert( 'Gin case not implemented' );
+                        // Line: 9 - update processing for a single SpiritType
+                        $( '#p1_9g_Gin' ).val( result.Part1[i].ProccessingAcct );
+
+                        // Line: 11 - update storage for a single SpiritType
+                        $( '#p1_11g_Gin' ).val( result.Part1[i].SorageAcct );
+
+                        // Line: 14 - update totals for line 14 for all applicable rows
+                        $( '#p1_14g_Gin' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+
+                        // Line: 15 - update Received for Redistillation for a single SpiritType
+                        $( '#p1_15g_Gin' ).val( result.Part1[i].Recd4Redistil );
+
+                        // Line: 17(a) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17a_g_Gin' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        // Line: 17(b) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17b_g_Gin' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        computeColLTotals( result.Part1[i] );
                     }
                     else if ( result.Part1[i].SpiritCatName === 'Vodka' ) {
-                        alert( 'Vodka case not implemented' );
+                        // Line: 9 - update processing for a single SpiritType
+                        $( '#p1_9h_Vodka' ).val( result.Part1[i].ProccessingAcct );
+
+                        // Line: 11 - update storage for a single SpiritType
+                        $( '#p1_11h_Vodka' ).val( result.Part1[i].SorageAcct );
+
+                        // Line: 14 - update totals for line 14 for all applicable rows
+                        $( '#p1_14h_Vodka' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+
+                        // Line: 15 - update Received for Redistillation for a single SpiritType
+                        $( '#p1_15h_Vodka' ).val( result.Part1[i].Recd4Redistil );
+
+                        // Line: 17(a) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17a_h_Vodka' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        // Line: 17(b) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17b_h_Vodka' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        computeColLTotals( result.Part1[i] );
                     }
                     else if ( result.Part1[i].SpiritCatName === 'AlcoholUnder190' ) {
-                        alert( 'AlcoholUnder190 case not implemented' );
+                        // Line: 9 - update processing for a single SpiritType
+                        $( '#p1_9j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].ProccessingAcct );
+
+                        // Line: 11 - update storage for a single SpiritType
+                        $( '#p1_11j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].SorageAcct );
+
+                        // Line: 14 - update totals for line 14 for all applicable rows
+                        $( '#p1_14j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+
+                        // Line: 15 - update Received for Redistillation for a single SpiritType
+                        $( '#p1_15j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].Recd4Redistil );
+
+                        // Line: 17(a) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17a_j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        // Line: 17(b) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17b_j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        computeColLTotals( result.Part1[i] );
                     }
                     else if ( result.Part1[i].SpiritCatName === 'AlcoholOver190' ) {
-                        alert( 'AlcoholOver190 case not implemented' );
+                        // Line: 9 - update processing for a single SpiritType
+                        $( '#p1_9i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].ProccessingAcct );
+
+                        // Line: 11 - update storage for a single SpiritType
+                        $( '#p1_11i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].SorageAcct );
+
+                        // Line: 14 - update totals for line 14 for all applicable rows
+                        $( '#p1_14i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+
+                        // Line: 15 - update Received for Redistillation for a single SpiritType
+                        $( '#p1_15i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].Recd4Redistil );
+
+                        // Line: 17(a) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17a_i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        // Line: 17(b) - update Unfinished Spirits for a single SpiritType
+                        $( '#p1_17b_i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+
+                        computeColLTotals( result.Part1[i] );
                     }
-                    else
-                    {
+                    else {
                         // Line: 9 - update processing for a single SpiritType
                         $( '#p1_9k_Other' ).val( result.Part1[i].ProccessingAcct );
 
@@ -277,132 +362,107 @@
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_k_Other' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
 
-                        // Column (L) - update processing totals across all Spirit Types
-                        processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
-                        processingAcct += parseFloat( result.Part1[i].ProccessingAcct );
-                        $( '#p1_9l_Total' ).val( processingAcct );
-
-                        // Column (L) - update storages totals across all Spirit Types
-                        storagegAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
-                        storagegAcct += parseFloat( result.Part1[i].SorageAcct );
-                        $( '#p1_11l_Total' ).val( storagegAcct );
-
-                        // Column (L) - update line 14 totals across all Spirit Types
-                        producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                        producedTotals += parseFloat( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
-                        $( '#p1_14l_Total' ).val( producedTotals );
-
-                        // Column (L) - update Received for Redistillation for across all Spirit Types
-                        redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
-                        redistilledTotal += parseFloat( result.Part1[i].Recd4Redistil );
-                        $( '#p1_15l_Total' ).val( redistilledTotal );
-
-                        // Column (L) - update Unfinished spirits across all Spirit Types
-                        unfinishedTotal = isNaN( parseFloat( $( '#p1_17b_l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17b_l_Total' ).val() );
-                        unfinishedTotal += parseFloat( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
-                        $( '#p1_17b_l_Total' ).val( unfinishedTotal );
+                        computeColLTotals( result.Part1[i] );
                     }
                 }
 
                 // update totals for line 14 column "l"
 
-                //grisha - todo: this could potentially be moved to a function method
-                for ( var i = 0; i < result.Part2Through5.length; i++ )
-                {
+                //grisha - todo: this could potentially be moved to a separate function
+                for ( var i = 0; i < result.Part2Through5.length; i++ ) {
                     if ( result.Part2Through5[i].KindOfMaterial === "Grain" ) //grain
                     {
                         $( '#p2_1b_GrainProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Fruit") //fruit
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Fruit" ) //fruit
                     {
                         $( '#p2_2b_FruitProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Molasses") //Molasses
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Molasses" ) //Molasses
                     {
                         $( '#p2_3b_MolassesProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "EthylSulfate") //EthylSulfate
+                    else if ( result.Part2Through5[i].KindOfMaterial === "EthylSulfate" ) //EthylSulfate
                     {
                         $( '#p2_4b_EthylSulfateProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "EthyleneGas") //EthyleneGas
+                    else if ( result.Part2Through5[i].KindOfMaterial === "EthyleneGas" ) //EthyleneGas
                     {
                         $( '#p2_5b_EthyleneGasProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "SulphiteLiquor") //SulphiteLiquor
+                    else if ( result.Part2Through5[i].KindOfMaterial === "SulphiteLiquor" ) //SulphiteLiquor
                     {
                         $( '#p2_6b_SulphiteLiquorsProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "FromRedistillation") //FromRedistillation
+                    else if ( result.Part2Through5[i].KindOfMaterial === "FromRedistillation" ) //FromRedistillation
                     {
                         $( '#p2_7b_FromRedistillationProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Bourbon-New-Cooperage") //Bourbon-New-Cooperage
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Bourbon-New-Cooperage" ) //Bourbon-New-Cooperage
                     {
                         $( '#p3_1b_BourbonProofNewCooperage' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Bourbon-Used-Cooperage") //Bourbon-Used-Cooperage
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Bourbon-Used-Cooperage" ) //Bourbon-Used-Cooperage
                     {
                         $( '#p3_1c_BourbonProofUsedCooperage' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Bourbon-Deposited-in-Tanks") //Bourbon-Deposited-in-Tanks
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Bourbon-Deposited-in-Tanks" ) //Bourbon-Deposited-in-Tanks
                     {
                         $( '#p3_1d_BourbonProofDepositedInTanks' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Corn-New-Cooperage") //Corn-New-Cooperage
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Corn-New-Cooperage" ) //Corn-New-Cooperage
                     {
                         $( '#p3_2b_CornProofNewCooperage' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Corn-Used-Cooperage") //Corn-Used-Cooperage
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Corn-Used-Cooperage" ) //Corn-Used-Cooperage
                     {
                         $( '#p3_2c_CornProofUsedCooperage' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Corn-Deposited-in-Tanks") //Corn-Deposited-in-Tanks
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Corn-Deposited-in-Tanks" ) //Corn-Deposited-in-Tanks
                     {
                         $( '#p3_2d_CornProofDepositedInTanks' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Rye-New-Cooperage") //Rye-New-Cooperage
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Rye-New-Cooperage" ) //Rye-New-Cooperage
                     {
                         $( '#p3_3b_RyeProofNewCoooperage' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Rye-Used-Cooperage") //Rye-Used-Cooperage
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Rye-Used-Cooperage" ) //Rye-Used-Cooperage
                     {
                         $( '#p3_3c_RyeProofUsedCooperage' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === "Rye-Deposited-in-Tanks") //Rye-Deposited-in-Tanks
+                    else if ( result.Part2Through5[i].KindOfMaterial === "Rye-Deposited-in-Tanks" ) //Rye-Deposited-in-Tanks
                     {
                         $( '#p3_3d_RyeProofDepositedInTanks' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === 'Light-New-Cooperage') //Light-New-Cooperage
+                    else if ( result.Part2Through5[i].KindOfMaterial === 'Light-New-Cooperage' ) //Light-New-Cooperage
                     {
                         $( '#p3_4b_LightProofNewCooperage' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === 'Light-Used-Cooperage') //Light-Used-Cooperage
+                    else if ( result.Part2Through5[i].KindOfMaterial === 'Light-Used-Cooperage' ) //Light-Used-Cooperage
                     {
                         $( '#p3_4c_LightProofUsedCooperage' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === 'Light-Deposited-in-Tanks') //Light-Deposited-in-Tanks
+                    else if ( result.Part2Through5[i].KindOfMaterial === 'Light-Deposited-in-Tanks' ) //Light-Deposited-in-Tanks
                     {
                         $( '#p3_4d_LightProofDepositedInTanks' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === 'GrapeBrandy') //GrapeBrandy
+                    else if ( result.Part2Through5[i].KindOfMaterial === 'GrapeBrandy' ) //GrapeBrandy
                     {
                         $( '#p4_1b_GrapeBrandyProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === 'AllOtherBrandy') //AllOtherBrandy
+                    else if ( result.Part2Through5[i].KindOfMaterial === 'AllOtherBrandy' ) //AllOtherBrandy
                     {
                         $( '#p4_2b_AllOtherBrandyProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === 'NeutralGrapeBrandy') //NeutralGrapeBrandy
+                    else if ( result.Part2Through5[i].KindOfMaterial === 'NeutralGrapeBrandy' ) //NeutralGrapeBrandy
                     {
                         $( '#p4_3b_NeutralGrapeBrandyProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else if (result.Part2Through5[i].KindOfMaterial === 'AllOtherNeutralBrandy') //AllOtherNeutralBrandy
+                    else if ( result.Part2Through5[i].KindOfMaterial === 'AllOtherNeutralBrandy' ) //AllOtherNeutralBrandy
                     {
                         $( '#p4_4b_AllOtherNeutralBrandyProof' ).val( result.Part2Through5[i].ProofGallons );
                     }
-                    else
-                    {
+                    else {
                         // this case is when new custom Material Kinds are being used.
                         // grisha - todo: this should be done when we have a workflow that allows for adding custom Material Kinds in Task #846
                         // I am proposing the following  algorithm:
@@ -416,30 +476,120 @@
                 }
 
                 // part 6 of the report - 2nd page of production report
-                for ( var i = 0; i < result.ProdReportPart6.length; i++ )
-                {
+                for ( var i = 0; i < result.ProdReportPart6.length; i++ ) {
                     if ( result.ProdReportPart6[i].ProdReportMaterialCategoryID === 1 ) // grain and grain products case
                     {
-                        // todo implement
+                        var table = document.getElementById( 'tablePart6' );
+
+                        for ( var k = 4; k <= 11; k++ ) {
+                            if ( table.rows[k + i].cells[0].getElementsByTagName( 'p' )[0].innerText.toUpperCase().indexOf( result.ProdReportPart6[i].KindOfMaterial.toUpperCase() ) !== -1 ) {
+                                if ( result.ProdReportPart6[i].KindOfMaterial.toUpperCase() === 'CORN' ) {
+                                    // we need to do this weirdness because of how our tables' html are autogenerated during the conversion from PDF into html
+                                    $( '#p6_1c_GallonsCornUsedInProductionOfDistilledSpirits' ).val( result.ProdReportPart6[i].Volume );
+                                    $( '#p6_1b_PoundsCornUsedInProductionOfDistilledSpirits' ).val( result.ProdReportPart6[i].Weight );
+
+                                    break;
+                                }
+                                else {
+                                    var idLbs = '#' + table.rows[k + i].cells[1].getElementsByTagName( 'input' )[0].id;
+                                    var idGals = '#' + table.rows[k + i].cells[2].getElementsByTagName( 'input' )[0].id;
+
+                                    $( idGals ).val( result.ProdReportPart6[i].Volume );
+                                    $( idLbs ).val( result.ProdReportPart6[i].Weight );
+
+                                    isUnknownMaterial = false;
+                                    break;
+                                }
+                            }
+                            else {
+                                isUnknownMaterial = true;
+                            }
+                        }
+
+                        if ( isUnknownMaterial ) {
+                            unknownMaterialsList.push( result.ProdReportPart6[i] );
+                        }
+                        else {
+                            table.rows[4 + i].cells[0].getElementsByTagName( 'div' )[0].innerText = table.rows[14 + i].cells[0].getElementsByTagName( 'div' )[0].innerText + ' ' + result.ProdReportPart6[i].KindOfMaterial;
+
+                            var idLbs = '#' + table.rows[k + i].cells[1].getElementsByTagName( 'input' )[0].id;
+                            var idGals = '#' + table.rows[k + i].cells[2].getElementsByTagName( 'input' )[0].id;
+
+                            $( idGals ).val( result.ProdReportPart6[i].Volume );
+                            $( idLbs ).val( result.ProdReportPart6[i].Weight );
+
+                            break;
+                        }
+                        if ( isUnknownMaterial ) {
+                            unknownMaterialsList.push( result.ProdReportPart6[i] );
+                        }
                     }
                     else if ( result.ProdReportPart6[i].ProdReportMaterialCategoryID === 2 ) // fruit and fruit products case
                     {
                         var table = document.getElementById( 'tablePart6' );
-                        table.rows[14 + i].cells[0].getElementsByTagName( 'div' )[0].innerText = result.ProdReportPart6[i].KindOfMaterial;
-                        
-                        var idLbs = '#' + table.rows[14 + i].cells[1].getElementsByTagName( 'input' )[0].id;
-                        var idGals = '#' + table.rows[14 + i].cells[2].getElementsByTagName( 'input' )[0].id;
 
-                        $( idGals ).val( result.ProdReportPart6[i].Volume );
-                        $( idLbs ).val( result.ProdReportPart6[i].Weight );
+                        for ( var k = 13; k <= 18; k++ ) {
 
-                        //table.rows[14 + i].cells[1].getElementsByTagName( 'input' )[0].val = result.ProdReportPart6[i].Weight;
-                        //table.rows[14 + i].cells[2].getElementsByTagName( 'input' )[0].val = result.ProdReportPart6[i].Volume;
+                            if ( table.rows[k + i].cells[0].getElementsByTagName( 'p' )[0].innerText.indexOf( result.ProdReportPart6[i].KindOfMaterial ) !== -1 ) {
+                                if ( result.ProdReportPart6[i].KindOfMaterial.toUpperCase() === 'GRAPE' ) {
+                                    // we need to do this weirdness because of how our tables' html are autogenerated during the conversion from PDF into html
+                                    $( '#p6_9c_GallonsGrapeUsedInProductionOfDistilledSpirits' ).val( result.ProdReportPart6[i].Volume );
+                                    $( '#p6_9b_PoundsGrapeUsedInProductionOfDistilledSpirits' ).val( result.ProdReportPart6[i].Weight );
 
+                                    break;
+                                }
+                                else {
+                                    var idLbs = '#' + table.rows[k + i].cells[1].getElementsByTagName( 'input' )[0].id;
+                                    var idGals = '#' + table.rows[k + i].cells[2].getElementsByTagName( 'input' )[0].id;
+
+                                    $( idGals ).val( result.ProdReportPart6[i].Volume );
+                                    $( idLbs ).val( result.ProdReportPart6[i].Weight );
+
+                                    isUnknownMaterial = false;
+
+                                    break;
+                                }
+                            }
+                            else {
+
+                                isUnknownMaterial = true;
+                            }
+                        }
+
+                        if ( isUnknownMaterial ) {
+                            unknownMaterialsList.push( result.ProdReportPart6[i] );
+                        }
                     }
                     else if ( result.ProdReportPart6[i].ProdReportMaterialCategoryID === 3 ) // cane and cane products case
                     {
-                        // todo implement
+                        var table = document.getElementById( 'tablePart6' );
+
+                        for ( var k = 20; k <= 23; k++ ) {
+                            if ( table.rows[k + i].cells[0].getElementsByTagName( 'p' )[0].innerText.toUpperCase().indexOf( result.ProdReportPart6[i].KindOfMaterial.toUpperCase() ) != -1 ) {
+                                if ( result.ProdReportPart6[i].KindOfMaterial.toUpperCase() === 'MOLASSES' ) {
+                                    // we need to do this weirdness because of how our tables' html are autogenerated during the conversion from PDF into html
+                                    $( '#p6_15c_GallonsMolassesUsedInProductionOfDistilledSpirits' ).val( result.ProdReportPart6[i].Volume );
+                                    $( '#p6_15b_PoundsMolassesUsedInProductionOfDistilledSpirits' ).val( result.ProdReportPart6[i].Weight );
+                                    break;
+                                }
+                                else {
+                                    var idLbs = '#' + table.rows[k + i].cells[1].getElementsByTagName( 'input' )[0].id;
+                                    var idGals = '#' + table.rows[k + i].cells[2].getElementsByTagName( 'input' )[0].id;
+
+                                    $( idGals ).val( result.ProdReportPart6[i].Volume );
+                                    $( idLbs ).val( result.ProdReportPart6[i].Weight );
+                                    isUnknownMaterial = false;
+                                    break;
+                                }
+                            }
+                            else {
+                                isUnknownMaterial = true;
+                            }
+                        }
+
+                        if ( isUnknownMaterial ) {
+                            unknownMaterialsList.push( result.ProdReportPart6[i] );
+                        }
                     }
                     else if ( result.ProdReportPart6[i].ProdReportMaterialCategoryID === 4 ) // other products case
                     {
@@ -447,8 +597,83 @@
                     }
                 }
 
-            }
+                if ( isUnknownMaterial ) { // flag evaluates to true is we ever came across the unknown material
+                    // this section deals with materials uknown to the existing Production Report, part 6
+                    for ( var l = 0; l <= unknownMaterialsList.length; l++ ) {
 
+                        if ( unknownMaterialsList[l].ProdReportMaterialCategoryID === 1 ) { // Whiskey
+                            // find first availabe empty spot and insert there
+                            for ( var h = 4; h <= 11; h++ ) {
+                                var currentString = table.rows[h].cells[0].getElementsByTagName( 'p' )[0].innerText;
+                                var index = currentString.indexOf( '.' );
+                                var secondHalfOfString = currentString.substr( ++index );
+                                if ( secondHalfOfString !== "" ) {
+                                    continue;
+                                }
+                                else {
+                                    table.rows[h].cells[0].getElementsByTagName( 'p' )[0].innerText = currentString + unknownMaterialsList[l].KindOfMaterial.toUpperCase();
+
+                                    var idLbs = '#' + table.rows[h].cells[1].getElementsByTagName( 'input' )[0].id;
+                                    var idGals = '#' + table.rows[h].cells[2].getElementsByTagName( 'input' )[0].id;
+
+                                    $( idGals ).val( unknownMaterialsList[l].Volume );
+                                    $( idLbs ).val( unknownMaterialsList[l].Weight );
+
+                                    break;
+                                }
+                            }
+                        }
+                        else if ( unknownMaterialsList[l].ProdReportMaterialCategoryID === 2 ) { // Fruit related products
+                            // find first availabe empty spot and insert there
+                            for ( var h = 13; h <= 18; h++ ) {
+                                var currentString = table.rows[h].cells[0].getElementsByTagName( 'p' )[0].innerText;
+                                var index = currentString.indexOf( '.' );
+                                var secondHalfOfString = currentString.substr( ++index );
+                                if ( secondHalfOfString !== "" ) {
+                                    continue;
+                                }
+
+                                else {
+                                    table.rows[h].cells[0].getElementsByTagName( 'p' )[0].innerText = currentString + unknownMaterialsList[l].KindOfMaterial.toUpperCase();
+
+                                    var idLbs = '#' + table.rows[h].cells[1].getElementsByTagName( 'input' )[0].id;
+                                    var idGals = '#' + table.rows[h].cells[2].getElementsByTagName( 'input' )[0].id;
+
+                                    $( idGals ).val( unknownMaterialsList[l].Volume );
+                                    $( idLbs ).val( unknownMaterialsList[l].Weight );
+
+                                    break;
+                                }
+                            }
+                        }
+                        else if ( unknownMaterialsList[l].ProdReportMaterialCategoryID === 3 ) { // Cane related products
+                            // find first availabe empty spot and insert there
+                            for ( var h = 20; h <= 23; h++ ) {
+                                var currentString = table.rows[h].cells[0].getElementsByTagName( 'p' )[0].innerText;
+                                var index = currentString.indexOf( '.' );
+                                var secondHalfOfString = currentString.substr( ++index );
+                                if ( secondHalfOfString !== "" ) {
+                                    continue;
+                                }
+                                else {
+                                    table.rows[h].cells[0].getElementsByTagName( 'p' )[0].innerText = currentString + unknownMaterialsList[l].KindOfMaterial.toUpperCase();
+
+                                    var idLbs = '#' + table.rows[h].cells[1].getElementsByTagName( 'input' )[0].id;
+                                    var idGals = '#' + table.rows[h].cells[2].getElementsByTagName( 'input' )[0].id;
+
+                                    $( idGals ).val( unknownMaterialsList[l].Volume );
+                                    $( idLbs ).val( unknownMaterialsList[l].Weight );
+
+                                    break;
+                                }
+                            }
+                        }
+                        else if ( unknownMaterialsList[l].ProdReportMaterialCategoryID === 4 ) {
+                            // todo: need to implment
+                        }
+                    }
+                }
+            }
             // parse JSON datetime "/Date(1492412400000)/" format into a regular javascript format
             function parseJSONDateToJSDate(date) {
                 var parsedDate;
@@ -466,20 +691,22 @@
             }
 
             function createElements() {
+                var date = new Date();
 
+                var month = date.getMonth();
                 var monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
                 $("#ReportingMonth").jqxDropDownList({
-                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList
+                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList, selectedIndex: (month - 1)
                 });
 
                 var yearList = [];
-                var date = new Date();
+                
                 var year = date.getFullYear();
                 for (i = 0; i < (year - 1900) ; i++) {
                     yearList.push(year - i);
                 }
                 $("#ReportingYear").jqxDropDownList({
-                    theme: 'bootstrap', height: '26px', width: '130px', source: yearList
+                    theme: 'bootstrap', height: '26px', width: '130px', source: yearList, selectedIndex: 0
                 });
 
                 $("#GenerateReportBtn").jqxButton({ theme: 'bootstrap' });
@@ -1290,7 +1517,7 @@
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_11h_Vodka" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_11i_AlcoholAndSpiritsOver190"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_11i_AlcoholAndSpiritsOver190" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_11j_AlcoholAndSpiritsUnder190" readonly=readonly /></p>
@@ -1392,37 +1619,37 @@
                 <p class="s4" style="padding-left: 2pt;text-indent: 0pt;text-align: left;">14. PRODUCED (Total, Lines 1 through 13)</p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14b_WhiskyUnder160" readonly/></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14b_WhiskyUnder160" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14c_WhiskyOver160" readonly /></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14c_WhiskyOver160" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14d_BrandyUnder170" readonly /></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14d_BrandyUnder170" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none"id="p1_14e_BrandyOver170" readonly/></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14e_BrandyOver170" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14f_Rum" readonly/></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14f_Rum" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_14g_Gin"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14g_Gin" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_14h_Vodka"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14h_Vodka" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_14i_AlcoholAndSpiritsOver190"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14i_AlcoholAndSpiritsOver190" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_14j_AlcoholAndSpiritsUnder190"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14j_AlcoholAndSpiritsUnder190" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14k_Other" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14l_Total" readonly /></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_14l_Total" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -1433,37 +1660,37 @@
                 <p class="s4" style="padding-left: 2pt;text-indent: 0pt;text-align: left;">15. RECEIVED FOR REDISTILLATION <span class="s12">3</span></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15b_WhiskyUnder160" readonly /></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15b_WhiskyUnder160" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_15c_WhiskyOver160"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15c_WhiskyOver160" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15d_BrandyUnder170" readonly /></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15d_BrandyUnder170" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15e_BrandyOver170" readonly /></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15e_BrandyOver170" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_15f_Rum"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15f_Rum" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_15g_Gin"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15g_Gin" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_15h_Vodka"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15h_Vodka" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_15i_AlcoholAndSpiritsOver190"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15i_AlcoholAndSpiritsOver190" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p1_15j_AlcoholAndSpiritsUnder190"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15j_AlcoholAndSpiritsUnder190" readonly=readonly /></p>
             </td>
             <td style="width:72pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15k_Other" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15l_Total" readonly /></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_15l_Total" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -1654,7 +1881,7 @@
                 <p class="s4" style="padding-top: 1pt;padding-left: 3pt;text-indent: 0pt;line-height: 9pt;text-align: left;">1. GRAIN</p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_1b_GrainProof" readonly /></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_1b_GrainProof" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p class="s4" style="padding-top: 2pt;padding-left: 2pt;text-indent: 0pt;line-height: 8pt;text-align: left;">1. BOURBON</p>
@@ -1788,19 +2015,19 @@
                 <p class="s4" style="padding-top: 2pt;padding-left: 2pt;text-indent: 0pt;line-height: 8pt;text-align: left;">5.<div id="p3_5a_Kind"></div></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_5b_ProofNewCooperage"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_5b_ProofNewCooperage" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_5c_ProofUsedCooperage"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_5c_ProofUsedCooperage" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_5d_ProofDepositedInTanks"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_5d_ProofDepositedInTanks" readonly=readonly /></p>
             </td>
             <td style="width:198pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="3">
                 <p class="s4" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">5.<div id="p4_5a_Kind"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_5b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_5b_Proof" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p class="s4" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">5.<div id="p5_5a_KindOfSpirits"></div></p>
@@ -1820,19 +2047,19 @@
                 <p class="s4" style="padding-top: 2pt;padding-left: 2pt;text-indent: 0pt;line-height: 8pt;text-align: left;">6.<div id="p3_6a_Kind"></div></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_6b_ProofNewCooperage"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_6b_ProofNewCooperage" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_6c_ProofUsedCooperage"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_6c_ProofUsedCooperage" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_6d_ProofDepositedInTanks"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_6d_ProofDepositedInTanks" readonly=readonly /></p>
             </td>
             <td style="width:198pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="3">
                 <p class="s4" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">6.<div id="p4_6a_Kind"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_6b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_6b_Proof" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p class="s4" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">6.<div id="p5_6a_KindOfSpirits"></div></p>
@@ -1852,19 +2079,19 @@
                 <p class="s4" style="padding-top: 2pt;padding-left: 2pt;text-indent: 0pt;line-height: 8pt;text-align: left;">7.<div id="p3_7a_Kind"></div></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_7b_ProofNewCooperage"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_7b_ProofNewCooperage" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_7c_ProofUsedCooperage"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_7c_ProofUsedCooperage" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_7d_ProofDepositedInTanks"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_7d_ProofDepositedInTanks" readonly=readonly /></p>
             </td>
             <td style="width:198pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="3">
                 <p class="s4" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">7.<div id="p4_7a_Kind"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_7b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_7b_Proof" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p class="s4" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">7.<div id="p5_7a_KindOfSpirits"></div></p>
@@ -1878,25 +2105,25 @@
                 <p class="s4" style="padding-top: 1pt;padding-left: 3pt;text-indent: 0pt;text-align: left;">8.</p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p2_8b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_8b_Proof" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p class="s4" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;line-height: 9pt;text-align: left;">8.<div id="p3_8a_Kind"></div></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_8b_ProofNewCooperage"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_8b_ProofNewCooperage" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_8c_ProofUsedCooperage"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_8c_ProofUsedCooperage" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p3_8d_ProofDepositedInTanks"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p3_8d_ProofDepositedInTanks" readonly=readonly /></p>
             </td>
             <td style="width:198pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="3">
                 <p class="s4" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">8.<div id="p4_8a_Kind"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_8b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_8b_Proof" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p class="s4" style="padding-left: 2pt;text-indent: 0pt;text-align: left;">8.<div id="p5_8a_KindOfSpirits"></div></p>
@@ -1961,106 +2188,106 @@
                 <p class="s4" style="padding-top: 1pt;padding-right: 40pt;text-indent: 0pt;text-align: right;">GRAIN AND GRAIN PRODUCTS</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_1b_PoundsCornUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_1b_PoundsCornUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_1c_GallonsCornUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_1c_GallonsCornUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_1d_PoundsCornSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_1d_PoundsCornSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20" rowspan="2">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_1e_GallonsCornSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_1e_GallonsCornSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
             <td style="width:203pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p class="s4" style="padding-top: 6pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">1. CORN</p>
+                <p id="part6GrainRow1" class="s4" style="padding-top: 6pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">1. CORN</p>
             </td>
         </tr>
         <tr style="height:23pt">
             <td style="width:203pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p class="s4" style="padding-top: 7pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">2. RYE</p>
+                <p id="part6GrainRow2" class="s4" style="padding-top: 7pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">2. RYE</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_2b_PoundsRyeUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_2b_PoundsRyeUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_2c_GallonsRyeUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_2c_GallonsRyeUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_2d_PoundsRyeSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_2d_PoundsRyeSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_2e_GallonsRyeSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_2e_GallonsRyeSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
             <td style="width:203pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p class="s4" style="padding-top: 7pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">3. MALT</p>
+                <p id="part6GrainRow3" class="s4" style="padding-top: 7pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">3. MALT</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_3b_PoundsMaltUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_3b_PoundsMaltUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_3c_GallonsMaltUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_3c_GallonsMaltUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_3d_PoundsMaltSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_3d_PoundsMaltSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_3e_GallonsMaltSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_3e_GallonsMaltSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
             <td style="width:203pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p class="s4" style="padding-top: 6pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">4. WHEAT</p>
+                <p id="part6GrainRow4" class="s4" style="padding-top: 6pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">4. WHEAT</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_4b_PoundsWheatUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_4b_PoundsWheatUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_4c_GallonsWheatUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_4c_GallonsWheatUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_4d_PoundsWheatSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_4d_PoundsWheatSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_4e_GallonsWheatSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_4e_GallonsWheatSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
             <td style="width:203pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p class="s4" style="padding-top: 6pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">5. SORGHUM GRAIN</p>
+                <p id="part6GrainRow5" class="s4" style="padding-top: 6pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">5. SORGHUM GRAIN</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_5b_PoundsSourhumGrainUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_5b_PoundsSourhumGrainUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_5c_GallonsSourhumGrainUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_5c_GallonsSourhumGrainUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_5d_PoundsSourhumGrainSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_5d_PoundsSourhumGrainSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_5e_GallonsSourhumGrainSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_5e_GallonsSourhumGrainSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
             <td style="width:203pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p class="s4" style="padding-top: 5pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">6. BARLEY</p>
+                <p id="part6GrainRow6" class="s4" style="padding-top: 5pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">6. BARLEY</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_6b_PoundsBarleyUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_6b_PoundsBarleyUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_6c_GallonsBarleyUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_6c_GallonsBarleyUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_6d_PoundsBarleySpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_6d_PoundsBarleySpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_6e_GallonsBarleySpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_6e_GallonsBarleySpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
@@ -2068,16 +2295,16 @@
                 <p class="s21" style="padding-top: 6pt;text-indent: 0pt;text-align: left;">7.<div id="p6_7a_Kind"></div></p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_7b_PoundsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_7b_PoundsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_7c_GallonsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_7c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_7d_PoundsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_7d_PoundsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_7e_GallonsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_7e_GallonsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
@@ -2085,16 +2312,16 @@
                 <p class="s4" style="padding-top: 8pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">8.<div id="p6_8a_Kind"></div></p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_8b_PoundsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_8b_PoundsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_8c_GallonsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_8c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_8d_PoundsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_8d_PoundsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_8e_GallonsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_8e_GallonsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -2116,7 +2343,7 @@
         </tr>
         <tr style="height:23pt">
             <td style="width:203pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p class="s4" style="padding-top: 6pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">9. GRAPE</p>
+                <p id="part6FruitRow9" class="s4" style="padding-top: 6pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">9. GRAPE</p>
             </td>
         </tr>
         <tr style="height:23pt">
@@ -2130,10 +2357,10 @@
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_10c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_10d_PoundsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_10d_PoundsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_10e_GallonsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_10e_GallonsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
@@ -2147,10 +2374,10 @@
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_11c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_11d_PoundsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><div id="p6_11d_PoundsSpiritsAsByProduct"></div><input type="number" style="border:none" id="p6_11d_PoundsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_11e_GallonsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_11e_GallonsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
@@ -2164,10 +2391,10 @@
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_12c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_12d_PoundsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_12d_PoundsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_12e_GallonsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_12e_GallonsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:22pt">
@@ -2181,10 +2408,10 @@
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_13c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_13d_PoundsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_13d_PoundsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_13e_GallonsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_13e_GallonsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:24pt">
@@ -2198,10 +2425,10 @@
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_14c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_14d_PoundsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_14d_PoundsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_14e_GallonsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_14e_GallonsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -2209,10 +2436,10 @@
                 <p class="s4" style="padding-right: 45pt;text-indent: 0pt;text-align: right;">CANE AND CANE PRODUCTS</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_15b_PoundsMolassesUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_15b_PoundsMolassesUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_15c_GallonsMolassesUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_15c_GallonsMolassesUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
                 <p style="text-indent: 0pt;text-align: left;"><div id="p6_15d_PoundsMolassesSpiritsAsByProduct"></div></p>
@@ -2231,10 +2458,10 @@
                 <p class="s4" style="padding-top: 7pt;text-indent: 0pt;text-align: left;">16.<div id="p6_16a_Kind"></div></p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_16b_PoundsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_16b_PoundsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_16c_GallonsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_16c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><div id="p6_16d_PoundsSpiritsAsByProduct"></div></p>
@@ -2248,10 +2475,10 @@
                 <p class="s4" style="padding-top: 6pt;text-indent: 0pt;text-align: left;">17.<div id="p6_17a_Kind"></div></p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_17b_PoundsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_17b_PoundsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_17c_GallonsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_17c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><div id="p6_17d_PoundsSpiritsAsByProduct"></div></p>
@@ -2265,10 +2492,10 @@
                 <p class="s4" style="padding-top: 7pt;text-indent: 0pt;text-align: left;">18.<div id="p6_18a_Kind"></div></p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_18b_PoundsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_18b_PoundsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_18c_GallonsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_18c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><div id="p6_18d_PoundsSpiritsAsByProduct"></div></p>
@@ -2282,16 +2509,16 @@
                 <p class="s4" style="padding-top: 1pt;padding-left: 63pt;text-indent: 0pt;text-align: left;">OTHER MATERIALS</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_19b_PoundsEthylSulfateUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_19b_PoundsEthylSulfateUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_19c_GallonsEthylSulfateUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_19c_GallonsEthylSulfateUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_19d_PoundsEthylSulfateSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_19d_PoundsEthylSulfateSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20" rowspan="2">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_19e_GallonsEthylSulfateSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_19e_GallonsEthylSulfateSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
@@ -2304,16 +2531,16 @@
                 <p class="s4" style="padding-top: 6pt;text-indent: 0pt;text-align: left;">20. ETHYLENE GAS</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_20b_PoundsEthyleneGasUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_20b_PoundsEthyleneGasUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_20c_GallonsEthyleneGasUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_20c_GallonsEthyleneGasUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_20d_PoundsEthyleneGasSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_20d_PoundsEthyleneGasSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_20e_GallonsEthyleneGasSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_20e_GallonsEthyleneGasSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
@@ -2321,16 +2548,16 @@
                 <p class="s4" style="padding-top: 6pt;text-indent: 0pt;text-align: left;">21. SULPHITE LIQUORS</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_21b_PoundsSulphiteLiquorsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_21b_PoundsSulphiteLiquorsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_21c_GallonsSulphiteLiquorsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_21c_GallonsSulphiteLiquorsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_21d_PoundsSulphiteLiquorsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_21d_PoundsSulphiteLiquorsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_21e_GallonsSulphiteLiquorsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_21e_GallonsSulphiteLiquorsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
@@ -2338,16 +2565,16 @@
                 <p class="s4" style="padding-top: 7pt;text-indent: 0pt;text-align: left;">22. BUTANE GAS</p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_22b_PoundsButaneGasUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_22b_PoundsButaneGasUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_22c_GallonsButaneGasUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_22c_GallonsButaneGasUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_22d_PoundsButaneGasSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_22d_PoundsButaneGasSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_22e_GallonsButaneGasSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_22e_GallonsButaneGasSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:23pt">
@@ -2355,16 +2582,16 @@
                 <p class="s4" style="padding-top: 6pt;text-indent: 0pt;text-align: left;">23.<div id="p6_23a_Kind"></div></p>
             </td>
             <td style="width:85pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_23b_PoundsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_23b_PoundsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:89pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_23c_GallonsUsedInProductionOfDistilledSpirits"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_23c_GallonsUsedInProductionOfDistilledSpirits" readonly=readonly /></p>
             </td>
             <td style="width:90pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_23d_PoundsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_23d_PoundsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
             <td style="width:91pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p6_23e_GallonsSpiritsAsByProduct"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p6_23e_GallonsSpiritsAsByProduct" readonly=readonly /></p>
             </td>
         </tr>
     </table>

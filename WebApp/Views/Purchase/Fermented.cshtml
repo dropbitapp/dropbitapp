@@ -276,8 +276,6 @@
                     source: reportingSpiritKindAdapter,
                     displayMember: 'ProductTypeName',
                     valueMember: 'SpiritTypeReportingID',
-                    disabled: true,
-                    selectedIndex: 10,
                     theme: 'bootstrap',
                     height: '26px',
                     width: '175px',
@@ -290,12 +288,6 @@
                     onSuccess: function () {
                         _createRecord();
                         genericWorkflowHelper.emptyControls();
-                        // Reset SpiritType dropdown to "Wine" after record creation
-                        // Note: selectIndex doesn't work when dropdown is disabled
-                        let $dropDown = $('#ReportingSpiritTypeDropDown');
-                        $dropDown.jqxDropDownList({ disabled: false });
-                        $dropDown.jqxDropDownList('selectIndex', 10);
-                        $dropDown.jqxDropDownList({ disabled: true });
                     },
                     onError: function () {
                         alert('Please complete filling out the form');
@@ -354,8 +346,8 @@
                         },
                         {
                             input: "#StorageInput", message: "Please Select Storage", action: 'click', rule: function (input, commit) {
-                                var index = $("#StorageInput").jqxListBox('getSelectedIndex');
-                                return index != -1;
+                                var selectedItems = $("#StorageInput").jqxListBox('getSelectedItems');
+                                return selectedItems.length > 0 ? true : false;
                             }
                         },
                         {
@@ -468,6 +460,17 @@
                         autoBind: true,
                         loadComplete: function (records) {
                             reportingSpiritKindAdapter = records;
+                        },
+                        beforeLoadComplete: function (records) {
+                            let filteredRecords = [];
+                            for (let i = 0; i < records.length; i++)
+                            {
+                                if(records[i].SpiritTypeReportingID === 10 || records[i].SpiritTypeReportingID === 11)
+                                {
+                                    filteredRecords.push(records[i]);
+                                }
+                            }
+                            return filteredRecords;
                         }
                     });
             }

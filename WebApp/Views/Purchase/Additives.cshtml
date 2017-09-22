@@ -229,8 +229,8 @@
                         },
                         {
                             input: "#StorageInput", message: "Please Select Storage", action: 'click', rule: function (input, commit) {
-                                var index = $("#StorageInput").jqxListBox('getSelectedIndex');
-                                return index != -1;
+                                var selectedItems = $("#StorageInput").jqxListBox('getSelectedItems');
+                                return selectedItems.length > 0 ? true : false;
                             }
                         }
                     ]

@@ -216,6 +216,13 @@
             };
 
             function createRawMaterialRecord() {
+                var matCatID;
+                if ( $( "#materialCategoryDropdown" ).jqxDropDownList( 'getSelectedItem' ) ) {
+                    matCatID = $( "#materialCategoryDropdown" ).jqxDropDownList( 'getSelectedItem' ).originalItem.uid;
+                }
+                else {
+                    matCatID = 0;
+                }
                 var rawMaterialObject = {
                     RawMaterialId: "",
                     RawMaterialName: $("#RawMaterialNameInput").jqxInput('val'),
@@ -229,7 +236,7 @@
                     UnitType: $("#unitListbox").jqxListBox('getSelectedItem').label,
                     UnitTypeId: $("#unitListbox").jqxListBox('getSelectedItem').value,
                     Note: $( '#NotesInput' ).jqxTextArea( 'val' ),
-                    MaterialCategoryID: $( "#materialCategoryDropdown" ).jqxDropDownList( 'getSelectedItem' ).originalItem.uid != 'undefined' ? $( "#materialCategoryDropdown" ).jqxDropDownList( 'getSelectedItem' ).originalItem.uid : 0
+                    MaterialCategoryID: matCatID
                 };
                 $.ajax({
                     type: "POST",
