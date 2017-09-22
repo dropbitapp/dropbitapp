@@ -691,20 +691,22 @@
             }
 
             function createElements() {
+                var date = new Date();
 
+                var month = date.getMonth();
                 var monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
                 $("#ReportingMonth").jqxDropDownList({
-                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList
+                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList, selectedIndex: (month - 1)
                 });
 
                 var yearList = [];
-                var date = new Date();
+                
                 var year = date.getFullYear();
                 for (i = 0; i < (year - 1900) ; i++) {
                     yearList.push(year - i);
                 }
                 $("#ReportingYear").jqxDropDownList({
-                    theme: 'bootstrap', height: '26px', width: '130px', source: yearList
+                    theme: 'bootstrap', height: '26px', width: '130px', source: yearList, selectedIndex: 0
                 });
 
                 $("#GenerateReportBtn").jqxButton({ theme: 'bootstrap' });
