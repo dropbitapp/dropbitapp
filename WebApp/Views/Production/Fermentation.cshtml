@@ -424,8 +424,8 @@
                         { input: '#BatchName', message: 'Batch Name Required', action: 'blur', rule: 'required' },
                         {
                             input: '#ProdStorage', message: 'Please Select Storage', action: 'click', rule: function (input, commit) {
-                                var index = $('#ProdStorage').jqxListBox('getSelectedIndex');
-                                return index != -1;
+                                var selectedItems = $("#ProdStorage").jqxListBox('getSelectedItems');
+                                return selectedItems.length > 0 ? true : false;
                             }
                         },
                         {
