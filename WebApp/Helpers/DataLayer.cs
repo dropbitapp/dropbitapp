@@ -5041,7 +5041,7 @@ namespace WebApp.Helpers
                     part1Obj.SpiritCatName = rec.SpiritTypeReportName;
                     part1Obj.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
 
-                    if (!(bool)rec.Gauged)
+                    if (!(bool)rec.Gauged /*not gauged method*/) // all of the Distilled and Fermented Purchases should always be Gauged as per our design. So this check is really for internal Production distillation
                     {
                         part1Obj.UnfinishedSpiritsEndOfQuarter += (float)rec.Proof;
                     }
