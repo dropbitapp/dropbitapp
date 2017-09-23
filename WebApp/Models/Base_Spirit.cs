@@ -7,6 +7,16 @@ using System.Data.Entity.ModelConfiguration.Conventions;
 namespace WebApp.Models
 {
     /// <summary>
+    /// ProcessingReportType table contains values from Processing Report Part 4 and they are being associated with values from Spirit table such that
+    /// when a new record in Spirit table is created, user gets to determine the it's type so it can be properly displayed in the processing report
+    /// </summary>
+    public class ProcessingReportType
+    {
+        [Key]
+        public int ProcessingReportTypeID { get; set; }
+        public string ProcessingReportTypeName { get; set; }
+    }
+    /// <summary>
     /// Stores serial numbers that are assigned to a purchase or production record at the time of gauging
     /// </summary>
     public class GaugeSerial
@@ -744,6 +754,7 @@ namespace WebApp.Models
         public string Name { get; set; }
         [MaxLength(1024)]
         public string Note { get; set; }
+        public int ProcessingReportTypeID { get; set; }
 
         public virtual Distiller Distiller { get; set; }
     }
