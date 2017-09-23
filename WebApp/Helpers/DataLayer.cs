@@ -873,6 +873,18 @@ namespace WebApp.Helpers
                             prodT.WeightID = newVbwRec.WeightID;
                         }
                     }
+                    else
+                    {
+                        // Widrawn For Tax update:
+                        TaxWithdrawn taxes = new TaxWithdrawn();
+                        taxes.DateOfSale = pObj.WithdrawalDate;
+                        taxes.DateRecorded = DateTime.UtcNow;
+                        taxes.ProductionID = pObj.ProductionId;
+                        taxes.Value = pObj.TaxedProof;
+
+                        db.TaxWithdrawn.Add(taxes);
+                        db.SaveChanges();
+                    }
 
                     //Alcohol Content
                     if (prodT.AlcoholID != 0 && pObj.AlcoholContent != null)
@@ -921,16 +933,6 @@ namespace WebApp.Helpers
                         db.SaveChanges();
                         prodT.ProofID = newPrfRec.ProofID;
                     }
-
-                    // Widrawn For Tax update:
-                    TaxWithdrawn taxes = new TaxWithdrawn();
-                    taxes.DateOfSale = pObj.WithdrawalDate;
-                    taxes.DateRecorded = DateTime.UtcNow;
-                    taxes.ProductionID = pObj.ProductionId;
-                    taxes.Value = pObj.TaxedProof;
-
-                    db.TaxWithdrawn.Add(taxes);
-                    db.SaveChanges();
 
                     // storage update
                     var storages =
