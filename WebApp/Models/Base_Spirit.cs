@@ -844,6 +844,7 @@ namespace WebApp.Models
 
     public class DistilDBContext : DbContext
     {
+        public DbSet<ProcessingReportType> ProcessingReportType { get; set; }
         public DbSet<GaugeSerial> GaugeSerial { get; set; }
         public DbSet<TaxWithdrawn> TaxWithdrawn { get; set; }
         public DbSet<ProductionContent> ProductionContent { get; set; }

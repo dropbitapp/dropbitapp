@@ -1042,63 +1042,71 @@ namespace WebApp.Helpers
         internal List<ProdObjectConcise> GetBlendingList(string prodType, int userId)
         {
             List<ProdObjectConcise> bList = new List<ProdObjectConcise>();
-            var res =
-               from prod in db.Production
-               join quants in db.Volume on prod.VolumeID equals quants.VolumeID into quants_join
-               from quants in quants_join.DefaultIfEmpty()
-               join VBW in db.Weight on prod.WeightID equals VBW.WeightID into VBW_join
-               from VBW in VBW_join.DefaultIfEmpty()
-               join alc in db.Alcohol on prod.AlcoholID equals alc.AlcoholID into alc_join
-               from alc in alc_join.DefaultIfEmpty()
-               join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
-               from proof in proof_join.DefaultIfEmpty()
-               join p2Spi in db.ProductionToSpirit on prod.ProductionID equals p2Spi.ProductionID into p2Spi_join
-               from p2Spi in p2Spi_join.DefaultIfEmpty()
-               join spi in db.Spirit on p2Spi.SpiritID equals spi.SpiritID into spi_join
-               from spi in spi_join.DefaultIfEmpty()
-               join status in db.Status on prod.StatusID equals status.StatusID into status_join
-               from status in status_join.DefaultIfEmpty()
-               join state in db.State on prod.StateID equals state.StateID into state_join
-               from state in state_join.DefaultIfEmpty()
-               join distiller in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = distiller.DistillerID } into distiller_join
-               from distiller in distiller_join.DefaultIfEmpty()
-               where
-                 (prod.StatusID == 1 ||
-                 prod.StatusID == 2) &&
-                 prod.StateID == 4 &&
-                 distiller.UserId == userId
-               select new
-                {
-                   ProductionName = prod.ProductionName,
-                   ProductionID = ((System.Int32?)prod.ProductionID ?? (System.Int32?)0),
-                   StatusName = status.Name,
-                   StateName = state.Name,
-                   Quantity = ((System.Single?)quants.Value ?? (System.Single?)0),
-                   VolumeByWeight = ((System.Single?)VBW.Value ?? (System.Single?)0),
-                   Alcohol = ((System.Single?)alc.Value ?? (System.Single?)0),
-                   Proof = ((System.Single?)proof.Value ?? (System.Single?)0),
-                   SpiritName = (spi.Name ?? ""),
-                   SpiritID = ((System.Int32?)p2Spi.SpiritID ?? (System.Int32?)0)
-                };
-
-            if (res != null)
+            try
             {
-                foreach (var rec in res)
-                {
-                    ProdObjectConcise pobj = new ProdObjectConcise();
-                    pobj.DistillableOrigin = "prod";
-                    pobj.BatchName = rec.ProductionName;
-                    pobj.ProductionId = (int)rec.ProductionID;
-                    pobj.Quantity = (float)rec.Quantity;
-                    pobj.VolumeByWeight = (float)rec.VolumeByWeight;
-                    pobj.AlcoholContent = (float)rec.Alcohol;
-                    pobj.ProofGallon = (float)rec.Proof;
-                    pobj.SpiritId = (int)rec.SpiritID;
-                    pobj.SpiritName = rec.SpiritName;
+                var res =
+                   from prod in db.Production
+                   join quants in db.Volume on prod.VolumeID equals quants.VolumeID into quants_join
+                   from quants in quants_join.DefaultIfEmpty()
+                   join VBW in db.Weight on prod.WeightID equals VBW.WeightID into VBW_join
+                   from VBW in VBW_join.DefaultIfEmpty()
+                   join alc in db.Alcohol on prod.AlcoholID equals alc.AlcoholID into alc_join
+                   from alc in alc_join.DefaultIfEmpty()
+                   join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
+                   from proof in proof_join.DefaultIfEmpty()
+                   join p2Spi in db.ProductionToSpirit on prod.ProductionID equals p2Spi.ProductionID into p2Spi_join
+                   from p2Spi in p2Spi_join.DefaultIfEmpty()
+                   join spi in db.Spirit on p2Spi.SpiritID equals spi.SpiritID into spi_join
+                   from spi in spi_join.DefaultIfEmpty()
+                   join status in db.Status on prod.StatusID equals status.StatusID into status_join
+                   from status in status_join.DefaultIfEmpty()
+                   join state in db.State on prod.StateID equals state.StateID into state_join
+                   from state in state_join.DefaultIfEmpty()
+                   join distiller in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = distiller.DistillerID } into distiller_join
+                   from distiller in distiller_join.DefaultIfEmpty()
+                   where
+                     (prod.StatusID == 1 ||
+                     prod.StatusID == 2) &&
+                     prod.StateID == 4 &&
+                     distiller.UserId == userId
+                   select new
+                   {
+                       ProductionName = prod.ProductionName,
+                       ProductionID = ((System.Int32?)prod.ProductionID ?? (System.Int32?)0),
+                       StatusName = status.Name,
+                       StateName = state.Name,
+                       Quantity = ((System.Single?)quants.Value ?? (System.Single?)0),
+                       VolumeByWeight = ((System.Single?)VBW.Value ?? (System.Single?)0),
+                       Alcohol = ((System.Single?)alc.Value ?? (System.Single?)0),
+                       Proof = ((System.Single?)proof.Value ?? (System.Single?)0),
+                       SpiritName = (spi.Name ?? ""),
+                       SpiritID = ((System.Int32?)p2Spi.SpiritID ?? (System.Int32?)0)
+                   };
 
-                    bList.Add(pobj);
+                if (res != null)
+                {
+                    foreach (var rec in res)
+                    {
+                        ProdObjectConcise pobj = new ProdObjectConcise();
+                        pobj.DistillableOrigin = "prod";
+                        pobj.BatchName = rec.ProductionName;
+                        pobj.ProductionId = (int)rec.ProductionID;
+                        pobj.Quantity = (float)rec.Quantity;
+                        pobj.VolumeByWeight = (float)rec.VolumeByWeight;
+                        pobj.AlcoholContent = (float)rec.Alcohol;
+                        pobj.ProofGallon = (float)rec.Proof;
+                        pobj.SpiritId = (int)rec.SpiritID;
+                        pobj.SpiritName = rec.SpiritName;
+
+                        bList.Add(pobj);
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                throw (e);
+            }
+            
 
             return bList;
         }

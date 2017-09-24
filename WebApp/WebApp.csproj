@@ -246,6 +246,14 @@
     <Compile Include="Migrations\201709231745468_ProcessingReportTypesTable.Designer.cs">
       <DependentUpon>201709231745468_ProcessingReportTypesTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201709240436554_grisha.cs" />
+    <Compile Include="Migrations\201709240436554_grisha.Designer.cs">
+      <DependentUpon>201709240436554_grisha.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201709240441231_recreatingTable.cs" />
+    <Compile Include="Migrations\201709240441231_recreatingTable.Designer.cs">
+      <DependentUpon>201709240441231_recreatingTable.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
@@ -1209,6 +1217,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201709231745468_ProcessingReportTypesTable.resx">
       <DependentUpon>201709231745468_ProcessingReportTypesTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201709240436554_grisha.resx">
+      <DependentUpon>201709240436554_grisha.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201709240441231_recreatingTable.resx">
+      <DependentUpon>201709240441231_recreatingTable.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
