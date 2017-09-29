@@ -46,6 +46,15 @@
         $('*').jqxTextArea('val', '');
     }
 
+    this.emptyFillTest = function () {
+        var date = new Date(); // explicity specifying date value so that HH:mm is set to 00:00
+        var mm = date.getMonth();
+        var dd = date.getDate();
+        var yy = date.getFullYear();
+
+        $('#FillTestProof').jqxNumberInput('val', '');
+        $('#FillTestDate').jqxDateTimeInput('setDate', new Date(yy, mm, dd));
+    }
 
     // Function that convert local time to UTC and vice versa
     /* 

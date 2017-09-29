@@ -4104,6 +4104,20 @@ namespace WebApp.Helpers
                         db.BottlingInfo.Add(bottI);
                         db.SaveChanges();
                     }
+
+                    // update fillTest information.
+                    if (prodObject.FillTestList != null)
+                    {
+                        foreach (var i in prodObject.FillTestList)
+                        {
+                            FillTest fillTest = new FillTest();
+                            fillTest.ProductionID = prod.ProductionID;
+                            fillTest.ProofGallons = i.FillProof;
+                            fillTest.FillTestDate = i.FillDate;
+                            db.FillTest.Add(fillTest);
+                            db.SaveChanges();
+                        }
+                    }
                 }
                 retMthdExecResult = true;
             }

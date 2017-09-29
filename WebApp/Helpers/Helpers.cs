@@ -234,6 +234,7 @@ namespace WebApp.Helpers
         public string StatusName { get; set; }
         public List<BlendingAdditive> BlendingAdditives { get; set; }
         public BottlingObject BottlingInfo { get; set; }
+        public List<FillTestObject> FillTestList { get; set; }
         public List<int> PurchaseIdList { get; set; }
         public int SpiritTypeReportingID { get; set; }
         public int MaterialKindReportingID { get; set; }
@@ -478,5 +479,13 @@ namespace WebApp.Helpers
         public string ProductTypeName { get; set; }
         public List<MaterialKindObject> MaterialKindObject { get; set; }
         
+    }
+    /// <summary>
+    /// FillTestObject object is used to store fill test data (proof and date) during bottling 
+    /// </summary>
+    public class FillTestObject
+    {
+        public float FillProof { get; set; }
+        public DateTime FillDate { get; set; }
     }
 }
