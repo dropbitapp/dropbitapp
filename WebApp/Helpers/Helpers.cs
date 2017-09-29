@@ -107,8 +107,8 @@ namespace WebApp.Helpers
         public float AlcoholNeutral { get; set; }
         public float BlendedStraightWhiskey { get; set; }
         public float BlendedWhiskeyWithNeutral { get; set; }
-        public float BlendedWhiskeyWithLight { get; set; }
-        public float BlendedLightWhiskey { get; set; }
+        public float BlendedWhiskeyWithLight { get; set; } // line 51 of Processing report
+        public float BlendedLightWhiskey { get; set; } // line 52 of Processing report
         public float BlendedOtherWhiskey { get; set; }
         public float ImportedWhiskeyScotch { get; set; }
         public float ImportedWhiskeyCanadian { get; set; }
@@ -117,11 +117,17 @@ namespace WebApp.Helpers
         public float DomesticWhiskeyOver160 { get; set; }
         public float Brandy170Under { get; set; }
         public float BrandyOver170 { get; set; }
+        public float RumPuertoRican { get; set; }
+        public float RumVirginIslands { get; set; }
+        public float RumDomestic { get; set; }
+        public float RumOtherImported { get; set; }
         public float Gin { get; set; }
         public float Vodka { get; set; }
+        public float Liqueur { get; set; }
+        public float Cocktail { get; set; }
         public float Tequila { get; set; }
-        public int SpiritTypeReportingID { get; set; }
-        public string SpiritCatName { get; set; }
+        public string ProcessingReportTypeName { get; set; }
+        public int ProcessingTypeID { get; set; }
         public int StateID { get; set; }
     }
 
@@ -228,6 +234,7 @@ namespace WebApp.Helpers
         public string StatusName { get; set; }
         public List<BlendingAdditive> BlendingAdditives { get; set; }
         public BottlingObject BottlingInfo { get; set; }
+        public List<FillTestObject> FillTestList { get; set; }
         public List<int> PurchaseIdList { get; set; }
         public int SpiritTypeReportingID { get; set; }
         public int MaterialKindReportingID { get; set; }
@@ -472,5 +479,13 @@ namespace WebApp.Helpers
         public string ProductTypeName { get; set; }
         public List<MaterialKindObject> MaterialKindObject { get; set; }
         
+    }
+    /// <summary>
+    /// FillTestObject object is used to store fill test data (proof and date) during bottling 
+    /// </summary>
+    public class FillTestObject
+    {
+        public float FillProof { get; set; }
+        public DateTime FillDate { get; set; }
     }
 }

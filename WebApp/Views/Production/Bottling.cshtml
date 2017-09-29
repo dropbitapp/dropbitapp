@@ -34,6 +34,7 @@
             var usedMatsList = []; // this is a new arra of objects of type UsedMats. It is a replacementto PurchaseIdList.
             var storageList = [];
             var StorageObject = {};
+            var fillTestArray = [];
 
             // object to be used in the array below
             var materialR = {};
@@ -47,6 +48,12 @@
             var globals = {
                 prodId: 0,//global ProductionId variable
                 editDialogTotalProofVal: 0
+            };
+
+            // Fill Test object
+            var fillTestObject = {
+                FillProof: "",
+                FillDate: ""
             };
 
             function _addEventListeners() {
@@ -197,11 +204,13 @@
 
                 $("#CreateRecordButton").click(function () {
                     $('#validationForm').jqxValidator('validate');
+                    $('#FillTestList').empty();
                 });
 
                 $("#ClearInputElementsButton").click(function () {
                     genericWorkflowHelper.emptyControls();
                     $("#CaseCapacityInput").jqxNumberInput('setDecimal', 12); // resetting to default value after clearing
+                    $('#FillTestList').empty();
                 });
 
                 // Create Record Form: recalculate Bottle Quantity and Case Capacity upon user input of Case Quantity
@@ -501,7 +510,23 @@
                         $("#EditDialogAlcoholInput").val(blendingDataAdapter.recordids[value].AlcContent);
                         $("#EditDialogProofInput").val(blendingDataAdapter.recordids[value].Proof);
                     }
-                } );
+                });
+
+                // Listen to fillTest create button and create fillTest objects.
+                $('#FillTestCreateButton').click(function () {
+                    fillTestObject = {};
+                    fillTestObject.FillProof = $('#FillTestProof').val();
+                    fillTestObject.FillDate = genericWorkflowHelper.convertUTC($('#FillTestDate').jqxDateTimeInput('value'));
+                    fillTestArray.push(fillTestObject);
+                    $('#FillTestList').append($("<tr><td>" + "Fill Test " + fillTestArray.length + ": " + fillTestObject.FillProof + " PGALS" + "</td></tr>"));
+                    genericWorkflowHelper.emptyFillTest();
+                });
+                // Listen to fillTest remove button and delete fillTest objects.
+                $("#FillTestRemoveButton").click(function () {
+                    fillTestArray.pop();
+                    $('#FillTestList').children().last().remove()
+                    genericWorkflowHelper.emptyFillTest();
+                });
             }
 
             // Clear input elements
@@ -565,6 +590,22 @@
 
                 $('#ProofInput').jqxNumberInput({
                     theme: 'bootstrap', disabled: true, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                });
+
+                $('#FillTestProof').jqxNumberInput({
+                    theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                });
+
+                $('#FillTestDate').jqxDateTimeInput({
+                    theme: 'bootstrap', textAlign: 'center', height: '26px', width: '180px', formatString: "MM/dd/yyyy HH:mm"
+                });
+
+                $('#FillTestCreateButton').jqxButton({
+                    theme: 'bootstrap', width: '130px', height: '28px'
+                });
+
+                $('#FillTestRemoveButton').jqxButton({
+                    theme: 'bootstrap', width: '130px', height: '28px'
                 });
 
                 $('#NotesInput').jqxTextArea({
@@ -712,6 +753,7 @@
                     SpiritName: $("#SpiritTypeInput").jqxInput('val'),
                     Note: $('#NotesInput').jqxTextArea('val'),
                     BottlingInfo: bottlingInfo,
+                    FillTestList: fillTestArray,
                     UsedMats: usedMatsList,
                     Gauged: true
                 };
@@ -793,6 +835,7 @@
                         }
 
                         var productionObject = {
+                            ProductionType: "Bottling",
                             ProductionId: rowData.ProductionId,
                             BatchName: rowData.BatchName,
                             ProductionDate: rowData.ProductionDate,
@@ -1163,6 +1206,34 @@
                                         <label for="ProofInput" class="col-md-6 control-label">Total Proof Gallons</label>
                                         <div class="col-md-6">
                                             <div id="ProofInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="FillTestProof" class="col-sm-6 control-label">Fill Test Proof</label>
+                                        <div class="col-sm-6">
+                                            <div id="FillTestProof"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="FillTestDate" class="col-md-6 control-label">Fill Test Date</label>
+                                        <div class="col-md-6">
+                                            <div id="FillTestDate" tabindex="3"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-6">
+                                            <button class="pull-right" id="FillTestCreateButton" type="button">Add Fill Test</button>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <button class="pull-left" id="FillTestRemoveButton" type="button">Remove Fill Test</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="FillTestList" class="col-sm-6 control-label">Fill Test List</label>
+                                        <div class="col-sm-6">
+                                            <table>
+                                                <tbody id="FillTestList"></tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </form>

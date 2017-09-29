@@ -68,8 +68,8 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var productionReport = dl.GetProcessingReportData(startOfReporting, endOfReporting, userId);
-                    return Json(productionReport, JsonRequestBehavior.AllowGet);
+                    var processingReport = dl.GetProcessingReportData(startOfReporting, endOfReporting, userId);
+                    return Json(processingReport, JsonRequestBehavior.AllowGet);
                 }
                 else
                 {

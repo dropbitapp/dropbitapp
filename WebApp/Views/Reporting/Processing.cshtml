@@ -128,26 +128,36 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                         result.Part2.RecordedLosses + result.Part2.InventoryShortage + result.Part2.OnHandEndofMonth);
                 }
                 // part 4 of the processing report 
-                for ( var t = 0; t <= result.Part4List.length; t++ )
+                var bulkTotals = 0;
+                var bottledTotals = 0;
+
+                for ( var t = 0; t < result.Part4List.length; t++ )
                 {
                     if ( result.Part4List[t].ProcessingSpirits === "bulkSpiritDumped" ) {
-                        $( '#p4_49b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].AlcoholNeutral );
-                        $( '#p4_50b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedStraightWhiskey );
-                        $( '#p4_51a_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedWhiskeyWithNeutral );
-                        $( '#p4_51b_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedWhiskeyWithLight );
-                        $( '#p4_52b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedLightWhiskey );
-                        $( '#p4_53b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedOtherWhiskey );
-                        $( '#p4_54a_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].ImportedWhiskeyScotch );
-                        $( '#p4_54b_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].ImportedWhiskeyCanadian );
-                        $( '#p4_54c_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].ImportedWhiskeyIrish );
-                        $( '#p4_55b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].DomesticWhiskey160Under );
-                        $( '#p4_56b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].DomesticWhiskeyOver160 );
-                        $( '#p4_57b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Brandy170Under );
-                        $( '#p4_58b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BrandyOver170 );
-                        $( '#p4_61b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Gin );
-                        $( '#p4_62b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Vodka );
-                        $( '#p4_63b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Tequila );
-                        $( '#p4_67b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].AlcoholNeutral
+                        $( '#p4_49b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].AlcoholNeutral != 0 ? result.Part4List[t].AlcoholNeutral : $( '#p4_49b_BulkSpiritsDumpedIntoProcessing' ).val( ))
+                        $( '#p4_50b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedStraightWhiskey != 0 ? result.Part4List[t].BlendedStraightWhiskey : $( '#p4_50b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_51a_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedWhiskeyWithNeutral != 0 ? result.Part4List[t].BlendedWhiskeyWithNeutral : $( '#p4_51a_b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_51b_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedWhiskeyWithLight != 0 ? result.Part4List[t].BlendedWhiskeyWithLight : $( '#p4_51b_b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_52b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedLightWhiskey != 0 ? result.Part4List[t].BlendedLightWhiskey : $( '#p4_52b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_53b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BlendedOtherWhiskey != 0 ? result.Part4List[t].BlendedOtherWhiskey : $( '#p4_53b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_54a_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].ImportedWhiskeyScotch != 0 ? result.Part4List[t].ImportedWhiskeyScotch : $( '#p4_54a_b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_54b_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].ImportedWhiskeyCanadian != 0 ? result.Part4List[t].ImportedWhiskeyCanadian : $( '#p4_54b_b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_54c_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].ImportedWhiskeyIrish != 0 ? result.Part4List[t].ImportedWhiskeyIrish : $( '#p4_54c_b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_55b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].DomesticWhiskey160Under != 0 ? result.Part4List[t].DomesticWhiskey160Under : $( '#p4_55b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_56b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].DomesticWhiskeyOver160 != 0 ? result.Part4List[t].DomesticWhiskeyOver160 : $( '#p4_56b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_57b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Brandy170Under != 0 ? result.Part4List[t].Brandy170Under : $( '#p4_57b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_58b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].BrandyOver170 != 0 ? result.Part4List[t].BrandyOver170 : $( '#p4_58b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_59a_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].RumPuertoRican != 0 ? result.Part4List[t].RumPuertoRican : $( '#p4_59a_b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_59b_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].RumVirginIslands != 0 ? result.Part4List[t].RumVirginIslands : $( '#p4_59b_b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_60a_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].RumDomestic != 0 ? result.Part4List[t].RumDomestic : $( '#p4_60a_b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_60b_b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].RumOtherImported != 0 ? result.Part4List[t].RumOtherImported : $( '#p4_60b_b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_61b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Gin != 0 ? result.Part4List[t].Gin : $( '#p4_61b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_62b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Vodka != 0 ? result.Part4List[t].Vodka : $( '#p4_62b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_63b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Liqueur != 0 ? result.Part4List[t].Liqueur : $( '#p4_63b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_64b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Cocktail != 0 ? result.Part4List[t].Cocktail : $( '#p4_64b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_65b_BulkSpiritsDumpedIntoProcessing' ).val( result.Part4List[t].Tequila != 0 ? result.Part4List[t].Tequila : $( '#p4_65b_BulkSpiritsDumpedIntoProcessing' ).val() );
+
+                        bulkTotals += result.Part4List[t].AlcoholNeutral
                             + result.Part4List[t].BlendedStraightWhiskey
                             + result.Part4List[t].BlendedWhiskeyWithNeutral
                             + result.Part4List[t].BlendedWhiskeyWithLight
@@ -160,28 +170,42 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                             + result.Part4List[t].DomesticWhiskeyOver160
                             + result.Part4List[t].Brandy170Under
                             + result.Part4List[t].BrandyOver170
+                            + result.Part4List[t].RumPuertoRican
+                            + result.Part4List[t].RumVirginIslands
+                            + result.Part4List[t].RumDomestic
+                            + result.Part4List[t].RumOtherImported
                             + result.Part4List[t].Gin
+                            + result.Part4List[t].Liqueur
+                            + result.Part4List[t].Cocktail
                             + result.Part4List[t].Vodka
-                            + result.Part4List[t].Tequila );
+                            + result.Part4List[t].Tequila;
                     }
+
                     if ( result.Part4List[t].ProcessingSpirits === "bottled" ) {
-                        $( '#p4_49d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].AlcoholNeutral );
-                        $( '#p4_50d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedStraightWhiskey );
-                        $( '#p4_51a_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedWhiskeyWithNeutral );
-                        $( '#p4_51b_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedWhiskeyWithLight );
-                        $( '#p4_52d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedLightWhiskey );
-                        $( '#p4_53d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedOtherWhiskey );
-                        $( '#p4_54a_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].ImportedWhiskeyScotch );
-                        $( '#p4_54b_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].ImportedWhiskeyCanadian );
-                        $( '#p4_54c_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].ImportedWhiskeyIrish );
-                        $( '#p4_55d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].DomesticWhiskey160Under );
-                        $( '#p4_56d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].DomesticWhiskeyOver160 );
-                        $( '#p4_57d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Brandy170Under );
-                        $( '#p4_58d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BrandyOver170 );
-                        $( '#p4_61d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Gin );
-                        $( '#p4_62d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Vodka );
-                        $( '#p4_63d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Tequila );
-                        $( '#p4_67d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].AlcoholNeutral
+                        $( '#p4_49d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].AlcoholNeutral != 0 ? result.Part4List[t].AlcoholNeutral : $( '#p4_49d_BottledExcludedBottledInBondAndExport' ).val() )
+                        $( '#p4_50d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedStraightWhiskey != 0 ? result.Part4List[t].BlendedStraightWhiskey : $( '#p4_50d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_51a_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedWhiskeyWithNeutral != 0 ? result.Part4List[t].BlendedWhiskeyWithNeutral : $( '#p4_51a_d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_51b_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedWhiskeyWithLight != 0 ? result.Part4List[t].BlendedWhiskeyWithLight : $( '#p4_51b_d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_52d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedLightWhiskey != 0 ? result.Part4List[t].BlendedLightWhiskey : $( '#p4_52b_BulkSpiritsDumpedIntoProcessing' ).val() );
+                        $( '#p4_53d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BlendedOtherWhiskey != 0 ? result.Part4List[t].BlendedOtherWhiskey : $( '#p4_53d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_54a_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].ImportedWhiskeyScotch != 0 ? result.Part4List[t].ImportedWhiskeyScotch : $( '#p4_54a_d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_54b_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].ImportedWhiskeyCanadian != 0 ? result.Part4List[t].ImportedWhiskeyCanadian : $( '#p4_54b_d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_54c_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].ImportedWhiskeyIrish != 0 ? result.Part4List[t].ImportedWhiskeyIrish : $( '#p4_54c_d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_55d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].DomesticWhiskey160Under != 0 ? result.Part4List[t].DomesticWhiskey160Under : $( '#p4_55d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_56d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].DomesticWhiskeyOver160 != 0 ? result.Part4List[t].DomesticWhiskeyOver160 : $( '#p4_56d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_57d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Brandy170Under != 0 ? result.Part4List[t].Brandy170Under : $( '#p4_57d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_58d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].BrandyOver170 != 0 ? result.Part4List[t].BrandyOver170 : $( '#p4_58d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_59a_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].RumPuertoRican != 0 ? result.Part4List[t].RumPuertoRican : $( '#p4_59a_d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_59b_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].RumVirginIslands != 0 ? result.Part4List[t].RumVirginIslands : $( '#p4_59b_d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_60a_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].RumDomestic != 0 ? result.Part4List[t].RumDomestic : $( '#p4_60a_d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_60b_d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].RumOtherImported != 0 ? result.Part4List[t].RumOtherImported : $( '#p4_60b_d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_61d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Gin != 0 ? result.Part4List[t].Gin : $( '#p4_61d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_62d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Vodka != 0 ? result.Part4List[t].Vodka : $( '#p4_62d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_63d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Liqueur != 0 ? result.Part4List[t].Liqueur : $( '#p4_63d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_64d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Cocktail != 0 ? result.Part4List[t].Cocktail : $( '#p4_64d_BottledExcludedBottledInBondAndExport' ).val() );
+                        $( '#p4_65d_BottledExcludedBottledInBondAndExport' ).val( result.Part4List[t].Tequila != 0 ? result.Part4List[t].Tequila : $( '#p4_65d_BottledExcludedBottledInBondAndExport' ).val() );
+
+                        bottledTotals += result.Part4List[t].AlcoholNeutral
                             + result.Part4List[t].BlendedStraightWhiskey
                             + result.Part4List[t].BlendedWhiskeyWithNeutral
                             + result.Part4List[t].BlendedLightWhiskey
@@ -194,12 +218,20 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                             + result.Part4List[t].DomesticWhiskeyOver160
                             + result.Part4List[t].Brandy170Under
                             + result.Part4List[t].BrandyOver170
+                            + result.Part4List[t].RumPuertoRican
+                            + result.Part4List[t].RumVirginIslands
+                            + result.Part4List[t].RumDomestic
+                            + result.Part4List[t].RumOtherImported
                             + result.Part4List[t].Gin
                             + result.Part4List[t].Vodka
-                            + result.Part4List[t].Tequila
-                            );
+                            + result.Part4List[t].Liqueur
+                            + result.Part4List[t].Cocktail
+                            + result.Part4List[t].Tequila;
                     }
                 }
+
+                $( '#p4_67b_BulkSpiritsDumpedIntoProcessing' ).val( bulkTotals );
+                $( '#p4_67d_BottledExcludedBottledInBondAndExport' ).val( bottledTotals );
             }
 
             // parse JSON datetime "/Date(1492412400000)/" format into a regual javasript format
@@ -1439,16 +1471,16 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                 <p class="s10" style="padding-top: 1pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">a. Puerto Rican</p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_59a_b_BulkSpiritsDumpedIntoProcessing"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59a_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_59a_c_BottledImported"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59a_c_BottledImported" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_59a_d_BottledExcludedBottledInBondAndExport"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59a_d_BottledExcludedBottledInBondAndExport" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_59a_e_BottledInBond"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59a_e_BottledInBond" readonly=readonly /></p>
             </td>
             <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><br /></p>
@@ -1459,16 +1491,16 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                 <p class="s10" style="padding-top: 1pt;padding-left: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">1b. Virgin Islands</p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_59b_b_BulkSpiritsDumpedIntoProcessing"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59b_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_59b_c_BottledImported"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59b_c_BottledImported" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_59b_d_BottledExcludedBottledInBondAndExport"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59b_d_BottledExcludedBottledInBondAndExport" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_59b_e_BottledInBond"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59b_e_BottledInBond" readonly=readonly /></p>
             </td>
             <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><br /></p>
@@ -1482,16 +1514,16 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                 <p class="s10" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">a. Domestic</p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_60a_b_BulkSpiritsDumpedIntoProcessing"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60a_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_60a_c_BottledImported"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60a_c_BottledImported" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_60a_d_BottledExcludedBottledInBondAndExport"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60a_d_BottledExcludedBottledInBondAndExport" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_60a_e_BottledInBond"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60a_e_BottledInBond" readonly=readonly /></p>
             </td>
             <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><br /></p>
@@ -1502,16 +1534,16 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                 <p class="s10" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">b. &quot;Other&quot; Imported</p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_60b_b_BulkSpiritsDumpedIntoProcessing"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60b_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_60b_c_BottledImported"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60b_c_BottledImported" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_60b_d_BottledExcludedBottledInBondAndExport"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60b_d_BottledExcludedBottledInBondAndExport" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_60b_e_BottledInBond"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60b_e_BottledInBond" readonly=readonly /></p>
             </td>
             <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><br /></p>
@@ -1551,7 +1583,7 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_62d_BottledExcludedBottledInBondAndExport" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_62e_BottledInBond"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_62e_BottledInBond" readonly=readonly /></p>
             </td>
             <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><br /></p>
@@ -1562,16 +1594,16 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                 <p class="s10" style="padding-top: 1pt;text-indent: 0pt;text-align: left;">63. CORDIALS, LIQUEURS, AND SPECIALTIES<span class="s17">9</span></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_63b_BulkSpiritsDumpedIntoProcessing"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_63b_BulkSpiritsDumpedIntoProcessing" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_63c_BottledImported"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_63c_BottledImported" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_63d_BottledExcludedBottledInBondAndExport"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_63d_BottledExcludedBottledInBondAndExport" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_63e_BottledInBond"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_63e_BottledInBond" readonly=readonly /></p>
             </td>
             <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><br /></p>
@@ -1582,16 +1614,16 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                 <p class="s10" style="text-indent: 0pt;text-align: left;">64. COCKTAILS AND MIXED DRINKS</p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_64b_BulkSpiritsDumpedIntoProcessing"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_64b_BulkSpiritsDumpedIntoProcessing" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_64c_BottledImported"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_64c_BottledImported" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_64d_BottledExcludedBottledInBondAndExport"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_64d_BottledExcludedBottledInBondAndExport" readonly=readonly /></p>
             </td>
             <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p4_64e_BottledInBond"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_64e_BottledInBond" readonly=readonly /></p>
             </td>
             <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
                 <p style="text-indent: 0pt;text-align: left;"><br /></p>

@@ -85,3 +85,29 @@ and prod.ProductionTypeID = 4
 
 
 -- Packaged Column (c)
+
+
+-- Part 4
+select 
+prod.ProductionID,
+prod.StateID,
+spiritTypeRep.ProductTypeName,
+prodReport.Redistilled,
+prodReport.Weight,
+prodReport.Volume,
+prodReport.Alcohol,
+prodReport.Proof,
+spiritTypeRep.SpiritTypeReportingID
+
+from Production as prod
+left join Production4Reporting as prodReport on prod.ProductionID = prodReport.ProductionID
+left join AspNetUserToDistiller as distillers on prod.DistillerID = distillers.DistillerID
+left join ProductionToSpiritTypeReporting as prod2SpiritType on prod.ProductionID = prod2SpiritType.ProductionID
+left join SpiritTypeReporting as spiritTypeRep  on prod2SpiritType.SpiritTypeReportingID = spiritTypeRep.SpiritTypeReportingID
+left join ProductionToPurchase as prod2Purch on prod.ProductionID = prod2Purch.ProductionID
+left join Purchase4Reporting as purch4Reprt on prod2Purch.PurchaseID = purch4Reprt.PurchaseID
+where distillers.UserId = 1 and
+prod.Gauged = true and
+(prod.StatusID = 1 or prod.StatusID = 2) and prod.StateID in (4,5) and
+prod.ProductionEndTime >= '09-01-2017' and
+prod.ProductionEndTime <= '09-31-2017'

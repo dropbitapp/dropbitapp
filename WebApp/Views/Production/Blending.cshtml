@@ -412,7 +412,7 @@
                     var rowData = {
                         ProductionType: "Blending",
                         ProductionId: prodId,
-                        PurBatchName: $('#EditDialogPurBatchNameInput').jqxInput('val'),
+                        BatchName: $( '#EditDialogPurBatchNameInput' ).jqxInput( 'val' ),
                         ProductionDate: prodEndUtc,
                         ProductionStart: prodStartUtc,
                         ProductionEnd: prodEndUtc,
@@ -792,8 +792,6 @@
 
                     },
                     columns: [
-                   //{ text: 'Blending Additive ID', dataField: 'BlendingAdditiveId', cellsAlign: 'center', align: 'center', width: '8%' },
-                   //{ text: 'Blending ID', dataField: 'BlendingId', cellsAlign: 'center', align: 'center', width: '10%', editable: false },
                    { text: 'Additive Name', dataField: 'RawMaterialName', width: '12%', cellsAlign: 'center', align: 'center', },
                    { text: 'Additive Quantity', dataField: 'RawMaterialQuantity', cellsAlign: 'center', align: 'center', width: '10%' },
                    { text: 'Unit Of Measurement', dataField: 'UnitOfMeasurement', cellsAlign: 'center', align: 'center', width: '14%', editable: false }
