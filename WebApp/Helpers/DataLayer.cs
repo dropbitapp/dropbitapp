@@ -4070,9 +4070,7 @@ namespace WebApp.Helpers
                         glt.Type = true;
                         glt.Quantity = prodObject.GainLoss;
                         glt.DateRecorded = DateTime.UtcNow;
-                        //glt.BlendedRecordId = currentProdId;
                         glt.BottledRecordId = prod.ProductionID;
-                        //glt.DistillerID = DistillerID;
                         db.GainLoss.Add(glt);
                         db.SaveChanges();
                     }
@@ -4083,7 +4081,6 @@ namespace WebApp.Helpers
                         glt.Type = false;
                         glt.Quantity = Math.Abs(prodObject.GainLoss); // since cumulativeGainLoss is negative, making it to be positive
                         glt.DateRecorded = DateTime.UtcNow;
-                        //glt.BlendedRecordId = currentProdId;
                         glt.BottledRecordId = prod.ProductionID;
                         db.GainLoss.Add(glt);
                         db.SaveChanges();
@@ -6814,7 +6811,7 @@ namespace WebApp.Helpers
 
                 IEnumerable<GainLoss> queryGainLoss =
                 from gainloss in db.GainLoss
-                join prod in db.Production on new { BlendedRecordId = gainloss.BlendedRecordId } equals new { BlendedRecordId = prod.ProductionID }
+                join prod in db.Production on new { BottledRecordId = gainloss.BottledRecordId } equals new { BottledRecordId = prod.ProductionID }
                 join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
                 from us2Distills in us2Distills_join.DefaultIfEmpty()
                 where us2Distills.UserId == userId

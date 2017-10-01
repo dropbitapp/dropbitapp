@@ -566,7 +566,6 @@ namespace WebApp.Models
         public bool Type { get; set; } // true - gain, false - loss
         public float Quantity { get; set; }
         public DateTime DateRecorded { get; set; }
-        public int BlendedRecordId { get; set; } //  since we can ony bottle one blend at a time, we expect it to be Blended record ID
         public int BottledRecordId { get; set; } //  since we can ony bottle one blend at a time, we expect it to be Bottled record ID
     }
 
