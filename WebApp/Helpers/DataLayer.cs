@@ -3817,8 +3817,6 @@ namespace WebApp.Helpers
         {
             //define method execution return value to be false by default
             bool retMthdExecResult = false;
-            float cumulativeGainLoss = 0;
-            int currentProdId = 0;
 
             var distillerId = GetDistillerId(userId);
 
@@ -4065,27 +4063,27 @@ namespace WebApp.Helpers
                     }
 
                     // now, lets register gains/losses
-                    if (cumulativeGainLoss > 0)
+                    if (prodObject.GainLoss > 0)
                     {
                         // gain
                         GainLoss glt = new GainLoss();
                         glt.Type = true;
-                        glt.Quantity = cumulativeGainLoss;
+                        glt.Quantity = prodObject.GainLoss;
                         glt.DateRecorded = DateTime.UtcNow;
-                        glt.BlendedRecordId = currentProdId;
+                        //glt.BlendedRecordId = currentProdId;
                         glt.BottledRecordId = prod.ProductionID;
                         //glt.DistillerID = DistillerID;
                         db.GainLoss.Add(glt);
                         db.SaveChanges();
                     }
-                    else if (cumulativeGainLoss < 0)
+                    else if (prodObject.GainLoss < 0)
                     {
                         // loss
                         GainLoss glt = new GainLoss();
                         glt.Type = false;
-                        glt.Quantity = Math.Abs(cumulativeGainLoss); // since cumulativeGainLoss is negative, making it to be positive
+                        glt.Quantity = Math.Abs(prodObject.GainLoss); // since cumulativeGainLoss is negative, making it to be positive
                         glt.DateRecorded = DateTime.UtcNow;
-                        glt.BlendedRecordId = currentProdId;
+                        //glt.BlendedRecordId = currentProdId;
                         glt.BottledRecordId = prod.ProductionID;
                         db.GainLoss.Add(glt);
                         db.SaveChanges();

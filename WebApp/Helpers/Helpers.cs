@@ -242,6 +242,7 @@ namespace WebApp.Helpers
         public float TaxedProof { get; set; } // Proof value indicated as taxable. For now, it is used to enable reporting processing. In  other words, how much alcohol has been sold.
         public System.DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened
         public bool Gauged { get; set; }
+        public float GainLoss { get; set; }
     }
 
     /// <summary>
