@@ -249,6 +249,39 @@ namespace WebApp.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves a list of processing report types
+        /// </summary>
+        /// <returns>JsonResult</returns>
+        [HttpGet]
+        public JsonResult GetProcessingReportTypes()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                int userId = User.Identity.GetUserId<int>();
+                if (userId > 0)
+                {
+                    var types = dl.GetProcessingReportTypes();
+                    if (types != null)
+                    {
+                        return Json(types, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        return Json("There were no items associated with this Distillery", JsonRequestBehavior.AllowGet);
+                    }
+                }
+                else
+                {
+                    return Json("Unable to find UserId!");
+                }
+            }
+            else
+            {
+                return Json("Unauthenticated user!");
+            }
+        }
+
         #endregion
 
         #region Vendor Methods

@@ -8,6 +8,8 @@
 
             var genericWorkflowHelper = new genWHelpers();
 
+            var processingReportTypesAdapter;
+
             function _addEventListeners() {
                 $("#CreateRecordButton").click(function () {
                     $("#validationForm").jqxValidator('validate');
@@ -83,6 +85,10 @@
                     theme: 'bootstrap', width: '220px', height: '28px'
                 });
 
+                $('#report-spirit-type').jqxDropDownList({
+                    source: processingReportTypesAdapter, displayMember: 'Name', valueMember: 'Id', selectedIndex: 0, placeHolder: '', theme: 'bootstrap', width: '375px', height: '28px'
+                });
+
                 $('#validationForm').jqxValidator({
                     closeOnClick: true,
                     onSuccess: function () {
@@ -99,9 +105,18 @@
             };
 
             function _createSpiritRecord() {
+                
+                var processingReportTypeID = 0;
+                var reportType = $('#report-spirit-type').jqxDropDownList('getSelectedItem');
+                if (reportType !== null & reportType !== undefined && reportType !== '') {
+                    processingReportTypeID = reportType.value;
+                }
+                
                 var spiritObject = {
                     SpiritId: "",
+                    ProcessingReportTypeID: processingReportTypeID,
                     SpiritName: $("#SpiritNameInput").jqxInput('val'),
+                    
                     Note: $('#NotesInput').jqxTextArea('val')
                 };
 
@@ -287,11 +302,35 @@
                 });
             }
 
+            function _getProcessingReportTypes() {
+
+                var source = {
+                    datatype: 'json',
+                    dataFields: [
+                        { name: 'Id', type: 'number' },
+                        { name: 'Name', type: 'string' }
+                    ],
+                    id: 'I',
+                    url: '/Dictionary/GetProcessingReportTypes',
+                    async: true
+                }
+                
+                processingReportTypesAdapter = new $.jqx.dataAdapter(source,
+                {
+                    autoBind: true,
+                    loadComplete: function (records) {
+                        processingReportTypesAdapter = records;
+                    }
+                });
+            }
+
             return {
                 config: {
                     dragArea: null
                 },
                 init: function () {
+                    //Bind reporting spirit types
+                    _getProcessingReportTypes();
                     //Creating all jqxWindgets except the window
                     _createElements();
                     //Populate Table
@@ -331,12 +370,21 @@
                     <div role="tabpanel" class="tab-pane fade in active" id="createRecord">
                         <div class="row">
                             <form class="form-horizontal">
+                                <!-- Spirit name input -->
                                 <div class="form-group">
                                     <label for="SpiritNameInput" class="col-sm-4 control-label">Spirit Name</label>
                                     <div class="col-sm-8">
                                         <input type="text" class="form-control" id="SpiritNameInput">
                                     </div>
                                 </div>
+                                <!-- Spirit type dropdown -->
+                                <div class="form-group">
+                                    <label for="report-spirit-type" class="col-sm-4 control-label"></label>
+                                    <div class="col-sm-8">
+                                        <div id="report-spirit-type"></div>
+                                    </div>
+                                </div>
+                                <!-- Notes textarea -->
                                 <div class="form-group">
                                     <label for="NotesInput" class="col-sm-4 control-label">Notes</label>
                                     <div class="col-sm-8">

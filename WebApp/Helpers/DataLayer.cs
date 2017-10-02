@@ -2532,6 +2532,7 @@ namespace WebApp.Helpers
                 {
                     Spirit tbl = new Spirit();
                     tbl.Name = spiritObject.SpiritName;
+                    tbl.ProcessingReportTypeID = spiritObject.ProcessingReportTypeID;
                     tbl.DistillerID = GetDistillerId(userId);
                     if (spiritObject.Note != "" && spiritObject.Note != null)
                     {
@@ -3451,6 +3452,37 @@ namespace WebApp.Helpers
                 retMthdExecResult = false;
             }
             return retMthdExecResult;
+        }
+
+        /// <summary>
+        /// Retrieves a list of processing report types
+        /// </summary>
+        ///  <param name="userId"></param>
+        /// <returns>List<SpiritObject></returns>
+        public List<ProcessingReportTypeObject> GetProcessingReportTypes()
+        {
+            List<ProcessingReportTypeObject> types = new List<ProcessingReportTypeObject>();
+
+            try
+            {
+                var res = from rec in db.ProcessingReportType
+                        select rec;
+
+                foreach(var r in res)
+                {
+                    var type = new ProcessingReportTypeObject();
+                    type.Id = r.ProcessingReportTypeID;
+                    type.Name = r.ProcessingReportTypeName;
+                    types.Add(type);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Error retrieving a list of processing report types: " + e);
+            }
+
+            return types;
         }
         #endregion
 

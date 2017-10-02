@@ -265,6 +265,7 @@ namespace WebApp.Helpers
     {
         public int SpiritId { get; set; }
         public string SpiritName { get; set; }
+        public int ProcessingReportTypeID { get; set; }
         public string Note { get; set; }
     }
 
@@ -488,5 +489,11 @@ namespace WebApp.Helpers
     {
         public float FillProof { get; set; }
         public DateTime FillDate { get; set; }
+    }
+
+    public class ProcessingReportTypeObject
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }
