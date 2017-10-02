@@ -19,6 +19,7 @@ The IDs of elements should follow the pattern: Part of the report + cell number
 
             function addEventListeners() {
                 $("#GenerateReportBtn").click(function () {
+                    clearFields();
                     // get starting year
                     var reportingYear = $("#ReportingYear").jqxDropDownList('getSelectedItem');
                     // get starting month
@@ -44,7 +45,9 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                         success: function (result) {
                             // on success, clear controls
                             genericWorkflowHelper.emptyControls();
-
+                            var date = new Date();
+                            $('#ReportingMonth').jqxDropDownList('selectIndex', date.getMonth() - 1);
+                            $('#ReportingYear').jqxDropDownList('selectIndex', 0);
                             bindReportData(result);
                         }
                     });
@@ -253,10 +256,9 @@ The IDs of elements should follow the pattern: Part of the report + cell number
             function createElements() {
                 var date = new Date();
 
-                var month = date.getMonth();
                 var monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
                 $("#ReportingMonth").jqxDropDownList({
-                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList, selectedIndex: (month - 1)
+                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList, selectedIndex: (date.getMonth() - 1)
                 });
 
                 var yearList = [];
@@ -270,6 +272,26 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                 });
 
                 $("#GenerateReportBtn").jqxButton({ theme: 'bootstrap' });
+            }
+
+            function clearFields() {
+                /*PART 1*/
+                // column b pf Part 1
+                $('[id*=p1_][id*=_Wine]').val(0);
+                // column c pf Part 1
+                $('[id*=p1_][id*=_Spirits]').val(0);
+
+                /*PART 2*/
+                // column b pf Part 2
+                $('[id*=p2_][id*=_Bottled]').val(0);
+                // column c pf Part 2
+                $('[id*=p2_][id*=_Packaged]').val(0);
+
+                /*PART 4*/
+                // column b pf Part 4
+                $('[id*=p4_][id*=_BulkSpiritsDumpedIntoProcessing]').val(0);
+                // column d pf Part 4
+                $('[id*=p4_][id*=_BottledExcludedBottledInBondAndExport]').val(0);
             }
 
             return {
