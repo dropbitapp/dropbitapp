@@ -172,7 +172,7 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
-    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Documents\AccountController.cs" />
     <Compile Include="Controllers\DestructionController.cs" />
     <Compile Include="Controllers\DictionaryController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -254,11 +254,15 @@
     <Compile Include="Migrations\201709240441231_recreatingTable.Designer.cs">
       <DependentUpon>201709240441231_recreatingTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201710030219141_devToProdMerging.cs" />
+    <Compile Include="Migrations\201710030219141_devToProdMerging.Designer.cs">
+      <DependentUpon>201710030219141_devToProdMerging.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
     <Compile Include="Models\IdentityModels.cs" />
-    <Compile Include="SQL Server\ManageViewModels.cs" />
+    <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -1223,6 +1227,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201709240441231_recreatingTable.resx">
       <DependentUpon>201709240441231_recreatingTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201710030219141_devToProdMerging.resx">
+      <DependentUpon>201710030219141_devToProdMerging.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
