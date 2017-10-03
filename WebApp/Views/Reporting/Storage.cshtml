@@ -11,6 +11,7 @@
 
             function addEventListeners() {
                 $("#GenerateReportBtn").click(function () {
+                    clearFields();
                     // get starting year
                     var reportingYear = $("#ReportingYear").jqxDropDownList('getSelectedItem');
                     // get starting month
@@ -36,11 +37,15 @@
                         success: function (result) {
                             // on success, clear controls
                             genericWorkflowHelper.emptyControls();
-
+                            // reseting date dropdown values to current year and previous month because they get cleared when emptyControls() is called.
+                            var date = new Date();
+                            $('#ReportingMonth').jqxDropDownList('selectIndex', date.getMonth() - 1);
+                            $('#ReportingYear').jqxDropDownList('selectIndex', 0);
                             bindReportData(result);
                         }
                     });
                 });
+                
             }
 
             // populate the form
@@ -396,10 +401,9 @@
             function createElements() {
                 var date = new Date();
 
-                var month = date.getMonth();
                 var monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
                 $("#ReportingMonth").jqxDropDownList({
-                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList, selectedIndex: (month - 1)
+                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList, selectedIndex: (date.getMonth() - 1)
                 });
 
                 var yearList = [];
@@ -421,6 +425,22 @@
                 $("#puertoRicanSpiritCheckbox").jqxCheckBox({ width: 150, height: 25 });
 
                 $("#virginIslandSpiritCheckbox").jqxCheckBox({ width: 200, height: 25 });
+            }
+
+            function clearFields() {
+                // clear all column values.
+                $('[id*=_WhiskyUnder160]').text('');
+                $('[id*=_WhiskyOver160]').text('');
+                $('[id*=_BrandyUnder170]').text('');
+                $('[id*=_BrandyOver170]').text('');
+                $('[id*=_Rum]').text('');
+                $('[id*=_Gin]').text('');
+                $('[id*=_Vodka]').text('');
+                $('[id*=_AlcoholAndSpiritsOver190]').text('');
+                $('[id*=_AlcoholAndSpiritsUnder190]').text('');
+                $('[id*=_Other]').text('');
+                $('[id*=_Wine]').text('');
+                $('[id*=_Total]').text('');
             }
 
             return {

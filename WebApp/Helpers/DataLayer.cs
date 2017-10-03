@@ -2532,6 +2532,7 @@ namespace WebApp.Helpers
                 {
                     Spirit tbl = new Spirit();
                     tbl.Name = spiritObject.SpiritName;
+                    tbl.ProcessingReportTypeID = spiritObject.ProcessingReportTypeID;
                     tbl.DistillerID = GetDistillerId(userId);
                     if (spiritObject.Note != "" && spiritObject.Note != null)
                     {
@@ -3452,6 +3453,37 @@ namespace WebApp.Helpers
             }
             return retMthdExecResult;
         }
+
+        /// <summary>
+        /// Retrieves a list of processing report types
+        /// </summary>
+        ///  <param name="userId"></param>
+        /// <returns>List<SpiritObject></returns>
+        public List<ProcessingReportTypeObject> GetProcessingReportTypes()
+        {
+            List<ProcessingReportTypeObject> types = new List<ProcessingReportTypeObject>();
+
+            try
+            {
+                var res = from rec in db.ProcessingReportType
+                        select rec;
+
+                foreach(var r in res)
+                {
+                    var type = new ProcessingReportTypeObject();
+                    type.Id = r.ProcessingReportTypeID;
+                    type.Name = r.ProcessingReportTypeName;
+                    types.Add(type);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Error retrieving a list of processing report types: " + e);
+            }
+
+            return types;
+        }
         #endregion
 
         #region Purchase Methods
@@ -3817,8 +3849,6 @@ namespace WebApp.Helpers
         {
             //define method execution return value to be false by default
             bool retMthdExecResult = false;
-            float cumulativeGainLoss = 0;
-            int currentProdId = 0;
 
             var distillerId = GetDistillerId(userId);
 
@@ -4065,27 +4095,24 @@ namespace WebApp.Helpers
                     }
 
                     // now, lets register gains/losses
-                    if (cumulativeGainLoss > 0)
+                    if (prodObject.GainLoss > 0)
                     {
                         // gain
                         GainLoss glt = new GainLoss();
                         glt.Type = true;
-                        glt.Quantity = cumulativeGainLoss;
+                        glt.Quantity = prodObject.GainLoss;
                         glt.DateRecorded = DateTime.UtcNow;
-                        glt.BlendedRecordId = currentProdId;
                         glt.BottledRecordId = prod.ProductionID;
-                        //glt.DistillerID = DistillerID;
                         db.GainLoss.Add(glt);
                         db.SaveChanges();
                     }
-                    else if (cumulativeGainLoss < 0)
+                    else if (prodObject.GainLoss < 0)
                     {
                         // loss
                         GainLoss glt = new GainLoss();
                         glt.Type = false;
-                        glt.Quantity = Math.Abs(cumulativeGainLoss); // since cumulativeGainLoss is negative, making it to be positive
+                        glt.Quantity = Math.Abs(prodObject.GainLoss); // since cumulativeGainLoss is negative, making it to be positive
                         glt.DateRecorded = DateTime.UtcNow;
-                        glt.BlendedRecordId = currentProdId;
                         glt.BottledRecordId = prod.ProductionID;
                         db.GainLoss.Add(glt);
                         db.SaveChanges();
@@ -6816,7 +6843,7 @@ namespace WebApp.Helpers
 
                 IEnumerable<GainLoss> queryGainLoss =
                 from gainloss in db.GainLoss
-                join prod in db.Production on new { BlendedRecordId = gainloss.BlendedRecordId } equals new { BlendedRecordId = prod.ProductionID }
+                join prod in db.Production on new { BottledRecordId = gainloss.BottledRecordId } equals new { BottledRecordId = prod.ProductionID }
                 join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
                 from us2Distills in us2Distills_join.DefaultIfEmpty()
                 where us2Distills.UserId == userId

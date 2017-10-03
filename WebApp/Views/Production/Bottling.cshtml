@@ -10,7 +10,6 @@
             var distillCompInstance = new distillCompute();
             var genericWorkflowHelper = new genWHelpers();
 
-
             // spirit ID for a spirit Name currently selected from Blend's selection
             var spiritId;
 
@@ -77,17 +76,25 @@
                             $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { disabled: true } );
                         }
 
-                        if ( blendingDataAdapter.records[curRawMatIndex].VolumeByWeight > 0 && blendingDataAdapter.records[curRawMatIndex].VolumeByWeight != undefined ) {
+                        if (blendingDataAdapter.records[curRawMatIndex].VolumeByWeight > 0 &&
+                            blendingDataAdapter.records[curRawMatIndex].VolumeByWeight !== undefined &&
+                            blendingDataAdapter.records[curRawMatIndex].AlcoholContent > 0 &&
+                            blendingDataAdapter.records[curRawMatIndex].AlcoholContent !== undefined) {
                             $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { checked: true } );
                             $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( blendingDataAdapter.records[curRawMatIndex].VolumeByWeight );
                             usedMat.OldVal = blendingDataAdapter.records[curRawMatIndex].VolumeByWeight;
                             usedMat.BurningDownMethod = "weight";
+                            usedMat.AlcoholContent = blendingDataAdapter.records[curRawMatIndex].AlcoholContent;
                         }
-                        else if ( blendingDataAdapter.records[curRawMatIndex].Quantity > 0 && blendingDataAdapter.records[curRawMatIndex].Quantity != undefined ) {
+                        else if (blendingDataAdapter.records[curRawMatIndex].Quantity > 0 &&
+                            blendingDataAdapter.records[curRawMatIndex].Quantity !== undefined &&
+                            blendingDataAdapter.records[curRawMatIndex].AlcoholContent > 0 &&
+                            blendingDataAdapter.records[curRawMatIndex].AlcoholContent !== undefined) {
                             $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { checked: true } );
                             $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( blendingDataAdapter.records[curRawMatIndex].Quantity );
                             usedMat.OldVal = blendingDataAdapter.records[curRawMatIndex].Quantity;
                             usedMat.BurningDownMethod = "volume";
+                            usedMat.AlcoholContent = blendingDataAdapter.records[curRawMatIndex].AlcoholContent;
                         }
                     }
 
@@ -218,6 +225,7 @@
                     distillCompInstance.caseQuantityUpdateEvent('#BottleQuantityInput', '#CaseCapacityInput', '#CaseQuantityInput');
                     // update total Quantity in Gallons
                     $("#QuantityInput").val(distillCompInstance.calculateTotalQuant($('#BottleCapacityInput').val(), $('#BottleQuantityInput').val()));
+                    $('#QuantityInput').trigger('change');
                     var qty = $("#QuantityInput").val();
                     var alc = $("#AlcoholInput").val();
                     var prf = distillCompInstance.calculateProof(qty, alc);
@@ -229,6 +237,7 @@
                     distillCompInstance.caseQuantityUpdateEvent('#BottleQuantityInput', '#CaseCapacityInput', '#CaseQuantityInput');
                     // update total Quantity in Gallons
                     $("#QuantityInput").val(distillCompInstance.calculateTotalQuant($('#BottleCapacityInput').val(), $('#BottleQuantityInput').val()));
+                    $('#QuantityInput').trigger('change');
                     var qty = $("#QuantityInput").val();
                     var alc = $("#AlcoholInput").val();
                     var prf = distillCompInstance.calculateProof(qty, alc);
@@ -237,19 +246,24 @@
 
                 // Create Record Form: recalculate Case Quantity and Case Capacity upon user input of Bottle Quantity. Also, calculate total quantity
                 $('#BottleQuantityInput').on('change', function (event) {
+
                     distillCompInstance.bottleQuantityUpdateEvent('#CaseCapacityInput', '#CaseQuantityInput', '#BottleQuantityInput');
-                    // update total Quantity in Gallons
+
+                    // update total volume and proof gallon input
                     $("#QuantityInput").val(distillCompInstance.calculateTotalQuant($('#BottleCapacityInput').val(), $('#BottleQuantityInput').val()));
+                    $('#QuantityInput').trigger('change');
                     var qty = $("#QuantityInput").val();
                     var alc = $("#AlcoholInput").val();
                     var prf = distillCompInstance.calculateProof(qty, alc);
                     $("#ProofInput").val(prf);
+
                 });
 
                 //  calculate total quantity
                 $('#BottleCapacityInput').on('change', function (event) {
                     // update total Quantity in Gallons
                     $("#QuantityInput").val(distillCompInstance.calculateTotalQuant($('#BottleCapacityInput').val(), $('#BottleQuantityInput').val()));
+                    $('#QuantityInput').trigger('change');
                     var qty = $("#QuantityInput").val();
                     var alc = $("#AlcoholInput").val();
                     var prf = distillCompInstance.calculateProof(qty, alc);
@@ -269,6 +283,7 @@
                 });
 
                 $('#QuantityInput').on('change', function (e) {
+
                     if (!($('#QuantityInput').val() == undefined || $('#QuantityInput').val() == "")) {
                         var qty = $("#QuantityInput").val();
                         var alc = $("#AlcoholInput").val();
@@ -278,6 +293,20 @@
                     else {
                         $('#ProofInput').val(0);
                     }
+
+                    // calculate bottling losses
+                    if (usedMatsList.length > 0) {
+                        let proofTotal = genericWorkflowHelper.getUsedMaterialProofTotal(usedMatsList);
+                        let $proofInput = $('#ProofInput');
+                        if (proofTotal >= $proofInput.val()) {
+                            $('#LossesInput').val(proofTotal - $proofInput.val());
+                        }
+                        else
+                        {
+                            alert("Record Volume can't be more than the volume sum of selected blended batches! Please enter a valid Volume in Gallons!")
+                        }
+                    }
+
                 });
 
                 // Select BlendingId within "Create Record" pill
@@ -304,7 +333,7 @@
                             alert( "Both values for selected record are undefined, you can't burn down records with non existing quantities" );
                         }
 
-                        $("#AlcoholInput").val(blendingDataAdapter.records[index].AlcoholContent); 
+                        $("#AlcoholInput").val(blendingDataAdapter.records[index].AlcoholContent);
                         // $("#ProofInput").val(blendingDataAdapter.records[index].ProofGallon);
                         $( "#SpiritTypeInput" ).val( blendingDataAdapter.records[index].SpiritName );
                         spiritId = blendingDataAdapter.records[index].SpiritId;
@@ -342,7 +371,7 @@
                     // initialize global variable as it will be used in other places in this workflow
                     globals.editDialogTotalProofVal = row.ProofGallon;
 
-                    // Event listeners for dialog window 
+                    // Event listeners for dialog window
 
                     // Create Record Form: recalculate Bottle Quantity and Case Capacity upon user input of Case Quantity
                     $('#EditDialogCaseQuantityInput').on('change', function (event) {
@@ -539,6 +568,7 @@
                 $("#BottleQuantityInput").jqxNumberInput('val', '');
                 $("#BottleCapacityInput").jqxNumberInput('val', '');
                 $("#QuantityInput").jqxNumberInput('val', '');
+                $('#LossesInput').jqxNumberInput('val', '');
                 $("#AlcoholInput").jqxNumberInput('val', '');
                 $("#ProofInput").jqxNumberInput('val', '');
                 $('#NotesInput').jqxTextArea('val', '');
@@ -581,6 +611,10 @@
                 });
 
                 $("#QuantityInput").jqxNumberInput({
+                    theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                });
+
+                $('#LossesInput').jqxNumberInput({
                     theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
                 });
 
@@ -654,6 +688,12 @@
                             input: '#AlcoholInput', message: 'Please Enter Alcohol Content', action: 'blur', rule: function () {
                                 var value = $('#AlcoholInput').val();
                                 return value > 0 ? true : false;
+                            }
+                        },
+                        {
+                            input: '#LossesInput', message: 'Please Enter Losses Content', action: 'blue', rule: function () {
+                                var value = $('#LossesInput').val();
+                                return value >= 0 ? true : false;
                             }
                         }
                     ]
@@ -739,11 +779,14 @@
                 var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStart").jqxDateTimeInput('val'), true);
                 var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProductionEnd").jqxDateTimeInput('val'), true);
 
+                let gainLoss = $('#LossesInput').jqxNumberInput('val') * -1;
+
                 var ProductionObject = {
                     ProductionId: "",
                     ProductionType: "Bottling",
                     BatchName: 'PROD-' + $("#BatchNameInput").jqxInput('val'),
                     Quantity: $("#QuantityInput").jqxNumberInput('val'),
+                    GainLoss: gainLoss,
                     ProductionDate: prodEndUtc,
                     ProductionStart: prodStartUtc,
                     ProductionEnd: prodEndUtc,
@@ -1191,7 +1234,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="QuantityInput" class="col-sm-6 control-label">Volume (gal)</label>
+                                        <label for="QuantityInput" class="col-sm-6 control-label">Volume (Gallons)</label>
                                         <div class="col-sm-6">
                                             <div id="QuantityInput"></div>
                                         </div>
@@ -1203,9 +1246,15 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="ProofInput" class="col-md-6 control-label">Total Proof Gallons</label>
+                                        <label for="ProofInput" class="col-md-6 control-label">Total (Proof Gallons)</label>
                                         <div class="col-md-6">
                                             <div id="ProofInput"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="LossesInput" class="col-sm-6 control-label">Losses (Proof Gallons)</label>
+                                        <div class="col-sm-6">
+                                            <div id="LossesInput"></div>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -1234,6 +1283,12 @@
                                             <table>
                                                 <tbody id="FillTestList"></tbody>
                                             </table>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="LossesInput" class="col-sm-6 control-label">Losses (Proof Gallons)</label>
+                                        <div class="col-sm-6">
+                                            <div id="LossesInput"></div>
                                         </div>
                                     </div>
                                 </form>

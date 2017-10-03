@@ -600,7 +600,8 @@
                         {
                             input: "#ReportingMaterialKindDropDown", message: "Please Select Material Kind", action: 'blur', rule: function (input, commit) {
                                 var index = $("#ReportingMaterialKindDropDown").jqxDropDownList('getSelectedIndex');
-                                if (index != -1) {
+                                var item = $("#ReportingSpiritTypeDropDown").jqxDropDownList('getSelectedItem');
+                                if (index != -1 || item.label == 'Wine') {
                                     return true;
                                 }
                                 return false;

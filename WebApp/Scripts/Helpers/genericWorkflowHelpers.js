@@ -158,6 +158,28 @@
         //    // get a selected row.
         //    var rowData = selection[i];
         //}
+    }
 
+    // Calculates total used material proof
+    // Parameter: usedMatsList array
+    this.getUsedMaterialProofTotal = function (arr) {
+
+        let proofTotal = 0;
+        let dc = new distillCompute();
+
+        if (arr.length > 0) {
+            for (let i = 0; i < arr.length; i++) {
+                let vol = arr[i].NewVal;
+                let alc = arr[i].AlcoholContent;
+                if (vol >= 0 &&
+                    vol !== undefined &&
+                    alc >= 0 &&
+                    alc !== undefined) {
+                    proofTotal += dc.calculateProof(vol, alc);
+                }
+            }
+        }
+        
+        return proofTotal;
     }
 };
