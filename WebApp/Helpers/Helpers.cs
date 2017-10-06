@@ -35,7 +35,8 @@ namespace WebApp.Helpers
         public float ProccessingAcct { get; set; } // stands for Entered In Proccessing Account
         public float SorageAcct { get; set; } // stands for Entered In Storage Account
         public float ProducedTotal { get; set; } // stands for Produced total (on report, lines 1 through 13) for 170 & Under
-        public float Recd4Redistil { get; set; } // stands for Received for Re-Distillation(on report, for this period, invlcuding values from storage + processing) for 170 & Under
+        public float Recd4RedistilL17 { get; set; } // stands for Received for Re-Distillation(line 17 on report, for this period, invlcuding values from storage + processing) for 170 & Under
+        public float Recd4RedistilaltionL15 { get; set; } // line 15 of received for redistillation - gauged spirits that have been redistilled into something else. Common scenairo is Gin production: Buy GNS and redistil it into Gin
         public int SpiritTypeReportingID { get; set; }
         public float UnfinishedSpiritsEndOfQuarter { get; set; }
         public float RedistilledEndOfQuarter { get; set; }

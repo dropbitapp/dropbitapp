@@ -138,9 +138,9 @@
                 producedTotals += parseFloat( reportObject.SorageAcct + reportObject.ProccessingAcct );
                 $( '#p1_14l_Total' ).val( producedTotals );
 
-                // Column (L) - update Received for Redistillation for across all Spirit Types
+                // Column (L) - update Received for Redistillation for across all Spirit Types - Line 15
                 redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
-                redistilledTotal += parseFloat( reportObject.Recd4Redistil );
+                redistilledTotal += parseFloat( reportObject.Recd4RedistilaltionL15 );
                 $( '#p1_15l_Total' ).val( redistilledTotal );
 
                 // Column (L) - update Unfinished spirits across all Spirit Types
@@ -183,7 +183,7 @@
                         $( '#p1_14b_WhiskyUnder160' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15b_WhiskyUnder160' ).val( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15b_WhiskyUnder160' ).val( result.Part1[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_b_WhiskyUnder160' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
@@ -201,7 +201,7 @@
                         $( '#p1_14c_WhiskyOver160' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15c_WhiskyUnder160' ).val( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15c_WhiskyUnder160' ).val( result.Part1[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_c_WhiskyOver160' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
@@ -219,7 +219,7 @@
                         $( '#p1_14d_BrandyUnder170' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15d_BrandyUnder170' ).val( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15d_BrandyUnder170' ).val( result.Part1[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_d_BrandyUnder170' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
@@ -237,7 +237,7 @@
                         $( '#p1_14e_BrandyOver170' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15e_BrandyOver170' ).val( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15e_BrandyOver170' ).val( result.Part1[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_e_BrandyOver170' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
@@ -255,7 +255,7 @@
                         $( '#p1_14f_Rum' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15f_Rum' ).val( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15f_Rum' ).val( result.Part1[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(a) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17a_f_Rum' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
@@ -276,7 +276,7 @@
                         $( '#p1_14g_Gin' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15g_Gin' ).val( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15g_Gin' ).val( result.Part1[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(a) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17a_g_Gin' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
@@ -297,7 +297,7 @@
                         $( '#p1_14h_Vodka' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15h_Vodka' ).val( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15h_Vodka' ).val( result.Part1[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(a) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17a_h_Vodka' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
@@ -318,7 +318,7 @@
                         $( '#p1_14j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(a) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17a_j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
@@ -339,7 +339,7 @@
                         $( '#p1_14i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(a) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17a_i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
@@ -360,7 +360,7 @@
                         $( '#p1_14k_Other' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15k_Other' ).val( result.Part1[i].Recd4Redistil );
+                        $( '#p1_15k_Other' ).val( result.Part1[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_k_Other' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
@@ -602,7 +602,7 @@
 
                 if ( isUnknownMaterial ) { // flag evaluates to true is we ever came across the unknown material
                     // this section deals with materials uknown to the existing Production Report, part 6
-                    for ( var l = 0; l <= unknownMaterialsList.length; l++ ) {
+                    for ( var l = 0; l < unknownMaterialsList.length; l++ ) {
 
                         if ( unknownMaterialsList[l].ProdReportMaterialCategoryID === 1 ) { // Whiskey
                             // find first availabe empty spot and insert there

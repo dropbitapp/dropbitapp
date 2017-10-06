@@ -96,8 +96,8 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var report = dl.GetStorageReportData(startOfReporting, endOfReporting, userId);
-                    return Json(report, JsonRequestBehavior.AllowGet);
+                    var storageReport = dl.GetStorageReportData(startOfReporting, endOfReporting, userId);
+                    return Json(storageReport, JsonRequestBehavior.AllowGet);
                 }
                 else
                 {
