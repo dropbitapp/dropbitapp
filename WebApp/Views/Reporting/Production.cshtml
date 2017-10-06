@@ -602,7 +602,7 @@
 
                 if ( isUnknownMaterial ) { // flag evaluates to true is we ever came across the unknown material
                     // this section deals with materials uknown to the existing Production Report, part 6
-                    for ( var l = 0; l <= unknownMaterialsList.length; l++ ) {
+                    for ( var l = 0; l < unknownMaterialsList.length; l++ ) {
 
                         if ( unknownMaterialsList[l].ProdReportMaterialCategoryID === 1 ) { // Whiskey
                             // find first availabe empty spot and insert there
