@@ -311,32 +311,39 @@
 
                 // Select BlendingId within "Create Record" pill
                 $('#BlendList').on('select', function (event) {
-                    var args = event.args;
-                    if (args) {
-                        var index = args.index;
-                        if ( blendingDataAdapter.records[index].Quantity !== undefined && blendingDataAdapter.records[index].VolumeByWeight !== undefined ) {
-                            initializeDialogs();
-                            usedMat.ID = blendingDataAdapter.records[index].ProductionId;
-                            usedMat.DistillableOrigin = blendingDataAdapter.records[index].DistillableOrigin;
-                            curRawMatIndex = index;
-                            if ( args.item.checked ) {
-                                // make burndown window visible and open it.
-                                $( "#MatBurnDwnDialog" ).css( 'visibility', 'visible' );
-                                $('#MatBurnDwnDialog').jqxWindow('open');
-                                $('#BlendList').jqxListBox({ disabled: true });
-                            } else {
-                                removeBurnDownMaterialRecord( curRawMatIndex );
+                    var checkedItems = $("#BlendList").jqxListBox('getCheckedItems');
+                    var selectedItem = $("#BlendList").jqxListBox('getSelectedItem');
+                    if (checkedItems.length > 1) {
+                        alert("Multiple items can't be selected for bottling.")
+                        $("#BlendList").jqxListBox('uncheckItem', selectedItem);
+                    } else {
+                        var args = event.args;
+                        if (args) {
+                            var index = args.index;
+                            if (blendingDataAdapter.records[index].Quantity !== undefined && blendingDataAdapter.records[index].VolumeByWeight !== undefined) {
+                                initializeDialogs();
+                                usedMat.ID = blendingDataAdapter.records[index].ProductionId;
+                                usedMat.DistillableOrigin = blendingDataAdapter.records[index].DistillableOrigin;
+                                curRawMatIndex = index;
+                                if (args.item.checked) {
+                                    // make burndown window visible and open it.
+                                    $("#MatBurnDwnDialog").css('visibility', 'visible');
+                                    $('#MatBurnDwnDialog').jqxWindow('open');
+                                    $('#BlendList').jqxListBox({ disabled: true });
+                                } else {
+                                    removeBurnDownMaterialRecord(curRawMatIndex);
+                                }
                             }
-                        }
-                        else {
-                            $( "#BlendList" ).jqxListBox( 'uncheckIndex', index );
-                            alert( "Both values for selected record are undefined, you can't burn down records with non existing quantities" );
-                        }
+                            else {
+                                $("#BlendList").jqxListBox('uncheckIndex', index);
+                                alert("Both values for selected record are undefined, you can't burn down records with non existing quantities");
+                            }
 
-                        $("#AlcoholInput").val(blendingDataAdapter.records[index].AlcoholContent);
-                        // $("#ProofInput").val(blendingDataAdapter.records[index].ProofGallon);
-                        $( "#SpiritTypeInput" ).val( blendingDataAdapter.records[index].SpiritName );
-                        spiritId = blendingDataAdapter.records[index].SpiritId;
+                            $("#AlcoholInput").val(blendingDataAdapter.records[index].AlcoholContent);
+                            // $("#ProofInput").val(blendingDataAdapter.records[index].ProofGallon);
+                            $("#SpiritTypeInput").val(blendingDataAdapter.records[index].SpiritName);
+                            spiritId = blendingDataAdapter.records[index].SpiritId;
+                        }
                     }
                 });
 
@@ -583,7 +590,7 @@
                 });
 
                 $("#BlendList").jqxListBox({
-                    theme: 'bootstrap', source: blendingDataAdapter, displayMember: "BatchName", valueMember: "ProductionId", checkboxes: true, width: '100%',
+                    theme: 'bootstrap', source: blendingDataAdapter, displayMember: "BatchName", valueMember: "ProductionId", checkboxes: true, multiple: false, width: '100%',
                 });
 
                 $("#ProductionStart").jqxDateTimeInput({
@@ -667,7 +674,7 @@
                     rules: [
                         { input: '#BatchNameInput', message: 'Batch Name Required', action: 'blur', rule: 'required' },
                         {
-                            input: "#BlendList", message: "Please Pick A Blend", action: 'click', rule: function (input, commit) {
+                            input: "#BlendList", message: "Please Pick A Batch for Bottling", action: 'click', rule: function (input, commit) {
                                 var index = $("#BlendList").jqxListBox('getSelectedIndex');
                                 return index != -1;
                             }
