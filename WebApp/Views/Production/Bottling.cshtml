@@ -296,8 +296,8 @@
 
                     // calculate bottling losses
                     if (usedMatsList.length > 0) {
-                        let proofTotal = genericWorkflowHelper.getUsedMaterialProofTotal(usedMatsList);
-                        let $proofInput = $('#ProofInput');
+                        var proofTotal = genericWorkflowHelper.getUsedMaterialProofTotal(usedMatsList);
+                        var $proofInput = $('#ProofInput');
                         if (proofTotal >= $proofInput.val()) {
                             $('#LossesInput').val(proofTotal - $proofInput.val());
                         }
@@ -786,7 +786,7 @@
                 var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStart").jqxDateTimeInput('val'), true);
                 var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProductionEnd").jqxDateTimeInput('val'), true);
 
-                let gainLoss = $('#LossesInput').jqxNumberInput('val') * -1;
+                var gainLoss = $('#LossesInput').jqxNumberInput('val') * -1;
 
                 var ProductionObject = {
                     ProductionId: "",
