@@ -45,7 +45,7 @@ namespace WebApp.Controllers
                         var returnResult = dl.CreatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Purchase record created sucessfully.";
+                            string message = "Purchase record created successfully.";
                             return Json(message);
                         }
                         else
@@ -187,7 +187,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Fermentable record updated sucessfully.";
+                            string message = "Fermentable record updated successfully.";
                             return Json(message);
                         }
                         else
@@ -221,7 +221,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.DeletePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Fermentable record deleted sucessfully.";
+                            string message = "Fermentable record deleted successfully.";
                             return Json(message);
                         }
                         else
@@ -266,7 +266,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Fermented record updated sucessfully.";
+                            string message = "Fermented record updated successfully.";
                             return Json(message);
                         }
                         else
@@ -300,7 +300,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.DeletePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Fermented record deleted sucessfully.";
+                            string message = "Fermented record deleted successfully.";
                             return Json(message);
                         }
                         else
@@ -356,7 +356,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Distilled record updated sucessfully.";
+                            string message = "Distilled record updated successfully.";
                             return Json(message);
                         }
                         else
@@ -390,7 +390,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.DeletePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Distilled record deleted sucessfully.";
+                            string message = "Distilled record deleted successfully.";
                             return Json(message);
                         }
                         else
@@ -434,7 +434,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Supply record updated sucessfully.";
+                            string message = "Supply record updated successfully.";
                             return Json(message);
                         }
                         else
@@ -468,7 +468,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.DeletePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Supply record deleted sucessfully.";
+                            string message = "Supply record deleted successfully.";
                             return Json(message);
                         }
                         else
@@ -512,7 +512,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Additive record updated sucessfully.";
+                            string message = "Additive record updated successfully.";
                             return Json(message);
                         }
                         else
@@ -546,7 +546,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.DeletePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
-                            string message = "Additive record deleted sucessfully.";
+                            string message = "Additive record deleted successfully.";
                             return Json(message);
                         }
                         else
