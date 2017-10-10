@@ -311,30 +311,28 @@ namespace WebApp.Helpers
 
             // 2(c) current month received bulk
             var recBulk =
-                (from prod in
-                    (from prod in db.Production
-                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
-                     from proof in proof_join.DefaultIfEmpty()
-                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                     from distillers in distillers_join.DefaultIfEmpty()
-                     where
-                       distillers.UserId == userId &&
-                       prod.Gauged == true &&
-                       prod.ProductionEndTime >= startOfReporting &&
-                       prod.ProductionEndTime <= endOfReporting &&
-                       (prod.StatusID == 1 ||
-                       prod.StatusID == 2 ||
-                       prod.StateID == 4)
-                     select new
-                     {
-                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
-                         Dummy = "x"
-                     })
-                 group prod by new { prod.Dummy } into g
+            (from prod in
+                (from prod in db.Production
+                 join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
+                 from prod4Rep in prod4Rep_join.DefaultIfEmpty()
+                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 where
+                   distillers.UserId == userId &&
+                   prod.Gauged == true &&
+                   prod.StateID == 4 &&
+                   prod.ProductionEndTime >= startOfReporting &&
+                   prod.ProductionEndTime <= endOfReporting
                  select new
                  {
-                     ReceivedBulk = g.Sum(p => p.Value)
-                 }).FirstOrDefault();
+                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
+                     Dummy = "x"
+                 })
+                 group prod by new { prod.Dummy } into g
+                    select new
+                    {
+                        ReceivedBulk = g.Sum(p => p.Value)
+                    }).FirstOrDefault();
 
             if (recBulk != null)
             {
@@ -345,25 +343,24 @@ namespace WebApp.Helpers
             // 9 (c) Bottled or Packaged
             var bottledPackaged =
                 (from prod in
-                    (from prod in db.Production
-                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
-                     from proof in proof_join.DefaultIfEmpty()
-                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                     from distillers in distillers_join.DefaultIfEmpty()
-                     where
-                       distillers.UserId == userId &&
-                       prod.ProductionTypeID == 4 &&
-                       prod.Gauged == true &&
-                       prod.ProductionEndTime >= startOfReporting &&
-                       prod.ProductionEndTime <= endOfReporting &&
-                       (prod.StatusID == 1 ||
-                       prod.StatusID == 2 ||
-                       prod.StateID == 5)
-                     select new
-                     {
-                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
-                         Dummy = "x"
-                     })
+                (from prod in db.Production
+                 join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
+                 from prod4Rep in prod4Rep_join.DefaultIfEmpty()
+                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 where
+                   distillers.UserId == 1 &&
+                   prod.Gauged == true &&
+                   prod.StateID == 5 &&
+                   (prod.StatusID == 1 ||
+                   prod.StatusID == 2) &&
+                   prod.ProductionEndTime >= startOfReporting &&
+                   prod.ProductionEndTime <= endOfReporting
+                 select new
+                 {
+                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
+                     Dummy = "x"
+                 })
                  group prod by new { prod.Dummy } into g
                  select new
                  {
@@ -434,22 +431,21 @@ namespace WebApp.Helpers
             var bottledPackagedp2 =
                 (from prod in
                     (from prod in db.Production
-                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
-                     from proof in proof_join.DefaultIfEmpty()
+                     join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
+                     from prod4Rep in prod4Rep_join.DefaultIfEmpty()
                      join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
                      from distillers in distillers_join.DefaultIfEmpty()
                      where
-                       distillers.UserId == userId &&
-                       prod.ProductionTypeID == 4 &&
-                       prod.Gauged == true &&
-                       prod.ProductionEndTime >= startOfReporting &&
-                       prod.ProductionEndTime <= endOfReporting &&
-                       (prod.StatusID == 1 ||
-                       prod.StatusID == 2 ||
-                       prod.StateID == 5)
+                        distillers.UserId == userId &&
+                        prod.Gauged == true &&
+                        prod.ProductionEndTime >= startOfReporting &&
+                        prod.ProductionEndTime <= endOfReporting &&
+                        (prod.StatusID == 1 ||
+                        prod.StatusID == 2) &&
+                        prod.StateID == 5
                      select new
                      {
-                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
+                         Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
                          Dummy = "x"
                      })
                  group prod by new { prod.Dummy } into g
@@ -463,7 +459,7 @@ namespace WebApp.Helpers
                 procRepP2.AmtBottledPackaged = (float)bottledPackagedp2.BottledPackagedBottled;
             }
 
-            // 28(b) On hand End of Month
+            // 46 (b) On hand End of Month
             var onHandEndOfMonthP2 =
              (from prod in
                     (from prod in db.Production
