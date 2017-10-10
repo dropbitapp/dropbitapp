@@ -34,7 +34,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.CreateProduction(prodObject, userId);
                         if (returnResult)
                         {
-                            string message = "Production record created sucessfully.";
+                            string message = "Production record created successfully.";
                             return Json(message);
                         }
                         else
@@ -248,7 +248,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.UpdateProduction(pObj, userId);
                         if (returnResult)
                         {
-                            string message = "Production record updated sucessfully.";
+                            string message = "Production record updated successfully.";
                             return Json(message);
                         }
                         else
@@ -290,7 +290,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.DeleteProduction(productionObject, userId);
                         if (returnResult)
                         {
-                            string message = "Fermentation record deleted sucessfully.";
+                            string message = "Fermentation record deleted successfully.";
                             return Json(message);
                         }
                         else
@@ -338,7 +338,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.DeleteProduction(productionObject, userId);
                         if (returnResult)
                         {
-                            string message = "Distillation record deleted sucessfully.";
+                            string message = "Distillation record deleted successfully.";
                             return Json(message);
                         }
                         else
@@ -397,7 +397,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.DeleteProduction(productionObject, userId);
                         if (returnResult)
                         {
-                            string message = "Blending record deleted sucessfully.";
+                            string message = "Blending record deleted successfully.";
                             return Json(message);
                         }
                         else
@@ -445,7 +445,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.DeleteProduction(productionObject, userId);
                         if (returnResult)
                         {
-                            string message = "Bottling record deleted sucessfully.";
+                            string message = "Bottling record deleted successfully.";
                             return Json(message);
                         }
                         else

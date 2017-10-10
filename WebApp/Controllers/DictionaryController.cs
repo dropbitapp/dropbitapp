@@ -148,7 +148,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.CreateSpirit(userId, spiritObject);
                         if (returnResult)
                         {
-                            string message = "Spirit dictionary record created sucessfully.";
+                            string message = "Spirit dictionary record created successfully.";
                             return Json(message);
                         }
                         else
@@ -191,7 +191,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.UpdateSpirit(userId, spiritObject);
                         if (returnResult)
                         {
-                            string message = "Spirit dictionary record updated sucessfully.";
+                            string message = "Spirit dictionary record updated successfully.";
                             return Json(message);
                         }
                         else
@@ -304,7 +304,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.CreateVendor(userId, vendorObject);
                         if (returnResult)
                         {
-                            string message = "Vendor dictionary record created sucessfully.";
+                            string message = "Vendor dictionary record created successfully.";
                             return Json(message);
                         }
                         else
@@ -347,7 +347,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.UpdateVendor(userId, vendorObject);
                         if (returnResult)
                         {
-                            string message = "Vendor dictionary record updated sucessfully.";
+                            string message = "Vendor dictionary record updated successfully.";
                             return Json(message);
                         }
                         else
@@ -427,7 +427,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.CreateStorage(userId, storageObject);
                         if (returnResult)
                         {
-                            string message = "Storage dictionary record created sucessfully.";
+                            string message = "Storage dictionary record created successfully.";
                             return Json(message);
                         }
                         else
@@ -470,7 +470,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.UpdateStorage(userId, storageObject);
                         if (returnResult)
                         {
-                            string message = "Storage dictionary record updated sucessfully.";
+                            string message = "Storage dictionary record updated successfully.";
                             return Json(message);
                         }
                         else
@@ -550,7 +550,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.CreateRawMaterial(userId, rawMObject);
                         if (returnResult)
                         {
-                            string message = "Raw Material dictionary record created sucessfully.";
+                            string message = "Raw Material dictionary record created successfully.";
                             return Json(message);
                         }
                         else
@@ -593,7 +593,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.UpdateRawMaterial(userId, rawMaterialObject);
                         if (returnResult)
                         {
-                            string message = "Raw Material dictionary record updated sucessfully.";
+                            string message = "Raw Material dictionary record updated successfully.";
                             return Json(message);
                         }
                         else

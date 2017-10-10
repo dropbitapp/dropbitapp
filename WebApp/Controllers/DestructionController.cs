@@ -100,7 +100,7 @@ namespace WebApp.Controllers
                         bool returnResult = dl.DestroyBatch(destructionObject, userId);
                         if (returnResult)
                         {
-                            string message = "Batch sucessfully destroyed.";
+                            string message = "Batch successfully destroyed.";
                             return Json(message);
                         }
                         else
