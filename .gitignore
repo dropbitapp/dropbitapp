@@ -14,3 +14,6 @@
 /WebApp/Properties/PublishProfiles
 /WebAppTests/obj/Release
 /WebAppTests/bin/
+/Public/bin/
+/Public/obj/Debug
+/Public/Properties/PublishProfiles/
