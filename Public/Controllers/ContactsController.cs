@@ -22,7 +22,11 @@ namespace Public.Controllers
         public async Task<IHttpActionResult> PostContact(ContactDTO contact)
         {
             if (!ModelState.IsValid ||
+                contact.Name == null ||
                 contact.Name.Length > 50 ||
+                contact.Name.Length < 1 ||
+                contact.Email == null ||
+                contact.Email.Length < 1 ||
                 contact.Email.Length > 100)
             {
                 return BadRequest();
@@ -53,6 +57,7 @@ namespace Public.Controllers
 
             // Create a new customer entity
             ContactEntity contactEntity = new ContactEntity(contact.Name, contact.Email);
+            contactEntity.Organization = contact.Organization;
 
             if (contactEntity == null)
             {

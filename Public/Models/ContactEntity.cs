@@ -10,13 +10,12 @@ namespace Public.Models
     {
         public ContactEntity(string name, string email)
         {
-            if (name.Length < 50 && email.Length < 100)
-            {
-                this.PartitionKey = name;
-                this.RowKey = email;
-            }
+            this.PartitionKey = name;
+            this.RowKey = email;
         }
 
         public ContactEntity() { }
+        
+        public string Organization { get; set; }
     }
 }
