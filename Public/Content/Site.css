@@ -16,7 +16,7 @@ textarea {
     max-width: 280px;
 }
 
-.col-lg-6 {
+.row > div {
     margin-top: 150px;
     margin-bottom: 150px;
 }
