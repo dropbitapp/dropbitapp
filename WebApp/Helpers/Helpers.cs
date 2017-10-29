@@ -488,7 +488,7 @@ namespace WebApp.Helpers
     /// </summary>
     public class FillTestObject
     {
-        public float FillProof { get; set; }
+        public float FillAlcoholContent { get; set; }
         public DateTime FillDate { get; set; }
     }
 

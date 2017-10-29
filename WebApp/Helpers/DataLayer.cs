@@ -4157,7 +4157,7 @@ namespace WebApp.Helpers
                         {
                             FillTest fillTest = new FillTest();
                             fillTest.ProductionID = prod.ProductionID;
-                            fillTest.ProofGallons = i.FillProof;
+                            fillTest.AlcoholContent = i.FillAlcoholContent;
                             fillTest.FillTestDate = i.FillDate;
                             db.FillTest.Add(fillTest);
                             db.SaveChanges();
