@@ -257,991 +257,6 @@ namespace WebApp.Helpers
             return rawMList;
         }
 
-        internal ProcessingReportingObject GetProcessingReportData(DateTime startOfReporting, DateTime endOfReporting, int userId)
-        {
-            ProcessingReportingObject procRepObj = new ProcessingReportingObject();
-            ProcessReportingPart1 procRepP1 = new ProcessReportingPart1();
-            ProcessReportingPart2 procRepP2 = new ProcessReportingPart2();
-            List<ProcessReportingPart4> procRepP4L = new List<ProcessReportingPart4>();
-
-            List<ProductionReportHelper> tempRepObjList = new List<ProductionReportHelper>();
-
-            var line8RunningSum = 0F;
-            var line26RunningSum = 0F;
-
-            // get distiller information for header report
-            int distillerID = GetDistillerId(userId);
-            procRepObj.Header = GetDistillerInfoForReportHeader(distillerID, startOfReporting);
-
-            // Processing Report Part 1 Section
-            procRepP1.BulkIngredients = "spirit";
-
-            // 1(c) previous month
-            var onHands1stMoC =
-                (from prod in
-                    (from prod in db.Production
-                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
-                     from proof in proof_join.DefaultIfEmpty()
-                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                     from distillers in distillers_join.DefaultIfEmpty()
-                     where
-                       distillers.UserId == userId &&
-                       prod.ProductionTypeID == 3 &&
-                       prod.Gauged == true &&
-                       prod.ProductionEndTime < startOfReporting &&
-                       (prod.StatusID == 1 ||
-                        prod.StatusID == 2 ||
-                        prod.StateID == 4)
-                     select new
-                     {
-                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
-                         Dummy = "x"
-                     })
-                 group prod by new { prod.Dummy } into g
-                 select new
-                 {
-                     OnHandFirstOfMonthBulk = g.Sum(p => p.Value)
-                 }).FirstOrDefault();
-
-            if (onHands1stMoC != null)
-            {
-                procRepP1.OnHandFirstofMonth = (float)onHands1stMoC.OnHandFirstOfMonthBulk;
-                line8RunningSum += (float)procRepP1.OnHandFirstofMonth;
-            }
-
-            // 2(c) current month received bulk
-            var recBulk =
-            (from prod in
-                (from prod in db.Production
-                 join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
-                 from prod4Rep in prod4Rep_join.DefaultIfEmpty()
-                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                 from distillers in distillers_join.DefaultIfEmpty()
-                 where
-                   distillers.UserId == userId &&
-                   prod.Gauged == true &&
-                   prod.StateID == 4 &&
-                   prod.ProductionEndTime >= startOfReporting &&
-                   prod.ProductionEndTime <= endOfReporting
-                 select new
-                 {
-                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
-                     Dummy = "x"
-                 })
-                 group prod by new { prod.Dummy } into g
-                    select new
-                    {
-                        ReceivedBulk = g.Sum(p => p.Value)
-                    }).FirstOrDefault();
-
-            if (recBulk != null)
-            {
-                procRepP1.Recd4Process = (float)recBulk.ReceivedBulk;
-                line8RunningSum += (float)procRepP1.Recd4Process;
-            }
-
-            // 9 (c) Bottled or Packaged
-            var bottledPackaged =
-                (from prod in
-                (from prod in db.Production
-                 join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
-                 from prod4Rep in prod4Rep_join.DefaultIfEmpty()
-                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                 from distillers in distillers_join.DefaultIfEmpty()
-                 where
-                   distillers.UserId == 1 &&
-                   prod.Gauged == true &&
-                   prod.StateID == 5 &&
-                   (prod.StatusID == 1 ||
-                   prod.StatusID == 2) &&
-                   prod.ProductionEndTime >= startOfReporting &&
-                   prod.ProductionEndTime <= endOfReporting
-                 select new
-                 {
-                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
-                     Dummy = "x"
-                 })
-                 group prod by new { prod.Dummy } into g
-                 select new
-                 {
-                     BottledPackagedBulk = g.Sum(p => p.Value)
-                 }).FirstOrDefault();
-
-            if (bottledPackaged != null)
-            {
-                procRepP1.AmtBottledPackaged = (float)bottledPackaged.BottledPackagedBulk;
-                line26RunningSum = (float)procRepP1.AmtBottledPackaged;
-            }
-
-            // 24 (c) Losses
-            procRepP1.Losses = db.GainLoss.Where(l => l.Type == false
-                                            && l.DateRecorded >= startOfReporting
-                                            && l.DateRecorded <= endOfReporting)
-                                            .Select(l => l.Quantity)
-                                            .DefaultIfEmpty(0)
-                                            .Sum();
-
-            line26RunningSum += procRepP1.Losses;
-
-            if ((line8RunningSum - line26RunningSum) < 0)
-            {
-                throw new InvalidOperationException();
-            }
-
-            // 25(c) On hand end of month
-            procRepP1.OnHandEndofMonth = line8RunningSum - line26RunningSum;
-
-            // Processing Report Part 2 Section
-            // Bottled Column(b)
-            procRepP2.FinishedProduct = "bottled";
-
-            // 27(c) previous month
-            var p2OnHand2stMo =
-                (from prod in
-                    (from prod in db.Production
-                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
-                     from proof in proof_join.DefaultIfEmpty()
-                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                     from distillers in distillers_join.DefaultIfEmpty()
-                     where
-                       distillers.UserId == userId &&
-                       prod.ProductionTypeID == 4 &&
-                       prod.Gauged == true &&
-                       prod.ProductionEndTime < startOfReporting &&
-                       (prod.StatusID == 1 ||
-                       prod.StatusID == 2 ||
-                       prod.StateID == 5)
-                     select new
-                     {
-                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
-                         Dummy = "x"
-                     })
-                 group prod by new { prod.Dummy } into g
-                 select new
-                 {
-                     OnHandFirstOfMonthBottled = g.Sum(p => p.Value)
-                 }).FirstOrDefault();
-
-            if (p2OnHand2stMo != null)
-            {
-                procRepP2.OnHandFirstofMonth = (float)p2OnHand2stMo.OnHandFirstOfMonthBottled;
-            }
-
-            // 28(b) Bottled or Packaged
-            var bottledPackagedp2 =
-                (from prod in
-                    (from prod in db.Production
-                     join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
-                     from prod4Rep in prod4Rep_join.DefaultIfEmpty()
-                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                     from distillers in distillers_join.DefaultIfEmpty()
-                     where
-                        distillers.UserId == userId &&
-                        prod.Gauged == true &&
-                        prod.ProductionEndTime >= startOfReporting &&
-                        prod.ProductionEndTime <= endOfReporting &&
-                        (prod.StatusID == 1 ||
-                        prod.StatusID == 2) &&
-                        prod.StateID == 5
-                     select new
-                     {
-                         Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
-                         Dummy = "x"
-                     })
-                 group prod by new { prod.Dummy } into g
-                 select new
-                 {
-                     BottledPackagedBottled = g.Sum(p => p.Value)
-                 }).FirstOrDefault();
-
-            if (bottledPackagedp2 != null)
-            {
-                procRepP2.AmtBottledPackaged = (float)bottledPackagedp2.BottledPackagedBottled;
-            }
-
-            // 46 (b) On hand End of Month
-            var onHandEndOfMonthP2 =
-             (from prod in
-                    (from prod in db.Production
-                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
-                     from proof in proof_join.DefaultIfEmpty()
-                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                     from distillers in distillers_join.DefaultIfEmpty()
-                     where
-                       distillers.UserId == userId &&
-                       prod.ProductionTypeID == 4 &&
-                       prod.ProductionEndTime <= endOfReporting &&
-                       prod.Gauged == true &&
-                       (prod.StatusID == 1 ||
-                       prod.StatusID == 2 ||
-                       prod.StateID == 5)
-                     select new
-                     {
-                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
-                         Dummy = "x"
-                     })
-              group prod by new { prod.Dummy } into g
-              select new
-              {
-                  OnHandEndOfMonth = g.Sum(p => p.Value)
-              }).FirstOrDefault();
-
-            if (onHandEndOfMonthP2 != null)
-            {
-                procRepP2.OnHandEndofMonth = (float)onHandEndOfMonthP2.OnHandEndOfMonth;
-            }
-
-            // line 33 - Withdrawn for Tax Determined
-            var taxWithdrawn =
-            from tax in db.TaxWithdrawn
-            where tax.DateOfSale >= startOfReporting && tax.DateOfSale <= endOfReporting
-            select new
-            {
-                TaxPaid = (System.Single?)tax.Value ?? (System.Single?)0
-            };
-
-            if(taxWithdrawn != null)
-            {
-                foreach(var i in taxWithdrawn)
-                {
-                    procRepP2.TaxWithdrawn += (float)i.TaxPaid;
-                }
-            }
-
-            // Processing Report Part 4
-            try
-            {
-                var ress =
-                (from prod in db.Production
-                 join prodReport in db.Production4Reporting on prod.ProductionID equals prodReport.ProductionID into prodReport_join
-                 from prodReport in prodReport_join.DefaultIfEmpty()
-                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                 from distillers in distillers_join.DefaultIfEmpty()
-                 join prod2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals prod2SpiritType.ProductionID into prod2SpiritType_join
-                 from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
-                 join prod2Purch in db.ProductionToPurchase on prod.ProductionID equals prod2Purch.ProductionID into prod2Purch_join
-                 from prod2Purch in prod2Purch_join.DefaultIfEmpty()
-                 join purch4Reprt in db.Purchase4Reporting on prod2Purch.PurchaseID equals purch4Reprt.PurchaseID into purch4Reprt_join
-                 from purch4Reprt in purch4Reprt_join.DefaultIfEmpty()
-                 join prod2Spirit in db.ProductionToSpirit on prod.ProductionID equals prod2Spirit.ProductionID into prod2Spirit_join
-                 from prod2Spirit in prod2Spirit_join.DefaultIfEmpty()
-                 join spirit in db.Spirit on prod2Spirit.SpiritID equals spirit.SpiritID into spirit_join
-                 from spirit in spirit_join.DefaultIfEmpty()
-                 join procRepType in db.ProcessingReportType on spirit.ProcessingReportTypeID equals procRepType.ProcessingReportTypeID into procRepType_join
-                 from procRepType in procRepType_join.DefaultIfEmpty()
-                 where
-                    distillers.UserId == userId &&
-                    prod.Gauged == true &&
-                    (prod.StatusID == 1 ||
-                    prod.StatusID == 2) &&
-                    (new int[] { 4, 5 }).Contains(prod.StateID) &&
-                    prod.ProductionEndTime >= startOfReporting &&
-                    prod.ProductionEndTime <= endOfReporting
-                 select new
-                 {
-                     prod.StateID,
-                     ProductionID = (int?)prod.ProductionID,
-                     SpiritTypeName = spirit.Name ?? "",
-                     Redistilled = (bool?)prodReport.Redistilled,
-                     Weight = (System.Single?)prodReport.Weight ?? (System.Single?)0,
-                     Volume = (System.Single?)prodReport.Volume ?? (System.Single?)0,
-                     Alcohol = (System.Single?)prodReport.Alcohol ?? (System.Single?)0,
-                     Proof = (System.Single?)prodReport.Proof ?? (System.Single?)0,
-                     ProcessingType = procRepType.ProcessingReportTypeName ?? "",
-                     ProcessingTypeID = (int?)procRepType.ProcessingReportTypeID,
-                 }).Distinct();
-
-                foreach (var rec in ress)
-                {
-                    bool isInProcRepList = false;
-                    ProcessReportingPart4 part4Obj = new ProcessReportingPart4();
-                    part4Obj.ProcessingReportTypeName = rec.ProcessingType;
-
-                    if (rec.StateID == 4)
-                    {
-                        if (rec.ProcessingType == "ALCOHOL AND NEUTRAL SPIRITS (Other than vodka)")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if(record != null && record.StateID == rec.StateID)
-                            {
-                                record.AlcoholNeutral += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.AlcoholNeutral = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BLENDED STRAIGHT WHISKEY")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BlendedStraightWhiskey += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.BlendedStraightWhiskey = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BLENDED WHISKEY: With neutral spirits")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BlendedWhiskeyWithNeutral += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.BlendedWhiskeyWithNeutral = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BLENDED WHISKEY: With light whiskey")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BlendedWhiskeyWithLight += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.BlendedWhiskeyWithLight = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BLENDED LIGHT WHISKEY")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BlendedLightWhiskey += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.BlendedLightWhiskey = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "ANY OTHER BLENDS OF 100% WHISKEY")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BlendedOtherWhiskey += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.BlendedOtherWhiskey = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Scotch")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.ImportedWhiskeyScotch += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.ImportedWhiskeyScotch = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Canadian")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.ImportedWhiskeyCanadian += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.ImportedWhiskeyCanadian = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Irish and Others")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.ImportedWhiskeyIrish += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.ImportedWhiskeyIrish = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "DOMESTIC WHISKEY DISTILLED AT 160 AND UNDER")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.DomesticWhiskey160Under += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.DomesticWhiskey160Under = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == " DOMESTIC WHISKEY DISTILLED AT OVER 160")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.DomesticWhiskeyOver160 += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.DomesticWhiskeyOver160 = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BRANDY DISTILLED AT 170 AND UNDER")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Brandy170Under += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.Brandy170Under = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BRANDY DISTILLED AT OVER 170")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BrandyOver170 += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.BrandyOver170 = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "SPIRITS (Rum):  Puerto Rican")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.RumPuertoRican += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.RumPuertoRican = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "SPIRITS (Rum): Virgin Islands")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.RumVirginIslands += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.RumVirginIslands = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "RUM: Domestic")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.RumDomestic += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.RumDomestic = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "RUM: \"Other\" Imported")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.RumOtherImported += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.RumOtherImported = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "GIN")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Gin += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.Gin = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "VODKA")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Vodka += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.Vodka = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "CORDIALS, LIQUEURS, AND SPECIALTIES")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Liqueur += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.Liqueur = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "COCKTAILS AND MIXED DRINKS")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Cocktail += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.Cocktail = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "TEQUILA")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Tequila += (float)rec.Proof;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
-                                part4Obj.Tequila = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                    }
-                    else if (rec.StateID == 5) // processing bottling record
-                    {
-                        if (rec.ProcessingType == "ALCOHOL AND NEUTRAL SPIRITS (Other than vodka)")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.AlcoholNeutral += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.AlcoholNeutral = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BLENDED STRAIGHT WHISKEY")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BlendedStraightWhiskey += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.BlendedStraightWhiskey = (float)rec.Proof;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BLENDED WHISKEY: With neutral spirits")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BlendedWhiskeyWithNeutral += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.BlendedWhiskeyWithNeutral = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BLENDED WHISKEY: With light whiskey")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BlendedWhiskeyWithLight += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.BlendedWhiskeyWithLight = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BLENDED LIGHT WHISKEY")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BlendedLightWhiskey += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.BlendedLightWhiskey = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "ANY OTHER BLENDS OF 100% WHISKEY")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BlendedOtherWhiskey += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.BlendedOtherWhiskey = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Scotch")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.ImportedWhiskeyScotch += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.ImportedWhiskeyScotch = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Canadian")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.ImportedWhiskeyCanadian += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.ImportedWhiskeyCanadian = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Irish and Others")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.ImportedWhiskeyIrish += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.ImportedWhiskeyIrish = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "DOMESTIC WHISKEY DISTILLED AT 160 AND UNDER")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.DomesticWhiskey160Under += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.DomesticWhiskey160Under = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == " DOMESTIC WHISKEY DISTILLED AT OVER 160")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.DomesticWhiskeyOver160 += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.DomesticWhiskeyOver160 = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BRANDY DISTILLED AT 170 AND UNDER")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Brandy170Under += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.Brandy170Under = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "BRANDY DISTILLED AT OVER 170")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.BrandyOver170 += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.BrandyOver170 = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "SPIRITS (Rum):  Puerto Rican")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.RumPuertoRican += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.RumPuertoRican = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "SPIRITS (Rum): Virgin Islands")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.RumVirginIslands += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.RumVirginIslands = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "RUM: Domestic")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.RumDomestic += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.RumDomestic = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "RUM: \"Other\" Imported")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.RumOtherImported += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.RumOtherImported = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "GIN")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Gin += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.Gin = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "VODKA")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Vodka += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.Vodka = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "CORDIALS, LIQUEURS, AND SPECIALTIES")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Liqueur += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.Liqueur = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "COCKTAILS AND MIXED DRINKS")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Cocktail += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.Cocktail = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                        else if (rec.ProcessingType == "TEQUILA")
-                        {
-                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
-                            if (record != null && record.StateID == rec.StateID)
-                            {
-                                record.Tequila += (float)rec.Volume;
-                                isInProcRepList = true;
-                            }
-                            else
-                            {
-                                part4Obj.ProcessingSpirits = "bottled";
-                                part4Obj.Tequila = (float)rec.Volume;
-                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
-                            }
-                        }
-                    }
-
-                    if(!isInProcRepList)
-                    {
-                        part4Obj.StateID = rec.StateID;
-                        procRepP4L.Add(part4Obj);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
-
-            procRepObj.Part1 = procRepP1;
-            procRepObj.Part2 = procRepP2;
-            procRepObj.Part4List = procRepP4L;
-            return procRepObj;
-        }
-
         internal bool UpdateProduction(ProductionObject pObj, int userId)
         {
             bool retMthdExecResult = false;
@@ -5611,7 +4626,992 @@ namespace WebApp.Helpers
 
         #endregion
 
-        #region Reporting
+        #region Reporting Methods
+
+        internal ProcessingReportingObject GetProcessingReportData(DateTime startOfReporting, DateTime endOfReporting, int userId)
+        {
+            ProcessingReportingObject procRepObj = new ProcessingReportingObject();
+            ProcessReportingPart1 procRepP1 = new ProcessReportingPart1();
+            ProcessReportingPart2 procRepP2 = new ProcessReportingPart2();
+            List<ProcessReportingPart4> procRepP4L = new List<ProcessReportingPart4>();
+
+            List<ProductionReportHelper> tempRepObjList = new List<ProductionReportHelper>();
+
+            var line8RunningSum = 0F;
+            var line26RunningSum = 0F;
+
+            // get distiller information for header report
+            int distillerID = GetDistillerId(userId);
+            procRepObj.Header = GetDistillerInfoForReportHeader(distillerID, startOfReporting);
+
+            // Processing Report Part 1 Section
+            procRepP1.BulkIngredients = "spirit";
+
+            // 1(c) previous month
+            var onHands1stMoC =
+                (from prod in
+                    (from prod in db.Production
+                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
+                     from proof in proof_join.DefaultIfEmpty()
+                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                     from distillers in distillers_join.DefaultIfEmpty()
+                     where
+                       distillers.UserId == userId &&
+                       prod.ProductionTypeID == 3 &&
+                       prod.Gauged == true &&
+                       prod.ProductionEndTime < startOfReporting &&
+                       (prod.StatusID == 1 ||
+                        prod.StatusID == 2 ||
+                        prod.StateID == 4)
+                     select new
+                     {
+                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
+                         Dummy = "x"
+                     })
+                 group prod by new { prod.Dummy } into g
+                 select new
+                 {
+                     OnHandFirstOfMonthBulk = g.Sum(p => p.Value)
+                 }).FirstOrDefault();
+
+            if (onHands1stMoC != null)
+            {
+                procRepP1.OnHandFirstofMonth = (float)onHands1stMoC.OnHandFirstOfMonthBulk;
+                line8RunningSum += (float)procRepP1.OnHandFirstofMonth;
+            }
+
+            // 2(c) current month received bulk
+            var recBulk =
+            (from prod in
+                (from prod in db.Production
+                 join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
+                 from prod4Rep in prod4Rep_join.DefaultIfEmpty()
+                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 where
+                   distillers.UserId == userId &&
+                   prod.Gauged == true &&
+                   prod.StateID == 4 &&
+                   prod.ProductionEndTime >= startOfReporting &&
+                   prod.ProductionEndTime <= endOfReporting
+                 select new
+                 {
+                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
+                     Dummy = "x"
+                 })
+             group prod by new { prod.Dummy } into g
+             select new
+             {
+                 ReceivedBulk = g.Sum(p => p.Value)
+             }).FirstOrDefault();
+
+            if (recBulk != null)
+            {
+                procRepP1.Recd4Process = (float)recBulk.ReceivedBulk;
+                line8RunningSum += (float)procRepP1.Recd4Process;
+            }
+
+            // 9 (c) Bottled or Packaged
+            var bottledPackaged =
+                (from prod in
+                (from prod in db.Production
+                 join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
+                 from prod4Rep in prod4Rep_join.DefaultIfEmpty()
+                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 where
+                   distillers.UserId == 1 &&
+                   prod.Gauged == true &&
+                   prod.StateID == 5 &&
+                   (prod.StatusID == 1 ||
+                   prod.StatusID == 2) &&
+                   prod.ProductionEndTime >= startOfReporting &&
+                   prod.ProductionEndTime <= endOfReporting
+                 select new
+                 {
+                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
+                     Dummy = "x"
+                 })
+                 group prod by new { prod.Dummy } into g
+                 select new
+                 {
+                     BottledPackagedBulk = g.Sum(p => p.Value)
+                 }).FirstOrDefault();
+
+            if (bottledPackaged != null)
+            {
+                procRepP1.AmtBottledPackaged = (float)bottledPackaged.BottledPackagedBulk;
+                line26RunningSum = (float)procRepP1.AmtBottledPackaged;
+            }
+
+            // 24 (c) Losses
+            procRepP1.Losses = db.GainLoss.Where(l => l.Type == false
+                                            && l.DateRecorded >= startOfReporting
+                                            && l.DateRecorded <= endOfReporting)
+                                            .Select(l => l.Quantity)
+                                            .DefaultIfEmpty(0)
+                                            .Sum();
+
+            line26RunningSum += procRepP1.Losses;
+
+            if ((line8RunningSum - line26RunningSum) < 0)
+            {
+                throw new InvalidOperationException();
+            }
+
+            // 25(c) On hand end of month
+            procRepP1.OnHandEndofMonth = line8RunningSum - line26RunningSum;
+
+            // Processing Report Part 2 Section
+            // Bottled Column(b)
+            procRepP2.FinishedProduct = "bottled";
+
+            // 27(c) previous month
+            var p2OnHand2stMo =
+                (from prod in
+                    (from prod in db.Production
+                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
+                     from proof in proof_join.DefaultIfEmpty()
+                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                     from distillers in distillers_join.DefaultIfEmpty()
+                     where
+                       distillers.UserId == userId &&
+                       prod.ProductionTypeID == 4 &&
+                       prod.Gauged == true &&
+                       prod.ProductionEndTime < startOfReporting &&
+                       (prod.StatusID == 1 ||
+                       prod.StatusID == 2 ||
+                       prod.StateID == 5)
+                     select new
+                     {
+                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
+                         Dummy = "x"
+                     })
+                 group prod by new { prod.Dummy } into g
+                 select new
+                 {
+                     OnHandFirstOfMonthBottled = g.Sum(p => p.Value)
+                 }).FirstOrDefault();
+
+            if (p2OnHand2stMo != null)
+            {
+                procRepP2.OnHandFirstofMonth = (float)p2OnHand2stMo.OnHandFirstOfMonthBottled;
+            }
+
+            // 28(b) Bottled or Packaged
+            var bottledPackagedp2 =
+                (from prod in
+                    (from prod in db.Production
+                     join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
+                     from prod4Rep in prod4Rep_join.DefaultIfEmpty()
+                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                     from distillers in distillers_join.DefaultIfEmpty()
+                     where
+                        distillers.UserId == userId &&
+                        prod.Gauged == true &&
+                        prod.ProductionEndTime >= startOfReporting &&
+                        prod.ProductionEndTime <= endOfReporting &&
+                        (prod.StatusID == 1 ||
+                        prod.StatusID == 2) &&
+                        prod.StateID == 5
+                     select new
+                     {
+                         Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
+                         Dummy = "x"
+                     })
+                 group prod by new { prod.Dummy } into g
+                 select new
+                 {
+                     BottledPackagedBottled = g.Sum(p => p.Value)
+                 }).FirstOrDefault();
+
+            if (bottledPackagedp2 != null)
+            {
+                procRepP2.AmtBottledPackaged = (float)bottledPackagedp2.BottledPackagedBottled;
+            }
+
+            // 46 (b) On hand End of Month
+            var onHandEndOfMonthP2 =
+             (from prod in
+                    (from prod in db.Production
+                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
+                     from proof in proof_join.DefaultIfEmpty()
+                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                     from distillers in distillers_join.DefaultIfEmpty()
+                     where
+                       distillers.UserId == userId &&
+                       prod.ProductionTypeID == 4 &&
+                       prod.ProductionEndTime <= endOfReporting &&
+                       prod.Gauged == true &&
+                       (prod.StatusID == 1 ||
+                       prod.StatusID == 2 ||
+                       prod.StateID == 5)
+                     select new
+                     {
+                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
+                         Dummy = "x"
+                     })
+              group prod by new { prod.Dummy } into g
+              select new
+              {
+                  OnHandEndOfMonth = g.Sum(p => p.Value)
+              }).FirstOrDefault();
+
+            if (onHandEndOfMonthP2 != null)
+            {
+                procRepP2.OnHandEndofMonth = (float)onHandEndOfMonthP2.OnHandEndOfMonth;
+            }
+
+            // line 33 - Withdrawn for Tax Determined
+            var taxWithdrawn =
+            from tax in db.TaxWithdrawn
+            where tax.DateOfSale >= startOfReporting && tax.DateOfSale <= endOfReporting
+            select new
+            {
+                TaxPaid = (System.Single?)tax.Value ?? (System.Single?)0
+            };
+
+            if (taxWithdrawn != null)
+            {
+                foreach (var i in taxWithdrawn)
+                {
+                    procRepP2.TaxWithdrawn += (float)i.TaxPaid;
+                }
+            }
+
+            // Processing Report Part 4
+            try
+            {
+                var ress =
+                (from prod in db.Production
+                 join prodReport in db.Production4Reporting on prod.ProductionID equals prodReport.ProductionID into prodReport_join
+                 from prodReport in prodReport_join.DefaultIfEmpty()
+                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 join prod2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals prod2SpiritType.ProductionID into prod2SpiritType_join
+                 from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
+                 join prod2Purch in db.ProductionToPurchase on prod.ProductionID equals prod2Purch.ProductionID into prod2Purch_join
+                 from prod2Purch in prod2Purch_join.DefaultIfEmpty()
+                 join purch4Reprt in db.Purchase4Reporting on prod2Purch.PurchaseID equals purch4Reprt.PurchaseID into purch4Reprt_join
+                 from purch4Reprt in purch4Reprt_join.DefaultIfEmpty()
+                 join prod2Spirit in db.ProductionToSpirit on prod.ProductionID equals prod2Spirit.ProductionID into prod2Spirit_join
+                 from prod2Spirit in prod2Spirit_join.DefaultIfEmpty()
+                 join spirit in db.Spirit on prod2Spirit.SpiritID equals spirit.SpiritID into spirit_join
+                 from spirit in spirit_join.DefaultIfEmpty()
+                 join procRepType in db.ProcessingReportType on spirit.ProcessingReportTypeID equals procRepType.ProcessingReportTypeID into procRepType_join
+                 from procRepType in procRepType_join.DefaultIfEmpty()
+                 where
+                    distillers.UserId == userId &&
+                    prod.Gauged == true &&
+                    (prod.StatusID == 1 ||
+                    prod.StatusID == 2) &&
+                    (new int[] { 4, 5 }).Contains(prod.StateID) &&
+                    prod.ProductionEndTime >= startOfReporting &&
+                    prod.ProductionEndTime <= endOfReporting
+                 select new
+                 {
+                     prod.StateID,
+                     ProductionID = (int?)prod.ProductionID,
+                     SpiritTypeName = spirit.Name ?? "",
+                     Redistilled = (bool?)prodReport.Redistilled,
+                     Weight = (System.Single?)prodReport.Weight ?? (System.Single?)0,
+                     Volume = (System.Single?)prodReport.Volume ?? (System.Single?)0,
+                     Alcohol = (System.Single?)prodReport.Alcohol ?? (System.Single?)0,
+                     Proof = (System.Single?)prodReport.Proof ?? (System.Single?)0,
+                     ProcessingType = procRepType.ProcessingReportTypeName ?? "",
+                     ProcessingTypeID = (int?)procRepType.ProcessingReportTypeID,
+                 }).Distinct();
+
+                foreach (var rec in ress)
+                {
+                    bool isInProcRepList = false;
+                    ProcessReportingPart4 part4Obj = new ProcessReportingPart4();
+                    part4Obj.ProcessingReportTypeName = rec.ProcessingType;
+
+                    if (rec.StateID == 4)
+                    {
+                        if (rec.ProcessingType == "ALCOHOL AND NEUTRAL SPIRITS (Other than vodka)")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.AlcoholNeutral += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.AlcoholNeutral = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BLENDED STRAIGHT WHISKEY")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BlendedStraightWhiskey += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.BlendedStraightWhiskey = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BLENDED WHISKEY: With neutral spirits")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BlendedWhiskeyWithNeutral += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.BlendedWhiskeyWithNeutral = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BLENDED WHISKEY: With light whiskey")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BlendedWhiskeyWithLight += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.BlendedWhiskeyWithLight = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BLENDED LIGHT WHISKEY")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BlendedLightWhiskey += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.BlendedLightWhiskey = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "ANY OTHER BLENDS OF 100% WHISKEY")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BlendedOtherWhiskey += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.BlendedOtherWhiskey = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Scotch")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.ImportedWhiskeyScotch += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.ImportedWhiskeyScotch = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Canadian")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.ImportedWhiskeyCanadian += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.ImportedWhiskeyCanadian = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Irish and Others")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.ImportedWhiskeyIrish += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.ImportedWhiskeyIrish = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "DOMESTIC WHISKEY DISTILLED AT 160 AND UNDER")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.DomesticWhiskey160Under += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.DomesticWhiskey160Under = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == " DOMESTIC WHISKEY DISTILLED AT OVER 160")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.DomesticWhiskeyOver160 += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.DomesticWhiskeyOver160 = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BRANDY DISTILLED AT 170 AND UNDER")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Brandy170Under += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.Brandy170Under = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BRANDY DISTILLED AT OVER 170")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BrandyOver170 += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.BrandyOver170 = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "SPIRITS (Rum):  Puerto Rican")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.RumPuertoRican += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.RumPuertoRican = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "SPIRITS (Rum): Virgin Islands")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.RumVirginIslands += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.RumVirginIslands = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "RUM: Domestic")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.RumDomestic += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.RumDomestic = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "RUM: \"Other\" Imported")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.RumOtherImported += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.RumOtherImported = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "GIN")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Gin += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.Gin = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "VODKA")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Vodka += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.Vodka = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "CORDIALS, LIQUEURS, AND SPECIALTIES")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Liqueur += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.Liqueur = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "COCKTAILS AND MIXED DRINKS")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Cocktail += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.Cocktail = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "TEQUILA")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Tequila += (float)rec.Proof;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bulkSpiritDumped";
+                                part4Obj.Tequila = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                    }
+                    else if (rec.StateID == 5) // processing bottling record
+                    {
+                        if (rec.ProcessingType == "ALCOHOL AND NEUTRAL SPIRITS (Other than vodka)")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.AlcoholNeutral += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.AlcoholNeutral = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BLENDED STRAIGHT WHISKEY")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BlendedStraightWhiskey += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.BlendedStraightWhiskey = (float)rec.Proof;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BLENDED WHISKEY: With neutral spirits")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BlendedWhiskeyWithNeutral += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.BlendedWhiskeyWithNeutral = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BLENDED WHISKEY: With light whiskey")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BlendedWhiskeyWithLight += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.BlendedWhiskeyWithLight = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BLENDED LIGHT WHISKEY")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BlendedLightWhiskey += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.BlendedLightWhiskey = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "ANY OTHER BLENDS OF 100% WHISKEY")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BlendedOtherWhiskey += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.BlendedOtherWhiskey = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Scotch")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.ImportedWhiskeyScotch += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.ImportedWhiskeyScotch = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Canadian")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.ImportedWhiskeyCanadian += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.ImportedWhiskeyCanadian = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "IMPORTED WHISKEY: Irish and Others")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.ImportedWhiskeyIrish += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.ImportedWhiskeyIrish = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "DOMESTIC WHISKEY DISTILLED AT 160 AND UNDER")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.DomesticWhiskey160Under += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.DomesticWhiskey160Under = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == " DOMESTIC WHISKEY DISTILLED AT OVER 160")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.DomesticWhiskeyOver160 += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.DomesticWhiskeyOver160 = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BRANDY DISTILLED AT 170 AND UNDER")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Brandy170Under += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.Brandy170Under = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "BRANDY DISTILLED AT OVER 170")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.BrandyOver170 += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.BrandyOver170 = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "SPIRITS (Rum):  Puerto Rican")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.RumPuertoRican += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.RumPuertoRican = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "SPIRITS (Rum): Virgin Islands")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.RumVirginIslands += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.RumVirginIslands = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "RUM: Domestic")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.RumDomestic += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.RumDomestic = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "RUM: \"Other\" Imported")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.RumOtherImported += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.RumOtherImported = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "GIN")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Gin += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.Gin = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "VODKA")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Vodka += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.Vodka = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "CORDIALS, LIQUEURS, AND SPECIALTIES")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Liqueur += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.Liqueur = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "COCKTAILS AND MIXED DRINKS")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Cocktail += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.Cocktail = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                        else if (rec.ProcessingType == "TEQUILA")
+                        {
+                            var record = procRepP4L.Find(x => x.ProcessingTypeID == rec.ProcessingTypeID);
+                            if (record != null && record.StateID == rec.StateID)
+                            {
+                                record.Tequila += (float)rec.Volume;
+                                isInProcRepList = true;
+                            }
+                            else
+                            {
+                                part4Obj.ProcessingSpirits = "bottled";
+                                part4Obj.Tequila = (float)rec.Volume;
+                                part4Obj.ProcessingTypeID = (int)rec.ProcessingTypeID;
+                            }
+                        }
+                    }
+
+                    if (!isInProcRepList)
+                    {
+                        part4Obj.StateID = rec.StateID;
+                        procRepP4L.Add(part4Obj);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+
+            procRepObj.Part1 = procRepP1;
+            procRepObj.Part2 = procRepP2;
+            procRepObj.Part4List = procRepP4L;
+            return procRepObj;
+        }
 
         internal ProductionReportingObject GetProductionReportData(DateTime start, DateTime end, int userId)
         {
@@ -6336,7 +6336,7 @@ namespace WebApp.Helpers
             }
         }
 
-        public StorageReport GetStorageReportData(DateTime startDate, DateTime endDate, int userId)
+        internal StorageReport GetStorageReportData(DateTime startDate, DateTime endDate, int userId)
         {
             try
             {
@@ -6355,6 +6355,7 @@ namespace WebApp.Helpers
                 GetPurchasedStorageToProduction(startDate, endDate, userId, ref storageReportBody);
                 GetProducedStorageToProcessing(startDate, endDate, userId, ref storageReportBody);
                 GetPurchasedStorageToProcessing(startDate, endDate, userId, ref storageReportBody);
+                GetStorageReportDestroyed(startDate, endDate, userId, ref storageReportBody);
 
                 storageReport.ReportBody = storageReportBody;
 
@@ -6366,11 +6367,101 @@ namespace WebApp.Helpers
             }
         }
 
+        private void GetStorageReportDestroyed(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        {
+            // Query production batches destroyed in Storage Account
+            var prodDestroyed = (from dest in db.Destruction
+                                 join prod in db.Production on dest.RecordID equals prod.ProductionID
+                                 join dist in db.AspNetUserToDistiller on prod.DistillerID equals dist.DistillerID
+                                 join prod_str in db.ProductionToSpiritTypeReporting on prod.ProductionID equals prod_str.ProductionID
+                                 join str in db.SpiritTypeReporting on prod_str.SpiritTypeReportingID equals str.SpiritTypeReportingID
+                                 where
+                                    dist.UserId == userId
+                                    && prod.ProductionTypeID == 2
+                                    && prod.StatusID == 9
+                                    && prod.ProductionDate < startDate
+                                    && prod.Gauged == true
+                                    && dest.EndTime > startDate
+                                    && dest.EndTime < endDate
+                                    && dest.WorkflowType == "Production"
+                                 select new
+                                 {
+                                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                                     proof = (float?)dest.ProofGallons ?? 0
+                                 }).DefaultIfEmpty();
+
+            if (prodDestroyed.First() != null)
+            {
+                foreach (var rec in prodDestroyed)
+                {
+                    // Search for existing category with matching name
+                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+
+                    if (category == null)
+                    {
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r20_Destroyed += rec.proof;
+                        storageReportBody.Add(cat);
+                    }
+                    else
+                    {
+                        category.r20_Destroyed += rec.proof;
+                    }
+                }
+            }
+
+            // Query purchase batches destroyed in Storage Account
+            var purDestroyed = (from dest in db.Destruction
+                             join pur in db.Purchase on dest.RecordID equals pur.PurchaseID
+                             join dist in db.AspNetUserToDistiller on pur.DistillerID equals dist.DistillerID
+                             join pur_str in db.PurchaseToSpiritTypeReporting on pur.PurchaseID equals pur_str.PurchaseID
+                             join str in db.SpiritTypeReporting on pur_str.SpiritTypeReportingID equals str.SpiritTypeReportingID
+                             where
+                                 dist.UserId == userId
+                                 && (pur.PurchaseTypeID == 2 || pur.PurchaseTypeID == 3)
+                                 && pur.StatusID == 9
+                                 && pur.PurchaseDate < startDate
+                                 && dest.EndTime > startDate
+                                 && dest.EndTime < endDate
+                                 && dest.WorkflowType == "Purchase"
+                             select new
+                             {
+                                 reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                                 proof = (float?)dest.ProofGallons ?? 0
+                             }).DefaultIfEmpty();
+
+            if(purDestroyed.First() != null)
+            {
+                foreach (var rec in purDestroyed)
+                {
+                    // Search for existing category with matching name
+                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+
+                    if (category == null)
+                    {
+                        // Add category to the list with given purchased distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r20_Destroyed += rec.proof;
+                        storageReportBody.Add(cat);
+                    }
+                    else
+                    {
+                        category.r20_Destroyed += rec.proof;
+                    }
+                }
+            }
+        }
+
         private void GetProducedOnHandAtStart(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             // Query distilled production records transferred to storage account
             var records =
                 (from rec in db.Production
+                join dest in db.Destruction on rec.ProductionID equals dest.RecordID into dest_join
+                from dest in dest_join.DefaultIfEmpty()
                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
                 from proof in proof_join.DefaultIfEmpty()
                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
@@ -6380,16 +6471,16 @@ namespace WebApp.Helpers
                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
                 from str in str_join.DefaultIfEmpty()
                 where
-                    distiller.UserId == userId &&
-                    rec.ProductionTypeID == 2 &&
-                    (rec.StatusID == 1 ||
-                    rec.StatusID == 2) &&
-                    rec.ProductionEndTime < startDate &&
-                    rec.Gauged == true
-                select new
+                    distiller.UserId == userId
+                    && rec.ProductionTypeID == 2
+                    && rec.ProductionEndTime < startDate
+                    && rec.Gauged == true
+                    && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
+                 select new
                 {
-                    reportingCategoryName = str.ProductTypeName ?? "",
-                    proof = (System.Single?)proof.Value ?? (System.Single?)0
+                    reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                    proof = (float?)proof.Value ?? (float?)0,
+                    destroyedProof = (float?)dest.ProofGallons ?? 0
                 }).DefaultIfEmpty();
 
             if (records.First() != null)
@@ -6404,12 +6495,12 @@ namespace WebApp.Helpers
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r1_OnHandFirstOfMonth += (float)rec.proof;
+                        cat.r1_OnHandFirstOfMonth += (float)rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r1_OnHandFirstOfMonth += (float)rec.proof;
+                        category.r1_OnHandFirstOfMonth += (float)rec.proof + rec.destroyedProof;
                     }
                 }
             }
@@ -6420,6 +6511,8 @@ namespace WebApp.Helpers
             // Query distilled purchase records transferred to storage account
             var records =
                 (from rec in db.Purchase
+                join dest in db.Destruction on rec.PurchaseID equals dest.RecordID into dest_join
+                from dest in dest_join.DefaultIfEmpty()
                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
                 from proof in proof_join.DefaultIfEmpty()
                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
@@ -6429,16 +6522,15 @@ namespace WebApp.Helpers
                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
                 from str in str_join.DefaultIfEmpty()
                 where
-                    distiller.UserId == userId &&
-                    (rec.PurchaseTypeID == 2 ||
-                    rec.PurchaseTypeID == 3) &&
-                    (rec.StatusID == 1 ||
-                    rec.StatusID == 2) &&
-                    rec.PurchaseDate < startDate
-                select new
+                    distiller.UserId == userId
+                    && (rec.PurchaseTypeID == 2 || rec.PurchaseTypeID == 3)
+                    && rec.PurchaseDate < startDate
+                    && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
+                 select new
                 {
-                    reportingCategoryName = str.ProductTypeName ?? "",
-                    proof = (System.Single?)proof.Value ?? (System.Single?)0
+                    reportingCategoryName = str.ProductTypeName ?? string.Empty,
+                    proof = (float?)proof.Value ?? 0,
+                    destroyedProof = (float?)dest.ProofGallons ?? 0
                 }).DefaultIfEmpty();
 
             if (records.First() != null)
@@ -6453,12 +6545,12 @@ namespace WebApp.Helpers
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r1_OnHandFirstOfMonth += (float)rec.proof;
+                        cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r1_OnHandFirstOfMonth += (float)rec.proof;
+                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
                     }
                 }
             }
@@ -6469,6 +6561,8 @@ namespace WebApp.Helpers
             // Query distilled production records transferred to storage account
             var records =
                 (from rec in db.Production
+                join dest in db.Destruction on rec.ProductionID equals dest.RecordID into dest_join
+                from dest in dest_join.DefaultIfEmpty()
                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
                 from proof in proof_join.DefaultIfEmpty()
                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
@@ -6478,17 +6572,17 @@ namespace WebApp.Helpers
                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
                 from str in str_join.DefaultIfEmpty()
                 where
-                    distiller.UserId == userId &&
-                    rec.ProductionTypeID == 2 &&
-                    (rec.StatusID == 1 ||
-                    rec.StatusID == 2) &&
-                    rec.ProductionEndTime >= startDate &&
-                    rec.ProductionEndTime <= endDate &&
-                    rec.Gauged == true
+                    distiller.UserId == userId
+                    && rec.ProductionTypeID == 2
+                    && rec.ProductionEndTime >= startDate
+                    && rec.ProductionEndTime <= endDate
+                    && rec.Gauged == true
+                    && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > endDate))
                 select new
                 {
-                    reportingCategoryName = str.ProductTypeName ?? "",
-                    proof = (System.Single?)proof.Value ?? (System.Single?)0
+                    reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                    proof = (float?)proof.Value ?? 0,
+                    destroyedProof  = (float?)dest.ProofGallons ?? 0
                 }).DefaultIfEmpty();
 
             if (records.First() != null)
@@ -6503,12 +6597,12 @@ namespace WebApp.Helpers
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r2_DepositedInBulkStorage += (float)rec.proof;
+                        cat.r2_DepositedInBulkStorage += rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r2_DepositedInBulkStorage += (float)rec.proof;
+                        category.r2_DepositedInBulkStorage += rec.proof + rec.destroyedProof;
                     }
                 }
             }
@@ -6519,6 +6613,8 @@ namespace WebApp.Helpers
             // Query fermented and distilled purchase records transferred to storage account
             var records =
                 (from purchase in db.Purchase
+                 join dest in db.Destruction on purchase.PurchaseID equals dest.RecordID into dest_join
+                 from dest in dest_join.DefaultIfEmpty()
                  join alcohol in db.Alcohol on purchase.AlcoholID equals alcohol.AlcoholID into alcohol_join
                  from alcohol in alcohol_join.DefaultIfEmpty()
                  join productionContent in db.ProductionContent on purchase.PurchaseID equals productionContent.RecordID into productionContent_join
@@ -6538,19 +6634,17 @@ namespace WebApp.Helpers
                  join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
                  from str in str_join.DefaultIfEmpty()
                  where
-                     distiller.UserId == userId &&
-                     (purchase.PurchaseTypeID == 2 ||
-                     purchase.PurchaseTypeID == 3) &&
-                     (purchase.StatusID == 1 ||
-                     purchase.StatusID == 2 ||
-                     purchase.StatusID == 3) &&
-                     purchase.PurchaseDate >= startDate &&
-                     purchase.PurchaseDate <= endDate
+                     distiller.UserId == userId
+                     && (purchase.PurchaseTypeID == 2 || purchase.PurchaseTypeID == 3)
+                     && purchase.PurchaseDate >= startDate
+                     && purchase.PurchaseDate <= endDate
+                     && ((purchase.StatusID == 1 || purchase.StatusID == 2 || purchase.StatusID == 3) || (purchase.StatusID == 9 && dest.EndTime > endDate))
                  select new
                  {
-                     reportingCategoryName = str.ProductTypeName ?? "",
-                     purchaseProof = (System.Single?)proof.Value ?? (System.Single?)0,
-                     productionProof = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                     purchaseProof = (float?)proof.Value ?? 0,
+                     productionProof = (float?)((productionContent.ContentValue * alcohol.Value * 2) / 100) ?? 0,
+                     destroyedProof = (float?)dest.ProofGallons ?? 0
                  }).DefaultIfEmpty();
 
             if (records.First() != null)
@@ -6565,12 +6659,12 @@ namespace WebApp.Helpers
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r2_DepositedInBulkStorage += (float)rec.purchaseProof + (float)rec.productionProof;
+                        cat.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r2_DepositedInBulkStorage += (float)rec.purchaseProof + (float)rec.productionProof;
+                        category.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
                     }
                 }
             }
