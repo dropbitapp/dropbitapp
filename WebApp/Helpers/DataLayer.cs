@@ -4159,6 +4159,8 @@ namespace WebApp.Helpers
                             fillTest.ProductionID = prod.ProductionID;
                             fillTest.AlcoholContent = i.FillAlcoholContent;
                             fillTest.FillTestDate = i.FillDate;
+                            fillTest.FillVariation = i.FillVariation;
+                            fillTest.CorrectiveAction = i.CorrectiveAction;
                             db.FillTest.Add(fillTest);
                             db.SaveChanges();
                         }
