@@ -258,6 +258,10 @@
     <Compile Include="Migrations\201710030219141_devToProdMerging.Designer.cs">
       <DependentUpon>201710030219141_devToProdMerging.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201711010247251_fillTest.cs" />
+    <Compile Include="Migrations\201711010247251_fillTest.Designer.cs">
+      <DependentUpon>201711010247251_fillTest.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
@@ -1063,7 +1067,9 @@
     <Content Include="Scripts\Helpers\dateModificationHelper.js" />
     <Content Include="Scripts\Helpers\distillcompute.js" />
     <Content Include="Scripts\Helpers\genericWorkflowHelpers.js" />
+    <None Include="Properties\PublishProfiles\merakiprod - FTP %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\merakiprod - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\merakiprod - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\merakiprod - Web Deploy.pubxml" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
     <Content Include="Scripts\jquery.validate.js" />
@@ -1230,6 +1236,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201710030219141_devToProdMerging.resx">
       <DependentUpon>201710030219141_devToProdMerging.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201711010247251_fillTest.resx">
+      <DependentUpon>201711010247251_fillTest.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
