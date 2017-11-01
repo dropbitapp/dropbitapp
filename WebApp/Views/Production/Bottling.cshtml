@@ -51,8 +51,10 @@
 
             // Fill Test object
             var fillTestObject = {
-                FillProof: "",
-                FillDate: ""
+                FillAlcoholContent: "",
+                FillDate: "",
+                FillVariation: "",
+                CorrectiveAction: ""
             };
 
             function _addEventListeners() {
@@ -211,7 +213,6 @@
 
                 $("#CreateRecordButton").click(function () {
                     $('#validationForm').jqxValidator('validate');
-                    $('#FillTestList').empty();
                 });
 
                 $("#ClearInputElementsButton").click(function () {
@@ -551,10 +552,14 @@
                 // Listen to fillTest create button and create fillTest objects.
                 $('#FillTestCreateButton').click(function () {
                     fillTestObject = {};
-                    fillTestObject.FillProof = $('#FillTestProof').val();
-                    fillTestObject.FillDate = genericWorkflowHelper.convertUTC($('#FillTestDate').jqxDateTimeInput('value'));
+                    fillTestObject.FillAlcoholContent = $('#FillAlcoholContent').val();
+                    fillTestObject.FillDate = genericWorkflowHelper.convertUTC($('#FillTestDate').jqxDateTimeInput('val'),true);
+                    fillTestObject.FillVariation = $('#FillVariation').val();
+                    fillTestObject.CorrectiveAction = $('#CorrectiveAction').val();
                     fillTestArray.push(fillTestObject);
-                    $('#FillTestList').append($("<tr><td>" + "Fill Test " + fillTestArray.length + ": " + fillTestObject.FillProof + " PGALS" + "</td></tr>"));
+                    $('#FillTestList').append($("<tr><td>" + "Fill Test " + fillTestArray.length + ": " + "AlcCont: " +
+                        fillTestObject.FillAlcoholContent + "%" + " Date: " + fillTestObject.FillDate.getMonth() + "/" +
+                        fillTestObject.FillDate.getDate() + "</td></tr>"));
                     genericWorkflowHelper.emptyFillTest();
                 });
                 // Listen to fillTest remove button and delete fillTest objects.
@@ -633,12 +638,20 @@
                     theme: 'bootstrap', disabled: true, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
                 });
 
-                $('#FillTestProof').jqxNumberInput({
-                    theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                $('#FillAlcoholContent').jqxNumberInput({
+                    theme: 'bootstrap', height: '26px', width: '180px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', symbol: '%', min: 0
                 });
 
                 $('#FillTestDate').jqxDateTimeInput({
                     theme: 'bootstrap', textAlign: 'center', height: '26px', width: '180px', formatString: "MM/dd/yyyy HH:mm"
+                });
+
+                $('#FillVariation').jqxNumberInput({
+                    theme: 'bootstrap', height: '26px', width: '180px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', symbol: '%', min: 0
+                });
+
+                $('#CorrectiveAction').jqxTextArea({
+                    theme: 'bootstrap', height: '50px', width: '180px', minLength: 1
                 });
 
                 $('#FillTestCreateButton').jqxButton({
@@ -665,7 +678,9 @@
                     closeOnClick: true,
                     onSuccess: function () {
                         _createBottlingRecord();
-                        genericWorkflowHelper.emptyControls();
+                        genericWorkflowHelper.emptyControls();  
+                        $('#FillTestList').empty();
+                        fillTestArray.length = 0;
                         $("#CaseCapacityInput").jqxNumberInput('setDecimal', 12); // resetting to default value after clearing
                     },
                     onError: function () {
@@ -1182,10 +1197,9 @@
                             <div class="col-md-6">
                                 <form class="form-horizontal">
                                     <div class="form-group">
-                                        <label for="BatchNameInput" class="col-md-4 control-label">Bottling Batch Name</label>
-                                        <div class="col-md-8">
-                                            <p class="pull-left">PROD-</p>
-                                            <input type="text" class="form-control" id="BatchNameInput">
+                                        <label for="BatchNameInput" class="col-sm-4 control-label">Bottling Batch Name</label>
+                                        <div class="col-sm-8">
+                                            PROD-<input id="BatchNameInput"/>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -1247,7 +1261,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="AlcoholInput" class="col-md-6 control-label">Alcohol Content</label>
+                                        <label for="AlcoholInput" class="col-md-6 control-label">Labeled Alcohol Content</label>
                                         <div class="col-md-6">
                                             <div id="AlcoholInput"></div>
                                         </div>
@@ -1256,40 +1270,6 @@
                                         <label for="ProofInput" class="col-md-6 control-label">Total (Proof Gallons)</label>
                                         <div class="col-md-6">
                                             <div id="ProofInput"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="LossesInput" class="col-sm-6 control-label">Losses (Proof Gallons)</label>
-                                        <div class="col-sm-6">
-                                            <div id="LossesInput"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="FillTestProof" class="col-sm-6 control-label">Fill Test Proof</label>
-                                        <div class="col-sm-6">
-                                            <div id="FillTestProof"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="FillTestDate" class="col-md-6 control-label">Fill Test Date</label>
-                                        <div class="col-md-6">
-                                            <div id="FillTestDate" tabindex="3"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="col-sm-6">
-                                            <button class="pull-right" id="FillTestCreateButton" type="button">Add Fill Test</button>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <button class="pull-left" id="FillTestRemoveButton" type="button">Remove Fill Test</button>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="FillTestList" class="col-sm-6 control-label">Fill Test List</label>
-                                        <div class="col-sm-6">
-                                            <table>
-                                                <tbody id="FillTestList"></tbody>
-                                            </table>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -1319,21 +1299,73 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-12 text-center">
-                                <button id="CreateRecordButton">Create Record</button>
-                                <button id="ClearInputElementsButton">Clear Form</button>
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10">
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading">Fill Test</div>
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-md-1"></div>
+                                            <label for="FillAlcoholContent" class="col-md-2 control-label">Alcohol Content</label>
+                                            <div class="col-md-3">
+                                                <div id="FillAlcoholContent"></div>
+                                            </div>
+                                            <label for="FillTestDate" class="col-md-2 control-label">Fill Test Date</label>
+                                            <div class="col-md-3">
+                                                <div id="FillTestDate"></div>
+                                            </div>
+                                            <div class="col-md-1"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-1"></div>
+                                            <label for="FillVariation" class="col-md-2 control-label">Fill Variation (%)</label>
+                                            <div class="col-md-3">
+                                                <div id="FillVariation"></div>
+                                            </div>
+                                            <label for="CorrectiveAction" class="col-md-2 control-label">Corrective Action</label>
+                                            <div class="col-md-3">
+                                                <div id="CorrectiveAction"></div>
+                                            </div>
+                                            <div class="col-md-1"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <button class="pull-right" id="FillTestCreateButton" type="button">Add Fill Test</button>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <button class="pull-left" id="FillTestRemoveButton" type="button">Remove Fill Test</button>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-1"></div>
+                                            <label for="FillTestList" class="col-md-2 control-label">Fill Test List</label>
+                                            <div class="col-md-4">
+                                                <table class="table table-striped table-bordered">
+                                                    <tbody id="FillTestList"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <button id="CreateRecordButton">Create Record</button>
+                                    <button id="ClearInputElementsButton">Clear Form</button>
+                                </div>
+                            </div>
+                        </div>
+                            <div role="tabpanel" class="tab-pane fade" id="viewRecord">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="dataTable"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div role="tabpanel" class="tab-pane fade" id="viewRecord">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div id="dataTable"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
     @Html.Partial("_FooterPartial")

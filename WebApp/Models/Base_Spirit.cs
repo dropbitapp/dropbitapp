@@ -825,9 +825,11 @@ namespace WebApp.Models
         public int FillTestID { get; set; }
         [Column(Order = 1), ForeignKey("Production")]
         public int ProductionID { get; set; }
-        public float ProofGallons { get; set; }
+        public float AlcoholContent { get; set; }
         [Column(TypeName = "datetime2")]
         public DateTime FillTestDate { get; set; }
+        public float FillVariation { get; set; }
+        public string CorrectiveAction { get; set; }
 
         public virtual Production Production { get; set; }
     }

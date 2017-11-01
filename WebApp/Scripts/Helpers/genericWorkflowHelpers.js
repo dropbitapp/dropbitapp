@@ -52,8 +52,12 @@
         var dd = date.getDate();
         var yy = date.getFullYear();
 
-        $('#FillTestProof').jqxNumberInput('val', '');
+        $('#FillAlcoholContent').jqxNumberInput('val', '');
         $('#FillTestDate').jqxDateTimeInput('setDate', new Date(yy, mm, dd));
+        $('#FillVariation').jqxNumberInput('val', '');
+        $('#CorrectiveAction').jqxTextArea('val', '');
+
+
     }
 
     // Function that convert local time to UTC and vice versa
