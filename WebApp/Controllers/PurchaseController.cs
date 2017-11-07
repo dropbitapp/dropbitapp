@@ -43,7 +43,7 @@ namespace WebApp.Controllers
                     if (userId > 0)
                     {
                         var returnResult = dl.CreatePurchase(purchaseObject, userId);
-                        if (returnResult)
+                        if (returnResult > 0)
                         {
                             string message = "Purchase record created successfully.";
                             return Json(message);

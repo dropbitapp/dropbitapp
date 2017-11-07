@@ -31,8 +31,8 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.CreateProduction(prodObject, userId);
-                        if (returnResult)
+                        int returnResult = dl.CreateProduction(prodObject, userId);
+                        if (returnResult > 0)
                         {
                             string message = "Production record created successfully.";
                             return Json(message);

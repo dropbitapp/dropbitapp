@@ -3,7 +3,7 @@
 -- step 2 get ProductionReportMaterialCategoryID for the records above that didn't have them
 
 -- step 1 get material amounts and where possible, also get ProductionReportMaterialCategoryID
-select
+select distinct
 prod.ProductionID,
 matDict.Name [Material Dict Name],
 prodC.ContentValue [Value],
@@ -22,7 +22,13 @@ left join ProductionToSpiritTypeReporting as prod2SpiritType on prod.ProductionI
 left join MaterialKindReporting as matKindRep on prod2SpiritType.MaterialKindReportingID = matKindRep.MaterialKindReportingID
 left join ProdRepMatCat2MaterialKind as prodRepMatCat2MatKind on matKindRep.MaterialKindReportingID = prodRepMatCat2MatKind.MaterialKindReportingID
 left join ProductionReportMaterialCategory as prodRepMatCat on prodRepMatCat2MatKind.ProductionReportMaterialCategoryID = prodRepMatCat.ProductionReportMaterialCategoryID
-where distillers.UserId = 1  and prod.ProductionEndTime >= '07/01/2016' and prod.ProductionEndTime <= '08/01/2017' and prodC.isProductionComponent = 0  and purch.PurchaseTypeID != 3--and prodRepMatCat.ProductionReportMaterialCategoryID is not null
+where distillers.UserId = 7
+--and prod.Gauged = 1
+and prod.ProductionEndTime >= '09/01/2017'
+and prod.ProductionEndTime <= '09/30/2017'
+and prodC.isProductionComponent = 0
+and purch.PurchaseTypeID != 3
+--and prodRepMatCat.ProductionReportMaterialCategoryID is not null
 
 -- step 2 get ProductionReportMaterialCategoryID for the records above that didn't have them.
 select 
@@ -32,7 +38,7 @@ left join ProductionToSpiritTypeReporting as prod2SpiritType on prodContent.Prod
 left join MaterialKindReporting as matKindRep on prod2SpiritType.MaterialKindReportingID = matKindRep.MaterialKindReportingID
 left join ProdRepMatCat2MaterialKind as prodRepMatCat2MatKind on matKindRep.MaterialKindReportingID = prodRepMatCat2MatKind.MaterialKindReportingID
 left join ProductionReportMaterialCategory as prodRepMatCat on prodRepMatCat2MatKind.ProductionReportMaterialCategoryID = prodRepMatCat.ProductionReportMaterialCategoryID
-where prodContent.isProductionComponent = 1 and prodContent.RecordID in (52,55,102,54,53)
+where prodContent.isProductionComponent = 1 and prodContent.RecordID in (241)
 
 
 
