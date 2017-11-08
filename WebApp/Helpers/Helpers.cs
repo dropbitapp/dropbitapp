@@ -33,13 +33,12 @@ namespace WebApp.Helpers
     {
         public string SpiritCatName { get; set; }
         public float ProccessingAcct { get; set; } // stands for Entered In Proccessing Account
-        public float SorageAcct { get; set; } // stands for Entered In Storage Account
+        public float StorageAcct { get; set; } // stands for Entered In Storage Account
         public float ProducedTotal { get; set; } // stands for Produced total (on report, lines 1 through 13) for 170 & Under
         public float Recd4RedistilL17 { get; set; } // stands for Received for Re-Distillation(line 17 on report, for this period, invlcuding values from storage + processing) for 170 & Under
         public float Recd4RedistilaltionL15 { get; set; } // line 15 of received for redistillation - gauged spirits that have been redistilled into something else. Common scenairo is Gin production: Buy GNS and redistil it into Gin
         public int SpiritTypeReportingID { get; set; }
-        public float UnfinishedSpiritsEndOfQuarter { get; set; }
-        public float RedistilledEndOfQuarter { get; set; }
+        public float UnfinishedSpiritsEndOfQuarterL17 { get; set; }
     }
 
     public class ProdReportParts2Through5
@@ -48,9 +47,9 @@ namespace WebApp.Helpers
         public float ProofGallons { get; set; }
         public int MaterialKindReportingID { get; set; }
         public int SpiritTypeReportingID { get; set; } // we need this here so we can associate Material Kind with Spirit Type if needed.
-        bool NewCoop { get; set; } // new cooperage - used only in whiskey production
-        bool UsedCoop { get; set; } // used cooperage - used only in whiskey production
-        bool Tanks { get; set; } // tanks- used only in whiskey production
+        public bool NewCoop { get; set; } // new cooperage - used only in whiskey production
+        public bool UsedCoop { get; set; } // used cooperage - used only in whiskey production
+        public bool Tanks { get; set; } // tanks- used only in whiskey production
     }
 
     public class ProdReportPart6
@@ -318,8 +317,8 @@ namespace WebApp.Helpers
         public string RecordName { get; set; }
         public int RawMaterialId { get; set; }
         public System.DateTime PurchaseDate { get; set; }
-        public float Quantity { get; set; }
-        public float VolumeByWeight { get; set; }
+        public float Quantity { get; set; } // volume
+        public float VolumeByWeight { get; set; } //weight
         public float AlcoholContent{ get; set; }
         public float ProofGallon { get; set; }
         public int UnitOfMeasurementId { get; set; }

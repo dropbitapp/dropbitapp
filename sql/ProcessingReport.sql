@@ -1,6 +1,6 @@
 
-declare @startTime Date = '11/01/2017';
-declare @endTime Date = '10/30/2017';
+declare @startTime Date = '09/01/2017';
+declare @endTime Date = '09/30/2017';
 
 -- Part 1
 
@@ -43,6 +43,18 @@ distillers.UserId = 1
 and prod.Gauged = 1
 and ( prod.StateID = 5)
 and (prod.StatusID = 1 or prod.StatusID = 2)
+and prod.ProductionEndTime >= @startTime and prod.ProductionEndTime <= @endTime
+
+-- 24 (c) Losses
+select sum(
+gl.Quantity) as [Losses]
+from Production as prod
+left join GainLoss as gl on prod.ProductionID = gl.BottledRecordID
+left join AspNetUserToDistiller as distillers on prod.DistillerID = distillers.DistillerId
+where
+distillers.UserId = 7
+and prod.Gauged = 1
+and prod.StateID = 5
 and prod.ProductionEndTime >= @startTime and prod.ProductionEndTime <= @endTime
 
 -- 25 (c) On hand end of month

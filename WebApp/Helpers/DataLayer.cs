@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using WebApp.Models;
-using System.Web.Mvc;
-using WebApp.Helpers;
-using System.Diagnostics;
-using Newtonsoft.Json;
-using System.Collections;
-using Microsoft.AspNet.Identity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
+using WebApp.Models;
 
 namespace WebApp.Helpers
 {
@@ -40,7 +34,7 @@ namespace WebApp.Helpers
         FermentableProd,
         FermentedProd,
         DistilledProd,
-        BlendingProd, 
+        BlendingProd,
         BlendedComponentProd,
         BottlingProd
     }
@@ -104,8 +98,8 @@ namespace WebApp.Helpers
             // Find last GaugeSerial record and get it's serial string
             // Sample serial string format: 12017, 23452017(last four digits represent a year)
             var last = (from rec in db.GaugeSerial
-                       orderby rec.GaugeSerialID descending
-                       select rec.Serial).FirstOrDefault();
+                        orderby rec.GaugeSerialID descending
+                        select rec.Serial).FirstOrDefault();
 
             if (last != null)
             {
@@ -159,17 +153,17 @@ namespace WebApp.Helpers
 
             // Find all serial records that are associated with purchase/production record whose date falls within supplied range
             var res = (from rec in db.GaugeSerial
-                        join production in db.Production on rec.RecordID equals production.ProductionID into production_join
-                        from production in production_join.DefaultIfEmpty()
-                        join purchase in db.Purchase on rec.RecordID equals purchase.PurchaseID into purchase_join
-                        from purchase in purchase_join.DefaultIfEmpty()
-                        where (rec.RecordType == 1 &&
-                              purchase.PurchaseDate > start &&
-                              purchase.PurchaseDate < end)
-                              || (rec.RecordType == 2 &&
-                              production.ProductionDate > start &&
-                              production.ProductionDate < end)
-                        select rec).DefaultIfEmpty();
+                       join production in db.Production on rec.RecordID equals production.ProductionID into production_join
+                       from production in production_join.DefaultIfEmpty()
+                       join purchase in db.Purchase on rec.RecordID equals purchase.PurchaseID into purchase_join
+                       from purchase in purchase_join.DefaultIfEmpty()
+                       where (rec.RecordType == 1 &&
+                             purchase.PurchaseDate > start &&
+                             purchase.PurchaseDate < end)
+                             || (rec.RecordType == 2 &&
+                             production.ProductionDate > start &&
+                             production.ProductionDate < end)
+                       select rec).DefaultIfEmpty();
 
             if (res != null)
             {
@@ -191,7 +185,7 @@ namespace WebApp.Helpers
         public int GetGaugeSerial(int recordId, int recordType)
         {
             var res = (from rec in db.GaugeSerial
-                       where rec.RecordID == recordId && 
+                       where rec.RecordID == recordId &&
                              rec.RecordType == recordType
                        select rec.Serial).FirstOrDefault();
 
@@ -236,7 +230,7 @@ namespace WebApp.Helpers
                     VolumeByWeight = ((System.Single?)vbw.Value ?? (System.Single?)0),
                     BurningDownMethod = purch.BurningDownMethod ?? null
                 };
-            
+
             if (fermentables != null)
             {
                 foreach (var i in fermentables)
@@ -257,7 +251,7 @@ namespace WebApp.Helpers
             return rawMList;
         }
 
-        internal ProcessingReportingObject GetProcessingReportData(DateTime startOfReporting, DateTime endOfReporting, int userId)
+        public ProcessingReportingObject GetProcessingReportData(DateTime startOfReporting, DateTime endOfReporting, int userId)
         {
             ProcessingReportingObject procRepObj = new ProcessingReportingObject();
             ProcessReportingPart1 procRepP1 = new ProcessReportingPart1();
@@ -349,7 +343,7 @@ namespace WebApp.Helpers
                  join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
                  from distillers in distillers_join.DefaultIfEmpty()
                  where
-                   distillers.UserId == 1 &&
+                   distillers.UserId == userId &&
                    prod.Gauged == true &&
                    prod.StateID == 5 &&
                    (prod.StatusID == 1 ||
@@ -374,12 +368,32 @@ namespace WebApp.Helpers
             }
 
             // 24 (c) Losses
-            procRepP1.Losses = db.GainLoss.Where(l => l.Type == false
-                                            && l.DateRecorded >= startOfReporting
-                                            && l.DateRecorded <= endOfReporting)
-                                            .Select(l => l.Quantity)
-                                            .DefaultIfEmpty(0)
-                                            .Sum();
+            var accumulatedLoss =
+                (from prod in
+                (from prod in db.Production
+                 join gl in db.GainLoss on new { ProductionID = prod.ProductionID } equals new { ProductionID = gl.BottledRecordId } into gl_join
+                 from gl in gl_join.DefaultIfEmpty()
+                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 where
+                 distillers.UserId == userId &&
+                 prod.Gauged == true &&
+                 prod.StateID == 5 &&
+                 prod.ProductionEndTime >= startOfReporting &&
+                 prod.ProductionEndTime <= endOfReporting
+                 select new
+                 {
+                     Quantity = (System.Single?)gl.Quantity ?? (System.Single?)0,
+                     Dummy = "x"
+                 })
+                 group prod by new { prod.Dummy } into g
+                 select new
+                 {
+                     Losses = g.Sum(p => p.Quantity)
+                 }).FirstOrDefault();
+
+
+            procRepP1.Losses = accumulatedLoss.Losses ?? 0;
 
             line26RunningSum += procRepP1.Losses;
 
@@ -1603,7 +1617,7 @@ namespace WebApp.Helpers
             {
                 throw (e);
             }
-            
+
 
             return bList;
         }
@@ -1616,11 +1630,11 @@ namespace WebApp.Helpers
             {
                 var purchT =
                     (from rec in db.Purchase
-                        join dslrs in db.AspNetUserToDistiller on rec.DistillerID equals dslrs.DistillerID into dslrs_join
-                        from dslrs in dslrs_join.DefaultIfEmpty()
-                        where rec.PurchaseID == purchaseObject.PurchaseId &&
-                        dslrs.UserId == userId
-                        select rec).FirstOrDefault();
+                     join dslrs in db.AspNetUserToDistiller on rec.DistillerID equals dslrs.DistillerID into dslrs_join
+                     from dslrs in dslrs_join.DefaultIfEmpty()
+                     where rec.PurchaseID == purchaseObject.PurchaseId &&
+                     dslrs.UserId == userId
+                     select rec).FirstOrDefault();
 
                 if (purchT != null)
                 {
@@ -1659,8 +1673,8 @@ namespace WebApp.Helpers
                         //update quantity record
                         var qtyRec =
                             (from rec in db.Volume
-                                where rec.VolumeID == purchT.VolumeID
-                                select rec).FirstOrDefault();
+                             where rec.VolumeID == purchT.VolumeID
+                             select rec).FirstOrDefault();
                         if (qtyRec != null && qtyRec.Value != purchaseObject.Quantity)
                         {
                             qtyRec.Value = purchaseObject.Quantity;
@@ -1685,8 +1699,8 @@ namespace WebApp.Helpers
                             //update volume by weight record
                             var vbwRec =
                                 (from rec in db.Weight
-                                    where rec.WeightID == purchT.WeightID
-                                    select rec).FirstOrDefault();
+                                 where rec.WeightID == purchT.WeightID
+                                 select rec).FirstOrDefault();
 
                             if (vbwRec != null && vbwRec.Value != purchaseObject.VolumeByWeight)
                             {
@@ -1713,8 +1727,8 @@ namespace WebApp.Helpers
                             //update alcohol content record
                             var alcRec =
                                 (from rec in db.Alcohol
-                                    where rec.AlcoholID == purchT.AlcoholID
-                                    select rec).FirstOrDefault();
+                                 where rec.AlcoholID == purchT.AlcoholID
+                                 select rec).FirstOrDefault();
                             if (alcRec != null && alcRec.Value != purchaseObject.AlcoholContent)
                             {
                                 alcRec.Value = purchaseObject.AlcoholContent;
@@ -1737,8 +1751,8 @@ namespace WebApp.Helpers
                             //update proof record
                             var prfRec =
                                 (from rec in db.Proof
-                                    where rec.ProofID == purchT.ProofID
-                                    select rec).FirstOrDefault();
+                                 where rec.ProofID == purchT.ProofID
+                                 select rec).FirstOrDefault();
                             if (prfRec != null && prfRec.Value != purchaseObject.ProofGallon)
                             {
                                 prfRec.Value = purchaseObject.ProofGallon;
@@ -1828,7 +1842,7 @@ namespace WebApp.Helpers
                             where rec.PurchaseID == purRec.PurchaseID
                             select rec).FirstOrDefault();
 
-                        if(purch4Rep != null)
+                        if (purch4Rep != null)
                         {
                             db.Purchase4Reporting.Remove(purch4Rep);
 
@@ -2301,15 +2315,15 @@ namespace WebApp.Helpers
             {
                 var res =
                     (from i in db.Spirit
-                        join distillers in db.AspNetUserToDistiller on i.DistillerID equals distillers.DistillerID into distillers_join
-                        from distillers in distillers_join
-                        where distillers.UserId == userId
-                        select new
-                        {
-                            i.SpiritID,
-                            i.Name,
-                            i.Note
-                        });
+                     join distillers in db.AspNetUserToDistiller on i.DistillerID equals distillers.DistillerID into distillers_join
+                     from distillers in distillers_join
+                     where distillers.UserId == userId
+                     select new
+                     {
+                         i.SpiritID,
+                         i.Name,
+                         i.Note
+                     });
                 foreach (var i in res)
                 {
                     SpiritObject spirit = new SpiritObject();
@@ -2447,15 +2461,15 @@ namespace WebApp.Helpers
                 var storageTable = db.Storage.ToList();
                 var storages =
                     (from storS in db.Storage
-                        join dslrs in db.AspNetUserToDistiller on storS.DistillerID equals dslrs.DistillerID into dslrs_join
-                        from dslrs in dslrs_join.DefaultIfEmpty()
-                            // where  storS.DistillerID == DistillerID
-                        where dslrs.UserId == userId
-                        select new
-                                {
-                                    storS.StorageID,
-                                    storS.Name
-                                });
+                     join dslrs in db.AspNetUserToDistiller on storS.DistillerID equals dslrs.DistillerID into dslrs_join
+                     from dslrs in dslrs_join.DefaultIfEmpty()
+                         // where  storS.DistillerID == DistillerID
+                     where dslrs.UserId == userId
+                     select new
+                     {
+                         storS.StorageID,
+                         storS.Name
+                     });
                 foreach (var storage in storages)
                 {
                     var currentObject = new StorageObject();
@@ -2482,13 +2496,13 @@ namespace WebApp.Helpers
             var spiritCutList = new List<SpiritCutObject>();
             try
             {
-                var spiritCuts = 
+                var spiritCuts =
                     (from spiritCut in db.SpiritCut
-                        select new
-                        {
-                            spiritCut.SpiritCutID,
-                            spiritCut.Name
-                        });
+                     select new
+                     {
+                         spiritCut.SpiritCutID,
+                         spiritCut.Name
+                     });
                 foreach (var spiritCut in spiritCuts)
                 {
                     var currentObject = new SpiritCutObject();
@@ -2524,7 +2538,7 @@ namespace WebApp.Helpers
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.WriteLine("Unable to get reporting spirit types: {0}", e);
             }
@@ -2538,11 +2552,11 @@ namespace WebApp.Helpers
         /// CreateSpirit Method inserts new record in Spirit table
         /// </summary>
         /// <param name="spiritObject"></param>
-        /// <returns>bool</returns>
-        public bool CreateSpirit(int userId, SpiritObject spiritObject)
+        /// <returns>int</returns>
+        public int CreateSpirit(int userId, SpiritObject spiritObject)
         {
             //define method execution return value to be false by default
-            var retMthdExecResult = false;
+            var retMthdExecResult = 0;
 
             if (spiritObject != null)
             {
@@ -2555,21 +2569,19 @@ namespace WebApp.Helpers
                     if (spiritObject.Note != "" && spiritObject.Note != null)
                     {
                         tbl.Note = spiritObject.Note;
-                    } 
+                    }
                     db.Spirit.Add(tbl);
                     db.SaveChanges();
-                    retMthdExecResult = true;
+                    retMthdExecResult = tbl.SpiritID;
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine("Failed to create Spirit Record : " + e);
+                    retMthdExecResult = 0;
                 }
             }
             else
             {
-                //grisha -todo: we have to figure a way to fail such that we send some feedback to the user
-                Debug.WriteLine("Failed to create Spirit Record because the te object came in empty from the client");
-                retMthdExecResult =  false;
+                retMthdExecResult =  0;
             }
 
             return retMthdExecResult;
@@ -2580,11 +2592,11 @@ namespace WebApp.Helpers
         /// </summary>
         /// <param name="vendorObject"></param>
         /// <param name="userId"></param>
-        /// <returns>bool</returns>
-        public bool CreateVendor(int userId, VendorObject vendorObject)
+        /// <returns>int</returns>
+        public int CreateVendor(int userId, VendorObject vendorObject)
         {
             //define method execution return value to be false by default
-            var retMthdExecResult = false;
+            int retMthdExecResult = 0;
             int distillerID = GetDistillerId(userId);
             if (vendorObject != null)
             {
@@ -2604,18 +2616,17 @@ namespace WebApp.Helpers
                     tbl1.VendorID = tbl.VendorID;
                     db.VendorDetail.Add(tbl1);
                     db.SaveChanges();
-                    retMthdExecResult = true;
+                    retMthdExecResult = tbl.VendorID;
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                    Debug.WriteLine("Failed to create Vendor Record : " + e);
+                    retMthdExecResult = 0;
+                    throw;
                 }
             }
             else
             {
-                //grisha -todo: we have to figure a way to fail such that we send some feedback to the user
-                Debug.WriteLine("Failed to create Vendo Record because the te object came in empty from the client");
-                retMthdExecResult = false;
+                retMthdExecResult = 0;
             }
 
             return retMthdExecResult;
@@ -2626,11 +2637,11 @@ namespace WebApp.Helpers
         /// </summary>
         /// <param name="storageObject"></param>
         /// <param name="userId"></param>
-        /// <returns>bool</returns>
-        public bool CreateStorage(int userId, StorageObject storageObject)
+        /// <returns>int</returns>
+        public int CreateStorage(int userId, StorageObject storageObject)
         {
             //define method execution return value to be false by default
-            var retMthdExecResult = false;
+            int retMthdExecResult = 0;
             int distillerId = GetDistillerId(userId);
 
             if (storageObject != null)
@@ -2654,12 +2665,11 @@ namespace WebApp.Helpers
                     storState.Available = true;
                     db.StorageState.Add(storState);
                     db.SaveChanges();
-                    retMthdExecResult = true;
+                    retMthdExecResult = storRec.StorageID;
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine("Failed to Create Storage Record: " + e);
-                    retMthdExecResult = false;
+                    retMthdExecResult = 0;
                 }
             }
 
@@ -2671,11 +2681,11 @@ namespace WebApp.Helpers
         /// </summary>
         /// <param name="rawMObject"></param>
         /// <param name="userId"></param>
-        /// <returns>bool</returns>
-        public bool CreateRawMaterial(int userId, RawMaterialObject rawMObject)
+        /// <returns>int</returns>
+        public int CreateRawMaterial(int userId, RawMaterialObject rawMObject)
         {
             //define method execution return value to be false by default
-            var retMthdExecResult = false;
+            int retMthdExecResult = 0;
             int materialDictID = 0;
             int distillerId = GetDistillerId(userId);
 
@@ -2701,121 +2711,66 @@ namespace WebApp.Helpers
                     // build relationships between given raw material and purchase material types
                     if (rawMObject.PurchaseMaterialTypes.Additive)
                     {
-                        try
-                        {
-                            MaterialType matType = new MaterialType();
-                            matType.MaterialDictID = materialDictID;
-                            matType.Name = "Additive";
-                            db.MaterialType.Add(matType);
-                            db.SaveChanges();
-                            retMthdExecResult = true;
-                        }
-                        catch
-                        {
-                            return false;
-                        }
+                        MaterialType matType = new MaterialType();
+                        matType.MaterialDictID = materialDictID;
+                        matType.Name = "Additive";
+                        db.MaterialType.Add(matType);
+                        db.SaveChanges();
                     }
 
                     if (rawMObject.PurchaseMaterialTypes.Distilled)
                     {
-                        try
-                        {
-                            MaterialType matType = new MaterialType();
-                            matType.MaterialDictID = materialDictID;
-                            matType.Name = "Distilled";
-                            db.MaterialType.Add(matType);
-                            db.SaveChanges();
-                            retMthdExecResult = true;
-                        }
-                        catch
-                        {
-                            return false;
-                        }
+                        MaterialType matType = new MaterialType();
+                        matType.MaterialDictID = materialDictID;
+                        matType.Name = "Distilled";
+                        db.MaterialType.Add(matType);
                     }
 
                     if (rawMObject.PurchaseMaterialTypes.Fermentable)
                     {
-                        try
-                        {
-                            MaterialType matType = new MaterialType();
-                            matType.MaterialDictID = materialDictID;
-                            matType.Name = "Fermentable";
-                            db.MaterialType.Add(matType);
-                            db.SaveChanges();
-                            retMthdExecResult = true;
-                        }
-                        catch
-                        {
-                            return false;
-                        }
-                        try
-                        {
-                            MaterialDict2MaterialCategory md2mc = new MaterialDict2MaterialCategory();
-                            md2mc.MaterialDictID = materialDictID;
-                            md2mc.ProductionReportMaterialCategoryID = rawMObject.MaterialCategoryID;
-                            db.MaterialDict2MaterialCategory.Add(md2mc);
-                            db.SaveChanges();
-                            retMthdExecResult = true;
-                        }
-                        catch(Exception e)
-                        {
-                            throw;
-                        }
+
+                        MaterialType matType = new MaterialType();
+                        matType.MaterialDictID = materialDictID;
+                        matType.Name = "Fermentable";
+                        db.MaterialType.Add(matType);
+
+                        MaterialDict2MaterialCategory md2mc = new MaterialDict2MaterialCategory();
+                        md2mc.MaterialDictID = materialDictID;
+                        md2mc.ProductionReportMaterialCategoryID = rawMObject.MaterialCategoryID;
+                        db.MaterialDict2MaterialCategory.Add(md2mc);
+                        db.SaveChanges();
                     }
 
                     if (rawMObject.PurchaseMaterialTypes.Fermented)
                     {
-                        try
-                        {
-                            MaterialType matType = new MaterialType();
-                            matType.MaterialDictID = materialDictID;
-                            matType.Name = "Fermented";
-                            db.MaterialType.Add(matType);
-                            db.SaveChanges();
-                            retMthdExecResult = true;
-                        }
-                        catch
-                        {
-                            return false;
-                        }
-                        try
-                        {
-                            MaterialDict2MaterialCategory md2mc = new MaterialDict2MaterialCategory();
-                            md2mc.MaterialDictID = materialDictID;
-                            md2mc.ProductionReportMaterialCategoryID = rawMObject.MaterialCategoryID;
-                            db.MaterialDict2MaterialCategory.Add(md2mc);
-                            db.SaveChanges();
-                            retMthdExecResult = true;
-                        }
-                        catch (Exception e)
-                        {
-                            throw;
-                        }
+
+                        MaterialType matType = new MaterialType();
+                        matType.MaterialDictID = materialDictID;
+                        matType.Name = "Fermented";
+                        db.MaterialType.Add(matType);
+
+                        MaterialDict2MaterialCategory md2mc = new MaterialDict2MaterialCategory();
+                        md2mc.MaterialDictID = materialDictID;
+                        md2mc.ProductionReportMaterialCategoryID = rawMObject.MaterialCategoryID;
+                        db.MaterialDict2MaterialCategory.Add(md2mc);
+                        db.SaveChanges();
                     }
 
                     if (rawMObject.PurchaseMaterialTypes.Supply)
                     {
-                        try
-                        {
-                            MaterialType matType = new MaterialType();
-                            matType.MaterialDictID = materialDictID;
-                            matType.Name = "Supply";
-                            db.MaterialType.Add(matType);
-                            db.SaveChanges();
-                            retMthdExecResult = true;
-                        }
-                        catch
-                        {
-                            return false;
-                        }
+                        MaterialType matType = new MaterialType();
+                        matType.MaterialDictID = materialDictID;
+                        matType.Name = "Supply";
+                        db.MaterialType.Add(matType);
+                        db.SaveChanges();
                     }
 
-                    retMthdExecResult = true;
+                    retMthdExecResult = materialDictID;
                 }
-                catch (Exception e)
+                catch
                 {
-                    Debug.WriteLine("Failed to Create Raw Material Record: " + e);
-                    return retMthdExecResult;
+                    retMthdExecResult = 0;
+                    throw;
                 }
             }
             return retMthdExecResult;
@@ -2839,7 +2794,7 @@ namespace WebApp.Helpers
                 {
                     var recs =
                         from rec in db.Spirit
-                                        where rec.SpiritID == spiritObject.SpiritId && rec.DistillerID == distillerId
+                        where rec.SpiritID == spiritObject.SpiritId && rec.DistillerID == distillerId
                         select rec;
                     var item = recs.FirstOrDefault();
 
@@ -2848,7 +2803,7 @@ namespace WebApp.Helpers
                         item.Name = spiritObject.SpiritName;
                     }
 
-                    if (item.Note != spiritObject.Note )
+                    if (item.Note != spiritObject.Note)
                     {
                         item.Note = spiritObject.Note;
                     }
@@ -2881,7 +2836,7 @@ namespace WebApp.Helpers
             {
                 try
                 {
-                    var recs = 
+                    var recs =
                         from rec in db.Vendor
                         where rec.VendorID == vendorObject.VendorId && rec.DistillerID == distillerId
                         select rec;
@@ -2937,9 +2892,9 @@ namespace WebApp.Helpers
                 {
                     var storRes =
                         from storRecord in db.Storage
-                                    where storRecord.StorageID == storageObject.StorageId 
-                                    && storRecord.DistillerID == distillerId
-                                    select storRecord;
+                        where storRecord.StorageID == storageObject.StorageId
+                        && storRecord.DistillerID == distillerId
+                        select storRecord;
 
                     var storItem = storRes.FirstOrDefault();
 
@@ -2991,17 +2946,17 @@ namespace WebApp.Helpers
 
                     var ress =
                         (from rec in db.MaterialDict
-                            where rec.MaterialDictID == materialDictID && rec.DistillerID == distillerId
-                            select rec).FirstOrDefault();
+                         where rec.MaterialDictID == materialDictID && rec.DistillerID == distillerId
+                         select rec).FirstOrDefault();
 
-                    if(ress != null)
+                    if (ress != null)
                     {
-                        if(ress.Name != rawMObject.RawMaterialName)
+                        if (ress.Name != rawMObject.RawMaterialName)
                         {
                             ress.Name = rawMObject.RawMaterialName;
                         }
 
-                        if(ress.Note != rawMObject.Note)
+                        if (ress.Note != rawMObject.Note)
                         {
                             ress.Note = rawMObject.Note;
                         }
@@ -3016,11 +2971,11 @@ namespace WebApp.Helpers
                     // re-build relationships between given raw material and purchase material types
                     var res =
                         (from rec in db.MaterialType
-                        where rec.MaterialDictID == materialDictID
-                        select rec);
-                    if(res != null)
+                         where rec.MaterialDictID == materialDictID
+                         select rec);
+                    if (res != null)
                     {
-                        foreach(var i in res)
+                        foreach (var i in res)
                         {
                             db.MaterialType.Remove(i);
                         }
@@ -3118,7 +3073,7 @@ namespace WebApp.Helpers
                     Debug.WriteLine("Failed to Update Raw Material Record: " + e);
                     return retMthdExecResult;
                 }
-            } 
+            }
 
             return retMthdExecResult;
         }
@@ -3198,7 +3153,7 @@ namespace WebApp.Helpers
             {
                 Debug.WriteLine("Error getting Vendor list : " + e);
             }
- 
+
             return vendorList;
         }
 
@@ -3484,9 +3439,9 @@ namespace WebApp.Helpers
             try
             {
                 var res = from rec in db.ProcessingReportType
-                        select rec;
+                          select rec;
 
-                foreach(var r in res)
+                foreach (var r in res)
                 {
                     var type = new ProcessingReportTypeObject();
                     type.Id = r.ProcessingReportTypeID;
@@ -3512,8 +3467,8 @@ namespace WebApp.Helpers
         public int GetDistillerId(int userId)
         {
             int distillerId = (from rec in db.AspNetUserToDistiller
-                                where rec.UserId == userId
-                                select rec.DistillerID).FirstOrDefault();
+                               where rec.UserId == userId
+                               select rec.DistillerID).FirstOrDefault();
             return distillerId;
         }
 
@@ -3521,10 +3476,10 @@ namespace WebApp.Helpers
         /// CreatePurchase Method creates a new Purchase Record
         /// </summary>
         /// <param name="purchaseObject"></param>
-        /// <returns>bool</returns>
-        public bool CreatePurchase(PurchaseObject purchaseObject, int userId)
+        /// <returns>int</returns>
+        public int CreatePurchase(PurchaseObject purchaseObject, int userId)
         {
-            var retMthdExecResult = false;
+            int retMthdExecResult = 0;
 
             try
             {
@@ -3539,10 +3494,10 @@ namespace WebApp.Helpers
 
                 var pTypes =
                     (from rec in db.PurchaseType
-                        where rec.Name == purchaseObject.PurchaseType
-                        select rec).FirstOrDefault();
+                     where rec.Name == purchaseObject.PurchaseType
+                     select rec).FirstOrDefault();
 
-                if(pTypes != null)
+                if (pTypes != null)
                 {
                     purchT.PurchaseTypeID = pTypes.PurchaseTypeID;
                 }
@@ -3605,8 +3560,8 @@ namespace WebApp.Helpers
 
                 purchT.StatusID =
                     (from rec in db.Status
-                    where rec.Name == "Active"
-                    select rec.StatusID).FirstOrDefault();
+                     where rec.Name == "Active"
+                     select rec.StatusID).FirstOrDefault();
 
                 purchT.StateID =
                     (from rec in db.State
@@ -3640,7 +3595,7 @@ namespace WebApp.Helpers
                     }
                 }
 
-                if(purchT.PurchaseTypeID == 3)
+                if (purchT.PurchaseTypeID == 3)
                 {
                     try
                     {
@@ -3655,16 +3610,14 @@ namespace WebApp.Helpers
 
                         db.Purchase4Reporting.Add(purch4RepT);
                         db.SaveChanges();
-                        retMthdExecResult = true;
                     }
                     catch (Exception e)
                     {
-                        Debug.WriteLine("Exception creating an entry in Purchase4Reporting: ", e);
-                        retMthdExecResult = false;
+                        throw;
                     }
                 }
 
-                retMthdExecResult = true;
+                retMthdExecResult = purchT.PurchaseID;
 
                 // now, lets' try to save to history table
                 purchaseObject.PurchaseId = purchT.PurchaseID;
@@ -3673,8 +3626,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                retMthdExecResult = false;
-                return retMthdExecResult;
+                retMthdExecResult = 0;
                 throw;
             }
 
@@ -3702,7 +3654,7 @@ namespace WebApp.Helpers
                 purH.Alcohol = purObject.AlcoholContent;
                 purH.Proof = purObject.ProofGallon;
 
-                if(purObject.PurchaseDate != DateTime.MinValue)
+                if (purObject.PurchaseDate != DateTime.MinValue)
                 {
                     purH.PurchaseDate = purObject.PurchaseDate;
                 }
@@ -3714,7 +3666,7 @@ namespace WebApp.Helpers
                 purH.UpdateDate = DateTime.UtcNow;
 
 
-                if(purObject.Storage != null)
+                if (purObject.Storage != null)
                 {
                     StringBuilder storageStr = new StringBuilder();
                     foreach (var k in purObject.Storage)
@@ -3783,7 +3735,7 @@ namespace WebApp.Helpers
                 from statuses in statuses_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
-                    purType.Name == purchaseType && 
+                    purType.Name == purchaseType &&
                     statuses.Name != "Deleted" &&
                     statuses.Name != "Destroyed" &&
                     statuses.Name != "Closed"
@@ -3839,7 +3791,7 @@ namespace WebApp.Helpers
                         stoName.Name,
                         rec.StorageID
                     };
-                if(storages != null)
+                if (storages != null)
                 {
                     foreach (var it in storages)
                     {
@@ -3863,10 +3815,10 @@ namespace WebApp.Helpers
         /// </summary>
         /// <param name="prodObject"></param>
         /// <returns>int</returns> 
-        public bool CreateProduction(ProductionObject prodObject, int userId)
+        public int CreateProduction(ProductionObject prodObject, int userId)
         {
             //define method execution return value to be false by default
-            bool retMthdExecResult = false;
+            int retMthdExecResult = 0;
 
             var distillerId = GetDistillerId(userId);
 
@@ -3880,19 +3832,19 @@ namespace WebApp.Helpers
             prod.ProductionEndTime = prodObject.ProductionEnd;
             prod.Note = prodObject.Note;
 
-            if(prodObject.Gauged)
+            if (prodObject.Gauged)
             {
                 prod.Gauged = prodObject.Gauged;
             }
-            else if(!prodObject.Gauged)
+            else if (!prodObject.Gauged)
             {
                 prod.Gauged = false;
             }
 
             var pTypes =
                     (from rec in db.ProductionType
-                        where rec.Name == prodObject.ProductionType
-                        select rec).FirstOrDefault();
+                     where rec.Name == prodObject.ProductionType
+                     select rec).FirstOrDefault();
 
             if (pTypes != null)
             {
@@ -3972,8 +3924,8 @@ namespace WebApp.Helpers
             }
             else if (prodObject.ProductionType == "Blending")
             {
-                 prod.StateID =
-                     (from rec in db.State
+                prod.StateID =
+                    (from rec in db.State
                      where rec.Name == "Blended"
                      select rec.StateID).FirstOrDefault();
             }
@@ -3987,8 +3939,8 @@ namespace WebApp.Helpers
 
             prod.StatusID =
                 (from rec in db.Status
-                where rec.Name == "Active"
-                select rec.StatusID).FirstOrDefault();
+                 where rec.Name == "Active"
+                 select rec.StatusID).FirstOrDefault();
 
             // save new records in Production table
             db.Production.Add(prod);
@@ -4026,8 +3978,6 @@ namespace WebApp.Helpers
                     // handle updating records that are being used for creating this production record
                     UpdateRecordsUsedInProductionWorkflow(prodObject.UsedMats, prod.ProductionID, userId);
                 }
-
-                retMthdExecResult = true;
             }
 
             else if (prodObject.ProductionType == "Distillation")
@@ -4048,14 +3998,12 @@ namespace WebApp.Helpers
                             db.ProductionToSpiritCut.Add(prodToSCut);
                             db.SaveChanges();
                         }
-
-                        retMthdExecResult = true;
                     }
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine("Exception creating Distillation production: ", e);
-                    retMthdExecResult = false;
+                    retMthdExecResult = 0;
+                    throw;
                 }
             }
 
@@ -4089,7 +4037,6 @@ namespace WebApp.Helpers
                             db.SaveChanges();
                         }
                     }
-                    retMthdExecResult = true;
                 }
             }
 
@@ -4166,7 +4113,6 @@ namespace WebApp.Helpers
                         }
                     }
                 }
-                retMthdExecResult = true;
             }
             try
             {
@@ -4181,19 +4127,22 @@ namespace WebApp.Helpers
 
                 db.Production4Reporting.Add(prod4RepT);
                 db.SaveChanges();
-                retMthdExecResult = true;
+                retMthdExecResult = 0;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                Debug.WriteLine("Exception creating an entry in Production4Reporting: ", e);
-                retMthdExecResult = false;
+                retMthdExecResult = 0;
+                throw;
             }
 
             // insert a record in the history table
             prodObject.ProductionId = prod.ProductionID;
-            retMthdExecResult = SaveProductionHistory(prodObject, userId);
+            if (!SaveProductionHistory(prodObject, userId))
+            {
+                retMthdExecResult = 0;
+            }
 
-            return retMthdExecResult;
+            return retMthdExecResult = prod.ProductionID;
         }
 
         internal void UpdateRecordsUsedInProductionWorkflow(List<ObjInfo4Burndwn> usedMats, int productionIDBeingCreated, int userId)
@@ -4247,8 +4196,8 @@ namespace WebApp.Helpers
                         // else, the same record in Purchase4Reporting needs to be marked as redistilled for reporting purposes.
                         var p =
                             (from rec in db.Purchase4Reporting
-                                where purch.PurchaseID == rec.PurchaseID
-                                select rec).FirstOrDefault();
+                             where purch.PurchaseID == rec.PurchaseID
+                             select rec).FirstOrDefault();
 
                         if (p != null)
                         {
@@ -4287,8 +4236,8 @@ namespace WebApp.Helpers
                         {
                             var proof =
                                 (from rec in db.Proof
-                                    where rec.ProofID == purch.ProofID
-                                    select rec).FirstOrDefault();
+                                 where rec.ProofID == purch.ProofID
+                                 select rec).FirstOrDefault();
 
                             if (proof != null)
                             {
@@ -4308,7 +4257,7 @@ namespace WebApp.Helpers
                             if (purch.PurchaseTypeID == 1)
                             {
                                 // PurFermentableVolume
-                                ProductionContent prodContent  = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 1, false, k.NewVal); 
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 1, false, k.NewVal);
                                 prodContentL.Add(prodContent);
                             }
 
@@ -4433,8 +4382,8 @@ namespace WebApp.Helpers
                         // another record into Production4Reporting with the same ProductionID but with different Proof and volume/weight values.
                         var p =
                             (from rec in db.Production4Reporting
-                                where prodRec.ProductionID == rec.ProductionID
-                                select rec).FirstOrDefault();
+                             where prodRec.ProductionID == rec.ProductionID
+                             select rec).FirstOrDefault();
                         if (p != null)
                         {
                             if (p.Proof == k.Proof && p.ProductionID == k.ID)
@@ -4498,30 +4447,30 @@ namespace WebApp.Helpers
                             if (prodRec.ProductionTypeID == 1)
                             {
                                 // ProdFermentedVolume
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 5, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 5, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 23, false, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 23, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
                             if (prodRec.ProductionTypeID == 2)
                             {
                                 // ProdDistilledVolume
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 11, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 11, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 20, false, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 20, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
                             if (prodRec.ProductionTypeID == 3)
                             {
                                 // ProdBlendedVolume
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 13, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 13, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 22, false, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 22, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
@@ -4547,30 +4496,30 @@ namespace WebApp.Helpers
                             if (prodRec.ProductionTypeID == 1)
                             {
                                 // ProdFermentedWeight
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 6, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 6, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 23, false, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 23, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
                             if (prodRec.ProductionTypeID == 2)
                             {
                                 // ProdDistilledWeight
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 12, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 12, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 20, false, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 20, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
                             if (prodRec.ProductionTypeID == 3)
                             {
                                 // ProdBlendedWeight
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 14, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 14, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 22, false, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 22, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
@@ -4578,8 +4527,8 @@ namespace WebApp.Helpers
 
                             var vBW =
                             (from rec in db.Weight
-                                where prodRec.WeightID == rec.WeightID
-                                select rec).FirstOrDefault();
+                             where prodRec.WeightID == rec.WeightID
+                             select rec).FirstOrDefault();
 
                             if (vBW != null)
                             {
@@ -4631,7 +4580,7 @@ namespace WebApp.Helpers
             productionContentInstance.ProductionID = productionID;
             productionContentInstance.RecordID = usedRecID;
             productionContentInstance.ContentFieldID = contentFieldID;
-            productionContentInstance.isProductionComponent = false;
+            productionContentInstance.isProductionComponent = isProductionComponent;
             productionContentInstance.ContentValue = contentValue;
 
             return productionContentInstance;
@@ -4668,7 +4617,7 @@ namespace WebApp.Helpers
                 histTable.UserID = userId;
                 histTable.Gauged = prodObject.Gauged;
 
-                if(prodObject.Storage != null)
+                if (prodObject.Storage != null)
                 {
                     StringBuilder storageString = new StringBuilder();
 
@@ -4681,7 +4630,7 @@ namespace WebApp.Helpers
                     histTable.Storage = storageString.ToString();
                 }
 
-                if(prodObject.UsedMats != null)
+                if (prodObject.UsedMats != null)
                 {
                     StringBuilder usedMats = new StringBuilder();
 
@@ -4705,7 +4654,7 @@ namespace WebApp.Helpers
 
                 histTable.SpiritCutName = prodObject.SpiritCutName;
 
-                if(prodObject.BlendingAdditives != null)
+                if (prodObject.BlendingAdditives != null)
                 {
                     StringBuilder blendingAdditives = new StringBuilder();
 
@@ -4715,7 +4664,7 @@ namespace WebApp.Helpers
                             .Append(l.RawMaterialId)
                             .Append(",")
                             .Append(l.RawMaterialName)
-                            .Append(",") 
+                            .Append(",")
                             .Append(l.RawMaterialQuantity)
                             .Append(",")
                             .Append(l.UnitOfMeasurement)
@@ -4723,7 +4672,7 @@ namespace WebApp.Helpers
                     }
                 }
 
-                if(prodObject.BottlingInfo != null)
+                if (prodObject.BottlingInfo != null)
                 {
                     StringBuilder bottInforStrBuilder = new StringBuilder();
                     bottInforStrBuilder.Append("{")
@@ -4744,7 +4693,7 @@ namespace WebApp.Helpers
 
                 histTable.TaxedProof = prodObject.TaxedProof;
 
-                if(prodObject.WithdrawalDate != DateTime.MinValue)
+                if (prodObject.WithdrawalDate != DateTime.MinValue)
                 {
                     histTable.WithdrawalDate = prodObject.WithdrawalDate;
                 }
@@ -4828,8 +4777,8 @@ namespace WebApp.Helpers
 
                         var prodC =
                             (from rec in db.ProductionContent
-                            where rec.ProductionID == prodRec.ProductionID
-                            select rec).FirstOrDefault();
+                             where rec.ProductionID == prodRec.ProductionID
+                             select rec).FirstOrDefault();
 
                         if (prodC != null)
                         {
@@ -5010,9 +4959,9 @@ namespace WebApp.Helpers
                 from spi in spi_join.DefaultIfEmpty()
                 join status in db.Status on prod.StatusID equals status.StatusID into status_join
                 from status in status_join.DefaultIfEmpty()
-                where prodTypes.Name == prodType && 
+                where prodTypes.Name == prodType &&
                 dstlrs.UserId == userId &&
-                status.Name != "Deleted"  &&
+                status.Name != "Deleted" &&
                 status.Name != "Destroyed" &&
                 status.Name != "Closed"
                 select new
@@ -5158,7 +5107,7 @@ namespace WebApp.Helpers
         public List<SpiritToKindListObject> GetSpiritToKindListData()
         {
             List<SpiritToKindListObject> spir2KindList = new List<SpiritToKindListObject>();
-            byte [] existsArray = new byte[256];
+            byte[] existsArray = new byte[256];
 
             try
             {
@@ -5194,9 +5143,9 @@ namespace WebApp.Helpers
                     }
                     else if (existsArray[(int)i.SpiritTypeReportingID] == 1)
                     {
-                        foreach(var li in spir2KindList)
+                        foreach (var li in spir2KindList)
                         {
-                            if(li.SpiritTypeReportingID == (int)i.SpiritTypeReportingID)
+                            if (li.SpiritTypeReportingID == (int)i.SpiritTypeReportingID)
                             {
                                 MaterialKindObject kind = new MaterialKindObject();
                                 kind.MaterialKindID = (int)i.MaterialKindReportingID;
@@ -5611,9 +5560,9 @@ namespace WebApp.Helpers
 
         #endregion
 
-        #region Reporting
+        #region Reporting Methods
 
-        internal ProductionReportingObject GetProductionReportData(DateTime start, DateTime end, int userId)
+        public ProductionReportingObject GetProductionReportData(DateTime start, DateTime end, int userId)
         {
             ProductionReportingObject prodRepObj = new ProductionReportingObject();
             List<ProdReportPart1> part1List = new List<ProdReportPart1>();
@@ -5653,7 +5602,7 @@ namespace WebApp.Helpers
 
                     if (!(bool)rec.Gauged /*not gauged method*/) // all of the Distilled and Fermented Purchases should always be Gauged as per our design. So this check is really for internal Production distillation
                     {
-                        part1Obj.UnfinishedSpiritsEndOfQuarter += (float)rec.Proof;
+                        part1Obj.UnfinishedSpiritsEndOfQuarterL17 += (float)rec.Proof;
                     }
                     else if ((bool)rec.Redistilled == true)
                     {
@@ -5661,22 +5610,24 @@ namespace WebApp.Helpers
                     }
                     else
                     {
-                        if(rec.StateID == 3) // Distilled - Storage report case
+                        if (rec.StateID == 3) // Distilled - Storage report case
                         {
-                            part1Obj.SorageAcct += (float)rec.Proof;
+                            part1Obj.StorageAcct += (float)rec.Proof;
+                            part1Obj.ProducedTotal += (float)rec.Proof;
                         }
-                        else if(rec.StateID == 4 || rec.StateID == 5) // Blended or Bottled cases- Processing report case
+                        else if (rec.StateID == 4 || rec.StateID == 5) // Blended or Bottled cases- Processing report case
                         {
                             part1Obj.ProccessingAcct += (float)rec.Proof;
+                            part1Obj.ProducedTotal += (float)rec.Proof;
                         }
                     }
                     part1List.Add(part1Obj);
                 }
                 else
                 {
-                    if(!(bool)rec.Gauged)
+                    if (!(bool)rec.Gauged)
                     {
-                        spiritType.UnfinishedSpiritsEndOfQuarter += (float)rec.Proof;
+                        spiritType.UnfinishedSpiritsEndOfQuarterL17 += (float)rec.Proof;
                     }
                     else if ((bool)rec.Redistilled == true)
                     {
@@ -5686,11 +5637,13 @@ namespace WebApp.Helpers
                     {
                         if (rec.StateID == 3) // Distilled - Storage report case
                         {
-                            spiritType.SorageAcct += (float)rec.Proof;
+                            spiritType.StorageAcct += (float)rec.Proof;
+                            spiritType.ProducedTotal += (float)rec.Proof;
                         }
                         else if (rec.StateID == 4 || rec.StateID == 5) // Blended or Bottled cases- Processing report case
                         {
                             spiritType.ProccessingAcct += (float)rec.Proof;
+                            spiritType.ProducedTotal += (float)rec.Proof;
                         }
                     }
                 }
@@ -5779,14 +5732,6 @@ namespace WebApp.Helpers
                             {
                                 prt6.Weight = (float)t.Value;
                             }
-                            else if ((int)t.ContentFieldID == 3)
-                            {
-                                prt6.Volume = (float)t.Value;
-                            }
-                            else if ((int)t.ContentFieldID == 4)
-                            {
-                                prt6.Weight = (float)t.Value;
-                            }
                             prodReportPart6List.Add(prt6);
                         }
                         else // case where Material already exists
@@ -5799,14 +5744,6 @@ namespace WebApp.Helpers
                             {
                                 mater.Weight += (float)t.Value;
                             }
-                            else if ((int)t.ContentFieldID == 3)
-                            {
-                                mater.Volume += (float)t.Value;
-                            }
-                            else if ((int)t.ContentFieldID == 4)
-                            {
-                                mater.Weight += (float)t.Value;
-                            }
                         } 
                     }
                 }
@@ -5814,7 +5751,7 @@ namespace WebApp.Helpers
                 // we need this here to fill up ProdReportMaterialCategoryID
                 foreach (var mat in prodReportPart6List)
                 {
-                    if(mat.ProdReportMaterialCategoryID == 0)
+                    if (mat.ProdReportMaterialCategoryID == 0)
                     {
                         var k =
                             (from prodContent in db.ProductionContent
@@ -5833,6 +5770,7 @@ namespace WebApp.Helpers
                             {
                                 ProductionReportMaterialCategoryID = (int?)prodRepMatCat.ProductionReportMaterialCategoryID
                             }).FirstOrDefault();
+
                         if (k != null)
                         {
                             if (k.ProductionReportMaterialCategoryID != null)
@@ -5840,10 +5778,10 @@ namespace WebApp.Helpers
                                 mat.ProdReportMaterialCategoryID = (int)k.ProductionReportMaterialCategoryID;
                             }
                         }
-                    } 
+                    }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw;
             }
@@ -5855,92 +5793,106 @@ namespace WebApp.Helpers
 
         private void GetReceivedForRedistillation(int userId, DateTime start, DateTime end, ref List<ProductionReportHelper> tempRepObjList)
         {
-            var reportPartAndRowIdentifier = "p1_15";
             try
             {
-                var recs =
-                    (
-                    (from prod in db.Production
+                var productionID4Inquiry =
+                     (from prod in db.Production
                      join prodContent in db.ProductionContent on prod.ProductionID equals prodContent.ProductionID into prodContent_join
                      from prodContent in prodContent_join.DefaultIfEmpty()
                      join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
                      from distillers in distillers_join.DefaultIfEmpty()
-                     join prod2SpiritType in db.ProductionToSpiritTypeReporting on new { RecordID = prodContent.RecordID } equals new { RecordID = prod2SpiritType.ProductionID } into prod2SpiritType_join
-                     from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
-                     join spiritTypeRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
-                     from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
-                     where
-                     prod.ProductionEndTime >= start && prod.ProductionEndTime <= end &&
-                     prod.Gauged == true &&
-                     distillers.UserId == userId &&
-                     (prod.StatusID == 1 ||
-                     prod.StatusID == 2) &&
-                     (new int[] { 16, 18, 20, 22 }).Contains(prodContent.ContentFieldID) && 
-                     spiritTypeRep.SpiritTypeReportingID != 0
+                      join CF in db.ContentField on prodContent.ContentFieldID equals CF.ContentFieldID into CF_join
+                      from CF in CF_join.DefaultIfEmpty()
+                      where
+                       prod.Gauged == true &&
+                       distillers.UserId == userId &&
+                       prod.StateID == 3 &&
+                       prod.ProductionEndTime >= start && prod.ProductionEndTime <= end
+                       && (new int[] { 18, 20, 22 }).Contains(prodContent.ContentFieldID)
                      select new
                      {
-                         ReportRowIdentifier = reportPartAndRowIdentifier,
-                         ProductionID = (int?)prod.ProductionID ?? (int?)0,
-                         Spirit_Short_Name = spiritTypeRep.ProductTypeName ?? "",
-                         Material_Name = (string)null,
-                         Weight = (string)null,
-                         Volume = (string)null,
-                         Alcohol = (string)null,
-                         Proof = (float?)prodContent.ContentValue ?? (float?)0,
-                         SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
-                         ContentFieldID = (int?)prodContent.ContentFieldID ?? (int?)0
-                            }).Distinct()
-                    ).Union
-                    (
-                        (from prod in db.Production
-                            join prodContent in db.ProductionContent on prod.ProductionID equals prodContent.ProductionID into prodContent_join
-                            from prodContent in prodContent_join.DefaultIfEmpty()
-                            join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                            from distillers in distillers_join.DefaultIfEmpty()
-                            join pur2SpiritType in db.PurchaseToSpiritTypeReporting on new { RecordID = prodContent.RecordID } equals new { RecordID = pur2SpiritType.PurchaseID } into pur2SpiritType_join
-                            from pur2SpiritType in pur2SpiritType_join.DefaultIfEmpty()
+                         ProductionID = prod.ProductionID,
+                         prodContent.isProductionComponent, // the record that went into making this production record is from either Purchase or Prod
+                         ContentFieldName = CF.ContentFieldName ?? String.Empty,
+                         RecordID = prodContent.RecordID,
+                         Proof = (float?)prodContent.ContentValue ?? (float?)0
+                     }).Distinct().ToList();
+
+                if(productionID4Inquiry != null)
+                {
+                    foreach (var i in productionID4Inquiry)
+                    {
+                        if(!i.isProductionComponent && i.ContentFieldName == "PurDistilledProofGal") // case when we distil Purchased Distillation like GNS
+                        {
+                            var purchaseSpiritType =
+                                (
+                            from pur2SpiritType in db.PurchaseToSpiritTypeReporting
                             join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
                             from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
                             where
-                            prod.ProductionEndTime >= start && prod.ProductionEndTime <= end &&
-                            prod.Gauged == true &&
-                            distillers.UserId == userId &&
-                            (prod.StatusID == 1 ||
-                            prod.StatusID == 2) &&
-                            (new int[] { 16, 18, 20, 22 }).Contains(prodContent.ContentFieldID) &&
-                            spiritTypeRep.SpiritTypeReportingID != 0
+                              pur2SpiritType.PurchaseID == i.RecordID
                             select new
                             {
-                                ReportRowIdentifier = reportPartAndRowIdentifier,
-                                ProductionID = (int?)prod.ProductionID ?? (int?)0,
-                                Spirit_Short_Name = spiritTypeRep.ProductTypeName ?? "",
-                                Material_Name = (string)null,
-                                Weight = (string)null,
-                                Volume = (string)null,
-                                Alcohol = (string)null,
-                                Proof = (float?)prodContent.ContentValue ?? (float?)0,
+                                Spirit_Short_Name = spiritTypeRep.ProductTypeName,
                                 SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
-                                ContentFieldID = (int?)prodContent.ContentFieldID ?? (int?)0
-                            }).Distinct()
-                    );
-                if(recs != null)
-                {
-                    foreach(var rec in recs)
-                    {
-                        if((int)rec.SpiritTypeReportingID != 0)
-                        {
-                            var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)rec.SpiritTypeReportingID);
-                            if (spRec != null)
+                            }).FirstOrDefault();
+
+                            if(purchaseSpiritType != null)
                             {
-                                spRec.Recd4RedistilaltionL15 += (float)rec.Proof;
+                                if ((int)purchaseSpiritType.SpiritTypeReportingID != 0)
+                                {
+                                    var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)purchaseSpiritType.SpiritTypeReportingID);
+                                    if (spRec != null)
+                                    {
+                                        spRec.Recd4RedistilaltionL15 += (float)i.Proof;
+                                    }
+                                    else
+                                    {
+                                        ProductionReportHelper part1Obj = new ProductionReportHelper();
+                                        part1Obj.Recd4RedistilaltionL15 = (float)i.Proof;
+                                        part1Obj.SpiritTypeReportingID = (int)purchaseSpiritType.SpiritTypeReportingID;
+                                        part1Obj.SpiritTypeReportName = (string)purchaseSpiritType.Spirit_Short_Name;
+                                        tempRepObjList.Add(part1Obj);
+                                    }
+                                }
                             }
-                            else
+                        }
+
+                        else if(i.isProductionComponent && i.ContentFieldName == "ProdDistilledProofGal") // case with redistilling our own production
+                        {
+                            var productionSpiritType =
+                                (from prod in db.Production
+                                 join pur2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals pur2SpiritType.ProductionID into pur2SpiritType_join
+                                 from pur2SpiritType in pur2SpiritType_join.DefaultIfEmpty()
+                                 join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
+                                 from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
+                                 where
+                                   prod.ProductionID == 498 &&
+                                   prod.Gauged == true
+                                 select new
+                                 {
+                                     Spirit_Short_Name = spiritTypeRep.ProductTypeName,
+                                     SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID
+                                 }).FirstOrDefault();
+
+                            if (productionSpiritType != null)
                             {
-                                ProductionReportHelper part1Obj = new ProductionReportHelper();
-                                part1Obj.Recd4RedistilaltionL15 = (float)rec.Proof;
-                                part1Obj.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
-                                part1Obj.SpiritTypeReportName = (string)rec.Spirit_Short_Name;
-                                tempRepObjList.Add(part1Obj);
+                                if ((int)productionSpiritType.SpiritTypeReportingID != 0)
+                                {
+                                    var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)productionSpiritType.SpiritTypeReportingID);
+                                    if (spRec != null)
+                                    {
+                                        spRec.Recd4RedistilaltionL15 += (float)i.Proof;
+                                    }
+                                    else
+                                    {
+                                        ProductionReportHelper part1Obj = new ProductionReportHelper();
+                                        part1Obj.Recd4RedistilaltionL15 = (float)i.Proof;
+                                        part1Obj.SpiritTypeReportingID = (int)productionSpiritType.SpiritTypeReportingID;
+                                        part1Obj.SpiritTypeReportName = (string)productionSpiritType.Spirit_Short_Name;
+                                        tempRepObjList.Add(part1Obj);
+                                    }
+                                }
                             }
                         }
                     }
@@ -6145,7 +6097,6 @@ namespace WebApp.Helpers
             const int august = 8;
             const int november = 11;
             DateTime[] startAndEndDates = new DateTime[2]; // [startDate, endDate]
-            
 
             if (end.Month == february)
             {
@@ -6197,9 +6148,9 @@ namespace WebApp.Helpers
                  select new
                  {
                      prod.StateID,
-                     ProductionID = (int?)prod.ProductionID,
+                     ProductionID = (int?)prod.ProductionID ?? 0,
                      SpiritTypeName = spiritTypeRep.ProductTypeName ?? "",
-                     Redistilled = (bool?)prodReport.Redistilled,
+                     Redistilled = (bool?)prodReport.Redistilled ?? false,
                      MaterialKindName = matKindRep.MaterialKindName ?? "",
                      Weight = (System.Single?)prodReport.Weight ?? (System.Single?)0,
                      Volume = (System.Single?)prodReport.Volume ?? (System.Single?)0,
@@ -6324,7 +6275,7 @@ namespace WebApp.Helpers
                             }
                             catch (Exception e)
                             {
-                                throw;
+                                throw e;
                             }
                         }
                     }
@@ -6332,7 +6283,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw;
+                throw e;
             }
         }
 
@@ -6345,7 +6296,7 @@ namespace WebApp.Helpers
 
                 // get distiller information for header report
                 int distillerID = GetDistillerId(userId);
-                storageReport.Header = GetDistillerInfoForReportHeader(distillerID, startDate); 
+                storageReport.Header = GetDistillerInfoForReportHeader(distillerID, startDate);
 
                 GetProducedOnHandAtStart(startDate, endDate, userId, ref storageReportBody);
                 GetPurchasedOnHandAtStart(startDate, endDate, userId, ref storageReportBody);
@@ -6355,6 +6306,7 @@ namespace WebApp.Helpers
                 GetPurchasedStorageToProduction(startDate, endDate, userId, ref storageReportBody);
                 GetProducedStorageToProcessing(startDate, endDate, userId, ref storageReportBody);
                 GetPurchasedStorageToProcessing(startDate, endDate, userId, ref storageReportBody);
+                GetStorageReportDestroyed(startDate, endDate, userId, ref storageReportBody);
 
                 storageReport.ReportBody = storageReportBody;
 
@@ -6362,7 +6314,96 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw;
+                throw e;
+            }
+        }
+
+        private void GetStorageReportDestroyed(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        {
+            // Query production batches destroyed in Storage Account
+            var prodDestroyed = (from dest in db.Destruction
+                                 join prod in db.Production on dest.RecordID equals prod.ProductionID
+                                 join dist in db.AspNetUserToDistiller on prod.DistillerID equals dist.DistillerID
+                                 join prod_str in db.ProductionToSpiritTypeReporting on prod.ProductionID equals prod_str.ProductionID
+                                 join str in db.SpiritTypeReporting on prod_str.SpiritTypeReportingID equals str.SpiritTypeReportingID
+                                 where
+                                    dist.UserId == userId
+                                    && prod.ProductionTypeID == 2
+                                    && prod.StatusID == 9
+                                    && prod.StateID == 3
+                                    && prod.Gauged == true
+                                    && dest.EndTime > startDate
+                                    && dest.EndTime < endDate
+                                    && dest.WorkflowType == "Production"
+                                 select new
+                                 {
+                                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                                     proof = (float?)dest.ProofGallons ?? 0
+                                 }).DefaultIfEmpty();
+
+            if (prodDestroyed.First() != null)
+            {
+                foreach (var rec in prodDestroyed)
+                {
+                    // Search for existing category with matching name
+                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+
+                    if (category == null)
+                    {
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r20_Destroyed += rec.proof;
+                        storageReportBody.Add(cat);
+                    }
+                    else
+                    {
+                        category.r20_Destroyed += rec.proof;
+                    }
+                }
+            }
+
+            // Query purchase batches destroyed in Storage Account
+            var purDestroyed = (from dest in db.Destruction
+                                join pur in db.Purchase on dest.RecordID equals pur.PurchaseID
+                                join dist in db.AspNetUserToDistiller on pur.DistillerID equals dist.DistillerID
+                                join pur_str in db.PurchaseToSpiritTypeReporting on pur.PurchaseID equals pur_str.PurchaseID
+                                join str in db.SpiritTypeReporting on pur_str.SpiritTypeReportingID equals str.SpiritTypeReportingID
+                                where
+                                    dist.UserId == userId
+                                    && (pur.PurchaseTypeID == 2 || pur.PurchaseTypeID == 3)
+                                    && pur.StatusID == 9
+                                    && pur.StateID == 2
+                                    && pur.StateID == 3
+                                    && dest.EndTime > startDate
+                                    && dest.EndTime < endDate
+                                    && dest.WorkflowType == "Purchase"
+                                select new
+                                {
+                                    reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                                    proof = (float?)dest.ProofGallons ?? 0
+                                }).DefaultIfEmpty();
+
+            if (purDestroyed.First() != null)
+            {
+                foreach (var rec in purDestroyed)
+                {
+                    // Search for existing category with matching name
+                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+
+                    if (category == null)
+                    {
+                        // Add category to the list with given purchased distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r20_Destroyed += rec.proof;
+                        storageReportBody.Add(cat);
+                    }
+                    else
+                    {
+                        category.r20_Destroyed += rec.proof;
+                    }
+                }
             }
         }
 
@@ -6371,26 +6412,28 @@ namespace WebApp.Helpers
             // Query distilled production records transferred to storage account
             var records =
                 (from rec in db.Production
-                join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
-                from proof in proof_join.DefaultIfEmpty()
-                join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
-                from distiller in distiller_join.DefaultIfEmpty()
-                join p2str in db.ProductionToSpiritTypeReporting on rec.ProductionID equals p2str.ProductionID into p2str_join
-                from p2str in p2str_join.DefaultIfEmpty()
-                join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                from str in str_join.DefaultIfEmpty()
-                where
-                    distiller.UserId == userId &&
-                    rec.ProductionTypeID == 2 &&
-                    (rec.StatusID == 1 ||
-                    rec.StatusID == 2) &&
-                    rec.ProductionEndTime < startDate &&
-                    rec.Gauged == true
-                select new
-                {
-                    reportingCategoryName = str.ProductTypeName ?? "",
-                    proof = (System.Single?)proof.Value ?? (System.Single?)0
-                }).DefaultIfEmpty();
+                 join dest in db.Destruction on rec.ProductionID equals dest.RecordID into dest_join
+                 from dest in dest_join.DefaultIfEmpty()
+                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
+                 from proof in proof_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.ProductionToSpiritTypeReporting on rec.ProductionID equals p2str.ProductionID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId
+                     && rec.ProductionTypeID == 2
+                     && rec.ProductionEndTime < startDate
+                     && rec.Gauged == true
+                     && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                     proof = (float?)proof.Value ?? (float?)0,
+                     destroyedProof = (float?)dest.ProofGallons ?? 0
+                 }).DefaultIfEmpty();
 
             if (records.First() != null)
             {
@@ -6404,12 +6447,12 @@ namespace WebApp.Helpers
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r1_OnHandFirstOfMonth += (float)rec.proof;
+                        cat.r1_OnHandFirstOfMonth += (float)rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r1_OnHandFirstOfMonth += (float)rec.proof;
+                        category.r1_OnHandFirstOfMonth += (float)rec.proof + rec.destroyedProof;
                     }
                 }
             }
@@ -6420,26 +6463,27 @@ namespace WebApp.Helpers
             // Query distilled purchase records transferred to storage account
             var records =
                 (from rec in db.Purchase
-                join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
-                from proof in proof_join.DefaultIfEmpty()
-                join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
-                from distiller in distiller_join.DefaultIfEmpty()
-                join p2str in db.PurchaseToSpiritTypeReporting on rec.PurchaseID equals p2str.PurchaseID into p2str_join
-                from p2str in p2str_join.DefaultIfEmpty()
-                join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                from str in str_join.DefaultIfEmpty()
-                where
-                    distiller.UserId == userId &&
-                    (rec.PurchaseTypeID == 2 ||
-                    rec.PurchaseTypeID == 3) &&
-                    (rec.StatusID == 1 ||
-                    rec.StatusID == 2) &&
-                    rec.PurchaseDate < startDate
-                select new
-                {
-                    reportingCategoryName = str.ProductTypeName ?? "",
-                    proof = (System.Single?)proof.Value ?? (System.Single?)0
-                }).DefaultIfEmpty();
+                 join dest in db.Destruction on rec.PurchaseID equals dest.RecordID into dest_join
+                 from dest in dest_join.DefaultIfEmpty()
+                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
+                 from proof in proof_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.PurchaseToSpiritTypeReporting on rec.PurchaseID equals p2str.PurchaseID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId
+                     && (rec.PurchaseTypeID == 2 || rec.PurchaseTypeID == 3)
+                     && rec.PurchaseDate < startDate
+                     && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? string.Empty,
+                     proof = (float?)proof.Value ?? 0,
+                     destroyedProof = (float?)dest.ProofGallons ?? 0
+                 }).DefaultIfEmpty();
 
             if (records.First() != null)
             {
@@ -6453,12 +6497,12 @@ namespace WebApp.Helpers
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r1_OnHandFirstOfMonth += (float)rec.proof;
+                        cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r1_OnHandFirstOfMonth += (float)rec.proof;
+                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
                     }
                 }
             }
@@ -6469,27 +6513,29 @@ namespace WebApp.Helpers
             // Query distilled production records transferred to storage account
             var records =
                 (from rec in db.Production
-                join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
-                from proof in proof_join.DefaultIfEmpty()
-                join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
-                from distiller in distiller_join.DefaultIfEmpty()
-                join p2str in db.ProductionToSpiritTypeReporting on rec.ProductionID equals p2str.ProductionID into p2str_join
-                from p2str in p2str_join.DefaultIfEmpty()
-                join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                from str in str_join.DefaultIfEmpty()
-                where
-                    distiller.UserId == userId &&
-                    rec.ProductionTypeID == 2 &&
-                    (rec.StatusID == 1 ||
-                    rec.StatusID == 2) &&
-                    rec.ProductionEndTime >= startDate &&
-                    rec.ProductionEndTime <= endDate &&
-                    rec.Gauged == true
-                select new
-                {
-                    reportingCategoryName = str.ProductTypeName ?? "",
-                    proof = (System.Single?)proof.Value ?? (System.Single?)0
-                }).DefaultIfEmpty();
+                 join dest in db.Destruction on rec.ProductionID equals dest.RecordID into dest_join
+                 from dest in dest_join.DefaultIfEmpty()
+                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
+                 from proof in proof_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.ProductionToSpiritTypeReporting on rec.ProductionID equals p2str.ProductionID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId
+                     && rec.ProductionTypeID == 2
+                     && rec.ProductionEndTime >= startDate
+                     && rec.ProductionEndTime <= endDate
+                     && rec.Gauged == true
+                     && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > endDate))
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                     proof = (float?)proof.Value ?? 0,
+                     destroyedProof = (float?)dest.ProofGallons ?? 0
+                 }).DefaultIfEmpty();
 
             if (records.First() != null)
             {
@@ -6503,12 +6549,12 @@ namespace WebApp.Helpers
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r2_DepositedInBulkStorage += (float)rec.proof;
+                        cat.r2_DepositedInBulkStorage += rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r2_DepositedInBulkStorage += (float)rec.proof;
+                        category.r2_DepositedInBulkStorage += rec.proof + rec.destroyedProof;
                     }
                 }
             }
@@ -6519,6 +6565,8 @@ namespace WebApp.Helpers
             // Query fermented and distilled purchase records transferred to storage account
             var records =
                 (from purchase in db.Purchase
+                 join dest in db.Destruction on purchase.PurchaseID equals dest.RecordID into dest_join
+                 from dest in dest_join.DefaultIfEmpty()
                  join alcohol in db.Alcohol on purchase.AlcoholID equals alcohol.AlcoholID into alcohol_join
                  from alcohol in alcohol_join.DefaultIfEmpty()
                  join productionContent in db.ProductionContent on purchase.PurchaseID equals productionContent.RecordID into productionContent_join
@@ -6546,11 +6594,13 @@ namespace WebApp.Helpers
                      purchase.StatusID == 3) &&
                      purchase.PurchaseDate >= startDate &&
                      purchase.PurchaseDate <= endDate
+                     && contentField.ContentFieldName != "PurFermentedProofGal"
                  select new
                  {
-                     reportingCategoryName = str.ProductTypeName ?? "",
-                     purchaseProof = (System.Single?)proof.Value ?? (System.Single?)0,
-                     productionProof = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                     purchaseProof = (float?)proof.Value ?? 0,
+                     productionProof = (float?)((productionContent.ContentValue * alcohol.Value * 2) / 100) ?? 0,
+                     destroyedProof = (float?)dest.ProofGallons ?? 0
                  }).DefaultIfEmpty();
 
             if (records.First() != null)
@@ -6565,12 +6615,12 @@ namespace WebApp.Helpers
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r2_DepositedInBulkStorage += (float)rec.purchaseProof + (float)rec.productionProof;
+                        cat.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r2_DepositedInBulkStorage += (float)rec.purchaseProof + (float)rec.productionProof;
+                        category.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
                     }
                 }
             }
@@ -6581,39 +6631,39 @@ namespace WebApp.Helpers
             // Query distilled production records transferred from storage account to production account
             var prodRes =
                 (from sourceProductionRecord in db.Production
-                join alcohol in db.Alcohol on sourceProductionRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
-                from alcohol in alcohol_join.DefaultIfEmpty()
-                join productionContent in db.ProductionContent on sourceProductionRecord.ProductionID equals productionContent.RecordID into productionContent_join
-                from productionContent in productionContent_join.DefaultIfEmpty()
-                join contentField in db.ContentField on productionContent.ContentFieldID equals contentField.ContentFieldID into contentField_join
-                from contentField in contentField_join.DefaultIfEmpty()
-                join outputProductionRecord in db.Production on productionContent.ProductionID equals outputProductionRecord.ProductionID into outputProductionRecord_join
-                from outputProductionRecord in outputProductionRecord_join.DefaultIfEmpty()
-                join productionType in db.ProductionType on outputProductionRecord.ProductionTypeID equals productionType.ProductionTypeID into productionType_join
-                from productionType in productionType_join.DefaultIfEmpty()
-                join distiller in db.AspNetUserToDistiller on sourceProductionRecord.DistillerID equals distiller.DistillerID into distiller_join
-                from distiller in distiller_join.DefaultIfEmpty()
-                join p2str in db.ProductionToSpiritTypeReporting on sourceProductionRecord.ProductionID equals p2str.ProductionID into p2str_join
-                from p2str in p2str_join.DefaultIfEmpty()
-                join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                from str in str_join.DefaultIfEmpty()
-                where
-                    distiller.UserId == userId &&
-                    sourceProductionRecord.ProductionTypeID == 2 &&
-                    outputProductionRecord.ProductionTypeID == 2 &&
-                    (sourceProductionRecord.StatusID == 1 ||
-                    sourceProductionRecord.StatusID == 2 ||
-                    sourceProductionRecord.StatusID == 3) &&
-                    contentField.ContentFieldID == 11 &&
-                    sourceProductionRecord.ProductionEndTime < startDate &&
-                    outputProductionRecord.ProductionEndTime >= startDate &&
-                    outputProductionRecord.ProductionEndTime <= endDate &&
-                    sourceProductionRecord.Gauged == true
-                select new
-                {
-                    reportingCategoryName = str.ProductTypeName ?? "",
-                    proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
-                }).DefaultIfEmpty();
+                 join alcohol in db.Alcohol on sourceProductionRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
+                 from alcohol in alcohol_join.DefaultIfEmpty()
+                 join productionContent in db.ProductionContent on sourceProductionRecord.ProductionID equals productionContent.RecordID into productionContent_join
+                 from productionContent in productionContent_join.DefaultIfEmpty()
+                 join contentField in db.ContentField on productionContent.ContentFieldID equals contentField.ContentFieldID into contentField_join
+                 from contentField in contentField_join.DefaultIfEmpty()
+                 join outputProductionRecord in db.Production on productionContent.ProductionID equals outputProductionRecord.ProductionID into outputProductionRecord_join
+                 from outputProductionRecord in outputProductionRecord_join.DefaultIfEmpty()
+                 join productionType in db.ProductionType on outputProductionRecord.ProductionTypeID equals productionType.ProductionTypeID into productionType_join
+                 from productionType in productionType_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on sourceProductionRecord.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.ProductionToSpiritTypeReporting on sourceProductionRecord.ProductionID equals p2str.ProductionID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId &&
+                     sourceProductionRecord.ProductionTypeID == 2 &&
+                     outputProductionRecord.ProductionTypeID == 2 &&
+                     (sourceProductionRecord.StatusID == 1 ||
+                     sourceProductionRecord.StatusID == 2 ||
+                     sourceProductionRecord.StatusID == 3) &&
+                     contentField.ContentFieldID == 11 &&
+                     sourceProductionRecord.ProductionEndTime < startDate &&
+                     outputProductionRecord.ProductionEndTime >= startDate &&
+                     outputProductionRecord.ProductionEndTime <= endDate &&
+                     sourceProductionRecord.Gauged == true
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? "",
+                     proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                 }).DefaultIfEmpty();
 
             if (prodRes.First() != null)
             {
@@ -6670,11 +6720,12 @@ namespace WebApp.Helpers
                      sourcePurchaseRecord.PurchaseDate < endDate &&
                      outputProductionRecord.ProductionEndTime >= startDate &&
                      outputProductionRecord.ProductionEndTime <= endDate
+                     && contentField.ContentFieldName != "PurFermentedProofGal"
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? "",
                      proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
-                }).DefaultIfEmpty();
+                 }).DefaultIfEmpty();
 
             if (purRes.First() != null)
             {
@@ -6704,38 +6755,38 @@ namespace WebApp.Helpers
             // Query distilled production records transferred from storage account to processing account
             var prodRes =
                 (from sourceProductionRecord in db.Production
-                join alcohol in db.Alcohol on sourceProductionRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
-                from alcohol in alcohol_join.DefaultIfEmpty()
-                join productionContent in db.ProductionContent on sourceProductionRecord.ProductionID equals productionContent.RecordID into productionContent_join
-                from productionContent in productionContent_join.DefaultIfEmpty()
-                join contentField in db.ContentField on productionContent.ContentFieldID equals contentField.ContentFieldID into contentField_join
-                from contentField in contentField_join.DefaultIfEmpty()
-                join outputProductionRecord in db.Production on productionContent.ProductionID equals outputProductionRecord.ProductionID into outputProductionRecord_join
-                from outputProductionRecord in outputProductionRecord_join.DefaultIfEmpty()
-                join productionType in db.ProductionType on outputProductionRecord.ProductionTypeID equals productionType.ProductionTypeID into productionType_join
-                from productionType in productionType_join.DefaultIfEmpty()
-                join distiller in db.AspNetUserToDistiller on sourceProductionRecord.DistillerID equals distiller.DistillerID into distiller_join
-                from distiller in distiller_join.DefaultIfEmpty()
-                join p2str in db.ProductionToSpiritTypeReporting on sourceProductionRecord.ProductionID equals p2str.ProductionID into p2str_join
-                from p2str in p2str_join.DefaultIfEmpty()
-                join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                from str in str_join.DefaultIfEmpty()
-                where
-                    distiller.UserId == userId &&
-                    sourceProductionRecord.ProductionTypeID == 2 &&
-                    outputProductionRecord.ProductionTypeID == 3 &&
-                    (sourceProductionRecord.StatusID == 1 ||
-                    sourceProductionRecord.StatusID == 2 ||
-                    sourceProductionRecord.StatusID == 3) &&
-                    contentField.ContentFieldID == 11 &&
-                    sourceProductionRecord.ProductionEndTime < startDate &&
-                    outputProductionRecord.ProductionEndTime >= startDate &&
-                    outputProductionRecord.ProductionEndTime <= endDate
-                select new
-                {
-                    reportingCategoryName = str.ProductTypeName ?? "",
-                    proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
-                }).DefaultIfEmpty();
+                 join alcohol in db.Alcohol on sourceProductionRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
+                 from alcohol in alcohol_join.DefaultIfEmpty()
+                 join productionContent in db.ProductionContent on sourceProductionRecord.ProductionID equals productionContent.RecordID into productionContent_join
+                 from productionContent in productionContent_join.DefaultIfEmpty()
+                 join contentField in db.ContentField on productionContent.ContentFieldID equals contentField.ContentFieldID into contentField_join
+                 from contentField in contentField_join.DefaultIfEmpty()
+                 join outputProductionRecord in db.Production on productionContent.ProductionID equals outputProductionRecord.ProductionID into outputProductionRecord_join
+                 from outputProductionRecord in outputProductionRecord_join.DefaultIfEmpty()
+                 join productionType in db.ProductionType on outputProductionRecord.ProductionTypeID equals productionType.ProductionTypeID into productionType_join
+                 from productionType in productionType_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on sourceProductionRecord.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.ProductionToSpiritTypeReporting on sourceProductionRecord.ProductionID equals p2str.ProductionID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId &&
+                     sourceProductionRecord.ProductionTypeID == 2 &&
+                     outputProductionRecord.ProductionTypeID == 3 &&
+                     (sourceProductionRecord.StatusID == 1 ||
+                     sourceProductionRecord.StatusID == 2 ||
+                     sourceProductionRecord.StatusID == 3) &&
+                     contentField.ContentFieldID == 11 &&
+                     sourceProductionRecord.ProductionEndTime < startDate &&
+                     outputProductionRecord.ProductionEndTime >= startDate &&
+                     outputProductionRecord.ProductionEndTime <= endDate
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? "",
+                     proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                 }).DefaultIfEmpty();
 
             if (prodRes.First() != null)
             {
@@ -6765,37 +6816,37 @@ namespace WebApp.Helpers
             // Query distilled purchase records transferred from storage account to processing account
             var purRes =
                 (from sourcePurchaseRecord in db.Purchase
-                join alcohol in db.Alcohol on sourcePurchaseRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
-                from alcohol in alcohol_join.DefaultIfEmpty()
-                join productionContent in db.ProductionContent on sourcePurchaseRecord.PurchaseID equals productionContent.RecordID into productionContent_join
-                from productionContent in productionContent_join.DefaultIfEmpty()
-                join contentField in db.ContentField on productionContent.ContentFieldID equals contentField.ContentFieldID into contentField_join
-                from contentField in contentField_join.DefaultIfEmpty()
-                join outputProductionRecord in db.Production on productionContent.ProductionID equals outputProductionRecord.ProductionID into outputProductionRecord_join
-                from outputProductionRecord in outputProductionRecord_join.DefaultIfEmpty()
-                join productionType in db.ProductionType on outputProductionRecord.ProductionTypeID equals productionType.ProductionTypeID into productionType_join
-                from productionType in productionType_join.DefaultIfEmpty()
-                join distiller in db.AspNetUserToDistiller on sourcePurchaseRecord.DistillerID equals distiller.DistillerID into distiller_join
-                from distiller in distiller_join.DefaultIfEmpty()
-                join p2str in db.PurchaseToSpiritTypeReporting on sourcePurchaseRecord.PurchaseID equals p2str.PurchaseID into p2str_join
-                from p2str in p2str_join.DefaultIfEmpty()
-                join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                from str in str_join.DefaultIfEmpty()
-                where
-                    distiller.UserId == userId &&
-                    sourcePurchaseRecord.PurchaseTypeID == 3 &&
-                    outputProductionRecord.ProductionTypeID == 3 &&
-                    (sourcePurchaseRecord.StatusID == 1 ||
-                    sourcePurchaseRecord.StatusID == 2 ||
-                    sourcePurchaseRecord.StatusID == 3) &&
-                    sourcePurchaseRecord.PurchaseDate < endDate &&
-                    outputProductionRecord.ProductionEndTime >= startDate &&
-                    outputProductionRecord.ProductionEndTime <= endDate
-                select new
-                {
-                    reportingCategoryName = str.ProductTypeName ?? "",
-                    proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
-                }).DefaultIfEmpty();
+                 join alcohol in db.Alcohol on sourcePurchaseRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
+                 from alcohol in alcohol_join.DefaultIfEmpty()
+                 join productionContent in db.ProductionContent on sourcePurchaseRecord.PurchaseID equals productionContent.RecordID into productionContent_join
+                 from productionContent in productionContent_join.DefaultIfEmpty()
+                 join contentField in db.ContentField on productionContent.ContentFieldID equals contentField.ContentFieldID into contentField_join
+                 from contentField in contentField_join.DefaultIfEmpty()
+                 join outputProductionRecord in db.Production on productionContent.ProductionID equals outputProductionRecord.ProductionID into outputProductionRecord_join
+                 from outputProductionRecord in outputProductionRecord_join.DefaultIfEmpty()
+                 join productionType in db.ProductionType on outputProductionRecord.ProductionTypeID equals productionType.ProductionTypeID into productionType_join
+                 from productionType in productionType_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on sourcePurchaseRecord.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.PurchaseToSpiritTypeReporting on sourcePurchaseRecord.PurchaseID equals p2str.PurchaseID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId &&
+                     sourcePurchaseRecord.PurchaseTypeID == 3 &&
+                     outputProductionRecord.ProductionTypeID == 3 &&
+                     (sourcePurchaseRecord.StatusID == 1 ||
+                     sourcePurchaseRecord.StatusID == 2 ||
+                     sourcePurchaseRecord.StatusID == 3) &&
+                     sourcePurchaseRecord.PurchaseDate < endDate &&
+                     outputProductionRecord.ProductionEndTime >= startDate &&
+                     outputProductionRecord.ProductionEndTime <= endDate
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? "",
+                     proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                 }).DefaultIfEmpty();
 
             if (purRes.First() != null)
             {
@@ -6846,9 +6897,9 @@ namespace WebApp.Helpers
 
                 return header;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                throw;
+                throw e;
             }
         }
 
@@ -6863,10 +6914,10 @@ namespace WebApp.Helpers
             {
                 var results = (from rec in db.ProductionReportMaterialCategory
                                select new
-                                       {
-                                           rec.ProductionReportMaterialCategoryID,
-                                           rec.MaterialCategoryName
-                                       });
+                               {
+                                   rec.ProductionReportMaterialCategoryID,
+                                   rec.MaterialCategoryName
+                               });
                 foreach (var res in results)
                 {
                     MaterialCategory categoryInstance = new MaterialCategory();
@@ -6877,8 +6928,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                Debug.WriteLine("Error getting the list of Material Categories: " + e);
-                throw;
+                throw e;
             }
             return materialCatList;
         }
@@ -6935,7 +6985,7 @@ namespace WebApp.Helpers
                join us2Distills in db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
                from us2Distills in us2Distills_join.DefaultIfEmpty()
                where us2Distills.UserId == userId &&
-               sto2Rec.TableIdentifier == "prod" 
+               sto2Rec.TableIdentifier == "prod"
                select sto2Rec;
 
                 db.StorageToRecord.RemoveRange(queryStorag2Record);
@@ -7040,7 +7090,7 @@ namespace WebApp.Helpers
 
                 db.TaxWithdrawn.RemoveRange(queryTaxWithdrawn);
 
-                IEnumerable< Production> queryProduction =
+                IEnumerable<Production> queryProduction =
                 from Production in db.Production
                 join us2Distills in db.AspNetUserToDistiller on new { DistillerID = Production.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
                 from us2Distills in us2Distills_join.DefaultIfEmpty()

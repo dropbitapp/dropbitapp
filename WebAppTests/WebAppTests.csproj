@@ -69,6 +69,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
   </ItemGroup>
   <Choose>
@@ -87,6 +88,7 @@
     <Compile Include="Controllers\ProductionControllerTests.cs" />
     <Compile Include="Helpers\DataLayerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Testing Helpers\UserIdentity.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WebApp\WebApp.csproj">

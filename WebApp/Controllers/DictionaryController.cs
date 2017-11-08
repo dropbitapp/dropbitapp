@@ -145,8 +145,8 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.CreateSpirit(userId, spiritObject);
-                        if (returnResult)
+                        int returnResult = dl.CreateSpirit(userId, spiritObject);
+                        if (returnResult > 0)
                         {
                             string message = "Spirit dictionary record created successfully.";
                             return Json(message);
@@ -301,8 +301,8 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.CreateVendor(userId, vendorObject);
-                        if (returnResult)
+                        int returnResult = dl.CreateVendor(userId, vendorObject);
+                        if (returnResult > 0)
                         {
                             string message = "Vendor dictionary record created successfully.";
                             return Json(message);
@@ -424,8 +424,8 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.CreateStorage(userId, storageObject);
-                        if (returnResult)
+                        int returnResult = dl.CreateStorage(userId, storageObject);
+                        if (returnResult > 0)
                         {
                             string message = "Storage dictionary record created successfully.";
                             return Json(message);
@@ -538,7 +538,7 @@ namespace WebApp.Controllers
         /// <param name="rawMObject"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult CreateRawMaterial(RawMaterialObject rawMObject)
+        public JsonResult CreateRawMaterial(RawMaterialObject rawMObject, bool testUserId = false)
         {
             if (rawMObject != null)
             {
@@ -547,8 +547,8 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.CreateRawMaterial(userId, rawMObject);
-                        if (returnResult)
+                        int returnResult = dl.CreateRawMaterial(userId, rawMObject);
+                        if (returnResult > 0)
                         {
                             string message = "Raw Material dictionary record created successfully.";
                             return Json(message);

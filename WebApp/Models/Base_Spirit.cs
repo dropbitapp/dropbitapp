@@ -172,6 +172,9 @@ namespace WebApp.Models
         public virtual MaterialKindReporting MaterialKindReporting { get; set; }
     }
 
+    /// <summary>
+    /// PurchaseToSpiritTypeReporting this table maps Purchase ids with SpiritType ids from reports
+    /// </summary>
     public class PurchaseToSpiritTypeReporting
     {
         [Key, Column(Order = 0), ForeignKey("Purchase")]
