@@ -2725,6 +2725,7 @@ namespace WebApp.Helpers
                         matType.MaterialDictID = materialDictID;
                         matType.Name = "Distilled";
                         db.MaterialType.Add(matType);
+                        db.SaveChanges();
                     }
 
                     if (rawMObject.PurchaseMaterialTypes.Fermentable)
