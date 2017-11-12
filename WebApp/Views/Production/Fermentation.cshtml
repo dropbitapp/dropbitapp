@@ -409,8 +409,8 @@
                     rules: [
                         {
                             input: '#RawMaterialInput', message: 'Please Select A Batch', action: 'click', rule: function (input, commit) {
-                                var index = $('#RawMaterialInput').jqxListBox('getSelectedIndex');
-                                return index != -1;
+                                var selectedItems = $('#RawMaterialInput').jqxListBox('getSelectedItems');
+                                return selectedItems > 0 ? true : false;
                             }
                         },
                         { input: '#BatchName', message: 'Batch Name Required', action: 'blur', rule: 'required' },
