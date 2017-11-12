@@ -300,8 +300,9 @@ namespace WebApp.Helpers
             if (onHands1stMoC != null)
             {
                 procRepP1.OnHandFirstofMonth = (float)onHands1stMoC.OnHandFirstOfMonthBulk;
-                line8RunningSum += (float)procRepP1.OnHandFirstofMonth;
             }
+
+            line8RunningSum += (float)procRepP1.OnHandFirstofMonth;
 
             // 2(c) current month received bulk
             var recBulk =
@@ -331,8 +332,9 @@ namespace WebApp.Helpers
             if (recBulk != null)
             {
                 procRepP1.Recd4Process = (float)recBulk.ReceivedBulk;
-                line8RunningSum += (float)procRepP1.Recd4Process;
             }
+
+            line8RunningSum += (float)procRepP1.Recd4Process;
 
             // 9 (c) Bottled or Packaged
             var bottledPackaged =
@@ -1620,7 +1622,6 @@ namespace WebApp.Helpers
             {
                 throw (e);
             }
-
 
             return bList;
         }

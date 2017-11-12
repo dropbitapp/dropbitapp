@@ -760,7 +760,7 @@ namespace WebApp.Helpers.Tests
                 prodBottl.Quantity = 149.92f; // 150 gallons of alcohol
                 prodBottl.VolumeByWeight = 0f;
                 prodBottl.AlcoholContent = 45f; // 40%
-                prodBottl.ProofGallon = 160f; // 135 pfg
+                prodBottl.ProofGallon = 159.92f; // 159.92 pfg
                 prodBottl.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
                 prodBottl.SpiritTypeReportingID = 6; // brandy under 170
                 prodBottl.SpiritId = spiritId;
@@ -808,11 +808,11 @@ namespace WebApp.Helpers.Tests
                 DateTime start = new DateTime(2017, 09, 01);
                 DateTime end = new DateTime(2017, 09, 30);
 
+                #region Produciton
                 /* PRODUCTION REPORT */
-
                 ProdReportPart1 part1E = new ProdReportPart1();
-                part1E.ProccessingAcct = 160f;
-                part1E.ProducedTotal = 160f;
+                part1E.ProccessingAcct = 159.92f;
+                part1E.ProducedTotal = 159.92f;
                 part1E.Recd4RedistilL17 = 0f;
                 part1E.Recd4RedistilaltionL15 = 180f;
                 part1E.StorageAcct = 0f;
@@ -843,52 +843,56 @@ namespace WebApp.Helpers.Tests
 
 
                 actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                #endregion
 
+                #region Storage
                 /* STORAGE REPORT */
                 StorageReport actualStorageReportObject = new StorageReport();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "AlcoholUnder190";
                 storageReportBody.r17_TransferredToProcessingAccount = 0f;
-                storageReportBody.r18_TransferredToProductionAccount = 160f;
+                storageReportBody.r18_TransferredToProductionAccount = 180f;
                 storageReportBody.r19_TransferredToOtherBondedPremises = 0;
                 storageReportBody.r1_OnHandFirstOfMonth = 0f;
                 storageReportBody.r20_Destroyed = 0f;
                 storageReportBody.r22_OtherLosses = 0f;
                 storageReportBody.r23_OnHandEndOfMonth = 0f;
                 storageReportBody.r24_Lines7Through23 = 0f;
-                storageReportBody.r2_DepositedInBulkStorage = 160f;
+                storageReportBody.r2_DepositedInBulkStorage = 180f;
                 storageReportBody.r4_ReturnedToBulkStorage = 0f;
                 storageReportBody.r6_TotalLines1Through5 = 0f;
                 storageReportBody.r7_TaxPaid = 0f;
 
                 actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                #endregion
 
+                #region Processing
                 /* PROCESING REPORT */
                 ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
 
                 ProcessReportingPart1 processingReportP1 = new ProcessReportingPart1();
-                processingReportP1.AmtBottledPackaged = 160f;
+                processingReportP1.AmtBottledPackaged = 159.92f;
                 processingReportP1.BulkIngredients = "spirit";
                 processingReportP1.Destroyed = 0f;
                 processingReportP1.Dumped4Processing = 0f;
                 processingReportP1.Gains = 0f;
-                processingReportP1.Losses = 0.1f;
+                processingReportP1.Losses = 0.08f;
                 processingReportP1.OnHandEndofMonth = 0f;
                 processingReportP1.OnHandFirstofMonth = 0f;
-                processingReportP1.Recd4Process = 18f;
+                processingReportP1.Recd4Process = 159.92f;
                 processingReportP1.Transf2Prod4Redistil = 0f;
                 processingReportP1.Used4Redistil = 0f;
                 processingReportP1.WineMixedWithSpirit = 0f;
 
                 ProcessReportingPart2 processingReportP2 = new ProcessReportingPart2();
-                processingReportP2.AmtBottledPackaged = 160f;
+                processingReportP2.AmtBottledPackaged = 159.92f;
                 processingReportP2.Destroyed = 0f;
                 processingReportP2.Dumped4Processing = 0f;
                 processingReportP2.FinishedProduct = "bottled";
                 processingReportP2.InventoryOverage = 0f;
                 processingReportP2.InventoryShortage = 0f;
-                processingReportP2.OnHandEndofMonth = 160f;
+                processingReportP2.OnHandEndofMonth = 159.92f;
                 processingReportP2.OnHandFirstofMonth = 0f;
                 processingReportP2.Recd4Process = 0f;
                 processingReportP2.RecordedLosses = 0f;
@@ -907,7 +911,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Cocktail = 0f;
                 processingReportP4.DomesticWhiskey160Under = 0f;
                 processingReportP4.DomesticWhiskeyOver160 = 0f;
-                processingReportP4.Gin = 160f;
+                processingReportP4.Gin = 159.92f;
                 processingReportP4.ImportedWhiskeyCanadian = 0f;
                 processingReportP4.ImportedWhiskeyIrish = 0f;
                 processingReportP4.ImportedWhiskeyScotch = 0f;
@@ -924,6 +928,8 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Vodka = 0f;
 
                 actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+                #endregion // end of processing region
+
                 #endregion
 
                 // Assert
@@ -940,7 +946,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1[0].ProccessingAcct);
                 Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1[0].ProducedTotal);
                 Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1[0].Recd4RedistilL17);
-                Assert.AreEqual(part1E.Recd4RedistilaltionL15, actualProdReportObject.Part1[0].Recd4RedistilaltionL15);
+                Assert.AreEqual(part1E.Recd4RedistilaltionL15, actualProdReportObject.Part1[1].Recd4RedistilaltionL15);
                 Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1[0].StorageAcct);
                 Assert.AreEqual(part1E.SpiritCatName, actualProdReportObject.Part1[0].SpiritCatName);
                 Assert.AreEqual(part1E.SpiritTypeReportingID, actualProdReportObject.Part1[0].SpiritTypeReportingID);

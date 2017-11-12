@@ -80,7 +80,7 @@ namespace WebApp.Helpers
     {
         public string BulkIngredients { get; set; } // either wine or spirit
         public float OnHandFirstofMonth { get; set; }
-        public float Recd4Process { get; set; } // Line 2 for Spirit of Part 1received for Processing, for spirit this value comes from production and/or storage
+        public float Recd4Process { get; set; } // Line 2 for Spirit of Part 1 received for Processing, for spirit this value comes from production and/or storage
         public float WineMixedWithSpirit { get; set; }
         public float Dumped4Processing { get; set; }
         public float Gains { get; set; }
