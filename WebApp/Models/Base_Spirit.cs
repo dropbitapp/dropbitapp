@@ -40,7 +40,7 @@ namespace WebApp.Models
     {
         [Key]
         public int TaxWithdrawnID { get; set; }
-        [Column(Order =  1), ForeignKey ("Production")]
+        [Column(Order = 1), ForeignKey("Production")]
         public int ProductionID { get; set; }
         public float Value { get; set; }
         public DateTime DateOfSale { get; set; } // date when the sale of the spirit has happened
@@ -56,7 +56,7 @@ namespace WebApp.Models
     {
         [Key]
         public int ProductionContentID { get; set; }
-        [Column(Order = 1), ForeignKey ("Production")]
+        [Column(Order = 1), ForeignKey("Production")]
         public int ProductionID { get; set; }
         public int RecordID { get; set; } // this could be either Production or Purchase ID. It is determined by ProductionRecord column in the table.
         [Column(Order = 4), ForeignKey("ContentField")]
@@ -97,9 +97,9 @@ namespace WebApp.Models
     {
         [Key]
         public int ProdRepMatCat2MaterialKindID { get; set; }
-        [Column(Order =1), ForeignKey("MaterialKindReporting")]
+        [Column(Order = 1), ForeignKey("MaterialKindReporting")]
         public int MaterialKindReportingID { get; set; }
-        [Column(Order =2), ForeignKey("ProductionReportMaterialCategory")]
+        [Column(Order = 2), ForeignKey("ProductionReportMaterialCategory")]
         public int ProductionReportMaterialCategoryID { get; set; }
 
         public virtual ProductionReportMaterialCategory ProductionReportMaterialCategory { get; set; }
@@ -164,12 +164,10 @@ namespace WebApp.Models
         [Key, Column(Order = 1), ForeignKey("SpiritTypeReporting")]
         public int SpiritTypeReportingID { get; set; }
 
-        [Key, Column(Order = 2), ForeignKey("MaterialKindReporting")]
         public int MaterialKindReportingID { get; set; }
 
         public virtual Production Production { get; set; }
         public virtual SpiritTypeReporting SpiritTypeReporting { get; set; }
-        public virtual MaterialKindReporting MaterialKindReporting { get; set; }
     }
 
     /// <summary>
@@ -348,7 +346,7 @@ namespace WebApp.Models
     public class PurchaseHist
     {
         [Key]
-        public  int PurchaseHistID { get; set; }
+        public int PurchaseHistID { get; set; }
         public int PurchaseID { get; set; }
         public int F2HID { get; set; }
         public string F2HValue { get; set; } // here, we are casting everything to a string, even though it is of different types.
@@ -368,7 +366,7 @@ namespace WebApp.Models
         public int PurchaseID { get; set; }
         public string PurchaseName { get; set; } // purchase batch name
         public float Price { get; set; }
-        public string Vendor { get; set; } 
+        public string Vendor { get; set; }
         public float Volume { get; set; }
         public float Weight { get; set; }
         public float Alcohol { get; set; }
@@ -377,7 +375,7 @@ namespace WebApp.Models
         public DateTime PurchaseDate { get; set; }
         [MaxLength(1024)]
         public string Note { get; set; }
-        public string State { get; set; } 
+        public string State { get; set; }
         public string Status { get; set; }
         public bool Gauged { get; set; } // this value is showing whether the particular record has been gauged so it shows up in reporting
         public int UserID { get; set; } // user that made the change
@@ -423,7 +421,7 @@ namespace WebApp.Models
         public float Volume { get; set; }
         public float Weight { get; set; }
         public float Alcohol { get; set; }
-        public float Proof { get; set; }   
+        public float Proof { get; set; }
         public string Status { get; set; }
         public string State { get; set; }
         [MaxLength(1024)]
@@ -614,7 +612,7 @@ namespace WebApp.Models
         public int MaterialDictID { get; set; }
         public string Name { get; set; } // Material Name could be grapes, pomace, Sugar, Vodka, Honey, Anise, etc...
         public int UnitOfMeasurementID { get; set; }
-        [MaxLength (1024)]
+        [MaxLength(1024)]
         public string Note { get; set; }
         [ForeignKey("Distiller")]
         public int DistillerID { get; set; }
@@ -632,7 +630,7 @@ namespace WebApp.Models
     {
         [Key ForeignKey("MaterialDict") Column(Order = 0)]
         public int MaterialDictID { get; set; }
-        [ForeignKey("ProductionReportMaterialCategory") Column(Order =1)]
+        [ForeignKey("ProductionReportMaterialCategory") Column(Order = 1)]
         public int ProductionReportMaterialCategoryID { get; set; }
 
         public virtual MaterialDict MaterialDict { get; set; }
@@ -657,7 +655,7 @@ namespace WebApp.Models
     public class PurchaseType
     {
         [Key]
-        public int PurchaseTypeID { get; set; } 
+        public int PurchaseTypeID { get; set; }
         public string Name { get; set; } // fermentabe, fermented, distilled, supply, additive
     }
 
