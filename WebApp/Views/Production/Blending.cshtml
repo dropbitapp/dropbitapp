@@ -598,10 +598,12 @@
                             }
                         },
                         {
+                            // 4 5 6 7 9
                             input: "#ReportingMaterialKindDropDown", message: "Please Select Material Kind", action: 'blur', rule: function (input, commit) {
                                 var index = $("#ReportingMaterialKindDropDown").jqxDropDownList('getSelectedIndex');
+                                var spiritTypeIndex = $("#ReportingSpiritTypeDropDown").jqxDropDownList('getSelectedIndex');
                                 var item = $("#ReportingSpiritTypeDropDown").jqxDropDownList('getSelectedItem');
-                                if (index != -1 || item.label == 'Wine') {
+                                if ((spiritTypeIndex === 4 || spiritTypeIndex === 5 || spiritTypeIndex === 6 || spiritTypeIndex === 4 || spiritTypeIndex === 9) || index !== -1 || item.label === 'Wine') {
                                     return true;
                                 }
                                 return false;
