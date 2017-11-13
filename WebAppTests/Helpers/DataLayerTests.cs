@@ -759,10 +759,10 @@ namespace WebApp.Helpers.Tests
                 prodBottl.ProductionType = "Bottling";
                 prodBottl.Quantity = 149.92f; // 150 gallons of alcohol
                 prodBottl.VolumeByWeight = 0f;
-                prodBottl.AlcoholContent = 45f; // 40%
+                prodBottl.AlcoholContent = 45f; // 45%
                 prodBottl.ProofGallon = 159.92f; // 159.92 pfg
                 prodBottl.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
-                prodBottl.SpiritTypeReportingID = 6; // brandy under 170
+                prodBottl.SpiritTypeReportingID = 6; // Gin
                 prodBottl.SpiritId = spiritId;
                 prodO.ProductionTypeId = 4;
 
@@ -1068,42 +1068,6 @@ namespace WebApp.Helpers.Tests
             }
         }
 
-        //[TestMethod()]
-        //public void GetUnitListTest()
-        //{
-        //    // Arrange
-
-        //    // Act
-        //    List<UnitObject> result = _dl.GetUnitList();
-
-        //    // Assert
-        //    Assert.IsNotNull(result, "GetUnitList result returned is null");
-        //}
-
-        //[TestMethod()]
-        //public void GetMaterialCategoryList()
-        //{
-        //    // Arrange
-
-        //    // Act
-        //    List<MaterialCategory> result = _dl.GetMaterialCategoryList();
-
-        //    // Assert
-        //    Assert.IsNotNull(result, "GetUnitList result returned is null");
-        //}
-
-        //[TestMethod()]
-        //public void GetReportingSpiritTypesTest()
-        //{
-        //    // Arrange
-
-        //    // Act
-        //    List<SpiritToKindListObject> result = _dl.GetReportingSpiritTypes();
-
-        //    // Assert
-        //    Assert.IsNotNull(result, "GetReportingSpiritTypesTest result returned is null");
-        //}
-
         [TestMethod()]
         public void CreateSpiritTest()
         {
@@ -1206,85 +1170,6 @@ namespace WebApp.Helpers.Tests
             TestRecordCleanup(result, Table.Storage);
 
         }
-
-        //[TestMethod()]
-        //public void UpdateProofTest()
-        //{
-        //    // Arrange
-        //    float newProof = 20.0F;
-        //    float oldProof = 10.0F;
-
-        //    Proof proof = new Proof()
-        //    {
-        //        Value = 10.0F
-        //    };
-
-        //    _db.Proof.Add(proof);
-        //    _db.SaveChanges();
-
-        //    // Act
-        //    float result = _dl.UpdateProof(proof.ProofID, newProof);
-        //    var proofRec =
-        //            (from res in _db.Proof
-        //             where res.ProofID == proof.ProofID &&
-        //                   res.Value == newProof
-        //             select res).FirstOrDefault();
-
-        //    _db.Proof.Remove(proofRec);
-        //    _db.SaveChanges();
-
-        //    // Assert
-        //    Assert.AreEqual(oldProof, result, 0.1F);
-        //    Assert.IsNotNull(proofRec);
-        //}
-
-        //public void UpdateStorageTest()
-        //{
-        //    // Arrange
-        //    int distillerId = _dl.GetDistillerId(1);
-
-        //    Storage storage = new Storage()
-        //    {
-        //        Name = "TestStorage",
-        //        Capacity = 500,
-        //        SerialNumber = "123",
-        //        Note = "TestNote",
-        //        DistillerID = distillerId
-        //    };
-
-        //    _db.Storage.Add(storage);
-        //    _db.SaveChanges();
-
-        //    StorageObject storageObject = new StorageObject();
-        //    storageObject.StorageId = storage.StorageID;
-        //    storageObject.Capacity = storage.Capacity;
-        //    storageObject.SerialNumber = storage.SerialNumber;
-        //    storageObject.Note = storage.Note;
-        //    storageObject.StorageName = storage.Name;
-
-        //    // Act
-        //    bool result = _dl.UpdateStorage(1, storageObject);
-
-        //    var rec =
-        //        (
-        //            from res in _db.Storage
-        //            where res.StorageID == storage.StorageID &&
-        //                  res.Name == storage.Name &&
-        //                  res.DistillerID == storage.DistillerID &&
-        //                  res.Capacity == storage.Capacity &&
-        //                  res.Note == storage.Note &&
-        //                  res.SerialNumber == storage.SerialNumber
-        //            select res).FirstOrDefault();
-
-        //    var queryRes = rec;
-
-        //    _db.Storage.Remove(rec);
-        //    _db.SaveChanges();
-
-        //    // Assert
-        //    Assert.IsTrue(result);
-        //    Assert.IsNotNull(queryRes);
-        //}
 
         [TestMethod()]
         public void GetStorageListTest()

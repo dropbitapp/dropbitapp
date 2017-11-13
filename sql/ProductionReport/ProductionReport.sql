@@ -63,7 +63,7 @@ and prodContent.ContentFieldID in (16, 18, 20, 22)
 			spiritTypeRep.SpiritTypeReportingID
 			from PurchaseToSpiritTypeReporting as pur2SpiritType 
 			left join SpiritTypeReporting as spiritTypeRep on spiritTypeRep.SpiritTypeReportingID = pur2SpiritType.SpiritTypeReportingID
-			where pur2SpiritType.PurchaseID = 499
+			where pur2SpiritType.PurchaseID = 287
 			-- increment by Proof value from the record from the previous step
 	
 	-- case 2: if RecordID(s) is a production record
@@ -73,7 +73,7 @@ and prodContent.ContentFieldID in (16, 18, 20, 22)
 			from Production as prod 
 			left join ProductionToSpiritTypeReporting as pur2SpiritType on pur2SpiritType.ProductionID = prod.ProductionID
 			left join SpiritTypeReporting as spiritTypeRep on spiritTypeRep.SpiritTypeReportingID = pur2SpiritType.SpiritTypeReportingID
-			where prod.ProductionID = 498 and prod.Gauged = 1
+			where prod.ProductionID = 713 and prod.Gauged = 1
 			-- increment by Proof value from the record from the previous step
 
        
