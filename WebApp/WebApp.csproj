@@ -254,6 +254,10 @@
     <Compile Include="Migrations\201709240441231_recreatingTable.Designer.cs">
       <DependentUpon>201709240441231_recreatingTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201711130053028_DisableForeignKey.cs" />
+    <Compile Include="Migrations\201711130053028_DisableForeignKey.Designer.cs">
+      <DependentUpon>201711130053028_DisableForeignKey.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
@@ -1223,6 +1227,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201709240441231_recreatingTable.resx">
       <DependentUpon>201709240441231_recreatingTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201711130053028_DisableForeignKey.resx">
+      <DependentUpon>201711130053028_DisableForeignKey.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
