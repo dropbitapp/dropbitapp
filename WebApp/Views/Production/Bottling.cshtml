@@ -690,8 +690,8 @@
                         { input: '#BatchNameInput', message: 'Batch Name Required', action: 'blur', rule: 'required' },
                         {
                             input: "#BlendList", message: "Please Pick A Batch for Bottling", action: 'click', rule: function (input, commit) {
-                                var selectedItems = $('#BlendList').jqxListBox('getSelectedItems');
-                                return selectedItems > 0 ? true : false;
+                                var index = $("#BlendList").jqxListBox('getSelectedIndex');
+                                return index != -1;
                             }
                         },
                         {
