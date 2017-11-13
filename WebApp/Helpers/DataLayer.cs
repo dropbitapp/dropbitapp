@@ -5659,20 +5659,23 @@ namespace WebApp.Helpers
                 }
 
                 // Deal with parts 2 through 4 Start
-                var materialKind = part2Thru4List.Find(x => x.MaterialKindReportingID == rec.MaterialKindReportingID);
+                if (rec.MaterialKindReportingID > 0)
+                {
+                    var materialKind = part2Thru4List.Find(x => x.MaterialKindReportingID == rec.MaterialKindReportingID);
 
-                if (materialKind == null)
-                {
-                    ProdReportParts2Through4 prodRP2T5 = new ProdReportParts2Through4();
-                    prodRP2T5.KindOfMaterial = rec.MaterialKindReportingName;
-                    prodRP2T5.MaterialKindReportingID = (int)rec.MaterialKindReportingID;
-                    prodRP2T5.ProofGallons = (float)rec.Proof;
-                    prodRP2T5.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
-                    part2Thru4List.Add(prodRP2T5);
-                }
-                else
-                {
-                    materialKind.ProofGallons += (float)rec.Proof;
+                    if (materialKind == null)
+                    {
+                        ProdReportParts2Through4 prodRP2T5 = new ProdReportParts2Through4();
+                        prodRP2T5.KindOfMaterial = rec.MaterialKindReportingName;
+                        prodRP2T5.MaterialKindReportingID = (int)rec.MaterialKindReportingID;
+                        prodRP2T5.ProofGallons = (float)rec.Proof;
+                        prodRP2T5.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
+                        part2Thru4List.Add(prodRP2T5);
+                    }
+                    else
+                    {
+                        materialKind.ProofGallons += (float)rec.Proof;
+                    }
                 }
             }
 
@@ -6610,6 +6613,11 @@ namespace WebApp.Helpers
                      purchase.PurchaseDate >= startDate &&
                      purchase.PurchaseDate <= endDate
                      && contentField.ContentFieldName != "PurFermentedProofGal"
+                     && contentField.ContentFieldName != "PurDistilledProofGal"
+                     && contentField.ContentFieldName != "ProdDistilledProofGal"
+                     && contentField.ContentFieldName != "ProdBlendedProofGal"
+                     && contentField.ContentFieldName != "ProdFermentedProofGal"
+
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? String.Empty,
@@ -6736,6 +6744,10 @@ namespace WebApp.Helpers
                      outputProductionRecord.ProductionEndTime >= startDate &&
                      outputProductionRecord.ProductionEndTime <= endDate
                      && contentField.ContentFieldName != "PurFermentedProofGal"
+                     && contentField.ContentFieldName != "PurDistilledProofGal"
+                     && contentField.ContentFieldName != "ProdDistilledProofGal"
+                     && contentField.ContentFieldName != "ProdBlendedProofGal"
+                     && contentField.ContentFieldName != "ProdFermentedProofGal"
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,

@@ -817,7 +817,7 @@ namespace WebApp.Helpers.Tests
                 part1E.Recd4RedistilaltionL15 = 180f;
                 part1E.StorageAcct = 0f;
                 part1E.SpiritCatName = "Gin";
-                part1E.SpiritTypeReportingID = 3;
+                part1E.SpiritTypeReportingID = 6;
                 part1E.UnfinishedSpiritsEndOfQuarterL17 = 0f;
 
                 ProdReportParts2Through4 part2thru4 = new ProdReportParts2Through4();
@@ -880,7 +880,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP1.Losses = 0.08f;
                 processingReportP1.OnHandEndofMonth = 0f;
                 processingReportP1.OnHandFirstofMonth = 0f;
-                processingReportP1.Recd4Process = 159.92f;
+                processingReportP1.Recd4Process = 160f;
                 processingReportP1.Transf2Prod4Redistil = 0f;
                 processingReportP1.Used4Redistil = 0f;
                 processingReportP1.WineMixedWithSpirit = 0f;
@@ -911,7 +911,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Cocktail = 0f;
                 processingReportP4.DomesticWhiskey160Under = 0f;
                 processingReportP4.DomesticWhiskeyOver160 = 0f;
-                processingReportP4.Gin = 159.92f;
+                processingReportP4.Gin = 149.92f;
                 processingReportP4.ImportedWhiskeyCanadian = 0f;
                 processingReportP4.ImportedWhiskeyIrish = 0f;
                 processingReportP4.ImportedWhiskeyScotch = 0f;
@@ -953,22 +953,18 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part1E.UnfinishedSpiritsEndOfQuarterL17, actualProdReportObject.Part1[0].UnfinishedSpiritsEndOfQuarterL17);
 
                 // verify Production report Part 2 trough 4
-                Assert.AreEqual(part2thru4.KindOfMaterial, actualProdReportObject.Part2Through4[0].KindOfMaterial);
-                Assert.AreEqual(part2thru4.MaterialKindReportingID, actualProdReportObject.Part2Through4[0].MaterialKindReportingID);
-                Assert.AreEqual(part2thru4.NewCoop, actualProdReportObject.Part2Through4[0].NewCoop);
-                Assert.AreEqual(part2thru4.UsedCoop, actualProdReportObject.Part2Through4[0].UsedCoop);
-                Assert.AreEqual(part2thru4.ProofGallons, actualProdReportObject.Part2Through4[0].ProofGallons);
-                Assert.AreEqual(part2thru4.SpiritTypeReportingID, actualProdReportObject.Part2Through4[0].SpiritTypeReportingID);
-                Assert.AreEqual(part2thru4.Tanks, actualProdReportObject.Part2Through4[0].Tanks);
+                Assert.AreEqual(0, actualProdReportObject.Part2Through4.Count);
 
                 // verify part 5
-                Assert.AreEqual(0, actualProdReportObject.part5List.Count);
+                Assert.AreEqual(part5.KindofSpirits, actualProdReportObject.part5List[0].KindofSpirits);
+                Assert.AreEqual(part5.Proof, actualProdReportObject.part5List[0].Proof);
 
                 // verify Production report Part 6
-                Assert.AreEqual(part6.KindOfMaterial, actualProdReportObject.ProdReportPart6[0].KindOfMaterial);
-                Assert.AreEqual(part6.ProdReportMaterialCategoryID, actualProdReportObject.ProdReportPart6[0].ProdReportMaterialCategoryID);
-                Assert.AreEqual(part6.Volume, actualProdReportObject.ProdReportPart6[0].Volume);
-                Assert.AreEqual(part6.Weight, actualProdReportObject.ProdReportPart6[0].Weight);
+                Assert.AreEqual(0, actualProdReportObject.ProdReportPart6.Count);
+                //Assert.AreEqual(part6.KindOfMaterial, actualProdReportObject.ProdReportPart6[0].KindOfMaterial);
+                //Assert.AreEqual(part6.ProdReportMaterialCategoryID, actualProdReportObject.ProdReportPart6[0].ProdReportMaterialCategoryID);
+                //Assert.AreEqual(part6.Volume, actualProdReportObject.ProdReportPart6[0].Volume);
+                //Assert.AreEqual(part6.Weight, actualProdReportObject.ProdReportPart6[0].Weight);
                 #endregion
 
                 #region Storage Report

@@ -36,7 +36,7 @@ namespace WebApp.Controllers
                 {
                     try
                     {
-                        bool returnResult = dl.RemoveRecordsFromDBForUser(7);
+                        bool returnResult = dl.RemoveRecordsFromDBForUser(userId);
                     }
                     catch
                     {
