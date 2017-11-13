@@ -548,7 +548,7 @@
                             {
                                 input: "#DistillationSourceBatchListBox", message: "Please Select A Batch", action: 'click', rule: function (input, commit) {
                                     var selectedItems = $('#DistillationSourceBatchListBox').jqxListBox('getSelectedItems');
-                                    return selectedItems > 0 ? true : false;
+                                    return selectedItems.length > 0 ? true : false;
                                 }
                             },
                             { input: '#BatchName', message: 'Batch Name Required', action: 'blur', rule: 'required' },
