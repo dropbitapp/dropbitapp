@@ -16,6 +16,7 @@ namespace WebApp.Models
         public int ProcessingReportTypeID { get; set; }
         public string ProcessingReportTypeName { get; set; }
     }
+
     /// <summary>
     /// Stores serial numbers that are assigned to a purchase or production record at the time of gauging
     /// </summary>

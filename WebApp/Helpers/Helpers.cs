@@ -10,7 +10,8 @@ namespace WebApp.Helpers
     {
         public ReportHeader Header { get; set; }
         public List<ProdReportPart1> Part1 { get; set; }
-        public List<ProdReportParts2Through5> Part2Through5 { get; set; }
+        public List<ProdReportParts2Through4> Part2Through4 { get; set; }
+        public List<ProdReportPart5> part5List { get; set; }
         public List<ProdReportPart6> ProdReportPart6 { get; set; }
     }
 
@@ -41,7 +42,7 @@ namespace WebApp.Helpers
         public float UnfinishedSpiritsEndOfQuarterL17 { get; set; }
     }
 
-    public class ProdReportParts2Through5
+    public class ProdReportParts2Through4
     {
         public string KindOfMaterial { get; set; }
         public float ProofGallons { get; set; }
@@ -50,6 +51,12 @@ namespace WebApp.Helpers
         public bool NewCoop { get; set; } // new cooperage - used only in whiskey production
         public bool UsedCoop { get; set; } // used cooperage - used only in whiskey production
         public bool Tanks { get; set; } // tanks- used only in whiskey production
+    }
+
+    public class ProdReportPart5
+    {
+        public string KindofSpirits { get; set; }
+        public float Proof { get; set; }
     }
 
     public class ProdReportPart6
@@ -73,7 +80,7 @@ namespace WebApp.Helpers
     {
         public string BulkIngredients { get; set; } // either wine or spirit
         public float OnHandFirstofMonth { get; set; }
-        public float Recd4Process { get; set; } // Line 2 for Spirit of Part 1received for Processing, for spirit this value comes from production and/or storage
+        public float Recd4Process { get; set; } // Line 2 for Spirit of Part 1 received for Processing, for spirit this value comes from production and/or storage
         public float WineMixedWithSpirit { get; set; }
         public float Dumped4Processing { get; set; }
         public float Gains { get; set; }

@@ -30,4 +30,8 @@ sourcePurchaseRecord.PurchaseDate <= '09/01/2017'
 and outputProductionRecord.ProductionEndTime >= '09/01/2017'
 and outputProductionRecord.ProductionEndTime <= '09/30/2017'
 and contentField.ContentFieldName ! = 'PurFermentedProofGal'
+and contentField.ContentFieldName ! = 'PurDistilledProofGal'
+and contentField.ContentFieldName ! = 'ProdDistilledProofGal'
+and contentField.ContentFieldName ! = 'ProdBlendedProofGal'
+and contentField.ContentFieldName ! = 'ProdFermentedProofGal'
 
