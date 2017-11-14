@@ -547,8 +547,8 @@
                         rules: [
                             {
                                 input: "#DistillationSourceBatchListBox", message: "Please Select A Batch", action: 'click', rule: function (input, commit) {
-                                    var index = $("#DistillationSourceBatchListBox").jqxListBox('getSelectedIndex');
-                                    return index != -1;
+                                    var selectedItems = $('#DistillationSourceBatchListBox').jqxListBox('getSelectedItems');
+                                    return selectedItems.length > 0 ? true : false;
                                 }
                             },
                             { input: '#BatchName', message: 'Batch Name Required', action: 'blur', rule: 'required' },

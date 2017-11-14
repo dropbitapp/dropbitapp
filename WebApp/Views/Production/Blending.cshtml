@@ -539,8 +539,8 @@
                         },
                         {
                             input: "#DistilList", message: "Please Select Distilled Batch", action: 'click', rule: function (input, commit) {
-                                var index = $("#DistilList").jqxListBox('getSelectedIndex');
-                                return index != -1;
+                                var selectedItems = $('#DistilList').jqxListBox('getSelectedItems');
+                                return selectedItems.length > 0 ? true : false;
                             }
                         },
                         { input: '#BatchName', message: 'Batch Name Required', action: 'blur', rule: 'required' },
