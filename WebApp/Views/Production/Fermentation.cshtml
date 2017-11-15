@@ -374,9 +374,7 @@
                     width: '175px',
                     autoDropDownHeight: true,
                     autoOpen: false,
-                    placeHolder: '',
-                    disabled: true,
-                    selectedIndex: 10
+                    placeHolder: ''
                 });
                 $('#MatBurnDwnDialog').jqxWindow({
                     width: '30%',
@@ -404,12 +402,6 @@
                     onSuccess: function () {
                         _createRecord();
                         genericWorkflowHelper.emptyControls();
-                        // Reset SpiritType dropdown to "Wine" after record creation
-                        // Note: selectIndex doesn't work when dropdown is disabled
-                        let $dropDown = $('#ReportingSpiritTypeDropDown');
-                        $dropDown.jqxDropDownList({ disabled: false });
-                        $dropDown.jqxDropDownList('selectIndex', 10);
-                        $dropDown.jqxDropDownList({ disabled: true });
                     },
                     onError: function () {
                         alert('Please complete filling out the form');
@@ -417,8 +409,8 @@
                     rules: [
                         {
                             input: '#RawMaterialInput', message: 'Please Select A Batch', action: 'click', rule: function (input, commit) {
-                                var index = $('#RawMaterialInput').jqxListBox('getSelectedIndex');
-                                return index != -1;
+                                var selectedItems = $('#RawMaterialInput').jqxListBox('getSelectedItems');
+                                return selectedItems.length > 0 ? true : false;
                             }
                         },
                         { input: '#BatchName', message: 'Batch Name Required', action: 'blur', rule: 'required' },
@@ -798,7 +790,9 @@
                         {
                             text: 'Batch Name',
                             dataField: 'BatchName',
-                            width: '10%'
+                            cellsAlign: 'center',
+                            align: 'center',
+                            width: '16%'
                         },
                         {
                             text: 'Date/Time',

@@ -164,7 +164,7 @@
                 var producedTotals = 0; // line 14
                 var unfinishedTotal = 0; //line 17(b)
 
-                var isUnknownMaterial = false; // this variable tracks whether RAw Material Used is not on the list of existing item in the Production Report, Part 6.
+                var isUnknownMaterial = false; // this variable tracks whether Raw Material Used is not on the list of existing item in the Production Report, Part 6.
 
                 var unknownMaterialsList = []; // this array temporarily holds the list of unknown materials to go over through again.
 
@@ -372,98 +372,98 @@
                 // update totals for line 14 column "l"
 
                 //grisha - todo: this could potentially be moved to a separate function
-                for ( var i = 0; i < result.Part2Through5.length; i++ ) {
-                    if ( result.Part2Through5[i].KindOfMaterial === "Grain" ) //grain
+                for ( var i = 0; i < result.Part2Through4.length; i++ ) {
+                    if ( result.Part2Through4[i].KindOfMaterial === "Grain" ) //grain
                     {
-                        $( '#p2_1b_GrainProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p2_1b_GrainProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Fruit" ) //fruit
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Fruit" ) //fruit
                     {
-                        $( '#p2_2b_FruitProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p2_2b_FruitProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Molasses" ) //Molasses
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Molasses" ) //Molasses
                     {
-                        $( '#p2_3b_MolassesProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p2_3b_MolassesProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "EthylSulfate" ) //EthylSulfate
+                    else if ( result.Part2Through4[i].KindOfMaterial === "EthylSulfate" ) //EthylSulfate
                     {
-                        $( '#p2_4b_EthylSulfateProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p2_4b_EthylSulfateProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "EthyleneGas" ) //EthyleneGas
+                    else if ( result.Part2Through4[i].KindOfMaterial === "EthyleneGas" ) //EthyleneGas
                     {
-                        $( '#p2_5b_EthyleneGasProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p2_5b_EthyleneGasProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "SulphiteLiquor" ) //SulphiteLiquor
+                    else if ( result.Part2Through4[i].KindOfMaterial === "SulphiteLiquor" ) //SulphiteLiquor
                     {
-                        $( '#p2_6b_SulphiteLiquorsProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p2_6b_SulphiteLiquorsProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "FromRedistillation" ) //FromRedistillation
+                    else if ( result.Part2Through4[i].KindOfMaterial === "FromRedistillation" ) //FromRedistillation
                     {
-                        $( '#p2_7b_FromRedistillationProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p2_7b_FromRedistillationProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Bourbon-New-Cooperage" ) //Bourbon-New-Cooperage
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Bourbon-New-Cooperage" ) //Bourbon-New-Cooperage
                     {
-                        $( '#p3_1b_BourbonProofNewCooperage' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_1b_BourbonProofNewCooperage' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Bourbon-Used-Cooperage" ) //Bourbon-Used-Cooperage
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Bourbon-Used-Cooperage" ) //Bourbon-Used-Cooperage
                     {
-                        $( '#p3_1c_BourbonProofUsedCooperage' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_1c_BourbonProofUsedCooperage' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Bourbon-Deposited-in-Tanks" ) //Bourbon-Deposited-in-Tanks
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Bourbon-Deposited-in-Tanks" ) //Bourbon-Deposited-in-Tanks
                     {
-                        $( '#p3_1d_BourbonProofDepositedInTanks' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_1d_BourbonProofDepositedInTanks' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Corn-New-Cooperage" ) //Corn-New-Cooperage
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Corn-New-Cooperage" ) //Corn-New-Cooperage
                     {
-                        $( '#p3_2b_CornProofNewCooperage' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_2b_CornProofNewCooperage' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Corn-Used-Cooperage" ) //Corn-Used-Cooperage
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Corn-Used-Cooperage" ) //Corn-Used-Cooperage
                     {
-                        $( '#p3_2c_CornProofUsedCooperage' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_2c_CornProofUsedCooperage' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Corn-Deposited-in-Tanks" ) //Corn-Deposited-in-Tanks
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Corn-Deposited-in-Tanks" ) //Corn-Deposited-in-Tanks
                     {
-                        $( '#p3_2d_CornProofDepositedInTanks' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_2d_CornProofDepositedInTanks' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Rye-New-Cooperage" ) //Rye-New-Cooperage
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Rye-New-Cooperage" ) //Rye-New-Cooperage
                     {
-                        $( '#p3_3b_RyeProofNewCoooperage' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_3b_RyeProofNewCoooperage' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Rye-Used-Cooperage" ) //Rye-Used-Cooperage
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Rye-Used-Cooperage" ) //Rye-Used-Cooperage
                     {
-                        $( '#p3_3c_RyeProofUsedCooperage' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_3c_RyeProofUsedCooperage' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === "Rye-Deposited-in-Tanks" ) //Rye-Deposited-in-Tanks
+                    else if ( result.Part2Through4[i].KindOfMaterial === "Rye-Deposited-in-Tanks" ) //Rye-Deposited-in-Tanks
                     {
-                        $( '#p3_3d_RyeProofDepositedInTanks' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_3d_RyeProofDepositedInTanks' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === 'Light-New-Cooperage' ) //Light-New-Cooperage
+                    else if ( result.Part2Through4[i].KindOfMaterial === 'Light-New-Cooperage' ) //Light-New-Cooperage
                     {
-                        $( '#p3_4b_LightProofNewCooperage' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_4b_LightProofNewCooperage' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === 'Light-Used-Cooperage' ) //Light-Used-Cooperage
+                    else if ( result.Part2Through4[i].KindOfMaterial === 'Light-Used-Cooperage' ) //Light-Used-Cooperage
                     {
-                        $( '#p3_4c_LightProofUsedCooperage' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_4c_LightProofUsedCooperage' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === 'Light-Deposited-in-Tanks' ) //Light-Deposited-in-Tanks
+                    else if ( result.Part2Through4[i].KindOfMaterial === 'Light-Deposited-in-Tanks' ) //Light-Deposited-in-Tanks
                     {
-                        $( '#p3_4d_LightProofDepositedInTanks' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p3_4d_LightProofDepositedInTanks' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === 'GrapeBrandy' ) //GrapeBrandy
+                    else if ( result.Part2Through4[i].KindOfMaterial === 'GrapeBrandy' ) //GrapeBrandy
                     {
-                        $( '#p4_1b_GrapeBrandyProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p4_1b_GrapeBrandyProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === 'AllOtherBrandy' ) //AllOtherBrandy
+                    else if ( result.Part2Through4[i].KindOfMaterial === 'AllOtherBrandy' ) //AllOtherBrandy
                     {
-                        $( '#p4_2b_AllOtherBrandyProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p4_2b_AllOtherBrandyProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === 'NeutralGrapeBrandy' ) //NeutralGrapeBrandy
+                    else if ( result.Part2Through4[i].KindOfMaterial === 'NeutralGrapeBrandy' ) //NeutralGrapeBrandy
                     {
-                        $( '#p4_3b_NeutralGrapeBrandyProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p4_3b_NeutralGrapeBrandyProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
-                    else if ( result.Part2Through5[i].KindOfMaterial === 'AllOtherNeutralBrandy' ) //AllOtherNeutralBrandy
+                    else if ( result.Part2Through4[i].KindOfMaterial === 'AllOtherNeutralBrandy' ) //AllOtherNeutralBrandy
                     {
-                        $( '#p4_4b_AllOtherNeutralBrandyProof' ).val( result.Part2Through5[i].ProofGallons );
+                        $( '#p4_4b_AllOtherNeutralBrandyProof' ).val( result.Part2Through4[i].ProofGallons );
                     }
                     else {
                         // this case is when new custom Material Kinds are being used.
@@ -476,6 +476,14 @@
                                 2.2 if empty field is taken, create a new field and assign value to it.
                         */
                     }
+                }
+
+                // fill out part 5 of Production report
+                for ( var k = 0; k < 8 /* we can insert a max of 8 items as there are only 8 rows in the report*/; k++ )
+                {
+                    var table5 = document.getElementById( 'tablePart1' );
+                    table5.rows[k + 23].cells[8].getElementsByTagName( 'p' )[0].innerText = table5.rows[k + 23].cells[8].getElementsByTagName( 'p' )[0].innerText + ' ' + result.part5List[k].KindofSpirits;
+                    $( '#' + table5.rows[k + 23].cells[9].getElementsByTagName( 'input' )[0].id ).val( result.part5List[k].KindofSpirits );
                 }
 
                 // part 6 of the report - 2nd page of production report
@@ -1031,7 +1039,7 @@
         </tr>
     </table>
     <h1 style="padding-top: 1pt;padding-bottom: 1pt;text-indent: 0pt;text-align: center;">PART I - TRANSACTIONS</h1>
-    <table style="border-collapse:collapse;margin-left:5.88pt" cellspacing="0">
+    <table id="tablePart1" style="border-collapse:collapse;margin-left:5.88pt" cellspacing="0">
         <tr style="height:11pt">
             <td style="width:234pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2" rowspan="3">
                 <p style="text-indent: 0pt;text-align: left;"><br /></p>
@@ -1904,10 +1912,10 @@
                 <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_1b_GrapeBrandyProof" readonly=readonly /></p>
             </td>
             <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
-                <p class="s4" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">1.<div id="p5_1a_KindOfSpirits"></div></p>
+                <p class="s4" id="p5_1a_KindOfSpirits"style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">1.</p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p5_1b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p5_1b_Proof" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -1939,7 +1947,7 @@
                 <p class="s4" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">2.<div id="p5_2a_KindOfSpirits"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p5_2b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p5_2b_Proof" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -1971,7 +1979,7 @@
                 <p class="s4" style="padding-left: 2pt;text-indent: 0pt;text-align: left;">3.<div id="p5_3a_KindOfSpirits"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p5_3b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p5_3b_Proof" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -2003,7 +2011,7 @@
                 <p class="s4" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">4.<div id="p5_4a_KindOfSpirits"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p5_4b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p5_4b_Proof" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -2035,7 +2043,7 @@
                 <p class="s4" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">5.<div id="p5_5a_KindOfSpirits"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p5_5b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p5_5b_Proof" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -2067,7 +2075,7 @@
                 <p class="s4" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">6.<div id="p5_6a_KindOfSpirits"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p5_6b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p5_6b_Proof" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -2099,7 +2107,7 @@
                 <p class="s4" style="padding-top: 1pt;padding-left: 2pt;text-indent: 0pt;text-align: left;">7.<div id="p5_7a_KindOfSpirits"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p5_7b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p5_7b_Proof" readonly=readonly /></p>
             </td>
         </tr>
         <tr style="height:11pt">
@@ -2131,7 +2139,7 @@
                 <p class="s4" style="padding-left: 2pt;text-indent: 0pt;text-align: left;">8.<div id="p5_8a_KindOfSpirits"></div></p>
             </td>
             <td style="width:102pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
-                <p style="text-indent: 0pt;text-align: left;"><div id="p5_8b_Proof"></div></p>
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p5_8b_Proof" readonly=readonly /></p>
             </td>
         </tr>
     </table>
