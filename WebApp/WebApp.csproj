@@ -194,7 +194,7 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
     <Compile Include="Models\IdentityModels.cs" />
-    <Compile Include="SQL Server\ManageViewModels.cs" />
+    <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -1096,7 +1096,7 @@
     <Content Include="Views\Reporting\Processing.cshtml" />
     <Content Include="Views\Reporting\Storage.cshtml" />
     <Content Include="Views\Destruction\Index.cshtml" />
-    <Content Include="Views\Purchase\Developer\Developer.cshtml" />
+    <Content Include="Views\Developer\Developer.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
