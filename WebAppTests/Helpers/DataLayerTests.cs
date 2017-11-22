@@ -580,13 +580,6 @@ namespace WebApp.Helpers.Tests
             // A dictionary to log database test records for later clean-up
             Dictionary<int, Table> testRecords = new Dictionary<int, Table>();
 
-            // REMOVE!
-            //testRecords.Add(411, Table.MaterialDict);
-            //testRecords.Add(196, Table.Vendor);
-            //testRecords.Add(206, Table.Storage);
-            //testRecords.Add(345, Table.Purchase);
-            //testRecords.Add(893, Table.Production);
-
             try
             {
                 // Arrange
