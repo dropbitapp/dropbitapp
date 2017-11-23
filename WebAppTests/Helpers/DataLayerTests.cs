@@ -1,10 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using WebApp.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WebApp.Models;
 
 namespace WebApp.Helpers.Tests
@@ -27,7 +24,7 @@ namespace WebApp.Helpers.Tests
     [TestClass()]
     public class DataLayerTests
     {
-        private readonly int  _userId = 7; /*test account*/
+        private readonly int _userId = 7; /*test account*/
         DataLayer _dl = new DataLayer();
         DistilDBContext _db = new DistilDBContext();
 
@@ -55,7 +52,7 @@ namespace WebApp.Helpers.Tests
          */
         [TestMethod()]
         public void Buy_Wine_Make_Brandy_Under_170_Test()
-        { 
+        {
             // Arrange
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tupleL = new List<Tuple<int, Table>>();
             int spiritId = 0;
@@ -575,6 +572,138 @@ namespace WebApp.Helpers.Tests
         }
 
         /// <summary>
+        /// Test Processing Report part 4, column b (BULK SPIRITS DUMPED INTO PROCESSING (Whole proof gallons))
+        /// </summary>
+        [TestMethod()]
+        public void PurchaseDistilled_Blend_GenerateProcessingReport()
+        {
+            // A dictionary to log database test records for later clean-up
+            Dictionary<int, Table> testRecords = new Dictionary<int, Table>();
+
+            try
+            {
+                // Arrange
+
+                // Create Spirit dictionary item
+                SpiritObject spirit = new SpiritObject
+                {
+                    SpiritName = "VODKA-4tUTav",
+                    ProcessingReportTypeID = 19
+                };
+
+                int spiritId = _dl.CreateSpirit(_userId, spirit);
+                testRecords.Add(spiritId, Table.Spirit);
+
+                // Create Raw Material dictionary item
+                RawMaterialObject rawMaterial = new RawMaterialObject
+                {
+                    RawMaterialName = "TestMaterial-4tUTav",
+                    PurchaseMaterialTypes = new PurchaseMaterialBooleanTypes { Distilled = true },
+                    UnitTypeId = 1,
+                    UnitType = "gal"
+                };
+
+                int rawMaterialId = _dl.CreateRawMaterial(_userId, rawMaterial);
+                testRecords.Add(rawMaterialId, Table.MaterialDict);
+
+                // Create Vendor dictionary item
+                VendorObject vendor = new VendorObject
+                {
+                    VendorName = "TestVendor-4tUTav"
+                };
+
+                int vendorId = _dl.CreateVendor(_userId, vendor);
+                testRecords.Add(vendorId, Table.Vendor);
+
+                // Create Storage dictionary item
+                StorageObject storage = new StorageObject
+                {
+                    StorageName = "TestStorage-4tUTav"
+                };
+
+                int storageId = _dl.CreateStorage(_userId, storage);
+                testRecords.Add(storageId, Table.Storage);
+
+                // Create Distilled Purchase record
+                PurchaseObject purchase = new PurchaseObject
+                {
+                    PurBatchName = "TestPurchase-4tUTav",
+                    PurchaseType = "Distilled",
+                    PurchaseDate = new DateTime(2017, 1, 1),
+                    Quantity = 100f,
+                    AlcoholContent = 50f,
+                    ProofGallon = 100f,
+                    RecordId = rawMaterialId,
+                    Price = 500f,
+                    VendorId = vendorId,
+                    Gauged = true,
+                    SpiritTypeReportingID = 7,
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject { StorageId = storageId }
+                    }
+                };
+
+                int purchaseId = _dl.CreatePurchase(purchase, _userId);
+                testRecords.Add(purchaseId, Table.Purchase);
+
+                // Create Production Blending record
+                ProductionObject production = new ProductionObject
+                {
+                    BatchName = "TestBlending-4tUTav",
+                    ProductionDate = new DateTime(2017, 1, 1),
+                    ProductionStart = new DateTime(2017, 1, 1),
+                    ProductionEnd = new DateTime(2017, 1, 1),
+                    Gauged = true,
+                    ProductionType = "Blending",
+                    Quantity = 110f,
+                    AlcoholContent = 40f,
+                    ProofGallon = 88f,
+                    SpiritTypeReportingID = 7,
+                    ProductionTypeId = 3,
+                    SpiritId = spiritId,
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject { StorageId = storageId }
+                    },
+                    UsedMats = new List<ObjInfo4Burndwn>
+                    {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            OldVal = 0f,
+                            NewVal = purchase.Quantity,
+                            DistillableOrigin = "pur",
+                            BurningDownMethod = "volume"
+                        }
+                    }
+                };
+
+                int productionId = _dl.CreateProduction(production, _userId);
+                testRecords.Add(productionId, Table.Production);
+
+                // Act
+
+                // Generate Processing Report
+                ProcessingReportingObject report = _dl.GetProcessingReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+
+                // Assert
+                var actual = report.Part4List.Find(x => x.ProcessingReportTypeName == "VODKA" && x.ProcessingSpirits == "bulkSpiritDumped").Vodka;
+                Assert.IsTrue(report.Part4List.Any());
+                // Blended Production had a quantity of 88 proof gallons
+                Assert.AreEqual(88, actual);
+            }
+            finally
+            {
+                // Perform table cleanup
+                foreach (var rec in testRecords)
+                {
+                    TestRecordCleanup(rec.Key, rec.Value);
+                }
+            }
+        }
+
+        /// <summary>
         /// This test tests workflow: Buy GNS -> Redistil -> Blend -> Bottle
         /// </summary>
         [TestMethod()]
@@ -1077,7 +1206,7 @@ namespace WebApp.Helpers.Tests
             int result = _dl.CreateSpirit(_userId, spirit);
 
             // Assert
-            Assert.AreNotEqual(0,result);
+            Assert.AreNotEqual(0, result);
 
             // Cleanup
             TestRecordCleanup(result, Table.Spirit);
@@ -1118,7 +1247,7 @@ namespace WebApp.Helpers.Tests
             int result = _dl.CreateRawMaterial(_userId, wineMaterial);
 
             // Assert
-            Assert.AreNotEqual(0,result);
+            Assert.AreNotEqual(0, result);
 
             // Cleanup
             TestRecordCleanup(result, Table.Spirit);
@@ -1135,7 +1264,7 @@ namespace WebApp.Helpers.Tests
             PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
             materialBoolTypes.Additive = true;
             waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
-            
+
             //Act
             int result = _dl.CreateRawMaterial(_userId, waterMaterial);
 
@@ -1190,7 +1319,7 @@ namespace WebApp.Helpers.Tests
             // Arrange
             int distillerId = _dl.GetDistillerId(1);
 
-            switch(tableIdent)
+            switch (tableIdent)
             {
                 case Table.Spirit:
                     {
@@ -1295,7 +1424,7 @@ namespace WebApp.Helpers.Tests
 
                             success = true;
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             throw e;
                         }
@@ -1351,11 +1480,11 @@ namespace WebApp.Helpers.Tests
                 case Table.Purchase:
                     {
                         try
-                        { 
+                        {
                             var pur =
                                 (from rec in _db.Purchase
-                                    where rec.PurchaseID == id
-                                    select rec).FirstOrDefault();
+                                 where rec.PurchaseID == id
+                                 select rec).FirstOrDefault();
 
                             if (pur != null)
                             {
@@ -1416,7 +1545,7 @@ namespace WebApp.Helpers.Tests
 
                                 if (sto2Rec != null)
                                 {
-                                    foreach(var i in sto2Rec)
+                                    foreach (var i in sto2Rec)
                                     {
                                         _db.StorageToRecord.Remove(i);
                                     }
@@ -1429,7 +1558,7 @@ namespace WebApp.Helpers.Tests
 
                                 if (pur4Rep != null)
                                 {
-                                    foreach(var l in pur4Rep)
+                                    foreach (var l in pur4Rep)
                                     {
                                         _db.Purchase4Reporting.Remove(l);
                                     }
@@ -1549,7 +1678,7 @@ namespace WebApp.Helpers.Tests
                                      where rec.ProductionID == prod.ProductionID
                                      select rec).FirstOrDefault();
 
-                                if(prod2SpiritTRep != null)
+                                if (prod2SpiritTRep != null)
                                 {
                                     _db.ProductionToSpiritTypeReporting.Remove(prod2SpiritTRep);
                                 }
@@ -1597,7 +1726,7 @@ namespace WebApp.Helpers.Tests
 
                                 if (prod4Rep != null)
                                 {
-                                    foreach(var i in prod4Rep)
+                                    foreach (var i in prod4Rep)
                                     {
                                         _db.Production4Reporting.Remove(i);
                                     }
@@ -1650,7 +1779,7 @@ namespace WebApp.Helpers.Tests
                                 if (fillTest != null)
                                 {
                                     foreach (var l in fillTest)
-                                    { 
+                                    {
                                         _db.FillTest.Remove(l);
                                     }
                                 }
