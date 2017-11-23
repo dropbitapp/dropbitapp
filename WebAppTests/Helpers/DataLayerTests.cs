@@ -449,7 +449,9 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1[0].ProccessingAcct);
                 Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1[0].ProducedTotal);
                 Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1[0].Recd4RedistilL17);
-                Assert.AreEqual(part1E.Recd4RedistilaltionL15, actualProdReportObject.Part1[0].Recd4RedistilaltionL15);
+                Assert.AreEqual(18, actualProdReportObject.Part1[1].Recd4RedistilaltionL15); // we should have received 18 proof gallons for redistillation from Purchased wine
+                Assert.AreEqual("Wine", actualProdReportObject.Part1[1].SpiritCatName); // we should have received 18 proof gallons for redistillation from Purchased wine
+                Assert.AreEqual(11, actualProdReportObject.Part1[1].SpiritTypeReportingID); // we should have received 18 proof gallons for redistillation from Purchased wine
                 Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1[0].StorageAcct);
                 Assert.AreEqual(part1E.SpiritCatName, actualProdReportObject.Part1[0].SpiritCatName);
                 Assert.AreEqual(part1E.SpiritTypeReportingID, actualProdReportObject.Part1[0].SpiritTypeReportingID);
@@ -465,7 +467,8 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part2thru4.Tanks, actualProdReportObject.Part2Through4[0].Tanks);
 
                 // verify part 5
-                Assert.AreEqual(0, actualProdReportObject.part5List.Count);
+                Assert.AreEqual("Wine", actualProdReportObject.part5List[0].KindofSpirits);
+                Assert.AreEqual(18, actualProdReportObject.part5List[0].Proof);
 
                 // verify Production report Part 6
                 Assert.AreEqual(part6.KindOfMaterial, actualProdReportObject.ProdReportPart6[0].KindOfMaterial);

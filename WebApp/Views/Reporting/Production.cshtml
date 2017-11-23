@@ -482,8 +482,13 @@
                 for ( var k = 0; k < 8 /* we can insert a max of 8 items as there are only 8 rows in the report*/; k++ )
                 {
                     var table5 = document.getElementById( 'tablePart1' );
+                    // fill out Kind Of Spirits column (a)
                     table5.rows[k + 23].cells[8].getElementsByTagName( 'p' )[0].innerText = table5.rows[k + 23].cells[8].getElementsByTagName( 'p' )[0].innerText + ' ' + result.part5List[k].KindofSpirits;
                     $( '#' + table5.rows[k + 23].cells[9].getElementsByTagName( 'input' )[0].id ).val( result.part5List[k].KindofSpirits );
+
+                    // fill out Proof column (b)
+                    var id = '#' + table5.rows[k + 23].cells[9].getElementsByTagName( 'input' )[0].id;
+                    $(id).val( result.part5List[k].Proof );
                 }
 
                 // part 6 of the report - 2nd page of production report
