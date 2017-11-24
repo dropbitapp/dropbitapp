@@ -130,12 +130,12 @@
 
                 // Column (L) - update storages totals across all Spirit Types
                 storageAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
-                storageAcct += parseFloat( reportObject.SorageAcct );
+                storageAcct += parseFloat( reportObject.StorageAcct );
                 $( '#p1_11l_Total' ).val( storageAcct );
 
                 // Column (L) - update line 14 totals across all Spirit Types
                 producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                producedTotals += parseFloat( reportObject.SorageAcct + reportObject.ProccessingAcct );
+                producedTotals += parseFloat( reportObject.StorageAcct + reportObject.ProccessingAcct );
                 $( '#p1_14l_Total' ).val( producedTotals );
 
                 // Column (L) - update Received for Redistillation for across all Spirit Types - Line 15
@@ -177,10 +177,10 @@
                         $( '#p1_9b_WhiskyUnder160' ).val( result.Part1[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11b_WhiskyUnder160' ).val( result.Part1[i].SorageAcct );
+                        $( '#p1_11b_WhiskyUnder160' ).val( result.Part1[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14b_WhiskyUnder160' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14b_WhiskyUnder160' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         $( '#p1_15b_WhiskyUnder160' ).val( result.Part1[i].Recd4RedistilaltionL15 );
@@ -195,10 +195,10 @@
                         $( '#p1_9c_WhiskyOver160' ).val( result.Part1[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11c_WhiskyOver160' ).val( result.Part1[i].SorageAcct );
+                        $( '#p1_11c_WhiskyOver160' ).val( result.Part1[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14c_WhiskyOver160' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14c_WhiskyOver160' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         $( '#p1_15c_WhiskyUnder160' ).val( result.Part1[i].Recd4RedistilaltionL15 );
@@ -213,10 +213,10 @@
                         $( '#p1_9d_BrandyUnder170' ).val( result.Part1[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11d_BrandyUnder170' ).val( result.Part1[i].SorageAcct );
+                        $( '#p1_11d_BrandyUnder170' ).val( result.Part1[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14d_BrandyUnder170' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14d_BrandyUnder170' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         $( '#p1_15d_BrandyUnder170' ).val( result.Part1[i].Recd4RedistilaltionL15 );
@@ -231,10 +231,10 @@
                         $( '#p1_9e_BrandyOver170' ).val( result.Part1[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11e_BrandyOver170' ).val( result.Part1[i].SorageAcct );
+                        $( '#p1_11e_BrandyOver170' ).val( result.Part1[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14e_BrandyOver170' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14e_BrandyOver170' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         $( '#p1_15e_BrandyOver170' ).val( result.Part1[i].Recd4RedistilaltionL15 );
@@ -249,10 +249,10 @@
                         $( '#p1_9f_Rum' ).val( result.Part1[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11f_Rum' ).val( result.Part1[i].SorageAcct );
+                        $( '#p1_11f_Rum' ).val( result.Part1[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14f_Rum' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14f_Rum' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         $( '#p1_15f_Rum' ).val( result.Part1[i].Recd4RedistilaltionL15 );
@@ -270,10 +270,10 @@
                         $( '#p1_9g_Gin' ).val( result.Part1[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11g_Gin' ).val( result.Part1[i].SorageAcct );
+                        $( '#p1_11g_Gin' ).val( result.Part1[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14g_Gin' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14g_Gin' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         $( '#p1_15g_Gin' ).val( result.Part1[i].Recd4RedistilaltionL15 );
@@ -291,10 +291,10 @@
                         $( '#p1_9h_Vodka' ).val( result.Part1[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11h_Vodka' ).val( result.Part1[i].SorageAcct );
+                        $( '#p1_11h_Vodka' ).val( result.Part1[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14h_Vodka' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14h_Vodka' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         $( '#p1_15h_Vodka' ).val( result.Part1[i].Recd4RedistilaltionL15 );
@@ -312,10 +312,10 @@
                         $( '#p1_9j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].SorageAcct );
+                        $( '#p1_11j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         $( '#p1_15j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].Recd4RedistilaltionL15 );
@@ -333,10 +333,10 @@
                         $( '#p1_9i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].SorageAcct );
+                        $( '#p1_11i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         $( '#p1_15i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].Recd4RedistilaltionL15 );
@@ -354,10 +354,10 @@
                         $( '#p1_9k_Other' ).val( result.Part1[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11k_Other' ).val( result.Part1[i].SorageAcct );
+                        $( '#p1_11k_Other' ).val( result.Part1[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14k_Other' ).val( result.Part1[i].SorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14k_Other' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         $( '#p1_15k_Other' ).val( result.Part1[i].Recd4RedistilaltionL15 );
@@ -479,7 +479,7 @@
                 }
 
                 // fill out part 5 of Production report
-                for ( var k = 0; k < 8 /* we can insert a max of 8 items as there are only 8 rows in the report*/; k++ )
+                for ( var k = 0; k < result.part5List.length; k++ )
                 {
                     var table5 = document.getElementById( 'tablePart1' );
                     // fill out Kind Of Spirits column (a)

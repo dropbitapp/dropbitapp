@@ -6397,6 +6397,7 @@ namespace WebApp.Helpers
                 GetProducedStorageToProcessing(startDate, endDate, userId, ref storageReportBody);
                 GetPurchasedStorageToProcessing(startDate, endDate, userId, ref storageReportBody);
                 GetStorageReportDestroyed(startDate, endDate, userId, ref storageReportBody);
+                GetStorgaOnHandEndOfMonth(startDate.AddMonths(1), endDate.AddMonths(1), userId, ref storageReportBody); // as per report explanation, this months "on hand end of month" is next month's "on hand at start of month" of next month
 
                 storageReport.ReportBody = storageReportBody;
 
@@ -6405,6 +6406,104 @@ namespace WebApp.Helpers
             catch (Exception e)
             {
                 throw e;
+            }
+        }
+
+        private void GetStorgaOnHandEndOfMonth(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        {
+            // Query distilled production records transferred to storage account in the next month
+            var records =
+                (from rec in db.Production
+                 join dest in db.Destruction on rec.ProductionID equals dest.RecordID into dest_join
+                 from dest in dest_join.DefaultIfEmpty()
+                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
+                 from proof in proof_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.ProductionToSpiritTypeReporting on rec.ProductionID equals p2str.ProductionID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId
+                     && rec.ProductionTypeID == 2
+                     && rec.ProductionEndTime < startDate
+                     && rec.Gauged == true
+                     && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                     proof = (float?)proof.Value ?? (float?)0,
+                     destroyedProof = (float?)dest.ProofGallons ?? 0
+                 }).DefaultIfEmpty();
+
+            if (records.First() != null)
+            {
+                foreach (var rec in records)
+                {
+                    // Search for existing category with matching name
+                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+
+                    if (category == null)
+                    {
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r23_OnHandEndOfMonth += (float)rec.proof + rec.destroyedProof;
+                        storageReportBody.Add(cat);
+                    }
+                    else
+                    {
+                        category.r23_OnHandEndOfMonth += (float)rec.proof + rec.destroyedProof;
+                    }
+                }
+            }
+
+            // Query distilled purchase records transferred to storage account in the next month
+            var prodRecords =
+                (from rec in db.Purchase
+                 join dest in db.Destruction on rec.PurchaseID equals dest.RecordID into dest_join
+                 from dest in dest_join.DefaultIfEmpty()
+                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
+                 from proof in proof_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.PurchaseToSpiritTypeReporting on rec.PurchaseID equals p2str.PurchaseID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId
+                     && (rec.PurchaseTypeID == 2 || rec.PurchaseTypeID == 3)
+                     && rec.PurchaseDate < startDate
+                     && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? string.Empty,
+                     proof = (float?)proof.Value ?? 0,
+                     destroyedProof = (float?)dest.ProofGallons ?? 0
+                 }).DefaultIfEmpty();
+
+            if (prodRecords.First() != null)
+            {
+                foreach (var rec in prodRecords)
+                {
+                    // Search for existing category with matching name
+                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+
+                    if (category == null)
+                    {
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                        storageReportBody.Add(cat);
+                    }
+                    else
+                    {
+                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                    }
+                }
             }
         }
 
