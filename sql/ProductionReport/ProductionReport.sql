@@ -40,7 +40,8 @@ prodContent.isProductionComponent [isProductionComponent],
 CF.ContentFieldName [ContentFieldName],
 prodContent.RecordID,
 prodContent.isProductionComponent,
-prodContent.ContentValue
+prodContent.ContentValue,
+prodContent.ContentFieldID
 
 from Production as prod
 left join ProductionContent as prodContent on prod.ProductionID = prodContent.ProductionID
@@ -48,9 +49,9 @@ left join AspNetUserToDistiller as distillers on prod.DistillerID = distillers.D
 left join ContentField as CF on prodContent.ContentFieldID = CF.ContentFieldID
 where prod.Gauged = 1 
 and distillers.UserId = 7 
-and prod.StateID = 3 
+and (prod.StateID = 3 or prod.StateID = 2)
 and ProductionEndTime between CONVERT(DATE, '2017-09-01') and CONVERT(DATE, '2017-09-30')
-and prodContent.ContentFieldID in (16, 18, 20, 22)
+and prodContent.ContentFieldID in (16/*Purchase Fermented Proof*/, 18, 20, 22, 23/*Produced Fermented Proof*/)
 
 -- not that we got list of ids, we can iterate through them.
 -- For simplicity of of converting it to the linq, let's assume here we only have one record and iterate on the C# side
@@ -63,7 +64,7 @@ and prodContent.ContentFieldID in (16, 18, 20, 22)
 			spiritTypeRep.SpiritTypeReportingID
 			from PurchaseToSpiritTypeReporting as pur2SpiritType 
 			left join SpiritTypeReporting as spiritTypeRep on spiritTypeRep.SpiritTypeReportingID = pur2SpiritType.SpiritTypeReportingID
-			where pur2SpiritType.PurchaseID = 287
+			where pur2SpiritType.PurchaseID = 940
 			-- increment by Proof value from the record from the previous step
 	
 	-- case 2: if RecordID(s) is a production record
@@ -73,7 +74,8 @@ and prodContent.ContentFieldID in (16, 18, 20, 22)
 			from Production as prod 
 			left join ProductionToSpiritTypeReporting as pur2SpiritType on pur2SpiritType.ProductionID = prod.ProductionID
 			left join SpiritTypeReporting as spiritTypeRep on spiritTypeRep.SpiritTypeReportingID = pur2SpiritType.SpiritTypeReportingID
-			where prod.ProductionID = 713 and prod.Gauged = 1
+			where prod.ProductionID = 940 and prod.Gauged = 1
 			-- increment by Proof value from the record from the previous step
 
-       
+       select * from ProductionContent
+	   where ProductionID = 940

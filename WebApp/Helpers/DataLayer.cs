@@ -5836,87 +5836,158 @@ namespace WebApp.Helpers
                 {
                     foreach (var i in productionID4Inquiry)
                     {
-                        if (!i.isProductionComponent && i.ContentFieldName == "PurDistilledProofGal") // case when we distil Purchased Distillation like GNS
+                        if (i.isProductionComponent) // case when other RecordID has isProductionComponent value set to 1
                         {
-                            var purchaseSpiritType =
-                                (
-                            from pur2SpiritType in db.PurchaseToSpiritTypeReporting
-                            join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
-                            from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
-                            where
-                              pur2SpiritType.PurchaseID == i.RecordID
-                            select new
-                            {
-                                Spirit_Short_Name = spiritTypeRep.ProductTypeName,
-                                SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
-                            }).FirstOrDefault();
+                            // let's determine whether we should query ProductionContent table again to get original records used
+                            var isGauged =
+                                        (from prod in db.Production
+                                         where prod.ProductionID == i.RecordID
+                                         select prod.Gauged
+                                         ).FirstOrDefault();
 
-                            if (purchaseSpiritType != null)
+                            if (isGauged == false) // if the gaugenes of the production record (that was referenced as RecordID in ProductionContent table) is false then we should immediately get Purchase information
                             {
-                                if ((int)purchaseSpiritType.SpiritTypeReportingID != 0)
+                                var recordForPurchaseWorkflow =
+                                    (from prodCont in db.ProductionContent
+                                     where
+                                 (new int[] { 16, 18 }).Contains(prodCont.ContentFieldID)
+                                 && prodCont.isProductionComponent == false
+                                 && prodCont.ProductionID == i.RecordID
+                                     select new
+                                     {
+                                         prodCont.RecordID,
+                                         contentvalue = (float?)prodCont.ContentValue ?? (float?)0,
+                                         prodCont.ContentFieldID
+                                     }
+                                        ).Distinct().ToList();
+
+                                if (recordForPurchaseWorkflow != null)
                                 {
-                                    var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)purchaseSpiritType.SpiritTypeReportingID);
-                                    if (spRec != null)
+                                    foreach (var l in recordForPurchaseWorkflow)
                                     {
-                                        spRec.Recd4RedistilaltionL15 += (float)i.Proof;
-                                        var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
-                                        prod5Rec.Proof += (float)i.Proof;
+                                        var purchaseSpiritType =
+                                        (from pur2SpiritType in db.PurchaseToSpiritTypeReporting
+                                        join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
+                                        from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
+                                        where
+                                            pur2SpiritType.PurchaseID == l.RecordID
+                                        select new
+                                        {
+                                            Spirit_Short_Name = spiritTypeRep.ProductTypeName,
+                                            SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
+                                        }).FirstOrDefault();
+
+                                        if (purchaseSpiritType != null)
+                                        {
+                                            if ((int)purchaseSpiritType.SpiritTypeReportingID != 0)
+                                            {
+                                                var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)purchaseSpiritType.SpiritTypeReportingID);
+                                                if (spRec != null)
+                                                {
+                                                    spRec.Recd4RedistilaltionL15 += (float)l.contentvalue;
+                                                    var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
+                                                    prod5Rec.Proof += (float)l.contentvalue;
+                                                }
+                                                else
+                                                {
+                                                    ProductionReportHelper part1Obj = new ProductionReportHelper();
+                                                    part1Obj.Recd4RedistilaltionL15 = (float)l.contentvalue;
+                                                    part1Obj.SpiritTypeReportingID = (int)purchaseSpiritType.SpiritTypeReportingID;
+                                                    part1Obj.SpiritTypeReportName = (string)purchaseSpiritType.Spirit_Short_Name;
+                                                    ProdReportPart5 prod5Inst = new ProdReportPart5();
+                                                    prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
+                                                    prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
+                                                    prodRPart5L.Add(prod5Inst);
+                                                    tempRepObjList.Add(part1Obj);
+                                                }
+                                            }
+                                        }
                                     }
-                                    else
+                                }
+                            }
+                            else if (isGauged == true && (i.ContentFieldName == "ProdFermentedProofGal" || i.ContentFieldName == "ProdDistilledProofGal"))
+                            {
+                                var productionSpiritType =
+                                (from prod in db.Production
+                                    join pur2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals pur2SpiritType.ProductionID into pur2SpiritType_join
+                                    from pur2SpiritType in pur2SpiritType_join.DefaultIfEmpty()
+                                    join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
+                                    from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
+                                    where
+                                    prod.ProductionID == i.RecordID &&
+                                    prod.Gauged == true
+                                    select new
                                     {
-                                        ProductionReportHelper part1Obj = new ProductionReportHelper();
-                                        part1Obj.Recd4RedistilaltionL15 = (float)i.Proof;
-                                        part1Obj.SpiritTypeReportingID = (int)purchaseSpiritType.SpiritTypeReportingID;
-                                        part1Obj.SpiritTypeReportName = (string)purchaseSpiritType.Spirit_Short_Name;
-                                        ProdReportPart5 prod5Inst = new ProdReportPart5();
-                                        prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
-                                        prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
-                                        prodRPart5L.Add(prod5Inst);
-                                        tempRepObjList.Add(part1Obj);
+                                        Spirit_Short_Name = spiritTypeRep.ProductTypeName,
+                                        SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID
+                                    }).FirstOrDefault();
+
+                                if (productionSpiritType != null)
+                                {
+                                    if ((int)productionSpiritType.SpiritTypeReportingID != 0)
+                                    {
+                                        var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)productionSpiritType.SpiritTypeReportingID);
+                                        if (spRec != null)
+                                        {
+                                            spRec.Recd4RedistilaltionL15 += (float)i.Proof;
+                                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
+                                            prod5Rec.Proof += (float)i.Proof;
+                                        }
+                                        else
+                                        {
+                                            ProductionReportHelper part1Obj = new ProductionReportHelper();
+                                            part1Obj.Recd4RedistilaltionL15 = (float)i.Proof;
+                                            part1Obj.SpiritTypeReportingID = (int)productionSpiritType.SpiritTypeReportingID;
+                                            part1Obj.SpiritTypeReportName = (string)productionSpiritType.Spirit_Short_Name;
+                                            tempRepObjList.Add(part1Obj);
+                                            ProdReportPart5 prod5Inst = new ProdReportPart5();
+                                            prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
+                                            prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
+                                            prodRPart5L.Add(prod5Inst);
+                                        }
                                     }
                                 }
                             }
                         }
-
-                        else if (i.isProductionComponent && i.ContentFieldName == "ProdDistilledProofGal") // case with redistilling our own production
+                        if (!i.isProductionComponent ) // case when we distil Purchased Distillation like GNS
                         {
-                            var productionSpiritType =
-                                (from prod in db.Production
-                                 join pur2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals pur2SpiritType.ProductionID into pur2SpiritType_join
-                                 from pur2SpiritType in pur2SpiritType_join.DefaultIfEmpty()
-                                 join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
-                                 from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
-                                 where
-                                   prod.ProductionID == 498 &&
-                                   prod.Gauged == true
-                                 select new
-                                 {
-                                     Spirit_Short_Name = spiritTypeRep.ProductTypeName,
-                                     SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID
-                                 }).FirstOrDefault();
-
-                            if (productionSpiritType != null)
+                            if (i.ContentFieldName == "PurDistilledProofGal" || i.ContentFieldName == "PurFermentedProofGal")
                             {
-                                if ((int)productionSpiritType.SpiritTypeReportingID != 0)
+                                var purchaseSpiritType =
+                                (from pur2SpiritType in db.PurchaseToSpiritTypeReporting
+                                join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
+                                from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
+                                where
+                                  pur2SpiritType.PurchaseID == i.RecordID
+                                select new
                                 {
-                                    var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)productionSpiritType.SpiritTypeReportingID);
-                                    if (spRec != null)
+                                    Spirit_Short_Name = spiritTypeRep.ProductTypeName,
+                                    SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
+                                }).FirstOrDefault();
+
+                                if (purchaseSpiritType != null)
+                                {
+                                    if ((int)purchaseSpiritType.SpiritTypeReportingID != 0)
                                     {
-                                        spRec.Recd4RedistilaltionL15 += (float)i.Proof;
-                                        var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
-                                        prod5Rec.Proof += (float)i.Proof;
-                                    }
-                                    else
-                                    {
-                                        ProductionReportHelper part1Obj = new ProductionReportHelper();
-                                        part1Obj.Recd4RedistilaltionL15 = (float)i.Proof;
-                                        part1Obj.SpiritTypeReportingID = (int)productionSpiritType.SpiritTypeReportingID;
-                                        part1Obj.SpiritTypeReportName = (string)productionSpiritType.Spirit_Short_Name;
-                                        tempRepObjList.Add(part1Obj);
-                                        ProdReportPart5 prod5Inst = new ProdReportPart5();
-                                        prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
-                                        prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
-                                        prodRPart5L.Add(prod5Inst);
+                                        var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)purchaseSpiritType.SpiritTypeReportingID);
+                                        if (spRec != null)
+                                        {
+                                            spRec.Recd4RedistilaltionL15 += (float)i.Proof;
+                                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
+                                            prod5Rec.Proof += (float)i.Proof;
+                                        }
+                                        else
+                                        {
+                                            ProductionReportHelper part1Obj = new ProductionReportHelper();
+                                            part1Obj.Recd4RedistilaltionL15 = (float)i.Proof;
+                                            part1Obj.SpiritTypeReportingID = (int)purchaseSpiritType.SpiritTypeReportingID;
+                                            part1Obj.SpiritTypeReportName = (string)purchaseSpiritType.Spirit_Short_Name;
+                                            ProdReportPart5 prod5Inst = new ProdReportPart5();
+                                            prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
+                                            prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
+                                            prodRPart5L.Add(prod5Inst);
+                                            tempRepObjList.Add(part1Obj);
+                                        }
                                     }
                                 }
                             }
@@ -6326,6 +6397,7 @@ namespace WebApp.Helpers
                 GetProducedStorageToProcessing(startDate, endDate, userId, ref storageReportBody);
                 GetPurchasedStorageToProcessing(startDate, endDate, userId, ref storageReportBody);
                 GetStorageReportDestroyed(startDate, endDate, userId, ref storageReportBody);
+                GetStorgaOnHandEndOfMonth(startDate.AddMonths(1), endDate.AddMonths(1), userId, ref storageReportBody); // as per report explanation, this months "on hand end of month" is next month's "on hand at start of month" of next month
 
                 storageReport.ReportBody = storageReportBody;
 
@@ -6334,6 +6406,104 @@ namespace WebApp.Helpers
             catch (Exception e)
             {
                 throw e;
+            }
+        }
+
+        private void GetStorgaOnHandEndOfMonth(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        {
+            // Query distilled production records transferred to storage account in the next month
+            var records =
+                (from rec in db.Production
+                 join dest in db.Destruction on rec.ProductionID equals dest.RecordID into dest_join
+                 from dest in dest_join.DefaultIfEmpty()
+                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
+                 from proof in proof_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.ProductionToSpiritTypeReporting on rec.ProductionID equals p2str.ProductionID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId
+                     && rec.ProductionTypeID == 2
+                     && rec.ProductionEndTime < startDate
+                     && rec.Gauged == true
+                     && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                     proof = (float?)proof.Value ?? (float?)0,
+                     destroyedProof = (float?)dest.ProofGallons ?? 0
+                 }).DefaultIfEmpty();
+
+            if (records.First() != null)
+            {
+                foreach (var rec in records)
+                {
+                    // Search for existing category with matching name
+                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+
+                    if (category == null)
+                    {
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r23_OnHandEndOfMonth += (float)rec.proof + rec.destroyedProof;
+                        storageReportBody.Add(cat);
+                    }
+                    else
+                    {
+                        category.r23_OnHandEndOfMonth += (float)rec.proof + rec.destroyedProof;
+                    }
+                }
+            }
+
+            // Query distilled purchase records transferred to storage account in the next month
+            var prodRecords =
+                (from rec in db.Purchase
+                 join dest in db.Destruction on rec.PurchaseID equals dest.RecordID into dest_join
+                 from dest in dest_join.DefaultIfEmpty()
+                 join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
+                 from proof in proof_join.DefaultIfEmpty()
+                 join distiller in db.AspNetUserToDistiller on rec.DistillerID equals distiller.DistillerID into distiller_join
+                 from distiller in distiller_join.DefaultIfEmpty()
+                 join p2str in db.PurchaseToSpiritTypeReporting on rec.PurchaseID equals p2str.PurchaseID into p2str_join
+                 from p2str in p2str_join.DefaultIfEmpty()
+                 join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                 from str in str_join.DefaultIfEmpty()
+                 where
+                     distiller.UserId == userId
+                     && (rec.PurchaseTypeID == 2 || rec.PurchaseTypeID == 3)
+                     && rec.PurchaseDate < startDate
+                     && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
+                 select new
+                 {
+                     reportingCategoryName = str.ProductTypeName ?? string.Empty,
+                     proof = (float?)proof.Value ?? 0,
+                     destroyedProof = (float?)dest.ProofGallons ?? 0
+                 }).DefaultIfEmpty();
+
+            if (prodRecords.First() != null)
+            {
+                foreach (var rec in prodRecords)
+                {
+                    // Search for existing category with matching name
+                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+
+                    if (category == null)
+                    {
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                        storageReportBody.Add(cat);
+                    }
+                    else
+                    {
+                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                    }
+                }
             }
         }
 
