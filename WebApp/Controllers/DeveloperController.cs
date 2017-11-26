@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using Microsoft.AspNet.Identity;
 using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
 using WebApp.Helpers;
 
 namespace WebApp.Controllers
@@ -12,9 +8,9 @@ namespace WebApp.Controllers
     {
         private DataLayer dl = new DataLayer();
 
+#if DEBUG
         public void Test()
         {
-            #if DEBUG
             if (User.Identity.IsAuthenticated)
             {
                 var userId = User.Identity.GetUserId<int>();
@@ -23,12 +19,11 @@ namespace WebApp.Controllers
                     // Test code goes here
                 }
             }
-            #endif
         }
 
+        // /Developer/NukeRecords
         public void NukeRecords()
         {
-            #if DEBUG
             if (User.Identity.IsAuthenticated)
             {
                 var userId = User.Identity.GetUserId<int>();
@@ -44,7 +39,27 @@ namespace WebApp.Controllers
                     }
                 }
             }
-            #endif
         }
+
+        // /Developer/NukeTestAccountRecords
+        public void NukeTestAccountRecords()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = User.Identity.GetUserId<int>();
+                if (userId > 0)
+                {
+                    try
+                    {
+                        bool returnResult = dl.RemoveRecordsFromDBForUser(7);
+                    }
+                    catch
+                    {
+                        throw;
+                    }
+                }
+            }
+        }
+#endif
     }
 }
