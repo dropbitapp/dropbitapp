@@ -8,11 +8,8 @@
 
             var genericWorkflowHelper = new genWHelpers();
             var distillCompInstance = new distillCompute();
-
             var purId = 0; // purId is used as a global FermentedPurchase page variable 
-
             var storageList = [];
-
             var StorageObject = {};
 
             // data adapters
@@ -22,6 +19,23 @@
             var reportingSpiritKindAdapter;
 
             function _addEventListeners() {
+
+                $('#MaterialTypeInput').on('select', function (event) {
+                    var selectedItem = $('#MaterialTypeInput').jqxListBox('getSelectedItem');
+                    var unitType = event.args.item.originalItem.UnitType;
+                    if(unitType && unitType === 'lb')
+                    {
+                        $('#QuantityInput').jqxNumberInput({ disabled: true });
+                        $('#AlcoholContentInput').jqxNumberInput({ disabled: true });
+                        $("#ProofGallonsInput").jqxNumberInput({ disabled: true });
+                        $('#ReportingSpiritTypeDropDown').jqxDropDownList({ disabled: true });
+                    } else if (unitType && unitType === 'gal') {
+                        $('#QuantityInput').jqxNumberInput({ disabled: false });
+                        $('#AlcoholContentInput').jqxNumberInput({ disabled: false });
+                        $("#ProofGallonsInput").jqxNumberInput({ disabled: false });
+                        $('#ReportingSpiritTypeDropDown').jqxDropDownList({ disabled: false });
+                    }
+                });
 
                 $("#CreateRecordButton").click(function () {
                     $('#validationForm').jqxValidator('validate');
@@ -294,27 +308,53 @@
                     },
                     rules: [
                         {
-                            input: "#MaterialTypeInput", message: "Please Select Material Type", action: 'click', rule: function (input, commit) {
+                            input: "#MaterialTypeInput",
+                            message: "Please Select Material Type",
+                            action: 'click',
+                            rule: function (input, commit) {
                                 var index = $("#MaterialTypeInput").jqxListBox('getSelectedIndex');
-                                return index != -1;
+                                return index > -1;
                             }
                         },
-                        { input: '#PurBatch', message: 'Batch Name Required', action: 'blur', rule: 'required' },
                         {
-                            input: '#QuantityInput', message: 'Please Enter Quantity', action: 'blur', rule: function () {
-                                var quantityValue = $("#QuantityInput").val();
-                                var volumeValue = $('#VolumeByWeightInput').val();
-                                if (volumeValue != 0) {
-                                    return true;
-                                } else if (quantityValue > 0) {
-                                    $('#validationForm').jqxValidator('validateInput', '#VolumeByWeightInput');
-                                    return true;
+                            input: '#PurBatch',
+                            message: 'Batch Name Required',
+                            action: 'blur',
+                            rule: 'required'
+                        },
+                        {
+                            input: '#QuantityInput',
+                            message: 'Please Enter Quantity',
+                            action: 'blur',
+                            rule: function () {
+                                // get material type unit of measurement (gal or lb)
+                                var selectedItem = $('#MaterialTypeInput').jqxListBox('getSelectedItem');
+                                if (selectedItem) {
+                                    var unitType = selectedItem.originalItem.UnitType;
+                                    // material type measured in lb (e.g pomace)
+                                    if (unitType && unitType === 'lb') {
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        var quantityValue = $("#QuantityInput").val();
+                                        var volumeValue = $('#VolumeByWeightInput').val();
+                                        if (volumeValue > 0) {
+                                            return true;
+                                        } else if (quantityValue > 0) {
+                                            $('#validationForm').jqxValidator('validateInput', '#VolumeByWeightInput');
+                                            return true;
+                                        }
+                                    }
+                                    return false;
                                 }
-                                return false;
                             }
                         },
                         {
-                            input: '#VolumeByWeightInput', message: 'Please Enter Volume', action: 'blur', rule: function () {
+                            input: '#VolumeByWeightInput',
+                            message: 'Please Enter Volume',
+                            action: 'blur',
+                            rule: function () {
                                 var volumeValue = $('#VolumeByWeightInput').val();
                                 var quantityValue = $("#QuantityInput").val();
                                 if (quantityValue != 0) {
@@ -327,37 +367,95 @@
                             }
                         },
                         {
-                            input: '#AlcoholContentInput', message: 'Please Enter Alcohol Content', action: 'blur', rule: function () {
-                                var value = $('#AlcoholContentInput').val();
-                                return value > 0 ? true : false;
+                            input: '#AlcoholContentInput',
+                            message: 'Please Enter Alcohol Content',
+                            action: 'blur',
+                            rule: function () {
+                                // get material type unit of measurement (gal or lb)
+                                var selectedItem = $('#MaterialTypeInput').jqxListBox('getSelectedItem');
+                                if (selectedItem) {
+                                    var unitType = selectedItem.originalItem.UnitType;
+                                    // material type measured in lb (e.g pomace)
+                                    if (unitType && unitType === 'lb') {
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        var value = $('#AlcoholContentInput').val();
+                                        return value > 0 ? true : false;
+                                    } 
+                                }
                             }
                         },
                         {
-                            input: '#PriceInput', message: 'Please Enter Price', action: 'blur', rule: function () {
+                            input: '#ProofGallonsInput',
+                            message: 'Please Enter Proof',
+                            action: 'blur',
+                            rule: function () {
+                                // get material type unit of measurement (gal or lb)
+                                var selectedItem = $('#MaterialTypeInput').jqxListBox('getSelectedItem');
+                                if (selectedItem) {
+                                    var unitType = selectedItem.originalItem.UnitType;
+                                    // material type measured in lb (e.g pomace)
+                                    if (unitType && unitType === 'lb') {
+                                        return true;
+                                    }
+                                    else {
+                                        var value = $('#ProofGallonsInput').val();
+                                        return value > 0 ? true : false;
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            input: '#PriceInput',
+                            message: 'Please Enter Price',
+                            action: 'blur',
+                            rule: function () {
                                 var value = $('#PriceInput').val();
                                 return value > 0 ? true : false;
                             }
                         },
                         {
-                            input: "#VendorInput", message: "Please Select Vendor", action: 'blur', rule: function (input, commit) {
+                            input: "#VendorInput",
+                            message: "Please Select Vendor",
+                            action: 'blur',
+                            rule: function (input, commit) {
                                 var index = $("#VendorInput").jqxDropDownList('getSelectedIndex');
-                                return index != -1;
+                                return index > -1;
                             }
                         },
                         {
-                            input: "#StorageInput", message: "Please Select Storage", action: 'click', rule: function (input, commit) {
+                            input: "#StorageInput",
+                            message: "Please Select Storage",
+                            action: 'click',
+                            rule: function (input, commit) {
                                 var selectedItems = $("#StorageInput").jqxListBox('getSelectedItems');
                                 return selectedItems.length > 0 ? true : false;
                             }
                         },
                         {
-                            input: "#ReportingSpiritTypeDropDown", message: "Please Select Spirit Type", action: 'blur', rule: function (input, commit) {
-                                var index = $("#ReportingSpiritTypeDropDown").jqxDropDownList('getSelectedIndex');
-                                var finalGauge = $("#FinalGaugeCheckBox").val();
-                                if (finalGauge == false || index != -1) {
-                                    return true;
+                            input: "#ReportingSpiritTypeDropDown",
+                            message: "Please Select Spirit Type",
+                            action: 'blur',
+                            rule: function (input, commit) {
+                                // get material type unit of measurement (gal or lb)
+                                var selectedItem = $('#MaterialTypeInput').jqxListBox('getSelectedItem');
+                                if (selectedItem) {
+                                    var unitType = selectedItem.originalItem.UnitType;
+                                    // material type measured in lb (e.g pomace)
+                                    if (unitType && unitType === 'lb') {
+                                        return true;
+                                    }
+                                    else {
+                                        var index = $("#ReportingSpiritTypeDropDown").jqxDropDownList('getSelectedIndex');
+                                        var finalGauge = $("#FinalGaugeCheckBox").val();
+                                        if (finalGauge == false || index > -1) {
+                                            return true;
+                                        }
+                                        return false;
+                                    }
                                 }
-                                return false;
                             }
                         }
                     ]
