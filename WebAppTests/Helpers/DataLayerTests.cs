@@ -780,7 +780,7 @@ namespace WebApp.Helpers.Tests
                 int purchaseId = _dl.CreatePurchase(purchase, _userId);
                 testRecords.Add(purchaseId, Table.Purchase);
 
-                // Create Production Blending record
+                // Create Production Distillation record and Gauged to true
                 ProductionObject production = new ProductionObject
                 {
                     BatchName = "PomaceDistillation",
@@ -807,7 +807,7 @@ namespace WebApp.Helpers.Tests
                         {
                             ID = purchaseId,
                             OldVal = 0f,
-                            NewVal = purchase.Quantity,
+                            NewVal = purchase.VolumeByWeight,
                             DistillableOrigin = "pur",
                             BurningDownMethod = "weight"
                         }

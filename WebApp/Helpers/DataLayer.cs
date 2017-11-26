@@ -5742,7 +5742,7 @@ namespace WebApp.Helpers
                             {
                                 prt6.Volume = (float)t.Value;
                             }
-                            else if ((int)t.ContentFieldID == 2)
+                            else if (t.ContentFieldID == 2 || t.ContentFieldID == 4)
                             {
                                 prt6.Weight = (float)t.Value;
                             }
