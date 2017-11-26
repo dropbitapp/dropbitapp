@@ -21,6 +21,7 @@ namespace WebApp.Controllers
             }
         }
 
+        // /Developer/NukeRecords
         public void NukeRecords()
         {
             if (User.Identity.IsAuthenticated)
@@ -40,6 +41,7 @@ namespace WebApp.Controllers
             }
         }
 
+        // /Developer/NukeTestAccountRecords
         public void NukeTestAccountRecords()
         {
             if (User.Identity.IsAuthenticated)
