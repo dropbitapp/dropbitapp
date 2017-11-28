@@ -707,6 +707,154 @@ namespace WebApp.Helpers.Tests
         }
 
         /// <summary>
+        /// Fermented pomace purchase workflow
+        /// </summary>
+        [TestMethod()]
+        public void BuyFermentedPomace_Distill_Redistill()
+        {
+            // A dictionary to log database test records for later clean-up
+            Dictionary<int, Table> testRecords = new Dictionary<int, Table>();
+
+            try
+            {
+                // Arrange
+
+                // Create Spirit dictionary item
+                SpiritObject spirit = new SpiritObject
+                {
+                    SpiritName = "PomaceBrandy",
+                    ProcessingReportTypeID = 12 // BRANDY DISTILLED AT 170 AND UNDER
+                };
+
+                int spiritId = _dl.CreateSpirit(_userId, spirit);
+                testRecords.Add(spiritId, Table.Spirit);
+
+                // Create Raw Material dictionary item
+                RawMaterialObject rawMaterial = new RawMaterialObject
+                {
+                    RawMaterialName = "FermentedPomace",
+                    PurchaseMaterialTypes = new PurchaseMaterialBooleanTypes { Fermented = true },
+                    UnitTypeId = 2,
+                    MaterialCategoryID = 2,
+                    UnitType = "lb"
+                };
+
+                int rawMaterialId = _dl.CreateRawMaterial(_userId, rawMaterial);
+                testRecords.Add(rawMaterialId, Table.MaterialDict);
+
+                // Create Vendor dictionary item
+                VendorObject vendor = new VendorObject
+                {
+                    VendorName = "BigGrapesWinery"
+                };
+
+                int vendorId = _dl.CreateVendor(_userId, vendor);
+                testRecords.Add(vendorId, Table.Vendor);
+
+                // Create Storage dictionary item
+                StorageObject storage = new StorageObject
+                {
+                    StorageName = "TheTank"
+                };
+
+                int storageId = _dl.CreateStorage(_userId, storage);
+                testRecords.Add(storageId, Table.Storage);
+
+                // Create Fermented Purchase record
+                PurchaseObject purchase = new PurchaseObject
+                {
+                    PurBatchName = "FermentedPomaceFromBigGrapesWinery",
+                    PurchaseType = "Fermented",
+                    PurchaseDate = new DateTime(2017, 1, 1),
+                    VolumeByWeight = 1000f,
+                    RecordId = rawMaterialId,
+                    Price = 2000f,
+                    VendorId = vendorId,
+                    Gauged = true,
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject { StorageId = storageId }
+                    }
+                };
+
+                int purchaseId = _dl.CreatePurchase(purchase, _userId);
+                testRecords.Add(purchaseId, Table.Purchase);
+
+                // Create Production Distillation record and Gauged to true
+                ProductionObject production = new ProductionObject
+                {
+                    BatchName = "PomaceDistillation",
+                    ProductionDate = new DateTime(2017, 1, 1),
+                    ProductionStart = new DateTime(2017, 1, 1),
+                    ProductionEnd = new DateTime(2017, 1, 1),
+                    Gauged = true,
+                    ProductionType = "Distillation",
+                    Quantity = 100f,
+                    AlcoholContent = 50f,
+                    ProofGallon = 100f,
+                    SpiritTypeReportingID = 3, // Brandy Under 170
+                    ProductionTypeId = 2,
+                    SpiritId = spiritId,
+                    SpiritCutId = 11, // mixed
+                    MaterialKindReportingID = 95, // All Other Brandy
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject { StorageId = storageId }
+                    },
+                    UsedMats = new List<ObjInfo4Burndwn>
+                    {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            OldVal = 0f,
+                            NewVal = purchase.VolumeByWeight,
+                            DistillableOrigin = "pur",
+                            BurningDownMethod = "weight"
+                        }
+                    }
+                };
+
+                int productionId = _dl.CreateProduction(production, _userId);
+                testRecords.Add(productionId, Table.Production);
+
+                // Act
+
+                // Generate Storage Report
+                StorageReport storageReport = _dl.GetStorageReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+
+                // Generate Production Report
+                ProductionReportingObject productionReport = _dl.GetProductionReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+
+                // Assert
+
+                // storage report should contain only one category named "BrandyUnder170"
+                Assert.AreEqual(1, storageReport.ReportBody.Count);
+                Assert.AreEqual("BrandyUnder170", storageReport.ReportBody.First().CategoryName);
+                Assert.AreEqual(100F, storageReport.ReportBody.First().r2_DepositedInBulkStorage);
+
+                // production report should contain three categories: Part1, Part2Through4, Part6
+                Assert.AreEqual(1, productionReport.Part1.Count);
+                Assert.AreEqual("BrandyUnder170", productionReport.Part1.First().SpiritCatName);
+                Assert.AreEqual(100F, productionReport.Part1.First().ProducedTotal);
+                Assert.AreEqual(1, productionReport.Part2Through4.Count);
+                Assert.AreEqual("AllOtherBrandy", productionReport.Part2Through4.First().KindOfMaterial);
+                Assert.AreEqual(100F, productionReport.Part2Through4.First().ProofGallons);
+                Assert.AreEqual(1, productionReport.ProdReportPart6.Count);
+                Assert.AreEqual("FermentedPomace", productionReport.ProdReportPart6.First().KindOfMaterial);
+                // Test fails because of this assertion. Weight is 0. Debug.
+                Assert.AreEqual(1000F, productionReport.ProdReportPart6.First().Weight);
+            }
+            finally
+            {
+                // Perform table cleanup
+                foreach (var rec in testRecords)
+                {
+                    TestRecordCleanup(rec.Key, rec.Value);
+                }
+            }
+        }
+
+        /// <summary>
         /// This test tests workflow: Buy GNS -> Redistil -> Blend -> Bottle
         /// </summary>
         [TestMethod()]

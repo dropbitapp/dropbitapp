@@ -395,7 +395,7 @@ namespace WebApp.Helpers
                      Losses = g.Sum(p => p.Quantity) ?? 0
                  }).FirstOrDefault();
 
-            if(accumulatedLoss != null)
+            if (accumulatedLoss != null)
             {
                 procRepP1.Losses = accumulatedLoss.Losses;
             }
@@ -3577,7 +3577,7 @@ namespace WebApp.Helpers
                 db.SaveChanges();
 
                 // Only fermented and distilled purchase records can be reported on storage report
-                if ((pTypes.PurchaseTypeID == 2 || pTypes.PurchaseTypeID == 3) && purchaseObject?.SpiritTypeReportingID != null)
+                if ((pTypes.PurchaseTypeID == 2 || pTypes.PurchaseTypeID == 3) && purchaseObject?.SpiritTypeReportingID != null && purchaseObject?.SpiritTypeReportingID != 0)
                 {
                     PurchaseToSpiritTypeReporting pstr = new PurchaseToSpiritTypeReporting();
                     pstr.PurchaseID = purchT.PurchaseID;
@@ -5575,7 +5575,7 @@ namespace WebApp.Helpers
             ProductionReportingObject prodRepObj = new ProductionReportingObject();
             List<ProdReportPart1> part1List = new List<ProdReportPart1>();
             List<ProdReportParts2Through4> part2Thru4List = new List<ProdReportParts2Through4>();
-            List<ProdReportPart5> part5= new List<ProdReportPart5>();
+            List<ProdReportPart5> part5 = new List<ProdReportPart5>();
             List<ProdReportPart6> prodReportPart6List = new List<ProdReportPart6>();
             List<ProductionReportHelper> tempRepObjList = new List<ProductionReportHelper>();
 
@@ -5742,7 +5742,7 @@ namespace WebApp.Helpers
                             {
                                 prt6.Volume = (float)t.Value;
                             }
-                            else if ((int)t.ContentFieldID == 2)
+                            else if (t.ContentFieldID == 2 || t.ContentFieldID == 4)
                             {
                                 prt6.Weight = (float)t.Value;
                             }
@@ -5867,15 +5867,15 @@ namespace WebApp.Helpers
                                     {
                                         var purchaseSpiritType =
                                         (from pur2SpiritType in db.PurchaseToSpiritTypeReporting
-                                        join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
-                                        from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
-                                        where
-                                            pur2SpiritType.PurchaseID == l.RecordID
-                                        select new
-                                        {
-                                            Spirit_Short_Name = spiritTypeRep.ProductTypeName,
-                                            SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
-                                        }).FirstOrDefault();
+                                         join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
+                                         from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
+                                         where
+                                             pur2SpiritType.PurchaseID == l.RecordID
+                                         select new
+                                         {
+                                             Spirit_Short_Name = spiritTypeRep.ProductTypeName,
+                                             SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
+                                         }).FirstOrDefault();
 
                                         if (purchaseSpiritType != null)
                                         {
@@ -5909,18 +5909,18 @@ namespace WebApp.Helpers
                             {
                                 var productionSpiritType =
                                 (from prod in db.Production
-                                    join pur2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals pur2SpiritType.ProductionID into pur2SpiritType_join
-                                    from pur2SpiritType in pur2SpiritType_join.DefaultIfEmpty()
-                                    join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
-                                    from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
-                                    where
-                                    prod.ProductionID == i.RecordID &&
-                                    prod.Gauged == true
-                                    select new
-                                    {
-                                        Spirit_Short_Name = spiritTypeRep.ProductTypeName,
-                                        SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID
-                                    }).FirstOrDefault();
+                                 join pur2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals pur2SpiritType.ProductionID into pur2SpiritType_join
+                                 from pur2SpiritType in pur2SpiritType_join.DefaultIfEmpty()
+                                 join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
+                                 from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
+                                 where
+                                 prod.ProductionID == i.RecordID &&
+                                 prod.Gauged == true
+                                 select new
+                                 {
+                                     Spirit_Short_Name = spiritTypeRep.ProductTypeName,
+                                     SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID
+                                 }).FirstOrDefault();
 
                                 if (productionSpiritType != null)
                                 {
@@ -5949,21 +5949,21 @@ namespace WebApp.Helpers
                                 }
                             }
                         }
-                        if (!i.isProductionComponent ) // case when we distil Purchased Distillation like GNS
+                        if (!i.isProductionComponent) // case when we distil Purchased Distillation like GNS
                         {
                             if (i.ContentFieldName == "PurDistilledProofGal" || i.ContentFieldName == "PurFermentedProofGal")
                             {
                                 var purchaseSpiritType =
                                 (from pur2SpiritType in db.PurchaseToSpiritTypeReporting
-                                join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
-                                from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
-                                where
-                                  pur2SpiritType.PurchaseID == i.RecordID
-                                select new
-                                {
-                                    Spirit_Short_Name = spiritTypeRep.ProductTypeName,
-                                    SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
-                                }).FirstOrDefault();
+                                 join spiritTypeRep in db.SpiritTypeReporting on pur2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
+                                 from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
+                                 where
+                                   pur2SpiritType.PurchaseID == i.RecordID
+                                 select new
+                                 {
+                                     Spirit_Short_Name = spiritTypeRep.ProductTypeName,
+                                     SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
+                                 }).FirstOrDefault();
 
                                 if (purchaseSpiritType != null)
                                 {
@@ -6089,23 +6089,23 @@ namespace WebApp.Helpers
                         {
                             var k =
                                     (from prodContent in db.ProductionContent
-                                    join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.RecordID equals prod2SpiritType.ProductionID into prod2SpiritType_join
-                                    from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
-                                    join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
-                                    from matKindRep in matKindRep_join.DefaultIfEmpty()
-                                    join spiritTRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTRep.SpiritTypeReportingID into spiritTRep_join
-                                    from spiritTRep in spiritTRep_join.DefaultIfEmpty()
-                                    where
-                                        prodContent.isProductionComponent == true &&
-                                        prodContent.ProductionID == i.ProductionID
-                                    select new
-                                    {
-                                        RecordID = (int?)prodContent.RecordID,
-                                        SpiritTypeReportingID = (int?)spiritTRep.SpiritTypeReportingID ?? (int?)0,
-                                        SpiritTypeReportingName = spiritTRep.ProductTypeName ?? String.Empty,
-                                        MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID ?? (int?)0,
-                                        MaterialKindReportingName = matKindRep.MaterialKindName ?? String.Empty
-                                    }).FirstOrDefault();
+                                     join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.RecordID equals prod2SpiritType.ProductionID into prod2SpiritType_join
+                                     from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
+                                     join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
+                                     from matKindRep in matKindRep_join.DefaultIfEmpty()
+                                     join spiritTRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTRep.SpiritTypeReportingID into spiritTRep_join
+                                     from spiritTRep in spiritTRep_join.DefaultIfEmpty()
+                                     where
+                                         prodContent.isProductionComponent == true &&
+                                         prodContent.ProductionID == i.ProductionID
+                                     select new
+                                     {
+                                         RecordID = (int?)prodContent.RecordID,
+                                         SpiritTypeReportingID = (int?)spiritTRep.SpiritTypeReportingID ?? (int?)0,
+                                         SpiritTypeReportingName = spiritTRep.ProductTypeName ?? String.Empty,
+                                         MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID ?? (int?)0,
+                                         MaterialKindReportingName = matKindRep.MaterialKindName ?? String.Empty
+                                     }).FirstOrDefault();
                             if (k != null)
                             {
                                 if ((int)k.SpiritTypeReportingID == 0)
@@ -6116,23 +6116,23 @@ namespace WebApp.Helpers
                                     {
                                         var t =
                                             (from prodContent in db.ProductionContent
-                                                join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.RecordID equals prod2SpiritType.ProductionID into prod2SpiritType_join
-                                                from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
-                                                join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
-                                                from matKindRep in matKindRep_join.DefaultIfEmpty()
-                                                join spiritTRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTRep.SpiritTypeReportingID into spiritTRep_join
-                                                from spiritTRep in spiritTRep_join.DefaultIfEmpty()
-                                                where
-                                                prodContent.isProductionComponent == true &&
-                                                prodContent.ProductionID == tempRecordID
-                                                select new
-                                                {
-                                                    RecordID = (int?)prodContent.RecordID,
-                                                    SpiritTypeReportingID = (int?)spiritTRep.SpiritTypeReportingID ?? (int?)0,
-                                                    SpiritTypeReportingName = spiritTRep.ProductTypeName ?? String.Empty,
-                                                    MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID ?? (int?)0,
-                                                    MaterialKindReportingName = matKindRep.MaterialKindName ?? String.Empty
-                                                }).FirstOrDefault();
+                                             join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.RecordID equals prod2SpiritType.ProductionID into prod2SpiritType_join
+                                             from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
+                                             join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
+                                             from matKindRep in matKindRep_join.DefaultIfEmpty()
+                                             join spiritTRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTRep.SpiritTypeReportingID into spiritTRep_join
+                                             from spiritTRep in spiritTRep_join.DefaultIfEmpty()
+                                             where
+                                             prodContent.isProductionComponent == true &&
+                                             prodContent.ProductionID == tempRecordID
+                                             select new
+                                             {
+                                                 RecordID = (int?)prodContent.RecordID,
+                                                 SpiritTypeReportingID = (int?)spiritTRep.SpiritTypeReportingID ?? (int?)0,
+                                                 SpiritTypeReportingName = spiritTRep.ProductTypeName ?? String.Empty,
+                                                 MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID ?? (int?)0,
+                                                 MaterialKindReportingName = matKindRep.MaterialKindName ?? String.Empty
+                                             }).FirstOrDefault();
                                         if (t != null)
                                         {
                                             if (t.SpiritTypeReportingID != null || t.SpiritTypeReportingID != 0)
@@ -6555,6 +6555,10 @@ namespace WebApp.Helpers
             // Query purchase batches destroyed in Storage Account
             var purDestroyed = (from dest in db.Destruction
                                 join pur in db.Purchase on dest.RecordID equals pur.PurchaseID
+                                join mDic in db.MaterialDict on pur.MaterialDictID equals mDic.MaterialDictID into mDic_join
+                                from mDic in mDic_join.DefaultIfEmpty()
+                                join uOm in db.UnitOfMeasurement on mDic.UnitOfMeasurementID equals uOm.UnitOfMeasurementID into uOm_join
+                                from uOm in uOm_join.DefaultIfEmpty()
                                 join dist in db.AspNetUserToDistiller on pur.DistillerID equals dist.DistillerID
                                 join pur_str in db.PurchaseToSpiritTypeReporting on pur.PurchaseID equals pur_str.PurchaseID
                                 join str in db.SpiritTypeReporting on pur_str.SpiritTypeReportingID equals str.SpiritTypeReportingID
@@ -6567,6 +6571,7 @@ namespace WebApp.Helpers
                                     && dest.EndTime > startDate
                                     && dest.EndTime < endDate
                                     && dest.WorkflowType == "Purchase"
+                                    && uOm.Name != "lb"
                                 select new
                                 {
                                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
@@ -6652,6 +6657,10 @@ namespace WebApp.Helpers
             // Query distilled purchase records transferred to storage account
             var records =
                 (from rec in db.Purchase
+                 join mDic in db.MaterialDict on rec.MaterialDictID equals mDic.MaterialDictID into mDic_join
+                 from mDic in mDic_join.DefaultIfEmpty()
+                 join uOm in db.UnitOfMeasurement on mDic.UnitOfMeasurementID equals uOm.UnitOfMeasurementID into uOm_join
+                 from uOm in uOm_join.DefaultIfEmpty()
                  join dest in db.Destruction on rec.PurchaseID equals dest.RecordID into dest_join
                  from dest in dest_join.DefaultIfEmpty()
                  join proof in db.Proof on rec.ProofID equals proof.ProofID into proof_join
@@ -6667,6 +6676,7 @@ namespace WebApp.Helpers
                      && (rec.PurchaseTypeID == 2 || rec.PurchaseTypeID == 3)
                      && rec.PurchaseDate < startDate
                      && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
+                     && uOm.Name != "lb"
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
@@ -6754,6 +6764,10 @@ namespace WebApp.Helpers
             // Query fermented and distilled purchase records transferred to storage account
             var records =
                 (from purchase in db.Purchase
+                 join mDic in db.MaterialDict on purchase.MaterialDictID equals mDic.MaterialDictID into mDic_join
+                 from mDic in mDic_join.DefaultIfEmpty()
+                 join uOm in db.UnitOfMeasurement on mDic.UnitOfMeasurementID equals uOm.UnitOfMeasurementID into uOm_join
+                 from uOm in uOm_join.DefaultIfEmpty()
                  join dest in db.Destruction on purchase.PurchaseID equals dest.RecordID into dest_join
                  from dest in dest_join.DefaultIfEmpty()
                  join alcohol in db.Alcohol on purchase.AlcoholID equals alcohol.AlcoholID into alcohol_join
@@ -6788,6 +6802,7 @@ namespace WebApp.Helpers
                      && contentField.ContentFieldName != "ProdDistilledProofGal"
                      && contentField.ContentFieldName != "ProdBlendedProofGal"
                      && contentField.ContentFieldName != "ProdFermentedProofGal"
+                     && uOm.Name != "lb"
 
                  select new
                  {
@@ -6887,6 +6902,10 @@ namespace WebApp.Helpers
             // Query distilled purchase records to transfer from storage account to production account
             var purRes =
                 (from sourcePurchaseRecord in db.Purchase
+                 join mDic in db.MaterialDict on sourcePurchaseRecord.MaterialDictID equals mDic.MaterialDictID into mDic_join
+                 from mDic in mDic_join.DefaultIfEmpty()
+                 join uOm in db.UnitOfMeasurement on mDic.UnitOfMeasurementID equals uOm.UnitOfMeasurementID into uOm_join
+                 from uOm in uOm_join.DefaultIfEmpty()
                  join alcohol in db.Alcohol on sourcePurchaseRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
                  from alcohol in alcohol_join.DefaultIfEmpty()
                  join productionContent in db.ProductionContent on sourcePurchaseRecord.PurchaseID equals productionContent.RecordID into productionContent_join
@@ -6919,6 +6938,7 @@ namespace WebApp.Helpers
                      && contentField.ContentFieldName != "ProdDistilledProofGal"
                      && contentField.ContentFieldName != "ProdBlendedProofGal"
                      && contentField.ContentFieldName != "ProdFermentedProofGal"
+                     && uOm.Name != "lb"
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
@@ -7014,6 +7034,10 @@ namespace WebApp.Helpers
             // Query distilled purchase records transferred from storage account to processing account
             var purRes =
                 (from sourcePurchaseRecord in db.Purchase
+                 join mDic in db.MaterialDict on sourcePurchaseRecord.MaterialDictID equals mDic.MaterialDictID into mDic_join
+                 from mDic in mDic_join.DefaultIfEmpty()
+                 join uOm in db.UnitOfMeasurement on mDic.UnitOfMeasurementID equals uOm.UnitOfMeasurementID into uOm_join
+                 from uOm in uOm_join.DefaultIfEmpty()
                  join alcohol in db.Alcohol on sourcePurchaseRecord.AlcoholID equals alcohol.AlcoholID into alcohol_join
                  from alcohol in alcohol_join.DefaultIfEmpty()
                  join productionContent in db.ProductionContent on sourcePurchaseRecord.PurchaseID equals productionContent.RecordID into productionContent_join
@@ -7040,6 +7064,7 @@ namespace WebApp.Helpers
                      sourcePurchaseRecord.PurchaseDate < endDate &&
                      outputProductionRecord.ProductionEndTime >= startDate &&
                      outputProductionRecord.ProductionEndTime <= endDate
+                     && uOm.Name != "lb"
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
