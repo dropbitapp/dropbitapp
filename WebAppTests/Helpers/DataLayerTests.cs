@@ -1777,6 +1777,36 @@ namespace WebApp.Helpers.Tests
         }
 
         [TestMethod()]
+        public void CreateMaterialDistilledTest()
+        {
+            // Arrange
+            RawMaterialObject distilledMaterial = new RawMaterialObject();
+            distilledMaterial.RawMaterialName = "Distilled Product";
+            distilledMaterial.UnitType = "gal";
+            distilledMaterial.UnitTypeId = 1;
+            PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+            materialBoolTypes.Distilled = true;
+            distilledMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+            // Act
+            int result = _dl.CreateRawMaterial(_userId, distilledMaterial);
+            var materialList = _dl.GetRawMaterialListDict(_userId);
+            var dbResult = materialList.Single(m => m.RawMaterialId == result);
+            // Assert
+            Assert.AreNotEqual(0, result);
+            Assert.AreEqual(dbResult.RawMaterialName, distilledMaterial.RawMaterialName);
+            Assert.AreEqual(dbResult.UnitType, distilledMaterial.UnitType);
+            Assert.AreEqual(dbResult.UnitTypeId, distilledMaterial.UnitTypeId);
+            Assert.AreEqual(dbResult.PurchaseMaterialTypes.Distilled, distilledMaterial.PurchaseMaterialTypes.Distilled);
+            Assert.AreEqual(dbResult.PurchaseMaterialTypes.Additive, distilledMaterial.PurchaseMaterialTypes.Additive);
+            Assert.AreEqual(dbResult.PurchaseMaterialTypes.Fermentable, distilledMaterial.PurchaseMaterialTypes.Fermentable);
+            Assert.AreEqual(dbResult.PurchaseMaterialTypes.Fermented, distilledMaterial.PurchaseMaterialTypes.Fermented);
+            Assert.AreEqual(dbResult.PurchaseMaterialTypes.Supply, distilledMaterial.PurchaseMaterialTypes.Supply);
+            // Cleanup
+            TestRecordCleanup(result, Table.MaterialDict);
+        }
+
+        [TestMethod()]
         public void CreateStorageTest()
         {
             // Arrange
