@@ -725,6 +725,176 @@ namespace WebApp.Helpers.Tests
         }
 
         /// <summary>
+        /// Test for validation bug tracked in task 1690.
+        /// Bug: The proof values in column b of Processing Report are removed when bottling a blended batch.
+        /// </summary>
+        /// 
+        [TestMethod]
+        public void PurchaseDistilled_Blend_Bottle()
+        {
+            // A dictionary to log database test records for later clean-up
+            Dictionary<int, Table> testRecords = new Dictionary<int, Table>();
+
+            try
+            {
+                // Arrange
+
+                // Create Spirit dictionary item
+                SpiritObject spirit = new SpiritObject
+                {
+                    SpiritName = "GIN",
+                    ProcessingReportTypeID = 18 // GIN
+                };
+
+                int spiritId = _dl.CreateSpirit(_userId, spirit);
+                testRecords.Add(spiritId, Table.Spirit);
+
+                // Create Raw Material dictionary item
+                RawMaterialObject rawMaterial = new RawMaterialObject
+                {
+                    RawMaterialName = "GNS",
+                    PurchaseMaterialTypes = new PurchaseMaterialBooleanTypes { Distilled = true },
+                    UnitTypeId = 2, // lb
+                    UnitType = "lb",
+                    MaterialCategoryID = 1 // grain
+                };
+
+                int rawMaterialId = _dl.CreateRawMaterial(_userId, rawMaterial);
+                testRecords.Add(rawMaterialId, Table.MaterialDict);
+
+                // Create Vendor dictionary item
+                VendorObject vendor = new VendorObject
+                {
+                    VendorName = "BigGrainsDistillery"
+                };
+
+                int vendorId = _dl.CreateVendor(_userId, vendor);
+                testRecords.Add(vendorId, Table.Vendor);
+
+                // Create Storage dictionary item
+                StorageObject storage = new StorageObject
+                {
+                    StorageName = "ThaTank"
+                };
+
+                int storageId = _dl.CreateStorage(_userId, storage);
+                testRecords.Add(storageId, Table.Storage);
+
+                // Distilled purchase
+                PurchaseObject purchase = new PurchaseObject
+                {
+                    PurBatchName = "GNS Gin",
+                    PurchaseType = "Distilled",
+                    PurchaseDate = new DateTime(2017, 11, 1),
+                    VolumeByWeight = 1000f,
+                    AlcoholContent = 75f,
+                    ProofGallon = 100f,
+                    RecordId = rawMaterialId,
+                    Price = 2000f,
+                    VendorId = vendorId,
+                    Gauged = true,
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject { StorageId = storageId }
+                    }
+                };
+
+                int purchaseId = _dl.CreatePurchase(purchase, _userId);
+                testRecords.Add(purchaseId, Table.Purchase);
+
+                // Blend and gauge
+                ProductionObject blending = new ProductionObject
+                {
+                    BatchName = "Gin blending",
+                    ProductionDate = new DateTime(2017, 11, 2),
+                    ProductionStart = new DateTime(2017, 11, 2),
+                    ProductionEnd = new DateTime(2017, 11, 2),
+                    Gauged = true,
+                    ProductionType = "Blending",
+                    VolumeByWeight = 100f,
+                    AlcoholContent = 37.5f,
+                    ProofGallon = 100f,
+                    SpiritTypeReportingID = 6, // Gin
+                    ProductionTypeId = 3, // Blending
+                    SpiritId = spiritId,
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject { StorageId = storageId }
+                    },
+                    UsedMats = new List<ObjInfo4Burndwn>
+                    {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            OldVal = 0f,
+                            NewVal = purchase.VolumeByWeight,
+                            DistillableOrigin = "pur",
+                            BurningDownMethod = "weight"
+                        }
+                    }
+                };
+
+                int productionId1 = _dl.CreateProduction(blending, _userId);
+                testRecords.Add(productionId1, Table.Production);
+
+                // Bottle
+                ProductionObject bottling = new ProductionObject
+                {
+                    BatchName = "Gin bottling",
+                    ProductionDate = new DateTime(2017, 11, 2),
+                    ProductionStart = new DateTime(2017, 11, 2),
+                    ProductionEnd = new DateTime(2017, 11, 2),
+                    Gauged = true,
+                    ProductionType = "Bottling",
+                    Quantity = 11.89f,
+                    AlcoholContent = 37.5f,
+                    ProofGallon = 8.91f,
+                    SpiritTypeReportingID = 6, // Gin
+                    ProductionTypeId = 3, // Blending
+                    SpiritId = spiritId,
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject { StorageId = storageId }
+                    },
+                    UsedMats = new List<ObjInfo4Burndwn>
+                    {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = productionId1,
+                            OldVal = 0f,
+                            NewVal = blending.VolumeByWeight,
+                            DistillableOrigin = "prod",
+                            BurningDownMethod = "weight"
+                        }
+                    }
+                };
+
+                int productionId2 = _dl.CreateProduction(bottling, _userId);
+                testRecords.Add(productionId2, Table.Production);
+
+                // Act
+
+                // Generate Processing Report
+                ProcessingReportingObject report = _dl.GetProcessingReportData(new DateTime(2017, 11, 1), new DateTime(2017, 11, 30), _userId);
+
+                // Assert
+                Assert.IsNotNull(report);
+                Assert.IsNotNull(report.Header);
+                Assert.IsTrue(report.Part4List.Count() > 0);
+                Assert.IsTrue(report.Part4List.Exists(x => x.ProcessingSpirits == "bulkSpiritDumped" && x.Gin == 100f));
+                Assert.IsTrue(report.Part4List.Exists(x => x.ProcessingSpirits == "bottled" && x.Gin == 11.89f));
+            }
+            finally
+            {
+                // Perform table cleanup
+                foreach (var rec in testRecords)
+                {
+                    TestRecordCleanup(rec.Key, rec.Value);
+                }
+            }
+        }
+
+        /// <summary>
         /// Fermented pomace purchase workflow
         /// Buy Pomace and Distil Once
         /// </summary>
@@ -1247,7 +1417,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1[0].ProccessingAcct);
                 Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1[0].ProducedTotal);
                 Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1[0].Recd4RedistilL17);
-                
+
 
                 Assert.AreEqual(part1E.Recd4RedistilaltionL15, actualProdReportObject.Part1[1].Recd4RedistilaltionL15);
                 Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1[0].StorageAcct);
@@ -2132,7 +2302,7 @@ namespace WebApp.Helpers.Tests
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
                 prodO1.ProductionTypeId = 2;
-                prodO1.Quantity =  80f;
+                prodO1.Quantity = 80f;
                 prodO1.VolumeByWeight = 0f;
                 prodO1.AlcoholContent = 42f;
                 prodO1.ProofGallon = 67.20f;

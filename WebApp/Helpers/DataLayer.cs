@@ -565,7 +565,8 @@ namespace WebApp.Helpers
                     distillers.UserId == userId &&
                     prod.Gauged == true &&
                     (prod.StatusID == 1 ||
-                    prod.StatusID == 2) &&
+                    prod.StatusID == 2 ||
+                    prod.StatusID == 3) &&
                     (new int[] { 4, 5 }).Contains(prod.StateID) &&
                     prod.ProductionEndTime >= startOfReporting &&
                     prod.ProductionEndTime <= endOfReporting
