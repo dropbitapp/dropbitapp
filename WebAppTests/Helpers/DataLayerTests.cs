@@ -54,7 +54,7 @@ namespace WebApp.Helpers.Tests
         public void Buy_Wine_Make_Brandy_Under_170_Test()
         {
             // Arrange
-            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tupleL = new List<Tuple<int, Table>>();
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
             int spiritId = 0;
             int vendorId = 0;
             int storageId = 0;
@@ -77,7 +77,7 @@ namespace WebApp.Helpers.Tests
                 vendor.VendorName = "testVendor";
 
                 vendorId = _dl.CreateVendor(_userId, vendor);
-                tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
                 StorageObject storage = new StorageObject();
@@ -85,7 +85,7 @@ namespace WebApp.Helpers.Tests
                 storage.SerialNumber = "2H29NNS";
 
                 storageId = _dl.CreateStorage(_userId, storage);
-                tupleL.Add(Tuple.Create(storageId, Table.Storage));
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
 
                 // setup Material Object
@@ -101,7 +101,7 @@ namespace WebApp.Helpers.Tests
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                     wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
-                    tupleL.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
+                    tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
                 // water
@@ -115,7 +115,7 @@ namespace WebApp.Helpers.Tests
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                     waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
-                    tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+                    tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
 
@@ -133,17 +133,17 @@ namespace WebApp.Helpers.Tests
                 purchO.Price = 350f;
                 purchO.VendorId = vendorId;
 
-                List<StorageObject> stoL = new List<StorageObject>();
-                StorageObject sto = new StorageObject();
-                sto.StorageId = storageId;
-                stoL.Add(sto);
-                purchO.Storage = stoL;
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
 
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
                 purchaseId = _dl.CreatePurchase(purchO, _userId);
-                tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
                 #region Production
@@ -160,7 +160,7 @@ namespace WebApp.Helpers.Tests
                 prodO.VolumeByWeight = 0f;
                 prodO.AlcoholContent = 80f; // 80%
                 prodO.ProofGallon = 80f; // 80pfg
-                prodO.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodO.SpiritTypeReportingID = 3; // brandy under 170
                 prodO.MaterialKindReportingID = 94; // grape brandy
                 prodO.ProductionTypeId = 2;
@@ -178,7 +178,7 @@ namespace WebApp.Helpers.Tests
                 prodO.UsedMats = usedMats;
 
                 productionId = _dl.CreateProduction(prodO, _userId);
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
                 ProductionObject prodO2 = new ProductionObject();
@@ -193,7 +193,7 @@ namespace WebApp.Helpers.Tests
                 prodO2.VolumeByWeight = 0f;
                 prodO2.AlcoholContent = 60f; // 60%
                 prodO2.ProofGallon = 18f; // 18pfg
-                prodO2.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO2.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodO2.SpiritTypeReportingID = 3; // brandy under 170
                 prodO2.MaterialKindReportingID = 94; // grape brandy
                 prodO2.ProductionTypeId = 2;
@@ -210,7 +210,7 @@ namespace WebApp.Helpers.Tests
                 prodO2.UsedMats = usedMats4Gauge;
 
                 productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
@@ -224,7 +224,7 @@ namespace WebApp.Helpers.Tests
                 prodBlend.VolumeByWeight = 0f;
                 prodBlend.AlcoholContent = 40f; // 40%
                 prodBlend.ProofGallon = 18f; // 18pfg
-                prodBlend.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodBlend.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodBlend.SpiritTypeReportingID = 3; // brandy under 170
                 prodBlend.MaterialKindReportingID = 94; // grape brandy
                 prodBlend.SpiritId = spiritId;
@@ -253,7 +253,7 @@ namespace WebApp.Helpers.Tests
                 prodBlend.BlendingAdditives = blendAdditives;
 
                 productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Bottling Record
                 ProductionObject prodBottl = new ProductionObject();
@@ -267,7 +267,7 @@ namespace WebApp.Helpers.Tests
                 prodBottl.VolumeByWeight = 0f;
                 prodBottl.AlcoholContent = 40f; // 40%
                 prodBottl.ProofGallon = 17.9f; // 17.9 pfg
-                prodBottl.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodBottl.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodBottl.SpiritTypeReportingID = 3; // brandy under 170
                 prodBottl.MaterialKindReportingID = 94; // grape brandy
                 prodBottl.SpiritId = spiritId;
@@ -297,7 +297,7 @@ namespace WebApp.Helpers.Tests
                 prodBottl.FillTestList = null;
 
                 productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
 
@@ -585,7 +585,7 @@ namespace WebApp.Helpers.Tests
             finally
             {
                 // Cleanup
-                foreach (var i in tupleL)
+                foreach (var i in tablesForCleanupTupleList)
                 {
                     TestRecordCleanup(i.Item1, i.Item2);
                 }
@@ -880,7 +880,7 @@ namespace WebApp.Helpers.Tests
         public void BuyGNS_RedistilOnce_Make_Gin()
         {
             // Arrange
-            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tupleL = new List<Tuple<int, Table>>();
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
             int spiritId = 0;
             int vendorId = 0;
             int storageId = 0;
@@ -905,7 +905,7 @@ namespace WebApp.Helpers.Tests
                 vendor.VendorName = "testVendor";
 
                 vendorId = _dl.CreateVendor(_userId, vendor);
-                tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
                 StorageObject storage = new StorageObject();
@@ -913,7 +913,7 @@ namespace WebApp.Helpers.Tests
                 storage.SerialNumber = "2H29NNS";
 
                 storageId = _dl.CreateStorage(_userId, storage);
-                tupleL.Add(Tuple.Create(storageId, Table.Storage));
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
                 // GNS
@@ -927,7 +927,7 @@ namespace WebApp.Helpers.Tests
                     gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                     gnsMaterialId = _dl.CreateRawMaterial(_userId, gnsMaterial);
-                    tupleL.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
+                    tablesForCleanupTupleList.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
                 }
 
                 // water
@@ -941,7 +941,7 @@ namespace WebApp.Helpers.Tests
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                     waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
-                    tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+                    tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
 
@@ -960,17 +960,17 @@ namespace WebApp.Helpers.Tests
                 purchO.VendorId = vendorId;
                 purchO.Gauged = true;
 
-                List<StorageObject> stoL = new List<StorageObject>();
-                StorageObject sto = new StorageObject();
-                sto.StorageId = storageId;
-                stoL.Add(sto);
-                purchO.Storage = stoL;
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
 
                 purchO.SpiritTypeReportingID = 8;
                 purchO.Gauged = true;
 
                 purchaseId = _dl.CreatePurchase(purchO, _userId);
-                tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
                 #region Production
@@ -987,7 +987,7 @@ namespace WebApp.Helpers.Tests
                 prodO.VolumeByWeight = 0f;
                 prodO.AlcoholContent = 80f; // 80%
                 prodO.ProofGallon = 160f; // 160pfg
-                prodO.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodO.SpiritTypeReportingID = 6; // GNS
                 prodO.ProductionTypeId = 2;
 
@@ -1004,7 +1004,7 @@ namespace WebApp.Helpers.Tests
                 prodO.UsedMats = usedMats;
 
                 productionId = _dl.CreateProduction(prodO, _userId);
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
@@ -1018,7 +1018,7 @@ namespace WebApp.Helpers.Tests
                 prodBlend.VolumeByWeight = 0f;
                 prodBlend.AlcoholContent = 46f; // 46%
                 prodBlend.ProofGallon = 160f; // 160pfg
-                prodBlend.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodBlend.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodBlend.SpiritTypeReportingID = 6; // GIN
                 prodBlend.SpiritId = spiritId;
                 prodBlend.ProductionTypeId = 3;
@@ -1046,7 +1046,7 @@ namespace WebApp.Helpers.Tests
                 prodBlend.BlendingAdditives = blendAdditives;
 
                 productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Bottling Record
                 ProductionObject prodBottl = new ProductionObject();
@@ -1060,7 +1060,7 @@ namespace WebApp.Helpers.Tests
                 prodBottl.VolumeByWeight = 0f;
                 prodBottl.AlcoholContent = 45f; // 45%
                 prodBottl.ProofGallon = 159.92f; // 159.92 pfg
-                prodBottl.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodBottl.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodBottl.SpiritTypeReportingID = 6; // Gin
                 prodBottl.SpiritId = spiritId;
                 prodO.ProductionTypeId = 4;
@@ -1089,7 +1089,7 @@ namespace WebApp.Helpers.Tests
                 prodBottl.FillTestList = null;
 
                 productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
 
@@ -1360,7 +1360,7 @@ namespace WebApp.Helpers.Tests
             finally
             {
                 // Cleanup
-                foreach (var i in tupleL)
+                foreach (var i in tablesForCleanupTupleList)
                 {
                     TestRecordCleanup(i.Item1, i.Item2);
                 }
@@ -1375,7 +1375,7 @@ namespace WebApp.Helpers.Tests
         public void BuyGNS_RedistilOnce_Make_Gin_And_Dont_Blend_Or_Bottle()
         {
             // Arrange
-            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tupleL = new List<Tuple<int, Table>>();
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
             int spiritId = 0;
             int vendorId = 0;
             int storageId = 0;
@@ -1400,7 +1400,7 @@ namespace WebApp.Helpers.Tests
                 vendor.VendorName = "testVendor";
 
                 vendorId = _dl.CreateVendor(_userId, vendor);
-                tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
                 StorageObject storage = new StorageObject();
@@ -1408,7 +1408,7 @@ namespace WebApp.Helpers.Tests
                 storage.SerialNumber = "2H29NNS";
 
                 storageId = _dl.CreateStorage(_userId, storage);
-                tupleL.Add(Tuple.Create(storageId, Table.Storage));
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
                 // GNS
@@ -1422,7 +1422,7 @@ namespace WebApp.Helpers.Tests
                     gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                     gnsMaterialId = _dl.CreateRawMaterial(_userId, gnsMaterial);
-                    tupleL.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
+                    tablesForCleanupTupleList.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
                 }
 
                 // water
@@ -1436,7 +1436,7 @@ namespace WebApp.Helpers.Tests
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                     waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
-                    tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+                    tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
 
@@ -1455,17 +1455,17 @@ namespace WebApp.Helpers.Tests
                 purchO.VendorId = vendorId;
                 purchO.Gauged = true;
 
-                List<StorageObject> stoL = new List<StorageObject>();
-                StorageObject sto = new StorageObject();
-                sto.StorageId = storageId;
-                stoL.Add(sto);
-                purchO.Storage = stoL;
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
 
                 purchO.SpiritTypeReportingID = 8;
                 purchO.Gauged = true;
 
                 purchaseId = _dl.CreatePurchase(purchO, _userId);
-                tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
                 #region Production
@@ -1482,7 +1482,7 @@ namespace WebApp.Helpers.Tests
                 prodO.VolumeByWeight = 0f;
                 prodO.AlcoholContent = 80f; // 80%
                 prodO.ProofGallon = 160f; // 160pfg
-                prodO.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodO.SpiritTypeReportingID = 6; // GNS
                 prodO.ProductionTypeId = 2;
 
@@ -1499,7 +1499,7 @@ namespace WebApp.Helpers.Tests
                 prodO.UsedMats = usedMats;
 
                 productionId = _dl.CreateProduction(prodO, _userId);
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
                 #endregion
 
                 #region Reports setup
@@ -1710,7 +1710,7 @@ namespace WebApp.Helpers.Tests
             finally
             {
                 // Cleanup
-                foreach (var i in tupleL)
+                foreach (var i in tablesForCleanupTupleList)
                 {
                     TestRecordCleanup(i.Item1, i.Item2);
                 }
@@ -1732,7 +1732,7 @@ namespace WebApp.Helpers.Tests
             ----------*/
 
             // Arrange
-            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tupleL = new List<Tuple<int, Table>>();
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
             int spiritId = 0;
             int vendorId = 0;
             int storageId = 0;
@@ -1749,7 +1749,7 @@ namespace WebApp.Helpers.Tests
             List<Tuple<int, float>> received4RedistillationLine15L = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
 
             // List used in assertions for entered into Storage
-            List<Tuple<int, float>> enteredInStorageL = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
+            List<Tuple<int, float>> enteredInStorageList = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
 
             // List used in asserions for Produced Total
             List<Tuple<int, float>> producedTotalLine14L = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
@@ -1769,7 +1769,7 @@ namespace WebApp.Helpers.Tests
                 vendor.VendorName = "testVendor";
 
                 vendorId = _dl.CreateVendor(_userId, vendor);
-                tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
                 StorageObject storage = new StorageObject();
@@ -1777,7 +1777,7 @@ namespace WebApp.Helpers.Tests
                 storage.SerialNumber = "2H29NNS";
 
                 storageId = _dl.CreateStorage(_userId, storage);
-                tupleL.Add(Tuple.Create(storageId, Table.Storage));
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
 
                 // setup Material Object
@@ -1793,7 +1793,7 @@ namespace WebApp.Helpers.Tests
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                     wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
-                    tupleL.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
+                    tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
                 // water
@@ -1807,7 +1807,7 @@ namespace WebApp.Helpers.Tests
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                     waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
-                    tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+                    tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
                 #endregion
@@ -1826,17 +1826,17 @@ namespace WebApp.Helpers.Tests
                 purchO.Price = 350f;
                 purchO.VendorId = vendorId;
 
-                List<StorageObject> stoL = new List<StorageObject>();
-                StorageObject sto = new StorageObject();
-                sto.StorageId = storageId;
-                stoL.Add(sto);
-                purchO.Storage = stoL;
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
 
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
                 purchaseId = _dl.CreatePurchase(purchO, _userId);
-                tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
                 #region Production
@@ -1854,7 +1854,7 @@ namespace WebApp.Helpers.Tests
                 prodO.VolumeByWeight = 0f;
                 prodO.AlcoholContent = 80f; // 80%
                 prodO.ProofGallon = 80f; // 80pfg
-                prodO.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodO.SpiritTypeReportingID = 9; // Alcohol 190+
                 prodO.MaterialKindReportingID = 81;
 
@@ -1871,7 +1871,7 @@ namespace WebApp.Helpers.Tests
                 prodO.UsedMats = usedMats;
 
                 productionId = _dl.CreateProduction(prodO, _userId);
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
@@ -1887,7 +1887,7 @@ namespace WebApp.Helpers.Tests
                 prodO1.VolumeByWeight = 0f;
                 prodO1.AlcoholContent = 45f;
                 prodO1.ProofGallon = 18f;
-                prodO1.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO1.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodO1.SpiritTypeReportingID = 4; // Brandy 170 +
                 prodO1.MaterialKindReportingID = 96; // neutral grape brandy
 
@@ -1904,7 +1904,7 @@ namespace WebApp.Helpers.Tests
                 prodO1.UsedMats = usedMats1;
 
                 productionId = _dl.CreateProduction(prodO1, _userId);
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
@@ -1946,9 +1946,9 @@ namespace WebApp.Helpers.Tests
                 }
 
                 // Assert that 18 PFGals went into storage
-                enteredInStorageL.Add(new Tuple<int, float>(prodO1.SpiritTypeReportingID, prodO1.ProofGallon));
+                enteredInStorageList.Add(new Tuple<int, float>(prodO1.SpiritTypeReportingID, prodO1.ProofGallon));
 
-                var brandy170PlusE = enteredInStorageL.Find(l => l.Item1 == prodO1.SpiritTypeReportingID);
+                var brandy170PlusE = enteredInStorageList.Find(l => l.Item1 == prodO1.SpiritTypeReportingID);
                 var brandy170PlusA = actualProdReportObject.Part1.Find(x => x.SpiritTypeReportingID == brandy170PlusE.Item1);
 
                 if (brandy170PlusA == null)
@@ -1965,14 +1965,10 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
             }
-            catch (Exception e)
-            {
-                throw e;
-            }
             finally
             {
                 // Cleanup
-                foreach (var i in tupleL)
+                foreach (var i in tablesForCleanupTupleList)
                 {
                     TestRecordCleanup(i.Item1, i.Item2);
                 }
@@ -1993,7 +1989,7 @@ namespace WebApp.Helpers.Tests
             ----------*/
 
             // Arrange
-            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tupleL = new List<Tuple<int, Table>>();
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
             int spiritId = 0;
             int vendorId = 0;
             int storageId = 0;
@@ -2010,7 +2006,7 @@ namespace WebApp.Helpers.Tests
             List<Tuple<int, float>> received4RedistillationLine15L = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
 
             // List used in assertions for entered into Storage
-            List<Tuple<int, float>> enteredInStorageL = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
+            List<Tuple<int, float>> enteredInStorageList = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
 
             try
             {
@@ -2027,7 +2023,7 @@ namespace WebApp.Helpers.Tests
                 vendor.VendorName = "testVendor";
 
                 vendorId = _dl.CreateVendor(_userId, vendor);
-                tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
                 StorageObject storage = new StorageObject();
@@ -2035,7 +2031,7 @@ namespace WebApp.Helpers.Tests
                 storage.SerialNumber = "2H29NNS";
 
                 storageId = _dl.CreateStorage(_userId, storage);
-                tupleL.Add(Tuple.Create(storageId, Table.Storage));
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
 
                 // setup Material Object
@@ -2052,7 +2048,7 @@ namespace WebApp.Helpers.Tests
                     grapeMaterial.MaterialCategoryID = 2;
 
                     grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
-                    tupleL.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
+                    tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
 
                 // water
@@ -2066,7 +2062,7 @@ namespace WebApp.Helpers.Tests
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                     waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
-                    tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+                    tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
                 #endregion
@@ -2083,14 +2079,14 @@ namespace WebApp.Helpers.Tests
                 purchO.Price = 350f;
                 purchO.VendorId = vendorId;
 
-                List<StorageObject> stoL = new List<StorageObject>();
-                StorageObject sto = new StorageObject();
-                sto.StorageId = storageId;
-                stoL.Add(sto);
-                purchO.Storage = stoL;
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
 
                 purchaseId = _dl.CreatePurchase(purchO, _userId);
-                tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
                 #region Production
@@ -2107,7 +2103,7 @@ namespace WebApp.Helpers.Tests
                 prodO.VolumeByWeight = 0f;
                 prodO.AlcoholContent = 12f; // %
                 prodO.ProofGallon = 72f; // pfg
-                prodO.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodO.SpiritTypeReportingID = 11; // Wine
                 prodO.MaterialKindReportingID = 0;
 
@@ -2124,7 +2120,7 @@ namespace WebApp.Helpers.Tests
                 prodO.UsedMats = usedMats;
 
                 productionId = _dl.CreateProduction(prodO, _userId);
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
@@ -2140,7 +2136,7 @@ namespace WebApp.Helpers.Tests
                 prodO1.VolumeByWeight = 0f;
                 prodO1.AlcoholContent = 42f;
                 prodO1.ProofGallon = 67.20f;
-                prodO1.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO1.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodO1.SpiritTypeReportingID = 3; // Brandy 170-
                 prodO1.MaterialKindReportingID = 94; // grape brandy
 
@@ -2157,8 +2153,11 @@ namespace WebApp.Helpers.Tests
                 prodO1.UsedMats = usedMats1;
 
                 productionId = _dl.CreateProduction(prodO1, _userId);
-                tupleL.Add(Tuple.Create(productionId, Table.Production));
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
+                #endregion
+
+                #region Reports
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
                 actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
@@ -2187,20 +2186,258 @@ namespace WebApp.Helpers.Tests
                 }
 
                 #endregion
-
-            }
-            catch (Exception e)
-            {
-                throw e;
             }
             finally
             {
-                // Cleanup
-                foreach (var i in tupleL)
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
                 {
                     TestRecordCleanup(i.Item1, i.Item2);
                 }
             }
+        }
+
+        /// <summary>
+        /// This test method verifies that after user buys grapes and ferments it.
+        /// Produced wine should show up in Storage report.
+        /// </summary>
+        [TestMethod()]
+        public void BuyGrapes_ProduceWine_ShowInStorageReport()
+        {
+            /*
+             * 1. Buy Grapes
+             * 2. Ferment Grapes
+             * 3. Check Storage report
+             **/
+
+            // Arrange
+            int spiritId = 0;
+            int vendorId = 0;
+            int storageId = 0;
+            int grapeMaterialId = 0;
+            int waterMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            // reporting time range
+            DateTime start = new DateTime(2017, 09, 01);
+            DateTime end = new DateTime(2017, 09, 30);
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            // List used in assertions in Storage report
+            List<Tuple<int, float>> storageDepositedInBulkStorageList = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
+            List<Tuple<int, float>> storageTotalLine6StorageList = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
+            List<Tuple<int, float>> storageOnHandEndOfMonthLine23StorageList = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
+            List<Tuple<int, float>> storageTotalLine24StorageList = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                // grapes
+                {
+                    RawMaterialObject grapeMaterial = new RawMaterialObject();
+                    grapeMaterial.RawMaterialName = "Grapes";
+                    grapeMaterial.MaterialCategoryID = 2;
+                    grapeMaterial.UnitType = "lb";
+                    grapeMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermentable = true;
+                    grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
+                    grapeMaterial.MaterialCategoryID = 2;
+
+                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
+                }
+
+                // water
+                {
+                    RawMaterialObject waterMaterial = new RawMaterialObject();
+                    waterMaterial.RawMaterialName = "Water";
+                    waterMaterial.UnitType = "gal";
+                    waterMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Additive = true;
+                    waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Riesling Grapes ";
+                purchO.PurchaseType = "Fermentable";
+                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.Quantity = 0f;
+                purchO.VolumeByWeight = 1000f;
+                purchO.RecordId = grapeMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Production
+                // create Fermented record
+                ProductionObject prodO = new ProductionObject();
+                prodO.BatchName = "Riesling Wine";
+                prodO.ProductionDate = new DateTime(2017, 09, 2);
+                prodO.ProductionStart = new DateTime(2017, 09, 7);
+                prodO.ProductionEnd = new DateTime(2017, 09, 7);
+                prodO.Gauged = true;
+                prodO.ProductionType = "Fermentation";
+                prodO.ProductionTypeId = 1;
+                prodO.Quantity = 300f; // 300 gallons of wine
+                prodO.VolumeByWeight = 0f;
+                prodO.AlcoholContent = 12f; // %
+                prodO.ProofGallon = 72f; // pfg
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.SpiritTypeReportingID = 11; // Wine
+                prodO.MaterialKindReportingID = 0;
+
+                List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
+                uMat.ID = purchaseId;
+                uMat.OldVal = 0f;
+                uMat.NewVal = purchO.Quantity;
+                uMat.DistillableOrigin = "pur";
+                uMat.BurningDownMethod = "weight";
+
+                usedMats.Add(uMat);
+
+                prodO.UsedMats = usedMats;
+
+                productionId = _dl.CreateProduction(prodO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                #endregion
+
+                #region Reports
+
+                // Report Header
+                ReportHeader reportHeaderE = new ReportHeader();
+                reportHeaderE.ProprietorName = "Test Distillery";
+                reportHeaderE.EIN = "12-3456789";
+                reportHeaderE.ReportDate = "September 2017";
+                reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
+                reportHeaderE.DSP = "DSP-WA-21086";
+
+                #region Storage Report
+
+                StorageReport actualStorageReportObject = new StorageReport();
+
+                //get actual storage data
+                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+
+                // verify Storage report Header
+                Assert.AreEqual(reportHeaderE.DSP, actualStorageReportObject.Header.DSP);
+                Assert.AreEqual(reportHeaderE.EIN, actualStorageReportObject.Header.EIN);
+                Assert.AreEqual(reportHeaderE.PlantAddress, actualStorageReportObject.Header.PlantAddress);
+                Assert.AreEqual(reportHeaderE.ProprietorName, actualStorageReportObject.Header.ProprietorName);
+                Assert.AreEqual(reportHeaderE.ReportDate, actualStorageReportObject.Header.ReportDate);
+
+                // verify Storage body
+
+                // Assert that we fermented 72 PFGals of wine
+                storageDepositedInBulkStorageList.Add(new Tuple<int, float>(prodO.SpiritTypeReportingID, prodO.ProofGallon));
+
+                var wineDeportitedInBulkStorageE = storageDepositedInBulkStorageList.Find(x => x.Item1 == prodO.SpiritTypeReportingID);
+                var wineDeportitedInBulkStorageA = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == wineDeportitedInBulkStorageE.Item1);
+
+                if (wineDeportitedInBulkStorageA == null)
+                {
+                    Assert.AreNotEqual(null, wineDeportitedInBulkStorageA, "No records for SpiritTypeID");
+                }
+                else
+                {
+                    Assert.AreEqual(wineDeportitedInBulkStorageE.Item2, wineDeportitedInBulkStorageA.r2_DepositedInBulkStorage);
+                }
+
+                storageOnHandEndOfMonthLine23StorageList.Add(new Tuple<int, float>(prodO.SpiritTypeReportingID, prodO.ProofGallon));
+
+                var wineOnHandEndOfMonthE = storageOnHandEndOfMonthLine23StorageList.Find(x => x.Item1 == prodO.SpiritTypeReportingID);
+                var wineOnHandEndOfMonthA = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == prodO.SpiritTypeReportingID);
+
+                if (wineOnHandEndOfMonthA == null)
+                {
+                    Assert.AreNotEqual(null, wineOnHandEndOfMonthA, "No records for SpiritTypeID");
+                }
+                else
+                {
+                    Assert.AreEqual(wineOnHandEndOfMonthE.Item2, wineDeportitedInBulkStorageA.r23_OnHandEndOfMonth);
+                }
+
+                storageTotalLine6StorageList.Add(new Tuple<int, float>(prodO.SpiritTypeReportingID, prodO.ProofGallon));
+
+                var wineTotalLine6E = storageTotalLine6StorageList.Find(x => x.Item1 == prodO.SpiritTypeReportingID);
+                var wineTotalLine6A = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == prodO.SpiritTypeReportingID);
+
+                if (wineOnHandEndOfMonthA == null)
+                {
+                    Assert.AreNotEqual(null, wineTotalLine6A, "No records for SpiritTypeID");
+                }
+                else
+                {
+                    Assert.AreEqual(wineTotalLine6E.Item2, wineTotalLine6A.r6_TotalLines1Through5);
+                }
+
+                storageTotalLine24StorageList.Add(new Tuple<int, float>(prodO.SpiritTypeReportingID, prodO.ProofGallon));
+
+                var wineTotalLine24E = storageTotalLine6StorageList.Find(x => x.Item1 == prodO.SpiritTypeReportingID);
+                var wineTotalLine24A = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == prodO.SpiritTypeReportingID);
+
+                if (wineTotalLine24A == null)
+                {
+                    Assert.AreNotEqual(null, wineTotalLine24A, "No records for SpiritTypeID");
+                }
+                else
+                {
+                    Assert.AreEqual(wineTotalLine24E.Item2, wineTotalLine24A.r24_Lines7Through23);
+                }
+
+                #endregion
+
+                #endregion
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+
         }
 
         [TestMethod()]
@@ -2869,8 +3106,8 @@ namespace WebApp.Helpers.Tests
         /// WorkflowBrandyTestSetup this method creates records in 
         /// dictionary tables for multistep workflow test scenarios
         /// </summary>
-        /// <param name="tupleL"></param>
-        private void WorkflowBrandyTestSetup(ref List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tupleL)
+        /// <param name="tablesForCleanupTupleList"></param>
+        private void WorkflowBrandyTestSetup(ref List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList)
         {
             int spiritId = 0;
             int vendorId = 0;
@@ -2883,7 +3120,7 @@ namespace WebApp.Helpers.Tests
             spirit.ProcessingReportTypeID = 12;
 
             spiritId = _dl.CreateSpirit(_userId, spirit);
-            tupleL.Add(Tuple.Create(spiritId, Table.Spirit));
+            tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
 
             // setup Vendor object
@@ -2891,7 +3128,7 @@ namespace WebApp.Helpers.Tests
             vendor.VendorName = "testVendor";
 
             vendorId = _dl.CreateVendor(_userId, vendor);
-            tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
+            tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
             // setup Storage Object
             StorageObject storage = new StorageObject();
@@ -2899,7 +3136,7 @@ namespace WebApp.Helpers.Tests
             storage.SerialNumber = "2H29NNS";
 
             storageId = _dl.CreateStorage(_userId, storage);
-            tupleL.Add(Tuple.Create(storageId, Table.Storage));
+            tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
 
             // setup Material Object
@@ -2915,7 +3152,7 @@ namespace WebApp.Helpers.Tests
                 wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                 materialDictId = _dl.CreateRawMaterial(_userId, wineMaterial);
-                tupleL.Add(Tuple.Create(materialDictId, Table.MaterialDict));
+                tablesForCleanupTupleList.Add(Tuple.Create(materialDictId, Table.MaterialDict));
             }
 
             // water
@@ -2929,7 +3166,7 @@ namespace WebApp.Helpers.Tests
                 waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
                 materialDictId = _dl.CreateRawMaterial(_userId, waterMaterial);
-                tupleL.Add(Tuple.Create(materialDictId, Table.MaterialDict));
+                tablesForCleanupTupleList.Add(Tuple.Create(materialDictId, Table.MaterialDict));
             }
 
         }

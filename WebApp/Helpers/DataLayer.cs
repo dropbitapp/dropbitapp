@@ -6440,15 +6440,29 @@ namespace WebApp.Helpers
                 storageReport.Header = GetDistillerInfoForReportHeader(distillerID, startDate);
 
                 GetProducedOnHandAtStart(startDate, endDate, userId, ref storageReportBody);
+
                 GetPurchasedOnHandAtStart(startDate, endDate, userId, ref storageReportBody);
+
                 GetProducedDepositedToStorage(startDate, endDate, userId, ref storageReportBody);
+
                 GetPurchasedDepositedToStorage(startDate, endDate, userId, ref storageReportBody);
+
                 GetProducedStorageToProduction(startDate, endDate, userId, ref storageReportBody);
+
                 GetPurchasedStorageToProduction(startDate, endDate, userId, ref storageReportBody);
+
                 GetProducedStorageToProcessing(startDate, endDate, userId, ref storageReportBody);
+
                 GetPurchasedStorageToProcessing(startDate, endDate, userId, ref storageReportBody);
+
                 GetStorageReportDestroyed(startDate, endDate, userId, ref storageReportBody);
-                GetStorgaOnHandEndOfMonth(startDate.AddMonths(1), endDate.AddMonths(1), userId, ref storageReportBody); // as per report explanation, this months "on hand end of month" is next month's "on hand at start of month" of next month
+
+                GetStorgaOnHandEndOfMonth(startDate.AddMonths(1), endDate.AddMonths(1)/*as per report explanation, this months "on hand end of month" is next month's "on hand at start of month" of next month*/, userId, ref storageReportBody);
+
+                ComputeLine6ForStorageReport(ref storageReportBody);
+
+                ComputeLine24ForStorageReport(ref storageReportBody);
+
 
                 storageReport.ReportBody = storageReportBody;
 
@@ -6457,6 +6471,23 @@ namespace WebApp.Helpers
             catch (Exception e)
             {
                 throw e;
+            }
+        }
+
+        private void ComputeLine24ForStorageReport(ref List<StorageReportCategory> storageReportBody)
+        {
+            foreach (var storage in storageReportBody)
+            {
+                storage.r24_Lines7Through23 = storage.r7_TaxPaid + storage.r17_TransferredToProcessingAccount + storage.r18_TransferredToProductionAccount
+                    + +storage.r19_TransferredToOtherBondedPremises + storage.r20_Destroyed + storage.r22_OtherLosses + storage.r23_OnHandEndOfMonth;
+            }
+        }
+
+        private void ComputeLine6ForStorageReport(ref List<StorageReportCategory> storageReportBody)
+        {
+            foreach (var storage in storageReportBody)
+            {
+                storage.r6_TotalLines1Through5 = storage.r1_OnHandFirstOfMonth + storage.r2_DepositedInBulkStorage + storage.r4_ReturnedToBulkStorage;
             }
         }
 
@@ -6477,13 +6508,14 @@ namespace WebApp.Helpers
                  from str in str_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && rec.ProductionTypeID == 2
+                     && (rec.ProductionTypeID == 2 || rec.ProductionTypeID == 1)
                      && rec.ProductionEndTime < startDate
                      && rec.Gauged == true
                      && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proof = (float?)proof.Value ?? (float?)0,
                      destroyedProof = (float?)dest.ProofGallons ?? 0
                  }).DefaultIfEmpty();
@@ -6493,12 +6525,13 @@ namespace WebApp.Helpers
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r23_OnHandEndOfMonth += (float)rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
@@ -6531,6 +6564,7 @@ namespace WebApp.Helpers
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proof = (float?)proof.Value ?? 0,
                      destroyedProof = (float?)dest.ProofGallons ?? 0
                  }).DefaultIfEmpty();
@@ -6540,12 +6574,13 @@ namespace WebApp.Helpers
                 foreach (var rec in prodRecords)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
@@ -6578,6 +6613,7 @@ namespace WebApp.Helpers
                                  select new
                                  {
                                      reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                                     spiritTypeReportingId = str.SpiritTypeReportingID,
                                      proof = (float?)dest.ProofGallons ?? 0
                                  }).DefaultIfEmpty();
 
@@ -6586,12 +6622,13 @@ namespace WebApp.Helpers
                 foreach (var rec in prodDestroyed)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r20_Destroyed += rec.proof;
                         storageReportBody.Add(cat);
@@ -6626,6 +6663,7 @@ namespace WebApp.Helpers
                                 select new
                                 {
                                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                                    spiritTypeReportingId = str.SpiritTypeReportingID,
                                     proof = (float?)dest.ProofGallons ?? 0
                                 }).DefaultIfEmpty();
 
@@ -6634,12 +6672,13 @@ namespace WebApp.Helpers
                 foreach (var rec in purDestroyed)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given purchased distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r20_Destroyed += rec.proof;
                         storageReportBody.Add(cat);
@@ -6676,6 +6715,7 @@ namespace WebApp.Helpers
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proof = (float?)proof.Value ?? (float?)0,
                      destroyedProof = (float?)dest.ProofGallons ?? 0
                  }).DefaultIfEmpty();
@@ -6685,12 +6725,13 @@ namespace WebApp.Helpers
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r1_OnHandFirstOfMonth += (float)rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
@@ -6731,6 +6772,7 @@ namespace WebApp.Helpers
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proof = (float?)proof.Value ?? 0,
                      destroyedProof = (float?)dest.ProofGallons ?? 0
                  }).DefaultIfEmpty();
@@ -6740,12 +6782,13 @@ namespace WebApp.Helpers
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
@@ -6775,7 +6818,7 @@ namespace WebApp.Helpers
                  from str in str_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && rec.ProductionTypeID == 2
+                     && (rec.ProductionTypeID == 2 || rec.ProductionTypeID == 1)
                      && rec.ProductionEndTime >= startDate
                      && rec.ProductionEndTime <= endDate
                      && rec.Gauged == true
@@ -6783,6 +6826,7 @@ namespace WebApp.Helpers
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proof = (float?)proof.Value ?? 0,
                      destroyedProof = (float?)dest.ProofGallons ?? 0
                  }).DefaultIfEmpty();
@@ -6792,12 +6836,13 @@ namespace WebApp.Helpers
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r2_DepositedInBulkStorage += rec.proof + rec.destroyedProof;
                         storageReportBody.Add(cat);
@@ -6858,6 +6903,7 @@ namespace WebApp.Helpers
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? String.Empty,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      purchaseProof = (float?)proof.Value ?? 0,
                      productionProof = (float?)((productionContent.ContentValue * alcohol.Value * 2) / 100) ?? 0,
                      destroyedProof = (float?)dest.ProofGallons ?? 0
@@ -6868,12 +6914,13 @@ namespace WebApp.Helpers
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
                         storageReportBody.Add(cat);
@@ -6922,6 +6969,7 @@ namespace WebApp.Helpers
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
                  }).DefaultIfEmpty();
 
@@ -6930,12 +6978,13 @@ namespace WebApp.Helpers
                 foreach (var rec in prodRes)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r18_TransferredToProductionAccount += (float)rec.proofGal;
                         storageReportBody.Add(cat);
@@ -6993,6 +7042,7 @@ namespace WebApp.Helpers
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
                  }).DefaultIfEmpty();
 
@@ -7001,12 +7051,13 @@ namespace WebApp.Helpers
                 foreach (var rec in purRes)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r18_TransferredToProductionAccount += (float)rec.proofGal;
                         storageReportBody.Add(cat);
@@ -7054,6 +7105,7 @@ namespace WebApp.Helpers
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
                  }).DefaultIfEmpty();
 
@@ -7062,12 +7114,13 @@ namespace WebApp.Helpers
                 foreach (var rec in prodRes)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r17_TransferredToProcessingAccount += (float)rec.proofGal;
                         storageReportBody.Add(cat);
@@ -7119,6 +7172,7 @@ namespace WebApp.Helpers
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
                  }).DefaultIfEmpty();
 
@@ -7127,12 +7181,13 @@ namespace WebApp.Helpers
                 foreach (var rec in purRes)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.CategoryName == rec.reportingCategoryName);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
 
                     if (category == null)
                     {
                         // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                         StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r17_TransferredToProcessingAccount += (float)rec.proofGal;
                         storageReportBody.Add(cat);
