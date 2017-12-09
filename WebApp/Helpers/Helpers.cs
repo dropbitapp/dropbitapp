@@ -141,6 +141,7 @@ namespace WebApp.Helpers
     public class StorageReportCategory
     {
         public string CategoryName { get; set; }
+        public int SpiritTypeReportingID { get; set; }
         public float r1_OnHandFirstOfMonth { get; set; }
         public float r2_DepositedInBulkStorage { get; set; }
         public float r4_ReturnedToBulkStorage { get; set; }
@@ -158,7 +159,7 @@ namespace WebApp.Helpers
 
     /// <summary>
     /// This object is used as a transport for data to be displayed in Fermentable Production workflow to display Fermentable list. 
-    /// Please updare comments if you starting to use it for something else
+    /// Please update comments if you starting to use it for something else
     /// </summary>
     public class PurMatObject
     {
