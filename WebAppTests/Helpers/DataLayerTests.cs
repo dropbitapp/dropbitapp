@@ -363,10 +363,10 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r20_Destroyed = 0f;
                 storageReportBody.r22_OtherLosses = 0f;
                 storageReportBody.r23_OnHandEndOfMonth = 0f;
-                storageReportBody.r24_Lines7Through23 = 0f;
+                storageReportBody.r24_Lines7Through23 = 18f;
                 storageReportBody.r2_DepositedInBulkStorage = 18f;
                 storageReportBody.r4_ReturnedToBulkStorage = 0f;
-                storageReportBody.r6_TotalLines1Through5 = 0f;
+                storageReportBody.r6_TotalLines1Through5 = 18f;
                 storageReportBody.r7_TaxPaid = 0f;
 
                 actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
@@ -559,7 +559,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(processingReportP4.BlendedStraightWhiskey, actualProcessingReportObject.Part4List[0].BlendedStraightWhiskey);
                 Assert.AreEqual(processingReportP4.BlendedWhiskeyWithLight, actualProcessingReportObject.Part4List[0].BlendedWhiskeyWithLight);
                 Assert.AreEqual(processingReportP4.BlendedWhiskeyWithNeutral, actualProcessingReportObject.Part4List[0].BlendedWhiskeyWithNeutral);
-                Assert.AreEqual(processingReportP4.Brandy170Under, actualProcessingReportObject.Part4List[0].Brandy170Under);
+                Assert.AreEqual(processingReportP4.Brandy170Under, actualProcessingReportObject.Part4List[1].Brandy170Under);
                 Assert.AreEqual(processingReportP4.BrandyOver170, actualProcessingReportObject.Part4List[0].BrandyOver170);
                 Assert.AreEqual(processingReportP4.Cocktail, actualProcessingReportObject.Part4List[0].Cocktail);
                 Assert.AreEqual(processingReportP4.DomesticWhiskey160Under, actualProcessingReportObject.Part4List[0].DomesticWhiskey160Under);
@@ -570,13 +570,13 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(processingReportP4.ImportedWhiskeyScotch, actualProcessingReportObject.Part4List[0].ImportedWhiskeyScotch);
                 Assert.AreEqual(processingReportP4.Liqueur, actualProcessingReportObject.Part4List[0].Liqueur);
                 Assert.AreEqual(processingReportP4.ProcessingReportTypeName, actualProcessingReportObject.Part4List[0].ProcessingReportTypeName);
-                Assert.AreEqual(processingReportP4.ProcessingSpirits, actualProcessingReportObject.Part4List[0].ProcessingSpirits);
+                Assert.AreEqual(processingReportP4.ProcessingSpirits, actualProcessingReportObject.Part4List[1].ProcessingSpirits);
                 Assert.AreEqual(processingReportP4.ProcessingTypeID, actualProcessingReportObject.Part4List[0].ProcessingTypeID);
                 Assert.AreEqual(processingReportP4.RumDomestic, actualProcessingReportObject.Part4List[0].RumDomestic);
                 Assert.AreEqual(processingReportP4.RumDomestic, actualProcessingReportObject.Part4List[0].RumDomestic);
                 Assert.AreEqual(processingReportP4.RumOtherImported, actualProcessingReportObject.Part4List[0].RumOtherImported);
                 Assert.AreEqual(processingReportP4.RumPuertoRican, actualProcessingReportObject.Part4List[0].RumPuertoRican);
-                Assert.AreEqual(processingReportP4.StateID, actualProcessingReportObject.Part4List[0].StateID);
+                Assert.AreEqual(processingReportP4.StateID, actualProcessingReportObject.Part4List[1].StateID);
                 Assert.AreEqual(processingReportP4.Tequila, actualProcessingReportObject.Part4List[0].Tequila);
                 Assert.AreEqual(processingReportP4.Vodka, actualProcessingReportObject.Part4List[0].Vodka);
 
@@ -1327,10 +1327,10 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r20_Destroyed = 0f;
                 storageReportBody.r22_OtherLosses = 0f;
                 storageReportBody.r23_OnHandEndOfMonth = 0f;
-                storageReportBody.r24_Lines7Through23 = 0f;
+                storageReportBody.r24_Lines7Through23 = 180f;
                 storageReportBody.r2_DepositedInBulkStorage = 180f;
                 storageReportBody.r4_ReturnedToBulkStorage = 0f;
-                storageReportBody.r6_TotalLines1Through5 = 0f;
+                storageReportBody.r6_TotalLines1Through5 = 180f;
                 storageReportBody.r7_TaxPaid = 0f;
 
                 actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
@@ -1509,19 +1509,19 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(processingReportP4.Cocktail, actualProcessingReportObject.Part4List[0].Cocktail);
                 Assert.AreEqual(processingReportP4.DomesticWhiskey160Under, actualProcessingReportObject.Part4List[0].DomesticWhiskey160Under);
                 Assert.AreEqual(processingReportP4.DomesticWhiskeyOver160, actualProcessingReportObject.Part4List[0].DomesticWhiskeyOver160);
-                Assert.AreEqual(processingReportP4.Gin, actualProcessingReportObject.Part4List[0].Gin);
+                Assert.AreEqual(processingReportP4.Gin, actualProcessingReportObject.Part4List[1].Gin);
                 Assert.AreEqual(processingReportP4.ImportedWhiskeyCanadian, actualProcessingReportObject.Part4List[0].ImportedWhiskeyCanadian);
                 Assert.AreEqual(processingReportP4.ImportedWhiskeyIrish, actualProcessingReportObject.Part4List[0].ImportedWhiskeyIrish);
                 Assert.AreEqual(processingReportP4.ImportedWhiskeyScotch, actualProcessingReportObject.Part4List[0].ImportedWhiskeyScotch);
                 Assert.AreEqual(processingReportP4.Liqueur, actualProcessingReportObject.Part4List[0].Liqueur);
                 Assert.AreEqual(processingReportP4.ProcessingReportTypeName, actualProcessingReportObject.Part4List[0].ProcessingReportTypeName);
-                Assert.AreEqual(processingReportP4.ProcessingSpirits, actualProcessingReportObject.Part4List[0].ProcessingSpirits);
+                Assert.AreEqual(processingReportP4.ProcessingSpirits, actualProcessingReportObject.Part4List[1].ProcessingSpirits);
                 Assert.AreEqual(processingReportP4.ProcessingTypeID, actualProcessingReportObject.Part4List[0].ProcessingTypeID);
                 Assert.AreEqual(processingReportP4.RumDomestic, actualProcessingReportObject.Part4List[0].RumDomestic);
                 Assert.AreEqual(processingReportP4.RumDomestic, actualProcessingReportObject.Part4List[0].RumDomestic);
                 Assert.AreEqual(processingReportP4.RumOtherImported, actualProcessingReportObject.Part4List[0].RumOtherImported);
                 Assert.AreEqual(processingReportP4.RumPuertoRican, actualProcessingReportObject.Part4List[0].RumPuertoRican);
-                Assert.AreEqual(processingReportP4.StateID, actualProcessingReportObject.Part4List[0].StateID);
+                Assert.AreEqual(processingReportP4.StateID, actualProcessingReportObject.Part4List[1].StateID);
                 Assert.AreEqual(processingReportP4.Tequila, actualProcessingReportObject.Part4List[0].Tequila);
                 Assert.AreEqual(processingReportP4.Vodka, actualProcessingReportObject.Part4List[0].Vodka);
 
@@ -1736,10 +1736,10 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r20_Destroyed = 0f;
                 storageReportBody.r22_OtherLosses = 0f;
                 storageReportBody.r23_OnHandEndOfMonth = 160f;
-                storageReportBody.r24_Lines7Through23 = 0f;
+                storageReportBody.r24_Lines7Through23 = 160f;
                 storageReportBody.r2_DepositedInBulkStorage = 180f;
                 storageReportBody.r4_ReturnedToBulkStorage = 0f;
-                storageReportBody.r6_TotalLines1Through5 = 0f;
+                storageReportBody.r6_TotalLines1Through5 = 160f;
                 storageReportBody.r7_TaxPaid = 0f;
 
                 actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
@@ -1831,11 +1831,11 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(storageReportBody.r20_Destroyed, actualStorageReportObject.ReportBody[1].r20_Destroyed);
                 Assert.AreEqual(storageReportBody.r22_OtherLosses, actualStorageReportObject.ReportBody[1].r22_OtherLosses);
                 Assert.AreEqual(storageReportBody.r23_OnHandEndOfMonth, actualStorageReportObject.ReportBody[0].r23_OnHandEndOfMonth); // we should have 160 Proof of Gin on hand at the end of the month
-                Assert.AreEqual(storageReportBody.r24_Lines7Through23, actualStorageReportObject.ReportBody[1].r24_Lines7Through23);
+                Assert.AreEqual(storageReportBody.r24_Lines7Through23, actualStorageReportObject.ReportBody[0].r24_Lines7Through23);
                 Assert.AreEqual(160, actualStorageReportObject.ReportBody[0].r2_DepositedInBulkStorage); // verifying receipt of Gin
                 Assert.AreEqual(storageReportBody.r2_DepositedInBulkStorage, actualStorageReportObject.ReportBody[1].r2_DepositedInBulkStorage); // verifying receipt of Alcohol 190 and over
                 Assert.AreEqual(storageReportBody.r4_ReturnedToBulkStorage, actualStorageReportObject.ReportBody[1].r4_ReturnedToBulkStorage);
-                Assert.AreEqual(storageReportBody.r6_TotalLines1Through5, actualStorageReportObject.ReportBody[1].r6_TotalLines1Through5);
+                Assert.AreEqual(storageReportBody.r6_TotalLines1Through5, actualStorageReportObject.ReportBody[0].r6_TotalLines1Through5);
                 Assert.AreEqual(storageReportBody.r7_TaxPaid, actualStorageReportObject.ReportBody[0].r7_TaxPaid);
 
                 #endregion
