@@ -5963,35 +5963,35 @@ namespace WebApp.Helpers
                      SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0
                  }).FirstOrDefault();
 
-                    if (productionSpiritType != null)
+                if (productionSpiritType != null)
+                {
+                    if ((int)productionSpiritType.SpiritTypeReportingID != 0)
                     {
-                        if ((int)productionSpiritType.SpiritTypeReportingID != 0)
+                        var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)productionSpiritType.SpiritTypeReportingID);
+                        if (spRec != null)
                         {
-                            var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)productionSpiritType.SpiritTypeReportingID);
-                            if (spRec != null)
-                            {
-                                spRec.Recd4RedistilaltionL15 += proof;
-                                var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
+                            spRec.Recd4RedistilaltionL15 += proof;
+                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
 
-                                if (prod5Rec != null)
-                                {
-                                    prod5Rec.Proof += proof;
-                                }
-                            }
-                            else
+                            if (prod5Rec != null)
                             {
-                                ProductionReportHelper part1Obj = new ProductionReportHelper();
-                                part1Obj.Recd4RedistilaltionL15 = proof;
-                                part1Obj.SpiritTypeReportingID = (int)productionSpiritType.SpiritTypeReportingID;
-                                part1Obj.SpiritTypeReportName = (string)productionSpiritType.SpiritShortName;
-                                tempRepObjList.Add(part1Obj);
-                                ProdReportPart5 prod5Inst = new ProdReportPart5();
-                                prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
-                                prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
-                                prodRPart5L.Add(prod5Inst);
+                                prod5Rec.Proof += proof;
                             }
                         }
+                        else
+                        {
+                            ProductionReportHelper part1Obj = new ProductionReportHelper();
+                            part1Obj.Recd4RedistilaltionL15 = proof;
+                            part1Obj.SpiritTypeReportingID = (int)productionSpiritType.SpiritTypeReportingID;
+                            part1Obj.SpiritTypeReportName = (string)productionSpiritType.SpiritShortName;
+                            tempRepObjList.Add(part1Obj);
+                            ProdReportPart5 prod5Inst = new ProdReportPart5();
+                            prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
+                            prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
+                            prodRPart5L.Add(prod5Inst);
+                        }
                     }
+                }
             }
             catch (Exception e)
             {
@@ -6017,35 +6017,35 @@ namespace WebApp.Helpers
                      SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0
                  }).FirstOrDefault();
 
-                    if (purchaseSpiritType != null)
+                if (purchaseSpiritType != null)
+                {
+                    if ((int)purchaseSpiritType.SpiritTypeReportingID != 0)
                     {
-                        if ((int)purchaseSpiritType.SpiritTypeReportingID != 0)
+                        var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)purchaseSpiritType.SpiritTypeReportingID);
+                        if (spRec != null)
                         {
-                            var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)purchaseSpiritType.SpiritTypeReportingID);
-                            if (spRec != null)
-                            {
-                                spRec.Recd4RedistilaltionL15 += proof;
-                                var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
+                            spRec.Recd4RedistilaltionL15 += proof;
+                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
 
-                                if (prod5Rec != null)
-                                {
-                                    prod5Rec.Proof += proof;
-                                }
-                            }
-                            else
+                            if (prod5Rec != null)
                             {
-                                ProductionReportHelper part1Obj = new ProductionReportHelper();
-                                part1Obj.Recd4RedistilaltionL15 = proof;
-                                part1Obj.SpiritTypeReportingID = (int)purchaseSpiritType.SpiritTypeReportingID;
-                                part1Obj.SpiritTypeReportName = (string)purchaseSpiritType.SpiritShortName;
-                                ProdReportPart5 prod5Inst = new ProdReportPart5();
-                                prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
-                                prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
-                                prodRPart5L.Add(prod5Inst);
-                                tempRepObjList.Add(part1Obj);
+                                prod5Rec.Proof += proof;
                             }
                         }
+                        else
+                        {
+                            ProductionReportHelper part1Obj = new ProductionReportHelper();
+                            part1Obj.Recd4RedistilaltionL15 = proof;
+                            part1Obj.SpiritTypeReportingID = (int)purchaseSpiritType.SpiritTypeReportingID;
+                            part1Obj.SpiritTypeReportName = (string)purchaseSpiritType.SpiritShortName;
+                            ProdReportPart5 prod5Inst = new ProdReportPart5();
+                            prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
+                            prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
+                            prodRPart5L.Add(prod5Inst);
+                            tempRepObjList.Add(part1Obj);
+                        }
                     }
+                }
             }
             catch (Exception e)
             {
@@ -6660,7 +6660,7 @@ namespace WebApp.Helpers
                                     && dest.EndTime > startDate
                                     && dest.EndTime < endDate
                                     && dest.WorkflowType == "Purchase"
-                                    && uOm.Name != "lb"
+                                    && uOm.UnitOfMeasurementID != 2 // != "lb"
                                 select new
                                 {
                                     reportingCategoryName = str.ProductTypeName ?? String.Empty,
@@ -6769,7 +6769,7 @@ namespace WebApp.Helpers
                      && (rec.PurchaseTypeID == 2 || rec.PurchaseTypeID == 3)
                      && rec.PurchaseDate < startDate
                      && ((rec.StatusID == 1 || rec.StatusID == 2) || (rec.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
-                     && uOm.Name != "lb"
+                     && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
@@ -6886,27 +6886,24 @@ namespace WebApp.Helpers
                  join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
                  from str in str_join.DefaultIfEmpty()
                  where
-                     distiller.UserId == userId &&
-                     (purchase.PurchaseTypeID == 2 ||
-                     purchase.PurchaseTypeID == 3) &&
-                     (purchase.StatusID == 1 ||
-                     purchase.StatusID == 2 ||
-                     purchase.StatusID == 3) &&
-                     purchase.PurchaseDate >= startDate &&
-                     purchase.PurchaseDate <= endDate
-                     && contentField.ContentFieldName != "PurFermentedProofGal"
-                     && contentField.ContentFieldName != "PurDistilledProofGal"
-                     && contentField.ContentFieldName != "ProdDistilledProofGal"
-                     && contentField.ContentFieldName != "ProdBlendedProofGal"
-                     && contentField.ContentFieldName != "ProdFermentedProofGal"
-                     && uOm.Name != "lb"
+                     distiller.UserId == userId
+                     && (purchase.PurchaseTypeID == 2
+                        || purchase.PurchaseTypeID == 3)
+                     && (purchase.StatusID == 1
+                        || purchase.StatusID == 2
+                        || purchase.StatusID == 3)
+                     && purchase.PurchaseDate >= startDate
+                     && purchase.PurchaseDate <= endDate
+                     && (contentField.ContentFieldID == 16 // PurFermentedProofGal
+                        || contentField.ContentFieldID == 18) // PurDistilledProofGal
+                     && uOm.UnitOfMeasurementID != 2 // != "lb"
 
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? String.Empty,
                      spiritTypeReportingId = str.SpiritTypeReportingID,
                      purchaseProof = (float?)proof.Value ?? 0,
-                     productionProof = (float?)((productionContent.ContentValue * alcohol.Value * 2) / 100) ?? 0,
+                     productionProof = (float?)productionContent.ContentValue ?? 0,
                      destroyedProof = (float?)dest.ProofGallons ?? 0
                  }).DefaultIfEmpty();
 
@@ -6956,22 +6953,22 @@ namespace WebApp.Helpers
                  join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
                  from str in str_join.DefaultIfEmpty()
                  where
-                     distiller.UserId == userId &&
-                     sourceProductionRecord.ProductionTypeID == 2 &&
-                     outputProductionRecord.ProductionTypeID == 2 &&
-                     (sourceProductionRecord.StatusID == 1 ||
-                     sourceProductionRecord.StatusID == 2 ||
-                     sourceProductionRecord.StatusID == 3) &&
-                     contentField.ContentFieldID == 11 &&
-                     sourceProductionRecord.ProductionEndTime < startDate &&
-                     outputProductionRecord.ProductionEndTime >= startDate &&
-                     outputProductionRecord.ProductionEndTime <= endDate &&
-                     sourceProductionRecord.Gauged == true
+                     distiller.UserId == userId
+                     && sourceProductionRecord.ProductionTypeID == 2
+                     && outputProductionRecord.ProductionTypeID == 2
+                     && (sourceProductionRecord.StatusID == 1
+                        || sourceProductionRecord.StatusID == 2
+                        || sourceProductionRecord.StatusID == 3)
+                     && contentField.ContentFieldID == 20 // ProdDistlledProofGal
+                     && sourceProductionRecord.ProductionEndTime < startDate
+                     && outputProductionRecord.ProductionEndTime >= startDate
+                     && outputProductionRecord.ProductionEndTime <= endDate
+                     && sourceProductionRecord.Gauged == true
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = str.SpiritTypeReportingID,
-                     proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                     proofGal = (float?)productionContent.ContentValue ?? 0
                  }).DefaultIfEmpty();
 
             if (prodRes.First() != null)
@@ -7024,27 +7021,24 @@ namespace WebApp.Helpers
                  join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
                  from str in str_join.DefaultIfEmpty()
                  where
-                     distiller.UserId == userId &&
-                     (sourcePurchaseRecord.PurchaseTypeID == 2 ||
-                     sourcePurchaseRecord.PurchaseTypeID == 3) &&
-                     outputProductionRecord.ProductionTypeID == 2 &&
-                     (sourcePurchaseRecord.StatusID == 1 ||
-                     sourcePurchaseRecord.StatusID == 2 ||
-                     sourcePurchaseRecord.StatusID == 3) &&
-                     sourcePurchaseRecord.PurchaseDate < endDate &&
-                     outputProductionRecord.ProductionEndTime >= startDate &&
-                     outputProductionRecord.ProductionEndTime <= endDate
-                     && contentField.ContentFieldName != "PurFermentedProofGal"
-                     && contentField.ContentFieldName != "PurDistilledProofGal"
-                     && contentField.ContentFieldName != "ProdDistilledProofGal"
-                     && contentField.ContentFieldName != "ProdBlendedProofGal"
-                     && contentField.ContentFieldName != "ProdFermentedProofGal"
-                     && uOm.Name != "lb"
+                     distiller.UserId == userId
+                     && (sourcePurchaseRecord.PurchaseTypeID == 2
+                        || sourcePurchaseRecord.PurchaseTypeID == 3)
+                     && outputProductionRecord.ProductionTypeID == 2
+                     && (sourcePurchaseRecord.StatusID == 1
+                        || sourcePurchaseRecord.StatusID == 2
+                        || sourcePurchaseRecord.StatusID == 3)
+                     && sourcePurchaseRecord.PurchaseDate < endDate
+                     && outputProductionRecord.ProductionEndTime >= startDate
+                     && outputProductionRecord.ProductionEndTime <= endDate
+                     && (contentField.ContentFieldID == 16 // PurFermentedProofGal
+                     || contentField.ContentFieldID == 18) // PurDistilledProofGal
+                     && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = str.SpiritTypeReportingID,
-                     proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                     proofGal = (float?)productionContent.ContentValue ?? 0
                  }).DefaultIfEmpty();
 
             if (purRes.First() != null)
@@ -7093,21 +7087,21 @@ namespace WebApp.Helpers
                  join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
                  from str in str_join.DefaultIfEmpty()
                  where
-                     distiller.UserId == userId &&
-                     sourceProductionRecord.ProductionTypeID == 2 &&
-                     outputProductionRecord.ProductionTypeID == 3 &&
-                     (sourceProductionRecord.StatusID == 1 ||
-                     sourceProductionRecord.StatusID == 2 ||
-                     sourceProductionRecord.StatusID == 3) &&
-                     contentField.ContentFieldID == 11 &&
-                     sourceProductionRecord.ProductionEndTime < startDate &&
-                     outputProductionRecord.ProductionEndTime >= startDate &&
-                     outputProductionRecord.ProductionEndTime <= endDate
+                     distiller.UserId == userId
+                     && sourceProductionRecord.ProductionTypeID == 2
+                     && outputProductionRecord.ProductionTypeID == 3
+                     && (sourceProductionRecord.StatusID == 1
+                        || sourceProductionRecord.StatusID == 2
+                        || sourceProductionRecord.StatusID == 3)
+                     && contentField.ContentFieldID == 20 // ProdDistilledProofGal
+                     && sourceProductionRecord.ProductionEndTime < startDate
+                     && outputProductionRecord.ProductionEndTime >= startDate
+                     && outputProductionRecord.ProductionEndTime <= endDate
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = str.SpiritTypeReportingID,
-                     proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                     proofGal = (float?)productionContent.ContentValue ?? 0
                  }).DefaultIfEmpty();
 
             if (prodRes.First() != null)
@@ -7160,21 +7154,22 @@ namespace WebApp.Helpers
                  join str in db.SpiritTypeReporting on p2str.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
                  from str in str_join.DefaultIfEmpty()
                  where
-                     distiller.UserId == userId &&
-                     sourcePurchaseRecord.PurchaseTypeID == 3 &&
-                     outputProductionRecord.ProductionTypeID == 3 &&
-                     (sourcePurchaseRecord.StatusID == 1 ||
-                     sourcePurchaseRecord.StatusID == 2 ||
-                     sourcePurchaseRecord.StatusID == 3) &&
-                     sourcePurchaseRecord.PurchaseDate < endDate &&
-                     outputProductionRecord.ProductionEndTime >= startDate &&
-                     outputProductionRecord.ProductionEndTime <= endDate
-                     && uOm.Name != "lb"
+                     distiller.UserId == userId
+                     && sourcePurchaseRecord.PurchaseTypeID == 3
+                     && outputProductionRecord.ProductionTypeID == 3
+                     && (sourcePurchaseRecord.StatusID == 1
+                        || sourcePurchaseRecord.StatusID == 2
+                        || sourcePurchaseRecord.StatusID == 3)
+                     && sourcePurchaseRecord.PurchaseDate < endDate
+                     && outputProductionRecord.ProductionEndTime >= startDate
+                     && outputProductionRecord.ProductionEndTime <= endDate
+                     && productionContent.ContentFieldID == 18 // PurDistilledProofGal
+                     && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = str.SpiritTypeReportingID,
-                     proofGal = (System.Single?)(float)(productionContent.ContentValue * alcohol.Value * 2) / 100 ?? (System.Single?)0
+                     proofGal = (float?)productionContent.ContentValue ?? 0
                  }).DefaultIfEmpty();
 
             if (purRes.First() != null)
