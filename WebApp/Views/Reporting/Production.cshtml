@@ -172,300 +172,300 @@
 
                 var alreadyInUnknownMatsArray = false; // this variable is used durnig determination of whether to push new unknown material in unknownMaterialList
 
-                for ( var i = 0; i < result.Part1.length; i++ ) {
-                    if ( result.Part1[i].SpiritCatName === 'WhiskyUnder160' ) {
+                for ( var i = 0; i < result.Part1List.length; i++ ) {
+                    if ( result.Part1List[i].SpiritCatName === 'WhiskyUnder160' ) {
 
                         // Line: 9 - update processing for a single SpiritType
-                        $( '#p1_9b_WhiskyUnder160' ).val( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9b_WhiskyUnder160' ).val( result.Part1List[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11b_WhiskyUnder160' ).val( result.Part1[i].StorageAcct );
+                        $( '#p1_11b_WhiskyUnder160' ).val( result.Part1List[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14b_WhiskyUnder160' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14b_WhiskyUnder160' ).val( result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15b_WhiskyUnder160' ).val( result.Part1[i].Recd4RedistilaltionL15 );
+                        $( '#p1_15b_WhiskyUnder160' ).val( result.Part1List[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17b_b_WhiskyUnder160' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_b_WhiskyUnder160' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
-                        computeColLTotals( result.Part1[i] );
+                        computeColLTotals( result.Part1List[i] );
                     }
-                    else if ( result.Part1[i].SpiritCatName === 'WhiskyOver160' ) {
+                    else if ( result.Part1List[i].SpiritCatName === 'WhiskyOver160' ) {
                         // Line: 9 - update processing for a single SpiritType
-                        $( '#p1_9c_WhiskyOver160' ).val( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9c_WhiskyOver160' ).val( result.Part1List[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11c_WhiskyOver160' ).val( result.Part1[i].StorageAcct );
+                        $( '#p1_11c_WhiskyOver160' ).val( result.Part1List[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14c_WhiskyOver160' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14c_WhiskyOver160' ).val( result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15c_WhiskyUnder160' ).val( result.Part1[i].Recd4RedistilaltionL15 );
+                        $( '#p1_15c_WhiskyUnder160' ).val( result.Part1List[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17b_c_WhiskyOver160' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_c_WhiskyOver160' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
-                        computeColLTotals( result.Part1[i] );
+                        computeColLTotals( result.Part1List[i] );
                     }
-                    else if ( result.Part1[i].SpiritCatName === 'BrandyUnder170' ) {
+                    else if ( result.Part1List[i].SpiritCatName === 'BrandyUnder170' ) {
                         // Line: 9 - update processing for a single SpiritType
-                        $( '#p1_9d_BrandyUnder170' ).val( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9d_BrandyUnder170' ).val( result.Part1List[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11d_BrandyUnder170' ).val( result.Part1[i].StorageAcct );
+                        $( '#p1_11d_BrandyUnder170' ).val( result.Part1List[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14d_BrandyUnder170' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14d_BrandyUnder170' ).val( result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15d_BrandyUnder170' ).val( result.Part1[i].Recd4RedistilaltionL15 );
+                        $( '#p1_15d_BrandyUnder170' ).val( result.Part1List[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17b_d_BrandyUnder170' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_d_BrandyUnder170' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
-                        computeColLTotals( result.Part1[i] );
+                        computeColLTotals( result.Part1List[i] );
                     }
-                    else if ( result.Part1[i].SpiritCatName === 'BrandyOver170' ) {
+                    else if ( result.Part1List[i].SpiritCatName === 'BrandyOver170' ) {
                         // Line: 9 - update processing for a single SpiritType
-                        $( '#p1_9e_BrandyOver170' ).val( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9e_BrandyOver170' ).val( result.Part1List[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11e_BrandyOver170' ).val( result.Part1[i].StorageAcct );
+                        $( '#p1_11e_BrandyOver170' ).val( result.Part1List[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14e_BrandyOver170' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14e_BrandyOver170' ).val( result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15e_BrandyOver170' ).val( result.Part1[i].Recd4RedistilaltionL15 );
+                        $( '#p1_15e_BrandyOver170' ).val( result.Part1List[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17b_e_BrandyOver170' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_e_BrandyOver170' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
-                        computeColLTotals( result.Part1[i] );
+                        computeColLTotals( result.Part1List[i] );
                     }
-                    else if ( result.Part1[i].SpiritCatName === 'Rum' ) {
+                    else if ( result.Part1List[i].SpiritCatName === 'Rum' ) {
                         // Line: 9 - update processing for a single SpiritType
-                        $( '#p1_9f_Rum' ).val( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9f_Rum' ).val( result.Part1List[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11f_Rum' ).val( result.Part1[i].StorageAcct );
+                        $( '#p1_11f_Rum' ).val( result.Part1List[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14f_Rum' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14f_Rum' ).val( result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15f_Rum' ).val( result.Part1[i].Recd4RedistilaltionL15 );
+                        $( '#p1_15f_Rum' ).val( result.Part1List[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(a) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17a_f_Rum' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17a_f_Rum' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17b_f_Rum' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_f_Rum' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
-                        computeColLTotals( result.Part1[i] );
+                        computeColLTotals( result.Part1List[i] );
                     }
-                    else if ( result.Part1[i].SpiritCatName === 'Gin' ) {
+                    else if ( result.Part1List[i].SpiritCatName === 'Gin' ) {
                         // Line: 9 - update processing for a single SpiritType
-                        $( '#p1_9g_Gin' ).val( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9g_Gin' ).val( result.Part1List[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11g_Gin' ).val( result.Part1[i].StorageAcct );
+                        $( '#p1_11g_Gin' ).val( result.Part1List[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14g_Gin' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14g_Gin' ).val( result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15g_Gin' ).val( result.Part1[i].Recd4RedistilaltionL15 );
+                        $( '#p1_15g_Gin' ).val( result.Part1List[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(a) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17a_g_Gin' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17a_g_Gin' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17b_g_Gin' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_g_Gin' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
-                        computeColLTotals( result.Part1[i] );
+                        computeColLTotals( result.Part1List[i] );
                     }
-                    else if ( result.Part1[i].SpiritCatName === 'Vodka' ) {
+                    else if ( result.Part1List[i].SpiritCatName === 'Vodka' ) {
                         // Line: 9 - update processing for a single SpiritType
-                        $( '#p1_9h_Vodka' ).val( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9h_Vodka' ).val( result.Part1List[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11h_Vodka' ).val( result.Part1[i].StorageAcct );
+                        $( '#p1_11h_Vodka' ).val( result.Part1List[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14h_Vodka' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14h_Vodka' ).val( result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15h_Vodka' ).val( result.Part1[i].Recd4RedistilaltionL15 );
+                        $( '#p1_15h_Vodka' ).val( result.Part1List[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(a) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17a_h_Vodka' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17a_h_Vodka' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17b_h_Vodka' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_h_Vodka' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
-                        computeColLTotals( result.Part1[i] );
+                        computeColLTotals( result.Part1List[i] );
                     }
-                    else if ( result.Part1[i].SpiritCatName === 'AlcoholUnder190' ) {
+                    else if ( result.Part1List[i].SpiritCatName === 'AlcoholUnder190' ) {
                         // Line: 9 - update processing for a single SpiritType
-                        $( '#p1_9j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9j_AlcoholAndSpiritsUnder190' ).val( result.Part1List[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].StorageAcct );
+                        $( '#p1_11j_AlcoholAndSpiritsUnder190' ).val( result.Part1List[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14j_AlcoholAndSpiritsUnder190' ).val( result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].Recd4RedistilaltionL15 );
+                        $( '#p1_15j_AlcoholAndSpiritsUnder190' ).val( result.Part1List[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(a) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17a_j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17a_j_AlcoholAndSpiritsUnder190' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17b_j_AlcoholAndSpiritsUnder190' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_j_AlcoholAndSpiritsUnder190' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
-                        computeColLTotals( result.Part1[i] );
+                        computeColLTotals( result.Part1List[i] );
                     }
-                    else if ( result.Part1[i].SpiritCatName === 'AlcoholOver190' ) {
+                    else if ( result.Part1List[i].SpiritCatName === 'AlcoholOver190' ) {
                         // Line: 9 - update processing for a single SpiritType
-                        $( '#p1_9i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9i_AlcoholAndSpiritsOver190' ).val( result.Part1List[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].StorageAcct );
+                        $( '#p1_11i_AlcoholAndSpiritsOver190' ).val( result.Part1List[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14i_AlcoholAndSpiritsOver190' ).val( result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].Recd4RedistilaltionL15 );
+                        $( '#p1_15i_AlcoholAndSpiritsOver190' ).val( result.Part1List[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(a) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17a_i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17a_i_AlcoholAndSpiritsOver190' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17b_i_AlcoholAndSpiritsOver190' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_i_AlcoholAndSpiritsOver190' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
-                        computeColLTotals( result.Part1[i] );
+                        computeColLTotals( result.Part1List[i] );
                     }
                     else {
                         // Line: 9 - update processing for a single SpiritType
-                        $( '#p1_9k_Other' ).val( result.Part1[i].ProccessingAcct );
+                        $( '#p1_9k_Other' ).val( result.Part1List[i].ProccessingAcct );
 
                         // Line: 11 - update storage for a single SpiritType
-                        $( '#p1_11k_Other' ).val( result.Part1[i].StorageAcct );
+                        $( '#p1_11k_Other' ).val( result.Part1List[i].StorageAcct );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
-                        $( '#p1_14k_Other' ).val( result.Part1[i].StorageAcct + result.Part1[i].ProccessingAcct );
+                        $( '#p1_14k_Other' ).val( result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
-                        $( '#p1_15k_Other' ).val( result.Part1[i].Recd4RedistilaltionL15 );
+                        $( '#p1_15k_Other' ).val( result.Part1List[i].Recd4RedistilaltionL15 );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
-                        $( '#p1_17b_k_Other' ).val( result.Part1[i].UnfinishedSpiritsEndOfQuarter );
+                        $( '#p1_17b_k_Other' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
 
-                        computeColLTotals( result.Part1[i] );
+                        computeColLTotals( result.Part1List[i] );
                     }
                 }
 
                 // update totals for line 14 column "l"
 
                 //grisha - todo: this could potentially be moved to a separate function
-                for ( var i = 0; i < result.Part2Through4.length; i++ ) {
-                    if ( result.Part2Through4[i].KindOfMaterial === "Grain" ) //grain
+                for ( var i = 0; i < result.Part2Through4List.length; i++ ) {
+                    if ( result.Part2Through4List[i].KindOfMaterial === "Grain" ) //grain
                     {
-                        $( '#p2_1b_GrainProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p2_1b_GrainProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Fruit" ) //fruit
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Fruit" ) //fruit
                     {
-                        $( '#p2_2b_FruitProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p2_2b_FruitProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Molasses" ) //Molasses
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Molasses" ) //Molasses
                     {
-                        $( '#p2_3b_MolassesProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p2_3b_MolassesProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "EthylSulfate" ) //EthylSulfate
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "EthylSulfate" ) //EthylSulfate
                     {
-                        $( '#p2_4b_EthylSulfateProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p2_4b_EthylSulfateProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "EthyleneGas" ) //EthyleneGas
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "EthyleneGas" ) //EthyleneGas
                     {
-                        $( '#p2_5b_EthyleneGasProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p2_5b_EthyleneGasProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "SulphiteLiquor" ) //SulphiteLiquor
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "SulphiteLiquor" ) //SulphiteLiquor
                     {
-                        $( '#p2_6b_SulphiteLiquorsProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p2_6b_SulphiteLiquorsProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "FromRedistillation" ) //FromRedistillation
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "FromRedistillation" ) //FromRedistillation
                     {
-                        $( '#p2_7b_FromRedistillationProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p2_7b_FromRedistillationProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Bourbon-New-Cooperage" ) //Bourbon-New-Cooperage
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Bourbon-New-Cooperage" ) //Bourbon-New-Cooperage
                     {
-                        $( '#p3_1b_BourbonProofNewCooperage' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_1b_BourbonProofNewCooperage' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Bourbon-Used-Cooperage" ) //Bourbon-Used-Cooperage
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Bourbon-Used-Cooperage" ) //Bourbon-Used-Cooperage
                     {
-                        $( '#p3_1c_BourbonProofUsedCooperage' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_1c_BourbonProofUsedCooperage' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Bourbon-Deposited-in-Tanks" ) //Bourbon-Deposited-in-Tanks
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Bourbon-Deposited-in-Tanks" ) //Bourbon-Deposited-in-Tanks
                     {
-                        $( '#p3_1d_BourbonProofDepositedInTanks' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_1d_BourbonProofDepositedInTanks' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Corn-New-Cooperage" ) //Corn-New-Cooperage
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Corn-New-Cooperage" ) //Corn-New-Cooperage
                     {
-                        $( '#p3_2b_CornProofNewCooperage' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_2b_CornProofNewCooperage' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Corn-Used-Cooperage" ) //Corn-Used-Cooperage
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Corn-Used-Cooperage" ) //Corn-Used-Cooperage
                     {
-                        $( '#p3_2c_CornProofUsedCooperage' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_2c_CornProofUsedCooperage' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Corn-Deposited-in-Tanks" ) //Corn-Deposited-in-Tanks
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Corn-Deposited-in-Tanks" ) //Corn-Deposited-in-Tanks
                     {
-                        $( '#p3_2d_CornProofDepositedInTanks' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_2d_CornProofDepositedInTanks' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Rye-New-Cooperage" ) //Rye-New-Cooperage
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Rye-New-Cooperage" ) //Rye-New-Cooperage
                     {
-                        $( '#p3_3b_RyeProofNewCoooperage' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_3b_RyeProofNewCoooperage' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Rye-Used-Cooperage" ) //Rye-Used-Cooperage
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Rye-Used-Cooperage" ) //Rye-Used-Cooperage
                     {
-                        $( '#p3_3c_RyeProofUsedCooperage' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_3c_RyeProofUsedCooperage' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === "Rye-Deposited-in-Tanks" ) //Rye-Deposited-in-Tanks
+                    else if ( result.Part2Through4List[i].KindOfMaterial === "Rye-Deposited-in-Tanks" ) //Rye-Deposited-in-Tanks
                     {
-                        $( '#p3_3d_RyeProofDepositedInTanks' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_3d_RyeProofDepositedInTanks' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === 'Light-New-Cooperage' ) //Light-New-Cooperage
+                    else if ( result.Part2Through4List[i].KindOfMaterial === 'Light-New-Cooperage' ) //Light-New-Cooperage
                     {
-                        $( '#p3_4b_LightProofNewCooperage' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_4b_LightProofNewCooperage' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === 'Light-Used-Cooperage' ) //Light-Used-Cooperage
+                    else if ( result.Part2Through4List[i].KindOfMaterial === 'Light-Used-Cooperage' ) //Light-Used-Cooperage
                     {
-                        $( '#p3_4c_LightProofUsedCooperage' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_4c_LightProofUsedCooperage' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === 'Light-Deposited-in-Tanks' ) //Light-Deposited-in-Tanks
+                    else if ( result.Part2Through4List[i].KindOfMaterial === 'Light-Deposited-in-Tanks' ) //Light-Deposited-in-Tanks
                     {
-                        $( '#p3_4d_LightProofDepositedInTanks' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p3_4d_LightProofDepositedInTanks' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === 'GrapeBrandy' ) //GrapeBrandy
+                    else if ( result.Part2Through4List[i].KindOfMaterial === 'GrapeBrandy' ) //GrapeBrandy
                     {
-                        $( '#p4_1b_GrapeBrandyProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p4_1b_GrapeBrandyProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === 'AllOtherBrandy' ) //AllOtherBrandy
+                    else if ( result.Part2Through4List[i].KindOfMaterial === 'AllOtherBrandy' ) //AllOtherBrandy
                     {
-                        $( '#p4_2b_AllOtherBrandyProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p4_2b_AllOtherBrandyProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === 'NeutralGrapeBrandy' ) //NeutralGrapeBrandy
+                    else if ( result.Part2Through4List[i].KindOfMaterial === 'NeutralGrapeBrandy' ) //NeutralGrapeBrandy
                     {
-                        $( '#p4_3b_NeutralGrapeBrandyProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p4_3b_NeutralGrapeBrandyProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
-                    else if ( result.Part2Through4[i].KindOfMaterial === 'AllOtherNeutralBrandy' ) //AllOtherNeutralBrandy
+                    else if ( result.Part2Through4List[i].KindOfMaterial === 'AllOtherNeutralBrandy' ) //AllOtherNeutralBrandy
                     {
-                        $( '#p4_4b_AllOtherNeutralBrandyProof' ).val( result.Part2Through4[i].ProofGallons );
+                        $( '#p4_4b_AllOtherNeutralBrandyProof' ).val( result.Part2Through4List[i].ProofGallons );
                     }
                     else {
                         // this case is when new custom Material Kinds are being used.
