@@ -237,9 +237,15 @@
                             // Assumption: dropDownList index == dataAdapter index
                             var adapterRecord = reportingSpiritKindAdapter[index];
                             var array = [];
-                            for (var i = 0; i < adapterRecord.MaterialKindObject.length; i++) {
-                                array.push(adapterRecord.MaterialKindObject[i]);
+                                for (var i = 0; i < adapterRecord.MaterialKindObject.length; i++) {
+                                    array.push(adapterRecord.MaterialKindObject[i]);
+                                }
+                            if (array.length === 0) {
+                                $('div#MaterialKindHidden').hide();
+                            } else {
+                                $('div#MaterialKindHidden').show();
                             }
+                            
                             $('#ReportingMaterialKindDropDown').jqxDropDownList({
                                 source: array
                             });
@@ -419,7 +425,8 @@
                         width: '100px',
                         inputMode: 'simple',
                         textAlign: 'center',
-                        min: 0
+                        min: 0,
+                        disabled: true
                     });
                     $("#ProdAlcoholContentInput").jqxNumberInput({
                         height: '25px',
@@ -1196,7 +1203,7 @@
                                                 <div id="ReportingSpiritTypeDropDown"></div>
                                             </div>
                                         </div>
-                                        <div class="form-group">
+                                        <div id ="MaterialKindHidden" class="form-group" style="display:none">
                                             <label for="ReportingMaterialKindDropDown" class="col-sm-6 control-label">Material Kind for Reporting</label>
                                             <div class="col-sm-6">
                                                 <div id="ReportingMaterialKindDropDown"></div>
