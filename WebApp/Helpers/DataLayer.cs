@@ -5141,38 +5141,45 @@ namespace WebApp.Helpers
                     from matKind in matKind_join.DefaultIfEmpty()
                     select new
                     {
-                        MaterialKindReportingID = ((System.Single?)spiT2Mat.MaterialKindReportingID ?? (System.Single?)0),
-                        SpiritTypeReportingID = ((System.Single?)spiT2Mat.SpiritTypeReportingID ?? (System.Single?)0),
-                        MaterialKindName = (matKind.MaterialKindName ?? string.Empty),
-                        ProductTypeName = (spiType.ProductTypeName ?? string.Empty),
+                        MaterialKindReportingID = (int?)spiT2Mat.MaterialKindReportingID ?? 0,
+                        SpiritTypeReportingID = (int?)spiType.SpiritTypeReportingID ?? 0,
+                        MaterialKindName = matKind.MaterialKindName ?? string.Empty,
+                        ProductTypeName = spiType.ProductTypeName ?? string.Empty
                     };
+
                 foreach (var i in res)
                 {
-                    if (existsArray[(int)i.SpiritTypeReportingID] == 0)
+                    if (existsArray[i.SpiritTypeReportingID] == 0)
                     {
                         SpiritToKindListObject spir2Kind = new SpiritToKindListObject();
-                        spir2Kind.SpiritTypeReportingID = (int)i.SpiritTypeReportingID;
+                        spir2Kind.SpiritTypeReportingID = i.SpiritTypeReportingID;
                         spir2Kind.ProductTypeName = i.ProductTypeName;
-                        List<MaterialKindObject> kindList = new List<MaterialKindObject>(); // material kind list
-                        MaterialKindObject kind = new MaterialKindObject();
-                        kind.MaterialKindID = (int)i.MaterialKindReportingID;
-                        kind.MaterialKindName = i.MaterialKindName;
-                        kind.SpiritTypeReportingID = (int)i.SpiritTypeReportingID;
-                        kindList.Add(kind);
+
+                        List<MaterialKindObject> kindList = new List<MaterialKindObject>();
+
+                        if (i.MaterialKindReportingID > 0 && i.MaterialKindName != string.Empty)
+                        {
+                            MaterialKindObject kind = new MaterialKindObject();
+                            kind.MaterialKindID = i.MaterialKindReportingID;
+                            kind.MaterialKindName = i.MaterialKindName;
+                            kind.SpiritTypeReportingID = i.SpiritTypeReportingID;
+                            kindList.Add(kind);
+                        }
+
                         spir2Kind.MaterialKindObject = kindList;
                         spir2KindList.Add(spir2Kind);
-                        existsArray[(int)i.SpiritTypeReportingID] = 1;
+                        existsArray[i.SpiritTypeReportingID] = 1;
                     }
-                    else if (existsArray[(int)i.SpiritTypeReportingID] == 1)
+                    else if (existsArray[i.SpiritTypeReportingID] == 1)
                     {
                         foreach (var li in spir2KindList)
                         {
-                            if (li.SpiritTypeReportingID == (int)i.SpiritTypeReportingID)
+                            if (li.SpiritTypeReportingID == i.SpiritTypeReportingID && i.MaterialKindReportingID > 0 && i.MaterialKindName != string.Empty)
                             {
                                 MaterialKindObject kind = new MaterialKindObject();
-                                kind.MaterialKindID = (int)i.MaterialKindReportingID;
+                                kind.MaterialKindID = i.MaterialKindReportingID;
                                 kind.MaterialKindName = i.MaterialKindName;
-                                kind.SpiritTypeReportingID = (int)i.SpiritTypeReportingID;
+                                kind.SpiritTypeReportingID = i.SpiritTypeReportingID;
                                 li.MaterialKindObject.Add(kind);
                             }
                         }
