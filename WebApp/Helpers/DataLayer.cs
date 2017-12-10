@@ -5141,38 +5141,45 @@ namespace WebApp.Helpers
                     from matKind in matKind_join.DefaultIfEmpty()
                     select new
                     {
-                        MaterialKindReportingID = ((System.Single?)spiT2Mat.MaterialKindReportingID ?? (System.Single?)0),
-                        SpiritTypeReportingID = ((System.Single?)spiT2Mat.SpiritTypeReportingID ?? (System.Single?)0),
-                        MaterialKindName = (matKind.MaterialKindName ?? string.Empty),
-                        ProductTypeName = (spiType.ProductTypeName ?? string.Empty),
+                        MaterialKindReportingID = (int?)spiT2Mat.MaterialKindReportingID ?? 0,
+                        SpiritTypeReportingID = (int?)spiType.SpiritTypeReportingID ?? 0,
+                        MaterialKindName = matKind.MaterialKindName ?? string.Empty,
+                        ProductTypeName = spiType.ProductTypeName ?? string.Empty
                     };
+
                 foreach (var i in res)
                 {
-                    if (existsArray[(int)i.SpiritTypeReportingID] == 0)
+                    if (existsArray[i.SpiritTypeReportingID] == 0)
                     {
                         SpiritToKindListObject spir2Kind = new SpiritToKindListObject();
-                        spir2Kind.SpiritTypeReportingID = (int)i.SpiritTypeReportingID;
+                        spir2Kind.SpiritTypeReportingID = i.SpiritTypeReportingID;
                         spir2Kind.ProductTypeName = i.ProductTypeName;
-                        List<MaterialKindObject> kindList = new List<MaterialKindObject>(); // material kind list
-                        MaterialKindObject kind = new MaterialKindObject();
-                        kind.MaterialKindID = (int)i.MaterialKindReportingID;
-                        kind.MaterialKindName = i.MaterialKindName;
-                        kind.SpiritTypeReportingID = (int)i.SpiritTypeReportingID;
-                        kindList.Add(kind);
+
+                        List<MaterialKindObject> kindList = new List<MaterialKindObject>();
+
+                        if (i.MaterialKindReportingID > 0 && i.MaterialKindName != string.Empty)
+                        {
+                            MaterialKindObject kind = new MaterialKindObject();
+                            kind.MaterialKindID = i.MaterialKindReportingID;
+                            kind.MaterialKindName = i.MaterialKindName;
+                            kind.SpiritTypeReportingID = i.SpiritTypeReportingID;
+                            kindList.Add(kind);
+                        }
+
                         spir2Kind.MaterialKindObject = kindList;
                         spir2KindList.Add(spir2Kind);
-                        existsArray[(int)i.SpiritTypeReportingID] = 1;
+                        existsArray[i.SpiritTypeReportingID] = 1;
                     }
-                    else if (existsArray[(int)i.SpiritTypeReportingID] == 1)
+                    else if (existsArray[i.SpiritTypeReportingID] == 1)
                     {
                         foreach (var li in spir2KindList)
                         {
-                            if (li.SpiritTypeReportingID == (int)i.SpiritTypeReportingID)
+                            if (li.SpiritTypeReportingID == i.SpiritTypeReportingID && i.MaterialKindReportingID > 0 && i.MaterialKindName != string.Empty)
                             {
                                 MaterialKindObject kind = new MaterialKindObject();
-                                kind.MaterialKindID = (int)i.MaterialKindReportingID;
+                                kind.MaterialKindID = i.MaterialKindReportingID;
                                 kind.MaterialKindName = i.MaterialKindName;
-                                kind.SpiritTypeReportingID = (int)i.SpiritTypeReportingID;
+                                kind.SpiritTypeReportingID = i.SpiritTypeReportingID;
                                 li.MaterialKindObject.Add(kind);
                             }
                         }
@@ -5598,7 +5605,9 @@ namespace WebApp.Helpers
             prodRepObj.Header = GetDistillerInfoForReportHeader(distillerID, start);
 
             // we need this for Part 1
-            GetSpiritsForProductionReport(userId, start, end, ref tempRepObjList);
+            GetAllProductionReportRecordsForGivenPeriod(userId, start, end, ref tempRepObjList);
+
+            GetProductionReportPart1Records(start, end, ref part1List, ref tempRepObjList);
 
             // we need this for line 17(b) of Part 1
             // we only need to get Unfinished Spirit during the quartely returns so doing the check here. Months could change from year to year. Need to check with TTB every year
@@ -5608,94 +5617,14 @@ namespace WebApp.Helpers
             }
 
             // get data for line 15 of Part 1
+            GetReceivedForRedistillation(userId, start, end, ref tempRepObjList, ref part1List, ref part5);
 
-            GetReceivedForRedistillation(userId, start, end, ref tempRepObjList, ref part5);
+            // parts 2 through 4
+            GetRecordsForParts2Through4(ref part1List, ref part2Thru4List, ref tempRepObjList);
+
+            prodRepObj.Part1List = part1List;
+            prodRepObj.Part2Through4List = part2Thru4List;
             prodRepObj.part5List = part5;
-
-            foreach (var rec in tempRepObjList)
-            {
-                // Deal with part 1 Start
-                // Assign data for part 1
-                var spiritType = part1List.Find(x => x.SpiritTypeReportingID == rec.SpiritTypeReportingID);
-
-                if (spiritType == null)
-                {
-                    ProdReportPart1 part1Obj = new ProdReportPart1();
-                    part1Obj.SpiritCatName = rec.SpiritTypeReportName;
-                    part1Obj.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
-                    part1Obj.Recd4RedistilaltionL15 = rec.Recd4RedistilaltionL15;
-
-                    if (!(bool)rec.Gauged /*not gauged method*/) // all of the Distilled and Fermented Purchases should always be Gauged as per our design. So this check is really for internal Production distillation
-                    {
-                        part1Obj.UnfinishedSpiritsEndOfQuarterL17 += (float)rec.Proof;
-                    }
-                    else if ((bool)rec.Redistilled == true)
-                    {
-                        part1Obj.Recd4RedistilL17 += (float)rec.Proof;
-                    }
-                    else
-                    {
-                        if (rec.StateID == 3) // Distilled - Storage report case
-                        {
-                            part1Obj.StorageAcct += (float)rec.Proof;
-                            part1Obj.ProducedTotal += (float)rec.Proof;
-                        }
-                        else if (rec.StateID == 4 || rec.StateID == 5) // Blended or Bottled cases- Processing report case
-                        {
-                            part1Obj.ProccessingAcct += (float)rec.Proof;
-                            part1Obj.ProducedTotal += (float)rec.Proof;
-                        }
-                    }
-                    part1List.Add(part1Obj);
-                }
-                else
-                {
-                    if (!(bool)rec.Gauged)
-                    {
-                        spiritType.UnfinishedSpiritsEndOfQuarterL17 += (float)rec.Proof;
-                    }
-                    else if ((bool)rec.Redistilled == true)
-                    {
-                        spiritType.Recd4RedistilL17 += (float)rec.Proof;
-                    }
-                    else
-                    {
-                        if (rec.StateID == 3) // Distilled - Storage report case
-                        {
-                            spiritType.StorageAcct += (float)rec.Proof;
-                            spiritType.ProducedTotal += (float)rec.Proof;
-                        }
-                        else if (rec.StateID == 4 || rec.StateID == 5) // Blended or Bottled cases- Processing report case
-                        {
-                            spiritType.ProccessingAcct += (float)rec.Proof;
-                            spiritType.ProducedTotal += (float)rec.Proof;
-                        }
-                    }
-                }
-
-                // Deal with parts 2 through 4 Start
-                if (rec.MaterialKindReportingID > 0)
-                {
-                    var materialKind = part2Thru4List.Find(x => x.MaterialKindReportingID == rec.MaterialKindReportingID);
-
-                    if (materialKind == null)
-                    {
-                        ProdReportParts2Through4 prodRP2T5 = new ProdReportParts2Through4();
-                        prodRP2T5.KindOfMaterial = rec.MaterialKindReportingName;
-                        prodRP2T5.MaterialKindReportingID = (int)rec.MaterialKindReportingID;
-                        prodRP2T5.ProofGallons = (float)rec.Proof;
-                        prodRP2T5.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
-                        part2Thru4List.Add(prodRP2T5);
-                    }
-                    else
-                    {
-                        materialKind.ProofGallons += (float)rec.Proof;
-                    }
-                }
-            }
-
-            prodRepObj.Part1 = part1List;
-            prodRepObj.Part2Through4 = part2Thru4List;
 
             try
             {
@@ -5811,15 +5740,199 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw;
+                throw e;
             }
 
-            prodRepObj.ProdReportPart6 = prodReportPart6List;
+            prodRepObj.ProdReportPart6List = prodReportPart6List;
 
             return prodRepObj;
         }
 
-        private void GetReceivedForRedistillation(int userId, DateTime start, DateTime end, ref List<ProductionReportHelper> tempRepObjList, ref List<ProdReportPart5> prodRPart5L)
+        private void GetRecordsForParts2Through4(ref List<ProdReportPart1> part1List, ref List<ProdReportParts2Through4> part2Thru4List, ref List<ProductionReportHelper> tempRepObjList)
+        {
+            foreach (var rec in tempRepObjList)
+            {
+                // Deal with parts 2 through 4 Start
+                if (rec.MaterialKindReportingID > 0)
+                {
+                    var materialKind = part2Thru4List.Find(x => x.MaterialKindReportingID == rec.MaterialKindReportingID);
+
+                    if (materialKind == null)
+                    {
+                        ProdReportParts2Through4 prodRP2T4 = new ProdReportParts2Through4();
+                        prodRP2T4.KindOfMaterial = rec.MaterialKindReportingName;
+                        prodRP2T4.MaterialKindReportingID = (int)rec.MaterialKindReportingID;
+
+                        var part1Record = part1List.Find(x => x.SpiritTypeReportingID == rec.SpiritTypeReportingID);
+
+                        prodRP2T4.ProofGallons = (part1Record.ProducedTotal > 0) ? part1Record.ProducedTotal : 0;
+
+                        prodRP2T4.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
+
+                        part2Thru4List.Add(prodRP2T4);
+                    }
+                    else
+                    {
+                        materialKind.ProofGallons += (float)rec.Proof;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// GetProductionReportPart1Records method calls Rows in the report iteratively
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="part1List"></param>
+        /// <param name="tempRepObjList"></param>
+        private void GetProductionReportPart1Records(DateTime start, DateTime end, ref List<ProdReportPart1> part1List, ref List<ProductionReportHelper> tempRepObjList)
+        {
+            foreach (var pRec in tempRepObjList)
+            {
+                // Entered into Storage and Processing account case
+                GetEnteredInStorageAndProcessingAccount(start, end, pRec, ref part1List);
+            }
+        }
+
+        /// <summary>
+        /// This method gets PFGals for line 11 on Production report
+        /// given the initial list of production Ids for that month.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="record"></param>
+        /// <param name="part1List"></param>
+        private void GetEnteredInStorageAndProcessingAccount(DateTime start, DateTime end, ProductionReportHelper record, ref List<ProdReportPart1> part1List)
+        {
+            float blendedProof = 0f;
+            float distilledProof = 0f;
+
+            // Entered into Storage account case 
+            var blended =
+                (from productionContent in db.ProductionContent
+                 join production in db.Production on productionContent.ProductionID equals production.ProductionID into production_join
+                 from production in production_join.DefaultIfEmpty()
+                 join prod4Rep in db.Production4Reporting on productionContent.ProductionID equals prod4Rep.ProductionID
+                 where productionContent.RecordID == record.ProductionID
+                 && production.ProductionEndTime >= start
+                 && production.ProductionEndTime <= end
+                 && prod4Rep.Redistilled == false
+                 && production.StateID == 4
+                 select new
+                 {
+                     id = prod4Rep.ProductionID,
+                     proof = (float?)prod4Rep.Proof ?? (float?)0
+                 }).Distinct().ToList();
+
+            if (blended != null)
+            {
+                foreach (var i in blended)
+                {
+                    blendedProof += (float)i.proof;
+                }
+            }
+            else
+            {
+                blendedProof = 0f;
+            }
+
+            var distilled =
+                (from prod4Reporting in db.Production4Reporting
+                 where prod4Reporting.ProductionID == record.ProductionID
+                 select new
+                 {
+                     Proof = (float?)prod4Reporting.Proof ?? (float?)0
+                 }).FirstOrDefault();
+
+            if (distilled != null)
+            {
+                distilledProof = (float)distilled.Proof;
+            }
+            else
+            {
+                distilledProof = 0f;
+            }
+
+            var spiritType = part1List.Find(x => x.SpiritTypeReportingID == record.SpiritTypeReportingID);
+
+            if (spiritType == null)
+            {
+                ProdReportPart1 part1Obj = new ProdReportPart1();
+                part1Obj.SpiritCatName = record.SpiritTypeReportName;
+                part1Obj.SpiritTypeReportingID = (int)record.SpiritTypeReportingID;
+                part1Obj.ProccessingAcct = blendedProof;
+                float storageProof = (distilledProof - blendedProof) >= 0 ? (distilledProof - blendedProof) : 0;
+                part1Obj.StorageAcct = storageProof;
+                part1Obj.ProducedTotal = blendedProof + storageProof;
+
+                part1List.Add(part1Obj);
+            }
+            else
+            {
+                float storageProof = (distilledProof - blendedProof) >= 0 ? (distilledProof - blendedProof) : 0;
+                spiritType.StorageAcct += storageProof;
+                spiritType.ProducedTotal += blendedProof + storageProof;
+            }
+        }
+
+
+        /// <summary>
+        /// This method gets PFGals for line 9 on Production report
+        /// given the initial list of production Ids for that month.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="record"></param>
+        /// <param name="part1List"></param>
+        private void GetEnteredInProcessingAccount(DateTime start, DateTime end, ProductionReportHelper record, ref List<ProdReportPart1> part1List)
+        {
+            float blendedProof = 0f;
+            var blended =
+                (from prod4Reporting in db.Production4Reporting
+                 where prod4Reporting.ProductionID == record.ProductionID
+                 select new
+                 {
+                     Proof = (float?)prod4Reporting.Proof ?? (float?)0
+                 }).FirstOrDefault();
+
+            if (blended != null)
+            {
+                blendedProof = (float)blended.Proof;
+            }
+            else
+            {
+                blendedProof = 0f;
+            }
+
+            var spiritType = part1List.Find(x => x.SpiritTypeReportingID == record.SpiritTypeReportingID);
+
+            if (spiritType == null)
+            {
+                ProdReportPart1 part1Obj = new ProdReportPart1();
+                part1Obj.SpiritCatName = record.SpiritTypeReportName;
+                part1Obj.SpiritTypeReportingID = (int)record.SpiritTypeReportingID;
+                part1Obj.ProccessingAcct = blendedProof;
+                part1Obj.ProducedTotal = blendedProof;
+
+                part1List.Add(part1Obj);
+            }
+            else
+            {
+                spiritType.ProccessingAcct += blendedProof;
+                spiritType.ProducedTotal += blendedProof;
+            }
+        }
+
+        /// <summary>
+        /// Gets records that are marked as received for redistillation on Line 15 of Production report
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="tempRepObjList"></param>
+        /// <param name="prodRPart5L"></param>
+        private void GetReceivedForRedistillation(int userId, DateTime start, DateTime end, ref List<ProductionReportHelper> tempRepObjList, ref List<ProdReportPart1> part1List, ref List<ProdReportPart5> prodRPart5L)
         {
             try
             {
@@ -5834,17 +5947,17 @@ namespace WebApp.Helpers
                 {
                     if (k.IsProductionComponent == true)
                     {
-                        GetProductionRedistilledRecords(k.ProductionContentId, k.Proof, ref tempRepObjList, ref prodRPart5L);
+                        GetProductionRedistilledRecords(k.ProductionContentId, k.Proof, ref tempRepObjList, ref part1List, ref prodRPart5L);
                     }
                     else if (k.IsProductionComponent == false)
                     {
-                        GetPurchasedRedistilledRecords(k.ProductionContentId, k.Proof, ref tempRepObjList, ref prodRPart5L);
+                        GetPurchasedRedistilledRecords(k.ProductionContentId, k.Proof, ref tempRepObjList, ref part1List, ref prodRPart5L);
                     }
                 }
             }
             catch (Exception e)
             {
-                throw;
+                throw e;
             }
         }
 
@@ -5852,6 +5965,7 @@ namespace WebApp.Helpers
         {
             bool parentGauged = false;
             int parentState = 0;
+            int parentProductionId = 0;
             try
             {
                 var baseCaseRecords =
@@ -5885,18 +5999,9 @@ namespace WebApp.Helpers
                          where prod.ProductionID == current.RecordID
                          select prod).FirstOrDefault();
 
-                        // need to move this in the if statement below
-                        if (current.isProductionComponent == true)
-                        {
-                            // todo
-                        }
-                        else
-                        {
-
-                        }
-
                         if (prodContentParentProductionRecordInfo != null)
                         {
+                            parentProductionId = prodContentParentProductionRecordInfo.ProductionID;
                             parentGauged = prodContentParentProductionRecordInfo.Gauged;
                             parentState = prodContentParentProductionRecordInfo.StateID;
                         }
@@ -5904,6 +6009,7 @@ namespace WebApp.Helpers
                         {
                             parentGauged = false;
                             parentState = 0;
+                            parentProductionId = 0;
                         }
 
                         if (current.isProductionComponent == false)
@@ -5918,7 +6024,6 @@ namespace WebApp.Helpers
 
                             prodContentIteratorList.Add(pCI);
                         }
-                        //else if (current.Gauged == true && current.StateID == 3 && parentState == 3 && parentGauged == true)
                         else if (current.Gauged == true && current.StateID == 3 && parentGauged == true)
                         {
                             ProductionContentIterator pCI = new ProductionContentIterator();
@@ -5931,10 +6036,14 @@ namespace WebApp.Helpers
 
                             prodContentIteratorList.Add(pCI);
                         }
-                        //if (current.isProductionComponent == true && current.Gauged == true && parentGauged == true && parentState == 3){}
+
                         if (current.isProductionComponent != false)
                         {
-                            GetRedistilledProductionContentRecordsForProcessing(ref prodContentIteratorList, current.RecordID);
+                            var skipNextRecrusiveCall = prodContentIteratorList.Find(x => x.ProductionId == parentProductionId);
+                            if (!(skipNextRecrusiveCall != null))
+                            {
+                                GetRedistilledProductionContentRecordsForProcessing(ref prodContentIteratorList, current.RecordID);
+                            }
                         }
                     }
                 }
@@ -5945,7 +6054,7 @@ namespace WebApp.Helpers
             }
         }
 
-        private void GetProductionRedistilledRecords(int prodContentId, float proof, ref List<ProductionReportHelper> tempRepObjList, ref List<ProdReportPart5> prodRPart5L)
+        private void GetProductionRedistilledRecords(int prodContentId, float proof, ref List<ProductionReportHelper> tempRepObjList, ref List<ProdReportPart1> part1List, ref List<ProdReportPart5> prodRPart5L)
         {
             try
             {
@@ -5967,11 +6076,11 @@ namespace WebApp.Helpers
                 {
                     if ((int)productionSpiritType.SpiritTypeReportingID != 0)
                     {
-                        var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)productionSpiritType.SpiritTypeReportingID);
+                        var spRec = part1List.Find(x => x.SpiritTypeReportingID == (int)productionSpiritType.SpiritTypeReportingID);
                         if (spRec != null)
                         {
                             spRec.Recd4RedistilaltionL15 += proof;
-                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
+                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritCatName);
 
                             if (prod5Rec != null)
                             {
@@ -5980,14 +6089,17 @@ namespace WebApp.Helpers
                         }
                         else
                         {
-                            ProductionReportHelper part1Obj = new ProductionReportHelper();
+                            ProdReportPart1 part1Obj = new ProdReportPart1();
                             part1Obj.Recd4RedistilaltionL15 = proof;
                             part1Obj.SpiritTypeReportingID = (int)productionSpiritType.SpiritTypeReportingID;
-                            part1Obj.SpiritTypeReportName = (string)productionSpiritType.SpiritShortName;
-                            tempRepObjList.Add(part1Obj);
+                            part1Obj.SpiritCatName = (string)productionSpiritType.SpiritShortName;
+
+                            part1List.Add(part1Obj);
+
                             ProdReportPart5 prod5Inst = new ProdReportPart5();
-                            prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
+                            prod5Inst.KindofSpirits = part1Obj.SpiritCatName;
                             prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
+
                             prodRPart5L.Add(prod5Inst);
                         }
                     }
@@ -5999,7 +6111,7 @@ namespace WebApp.Helpers
             }
         }
 
-        public void GetPurchasedRedistilledRecords(int productionContentId, float proof, ref List<ProductionReportHelper> tempRepObjList, ref List<ProdReportPart5> prodRPart5L)
+        public void GetPurchasedRedistilledRecords(int productionContentId, float proof, ref List<ProductionReportHelper> tempRepObjList, ref List<ProdReportPart1> part1List, ref List<ProdReportPart5> prodRPart5L)
         {
             try
             {
@@ -6021,11 +6133,12 @@ namespace WebApp.Helpers
                 {
                     if ((int)purchaseSpiritType.SpiritTypeReportingID != 0)
                     {
-                        var spRec = tempRepObjList.Find(x => x.SpiritTypeReportingID == (int)purchaseSpiritType.SpiritTypeReportingID);
+                        var spRec = part1List.Find(x => x.SpiritTypeReportingID == (int)purchaseSpiritType.SpiritTypeReportingID);
                         if (spRec != null)
                         {
                             spRec.Recd4RedistilaltionL15 += proof;
-                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritTypeReportName);
+
+                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritCatName);
 
                             if (prod5Rec != null)
                             {
@@ -6034,15 +6147,18 @@ namespace WebApp.Helpers
                         }
                         else
                         {
-                            ProductionReportHelper part1Obj = new ProductionReportHelper();
+                            ProdReportPart1 part1Obj = new ProdReportPart1();
                             part1Obj.Recd4RedistilaltionL15 = proof;
                             part1Obj.SpiritTypeReportingID = (int)purchaseSpiritType.SpiritTypeReportingID;
-                            part1Obj.SpiritTypeReportName = (string)purchaseSpiritType.SpiritShortName;
+                            part1Obj.SpiritCatName = (string)purchaseSpiritType.SpiritShortName;
+
+                            part1List.Add(part1Obj);
+
                             ProdReportPart5 prod5Inst = new ProdReportPart5();
-                            prod5Inst.KindofSpirits = part1Obj.SpiritTypeReportName;
+                            prod5Inst.KindofSpirits = part1Obj.SpiritCatName;
                             prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
+
                             prodRPart5L.Add(prod5Inst);
-                            tempRepObjList.Add(part1Obj);
                         }
                     }
                 }
@@ -6054,20 +6170,18 @@ namespace WebApp.Helpers
         }
 
         /// <summary>
-        /// GetSpiritsForProductionReport method gets the data for production report part 1
+        /// GetAllProductionReportRecordsForGivenPeriod method gets the data for production report part 1
         /// </summary>
         /// <param name="userId">Distiller user id</param>
         /// <param name="start">reporting start period</param>
         /// <param name="end">reporting end period</param>
         /// <param name="tempRepObjList">out parameter object list that needs to be populated</param>
-        public void GetSpiritsForProductionReport(int userId, DateTime start, DateTime end, ref List<ProductionReportHelper> tempRepObjList)
+        public void GetAllProductionReportRecordsForGivenPeriod(int userId, DateTime start, DateTime end, ref List<ProductionReportHelper> tempRepObjList)
         {
             try
             {
                 var ress =
                 (from prod in db.Production
-                 join prodReport in db.Production4Reporting on prod.ProductionID equals prodReport.ProductionID into prodReport_join
-                 from prodReport in prodReport_join.DefaultIfEmpty()
                  join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
                  from distillers in distillers_join.DefaultIfEmpty()
                  join prod2SpiritType in db.ProductionToSpiritTypeReporting on prod.ProductionID equals prod2SpiritType.ProductionID into prod2SpiritType_join
@@ -6076,10 +6190,6 @@ namespace WebApp.Helpers
                  from matKindRep in matKindRep_join.DefaultIfEmpty()
                  join spiritTypeRep in db.SpiritTypeReporting on prod2SpiritType.SpiritTypeReportingID equals spiritTypeRep.SpiritTypeReportingID into spiritTypeRep_join
                  from spiritTypeRep in spiritTypeRep_join.DefaultIfEmpty()
-                 join prod2Purch in db.ProductionToPurchase on prod.ProductionID equals prod2Purch.ProductionID into prod2Purch_join
-                 from prod2Purch in prod2Purch_join.DefaultIfEmpty()
-                 join purch4Reprt in db.Purchase4Reporting on prod2Purch.PurchaseID equals purch4Reprt.PurchaseID into purch4Reprt_join
-                 from purch4Reprt in purch4Reprt_join.DefaultIfEmpty()
                  join prodRepMatCat2MatKind in db.ProdRepMatCat2MaterialKind on matKindRep.MaterialKindReportingID equals prodRepMatCat2MatKind.MaterialKindReportingID into prodRepMatCat2MatKind_join
                  from prodRepMatCat2MatKind in prodRepMatCat2MatKind_join.DefaultIfEmpty()
                  join prodRepMatCat in db.ProductionReportMaterialCategory on prodRepMatCat2MatKind.ProductionReportMaterialCategoryID equals prodRepMatCat.ProductionReportMaterialCategoryID into prodRepMatCat_join
@@ -6087,9 +6197,10 @@ namespace WebApp.Helpers
                  where
                    distillers.UserId == userId &&
                    prod.Gauged == true &&
-                   (prod.StatusID == 1 ||
-                   prod.StatusID == 2) &&
-                   (new int[] { 3, 4, 5 }).Contains(prod.StateID) &&
+                   //(prod.StatusID == 1 ||
+                   //prod.StatusID == 2) &&
+                   //(new int[] { 3, 4, 5 }).Contains(prod.StateID) &&
+                   (new int[] { 3 }).Contains(prod.StateID) &&
                    prod.ProductionEndTime >= start &&
                    prod.ProductionEndTime <= end
                  select new
@@ -6097,12 +6208,7 @@ namespace WebApp.Helpers
                      prod.StateID,
                      ProductionID = (int?)prod.ProductionID,
                      SpiritTypeName = spiritTypeRep.ProductTypeName ?? string.Empty,
-                     Redistilled = (bool?)prodReport.Redistilled,
                      MaterialKindName = matKindRep.MaterialKindName ?? string.Empty,
-                     Weight = (System.Single?)prodReport.Weight ?? (System.Single?)0,
-                     Volume = (System.Single?)prodReport.Volume ?? (System.Single?)0,
-                     Alcohol = (System.Single?)prodReport.Alcohol ?? (System.Single?)0,
-                     Proof = (System.Single?)prodReport.Proof ?? (System.Single?)0,
                      SpiritTypeReportingID = (int?)spiritTypeRep.SpiritTypeReportingID ?? (int?)0,
                      MaterialKindReportingID = (int?)matKindRep.MaterialKindReportingID ?? (int?)0,
                      MaterialCategoryName = prodRepMatCat.MaterialCategoryName ?? string.Empty,
@@ -6117,12 +6223,7 @@ namespace WebApp.Helpers
                     tempRepObj.StateID = l.StateID;
                     tempRepObj.ProductionID = (int)l.ProductionID;
                     tempRepObj.SpiritTypeReportName = l.SpiritTypeName;
-                    tempRepObj.Redistilled = (bool)l.Redistilled;
                     tempRepObj.MaterialKindReportingName = l.MaterialKindName;
-                    tempRepObj.Weight = (float)l.Weight;
-                    tempRepObj.Volume = (float)l.Volume;
-                    tempRepObj.Alcohol = (float)l.Alcohol;
-                    tempRepObj.Proof = (float)l.Proof;
                     tempRepObj.SpiritTypeReportingID = (int)l.SpiritTypeReportingID;
                     tempRepObj.MaterialKindReportingID = (int)l.MaterialKindReportingID;
                     tempRepObj.Gauged = l.Gauged;

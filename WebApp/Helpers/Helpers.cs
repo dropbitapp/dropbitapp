@@ -9,10 +9,10 @@ namespace WebApp.Helpers
      public class ProductionReportingObject
     {
         public ReportHeader Header { get; set; }
-        public List<ProdReportPart1> Part1 { get; set; }
-        public List<ProdReportParts2Through4> Part2Through4 { get; set; }
+        public List<ProdReportPart1> Part1List { get; set; }
+        public List<ProdReportParts2Through4> Part2Through4List { get; set; }
         public List<ProdReportPart5> part5List { get; set; }
-        public List<ProdReportPart6> ProdReportPart6 { get; set; }
+        public List<ProdReportPart6> ProdReportPart6List { get; set; }
     }
 
     public class StorageReport
@@ -35,7 +35,7 @@ namespace WebApp.Helpers
         public string SpiritCatName { get; set; }
         public float ProccessingAcct { get; set; } // stands for Entered In Proccessing Account
         public float StorageAcct { get; set; } // stands for Entered In Storage Account
-        public float ProducedTotal { get; set; } // stands for Produced total (on report, lines 1 through 13) for 170 & Under
+        public float ProducedTotal { get; set; } // stands for Produced total (on report, lines 1 through 13)
         public float Recd4RedistilL17 { get; set; } // stands for Received for Re-Distillation(line 17 on report, for this period, invlcuding values from storage + processing) for 170 & Under
         public float Recd4RedistilaltionL15 { get; set; } // line 15 of received for redistillation - gauged spirits that have been redistilled into something else. Common scenairo is Gin production: Buy GNS and redistil it into Gin
         public int SpiritTypeReportingID { get; set; }
