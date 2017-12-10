@@ -318,8 +318,8 @@ namespace WebApp.Helpers.Tests
                 /* PRODUCTION REPORT */
 
                 ProdReportPart1 part1E = new ProdReportPart1();
-                part1E.ProccessingAcct = 17.9f;
-                part1E.ProducedTotal = 17.9f;
+                part1E.ProccessingAcct = 18f;
+                part1E.ProducedTotal = 18f;
                 part1E.Recd4RedistilL17 = 0f;
                 part1E.Recd4RedistilaltionL15 = 0f;
                 part1E.StorageAcct = 0f;
@@ -332,7 +332,7 @@ namespace WebApp.Helpers.Tests
                 part2thru4.MaterialKindReportingID = 94;
                 part2thru4.NewCoop = false;
                 part2thru4.UsedCoop = false;
-                part2thru4.ProofGallons = 17.9f;
+                part2thru4.ProofGallons = 18f;
                 part2thru4.SpiritTypeReportingID = 3;
                 part2thru4.Tanks = false;
 
@@ -453,12 +453,12 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(reportHeaderE.ReportDate, actualProdReportObject.Header.ReportDate);
 
                 // verify Production report Part 1
-                Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1[0].ProccessingAcct);
-                Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1[0].ProducedTotal);
-                Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1[0].Recd4RedistilL17);
+                Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1List[0].ProccessingAcct);
+                Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1List[0].ProducedTotal);
+                Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1List[0].Recd4RedistilL17);
 
                 var expectedWine = accumulatedProofGL4SpiritTypeReportingIdL.Find(l => l.Item1 == 11);
-                var actualWine = actualProdReportObject.Part1.Find(x => x.SpiritTypeReportingID == expectedWine.Item1);
+                var actualWine = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == expectedWine.Item1);
 
                 if (actualWine == null)
                 {
@@ -470,29 +470,29 @@ namespace WebApp.Helpers.Tests
                     Assert.AreEqual("Wine", actualWine.SpiritCatName);
                 }
 
-                Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1[0].StorageAcct);
-                Assert.AreEqual(part1E.SpiritCatName, actualProdReportObject.Part1[0].SpiritCatName);
-                Assert.AreEqual(part1E.SpiritTypeReportingID, actualProdReportObject.Part1[0].SpiritTypeReportingID);
-                Assert.AreEqual(part1E.UnfinishedSpiritsEndOfQuarterL17, actualProdReportObject.Part1[0].UnfinishedSpiritsEndOfQuarterL17);
+                Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1List[0].StorageAcct);
+                Assert.AreEqual(part1E.SpiritCatName, actualProdReportObject.Part1List[0].SpiritCatName);
+                Assert.AreEqual(part1E.SpiritTypeReportingID, actualProdReportObject.Part1List[0].SpiritTypeReportingID);
+                Assert.AreEqual(part1E.UnfinishedSpiritsEndOfQuarterL17, actualProdReportObject.Part1List[0].UnfinishedSpiritsEndOfQuarterL17);
 
                 // verify Production report Part 2 trough 4
-                Assert.AreEqual(part2thru4.KindOfMaterial, actualProdReportObject.Part2Through4[0].KindOfMaterial);
-                Assert.AreEqual(part2thru4.MaterialKindReportingID, actualProdReportObject.Part2Through4[0].MaterialKindReportingID);
-                Assert.AreEqual(part2thru4.NewCoop, actualProdReportObject.Part2Through4[0].NewCoop);
-                Assert.AreEqual(part2thru4.UsedCoop, actualProdReportObject.Part2Through4[0].UsedCoop);
-                Assert.AreEqual(part2thru4.ProofGallons, actualProdReportObject.Part2Through4[0].ProofGallons);
-                Assert.AreEqual(part2thru4.SpiritTypeReportingID, actualProdReportObject.Part2Through4[0].SpiritTypeReportingID);
-                Assert.AreEqual(part2thru4.Tanks, actualProdReportObject.Part2Through4[0].Tanks);
+                Assert.AreEqual(part2thru4.KindOfMaterial, actualProdReportObject.Part2Through4List[0].KindOfMaterial);
+                Assert.AreEqual(part2thru4.MaterialKindReportingID, actualProdReportObject.Part2Through4List[0].MaterialKindReportingID);
+                Assert.AreEqual(part2thru4.NewCoop, actualProdReportObject.Part2Through4List[0].NewCoop);
+                Assert.AreEqual(part2thru4.UsedCoop, actualProdReportObject.Part2Through4List[0].UsedCoop);
+                Assert.AreEqual(part2thru4.ProofGallons, actualProdReportObject.Part2Through4List[0].ProofGallons);
+                Assert.AreEqual(part2thru4.SpiritTypeReportingID, actualProdReportObject.Part2Through4List[0].SpiritTypeReportingID);
+                Assert.AreEqual(part2thru4.Tanks, actualProdReportObject.Part2Through4List[0].Tanks);
 
                 // verify part 5
                 Assert.AreEqual("Wine", actualProdReportObject.part5List[0].KindofSpirits);
                 Assert.AreEqual(18, actualProdReportObject.part5List[0].Proof);
 
                 // verify Production report Part 6
-                Assert.AreEqual(part6.KindOfMaterial, actualProdReportObject.ProdReportPart6[0].KindOfMaterial);
-                Assert.AreEqual(part6.ProdReportMaterialCategoryID, actualProdReportObject.ProdReportPart6[0].ProdReportMaterialCategoryID);
-                Assert.AreEqual(part6.Volume, actualProdReportObject.ProdReportPart6[0].Volume);
-                Assert.AreEqual(part6.Weight, actualProdReportObject.ProdReportPart6[0].Weight);
+                Assert.AreEqual(part6.KindOfMaterial, actualProdReportObject.ProdReportPart6List[0].KindOfMaterial);
+                Assert.AreEqual(part6.ProdReportMaterialCategoryID, actualProdReportObject.ProdReportPart6List[0].ProdReportMaterialCategoryID);
+                Assert.AreEqual(part6.Volume, actualProdReportObject.ProdReportPart6List[0].Volume);
+                Assert.AreEqual(part6.Weight, actualProdReportObject.ProdReportPart6List[0].Weight);
                 #endregion
 
                 #region Storage Report
@@ -1021,17 +1021,17 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual("BrandyUnder170", storageReport.ReportBody.First().CategoryName);
                 Assert.AreEqual(100F, storageReport.ReportBody.First().r2_DepositedInBulkStorage);
 
-                // production report should contain three categories: Part1, Part2Through4, Part6
-                Assert.AreEqual(1, productionReport.Part1.Count);
-                Assert.AreEqual("BrandyUnder170", productionReport.Part1.First().SpiritCatName);
-                Assert.AreEqual(100F, productionReport.Part1.First().ProducedTotal);
-                Assert.AreEqual(1, productionReport.Part2Through4.Count);
-                Assert.AreEqual("AllOtherBrandy", productionReport.Part2Through4.First().KindOfMaterial);
-                Assert.AreEqual(100F, productionReport.Part2Through4.First().ProofGallons);
-                Assert.AreEqual(1, productionReport.ProdReportPart6.Count);
-                Assert.AreEqual("FermentedPomace", productionReport.ProdReportPart6.First().KindOfMaterial);
+                // production report should contain three categories: Part1List, Part2Through4List, Part6
+                Assert.AreEqual(1, productionReport.Part1List.Count);
+                Assert.AreEqual("BrandyUnder170", productionReport.Part1List.First().SpiritCatName);
+                Assert.AreEqual(100F, productionReport.Part1List.First().ProducedTotal);
+                Assert.AreEqual(1, productionReport.Part2Through4List.Count);
+                Assert.AreEqual("AllOtherBrandy", productionReport.Part2Through4List.First().KindOfMaterial);
+                Assert.AreEqual(100F, productionReport.Part2Through4List.First().ProofGallons);
+                Assert.AreEqual(1, productionReport.ProdReportPart6List.Count);
+                Assert.AreEqual("FermentedPomace", productionReport.ProdReportPart6List.First().KindOfMaterial);
                 // Test fails because of this assertion. Weight is 0. Debug.
-                Assert.AreEqual(1000F, productionReport.ProdReportPart6.First().Weight);
+                Assert.AreEqual(1000F, productionReport.ProdReportPart6List.First().Weight);
             }
             finally
             {
@@ -1280,8 +1280,8 @@ namespace WebApp.Helpers.Tests
                 #region Produciton
                 /* PRODUCTION REPORT */
                 ProdReportPart1 part1E = new ProdReportPart1();
-                part1E.ProccessingAcct = 159.92f;
-                part1E.ProducedTotal = 159.92f;
+                part1E.ProccessingAcct = 160f;
+                part1E.ProducedTotal = 160f;
                 part1E.Recd4RedistilL17 = 0f;
                 part1E.Recd4RedistilaltionL15 = 180f;
                 part1E.StorageAcct = 0f;
@@ -1414,30 +1414,30 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(reportHeaderE.ReportDate, actualProdReportObject.Header.ReportDate);
 
                 // verify Production report Part 1
-                Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1[0].ProccessingAcct);
-                Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1[0].ProducedTotal);
-                Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1[0].Recd4RedistilL17);
+                Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1List[0].ProccessingAcct);
+                Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1List[0].ProducedTotal);
+                Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1List[0].Recd4RedistilL17);
+                
 
-
-                Assert.AreEqual(part1E.Recd4RedistilaltionL15, actualProdReportObject.Part1[1].Recd4RedistilaltionL15);
-                Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1[0].StorageAcct);
-                Assert.AreEqual(part1E.SpiritCatName, actualProdReportObject.Part1[0].SpiritCatName);
-                Assert.AreEqual(part1E.SpiritTypeReportingID, actualProdReportObject.Part1[0].SpiritTypeReportingID);
-                Assert.AreEqual(part1E.UnfinishedSpiritsEndOfQuarterL17, actualProdReportObject.Part1[0].UnfinishedSpiritsEndOfQuarterL17);
+                Assert.AreEqual(part1E.Recd4RedistilaltionL15, actualProdReportObject.Part1List[1].Recd4RedistilaltionL15);
+                Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1List[0].StorageAcct);
+                Assert.AreEqual(part1E.SpiritCatName, actualProdReportObject.Part1List[0].SpiritCatName);
+                Assert.AreEqual(part1E.SpiritTypeReportingID, actualProdReportObject.Part1List[0].SpiritTypeReportingID);
+                Assert.AreEqual(part1E.UnfinishedSpiritsEndOfQuarterL17, actualProdReportObject.Part1List[0].UnfinishedSpiritsEndOfQuarterL17);
 
                 // verify Production report Part 2 trough 4
-                Assert.AreEqual(0, actualProdReportObject.Part2Through4.Count);
+                Assert.AreEqual(0, actualProdReportObject.Part2Through4List.Count);
 
                 // verify part 5
                 Assert.AreEqual(part5.KindofSpirits, actualProdReportObject.part5List[0].KindofSpirits);
                 Assert.AreEqual(part5.Proof, actualProdReportObject.part5List[0].Proof);
 
                 // verify Production report Part 6
-                Assert.AreEqual(0, actualProdReportObject.ProdReportPart6.Count);
-                //Assert.AreEqual(part6.KindOfMaterial, actualProdReportObject.ProdReportPart6[0].KindOfMaterial);
-                //Assert.AreEqual(part6.ProdReportMaterialCategoryID, actualProdReportObject.ProdReportPart6[0].ProdReportMaterialCategoryID);
-                //Assert.AreEqual(part6.Volume, actualProdReportObject.ProdReportPart6[0].Volume);
-                //Assert.AreEqual(part6.Weight, actualProdReportObject.ProdReportPart6[0].Weight);
+                Assert.AreEqual(0, actualProdReportObject.ProdReportPart6List.Count);
+                //Assert.AreEqual(part6.KindOfMaterial, actualProdReportObject.ProdReportPart6List[0].KindOfMaterial);
+                //Assert.AreEqual(part6.ProdReportMaterialCategoryID, actualProdReportObject.ProdReportPart6List[0].ProdReportMaterialCategoryID);
+                //Assert.AreEqual(part6.Volume, actualProdReportObject.ProdReportPart6List[0].Volume);
+                //Assert.AreEqual(part6.Weight, actualProdReportObject.ProdReportPart6List[0].Weight);
                 #endregion
 
                 #region Storage Report
@@ -1793,24 +1793,24 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(reportHeaderE.ReportDate, actualProdReportObject.Header.ReportDate);
 
                 // verify Production report Part 1
-                Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1[0].ProccessingAcct);
-                Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1[0].ProducedTotal);
-                Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1[0].Recd4RedistilL17);
-                Assert.AreEqual(part1E.Recd4RedistilaltionL15, actualProdReportObject.Part1[1].Recd4RedistilaltionL15);
-                Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1[0].StorageAcct);
-                Assert.AreEqual(part1E.SpiritCatName, actualProdReportObject.Part1[0].SpiritCatName);
-                Assert.AreEqual(part1E.SpiritTypeReportingID, actualProdReportObject.Part1[0].SpiritTypeReportingID);
-                Assert.AreEqual(part1E.UnfinishedSpiritsEndOfQuarterL17, actualProdReportObject.Part1[0].UnfinishedSpiritsEndOfQuarterL17);
+                Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1List[0].ProccessingAcct);
+                Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1List[0].ProducedTotal);
+                Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1List[0].Recd4RedistilL17);
+                Assert.AreEqual(part1E.Recd4RedistilaltionL15, actualProdReportObject.Part1List[1].Recd4RedistilaltionL15);
+                Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1List[0].StorageAcct);
+                Assert.AreEqual(part1E.SpiritCatName, actualProdReportObject.Part1List[0].SpiritCatName);
+                Assert.AreEqual(part1E.SpiritTypeReportingID, actualProdReportObject.Part1List[0].SpiritTypeReportingID);
+                Assert.AreEqual(part1E.UnfinishedSpiritsEndOfQuarterL17, actualProdReportObject.Part1List[0].UnfinishedSpiritsEndOfQuarterL17);
 
                 // verify Production report Part 2 trough 4
-                Assert.AreEqual(0, actualProdReportObject.Part2Through4.Count);
+                Assert.AreEqual(0, actualProdReportObject.Part2Through4List.Count);
 
                 // verify part 5
                 Assert.AreEqual(part5.KindofSpirits, actualProdReportObject.part5List[0].KindofSpirits);
                 Assert.AreEqual(part5.Proof, actualProdReportObject.part5List[0].Proof);
 
                 // verify Production report Part 6
-                Assert.AreEqual(0, actualProdReportObject.ProdReportPart6.Count);
+                Assert.AreEqual(0, actualProdReportObject.ProdReportPart6List.Count);
                 #endregion
 
                 #region Storage Report
@@ -2081,15 +2081,14 @@ namespace WebApp.Helpers.Tests
                 actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
 
                 // verify Production report Part 1
-                Assert.AreEqual(0, actualProdReportObject.Part1[0].ProccessingAcct);
-                Assert.AreEqual(prodO1.ProofGallon, actualProdReportObject.Part1[0].ProducedTotal);
-                Assert.AreEqual(0, actualProdReportObject.Part1[0].Recd4RedistilL17);
+                Assert.AreEqual(0, actualProdReportObject.Part1List[0].ProccessingAcct);
+                Assert.AreEqual(0, actualProdReportObject.Part1List[0].Recd4RedistilL17);
 
                 // Assert that we redistilled 180 PFGals of wine
                 received4RedistillationLine15L.Add(new Tuple<int, float>(purchO.SpiritTypeReportingID, purchO.ProofGallon));
 
                 var wineE = received4RedistillationLine15L.Find(l => l.Item1 == purchO.SpiritTypeReportingID);
-                var wineA = actualProdReportObject.Part1.Find(x => x.SpiritTypeReportingID == wineE.Item1);
+                var wineA = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == wineE.Item1);
 
                 if (wineA == null)
                 {
@@ -2104,7 +2103,7 @@ namespace WebApp.Helpers.Tests
                 received4RedistillationLine15L.Add(new Tuple<int, float>(prodO.SpiritTypeReportingID, prodO.ProofGallon));
 
                 var alcohol190PlusE = received4RedistillationLine15L.Find(l => l.Item1 == prodO.SpiritTypeReportingID);
-                var alcohol190PlusA = actualProdReportObject.Part1.Find(x => x.SpiritTypeReportingID == alcohol190PlusE.Item1);
+                var alcohol190PlusA = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == alcohol190PlusE.Item1);
 
                 if (alcohol190PlusA == null)
                 {
@@ -2115,11 +2114,26 @@ namespace WebApp.Helpers.Tests
                     Assert.AreEqual(alcohol190PlusE.Item2, alcohol190PlusA.Recd4RedistilaltionL15);
                 }
 
-                // Assert that 18 PFGals went into storage
+                // Assert that 80 PFGals went into storage for 190+
+                enteredInStorageList.Add(new Tuple<int, float>(prodO.SpiritTypeReportingID, prodO.ProofGallon));
+
+                var alc190PlusE = enteredInStorageList.Find(l => l.Item1 == prodO.SpiritTypeReportingID);
+                var alc190PlusA = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == alc190PlusE.Item1);
+
+                if (alc190PlusA == null)
+                {
+                    Assert.AreNotEqual(null, alc190PlusA, "No records for SpiritTypeID");
+                }
+                else
+                {
+                    Assert.AreEqual(alc190PlusE.Item2, alc190PlusA.StorageAcct);
+                }
+
+                // Assert that 18 PFGals went into storage for Brandy
                 enteredInStorageList.Add(new Tuple<int, float>(prodO1.SpiritTypeReportingID, prodO1.ProofGallon));
 
                 var brandy170PlusE = enteredInStorageList.Find(l => l.Item1 == prodO1.SpiritTypeReportingID);
-                var brandy170PlusA = actualProdReportObject.Part1.Find(x => x.SpiritTypeReportingID == brandy170PlusE.Item1);
+                var brandy170PlusA = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == brandy170PlusE.Item1);
 
                 if (brandy170PlusA == null)
                 {
@@ -2127,10 +2141,40 @@ namespace WebApp.Helpers.Tests
                 }
                 else
                 {
-                    Assert.AreEqual(brandy170PlusE.Item2, actualProdReportObject.Part1[0].StorageAcct);
+                    Assert.AreEqual(brandy170PlusE.Item2, brandy170PlusA.StorageAcct);
                 }
 
-                Assert.AreEqual(0, actualProdReportObject.Part1[0].UnfinishedSpiritsEndOfQuarterL17);
+                // Assert that 80 PFGals were produced for Alcohol 190+
+                producedTotalLine14L.Add(new Tuple<int, float>(prodO.SpiritTypeReportingID, prodO.ProofGallon));
+
+                var alc190PlusTotalProducedE = producedTotalLine14L.Find(l => l.Item1 == prodO.SpiritTypeReportingID);
+                var alc190PlusTotalProducedA = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == alc190PlusTotalProducedE.Item1);
+
+                if (alc190PlusTotalProducedA == null)
+                {
+                    Assert.AreNotEqual(null, alc190PlusTotalProducedA, "No records for SpiritTypeID");
+                }
+                else
+                {
+                    Assert.AreEqual(alc190PlusTotalProducedE.Item2, alc190PlusTotalProducedA.ProducedTotal);
+                }
+
+                // Assert that 18 PFGals were produced for Brandy 170+
+                producedTotalLine14L.Add(new Tuple<int, float>(prodO1.SpiritTypeReportingID, prodO1.ProofGallon));
+
+                var brandy170PlusTotalProducedE = producedTotalLine14L.Find(l => l.Item1 == prodO1.SpiritTypeReportingID);
+                var brandy170PlusTotalProducedA = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == brandy170PlusTotalProducedE.Item1);
+
+                if (brandy170PlusTotalProducedA == null)
+                {
+                    Assert.AreNotEqual(null, brandy170PlusTotalProducedA, "No records for SpiritTypeID");
+                }
+                else
+                {
+                    Assert.AreEqual(brandy170PlusTotalProducedE.Item2, brandy170PlusTotalProducedA.ProducedTotal);
+                }
+
+                Assert.AreEqual(0, actualProdReportObject.Part1List[0].UnfinishedSpiritsEndOfQuarterL17);
 
                 #endregion
 
@@ -2333,18 +2377,18 @@ namespace WebApp.Helpers.Tests
                 actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
 
                 // verify Production report Part 1
-                Assert.AreEqual(0, actualProdReportObject.Part1[0].ProccessingAcct);
-                Assert.AreEqual(prodO1.ProofGallon, actualProdReportObject.Part1[0].ProducedTotal);
-                Assert.AreEqual(0, actualProdReportObject.Part1[0].Recd4RedistilL17);
-                Assert.AreEqual(0, actualProdReportObject.Part1[0].UnfinishedSpiritsEndOfQuarterL17);
-                Assert.AreEqual(prodO1.ProofGallon, actualProdReportObject.Part1[0].StorageAcct); // went into storage
+                Assert.AreEqual(0, actualProdReportObject.Part1List[0].ProccessingAcct);
+                Assert.AreEqual(prodO1.ProofGallon, actualProdReportObject.Part1List[0].ProducedTotal);
+                Assert.AreEqual(0, actualProdReportObject.Part1List[0].Recd4RedistilL17);
+                Assert.AreEqual(0, actualProdReportObject.Part1List[0].UnfinishedSpiritsEndOfQuarterL17);
+                Assert.AreEqual(prodO1.ProofGallon, actualProdReportObject.Part1List[0].StorageAcct); // went into storage
 
                 // Assert that we redistilled 72 PFGals of wine
                 received4RedistillationLine15L.Add(new Tuple<int, float>(prodO.SpiritTypeReportingID, prodO.ProofGallon));
 
                 // redistillation verification
                 var wineE = received4RedistillationLine15L.Find(l => l.Item1 == prodO.SpiritTypeReportingID);
-                var wineA = actualProdReportObject.Part1.Find(x => x.SpiritTypeReportingID == wineE.Item1);
+                var wineA = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == wineE.Item1);
 
                 if (wineA == null)
                 {
@@ -2751,6 +2795,403 @@ namespace WebApp.Helpers.Tests
 
             // Assert
             Assert.IsNotNull(result, "GetStorageListTest result returned is null");
+        }
+
+        /// <summary>
+        /// This test method checks that ProofGallon records stays on the Production report in September after
+        /// it has been Blended and Bottled in October and also, it checks production report in October
+        /// </summary>
+        [TestMethod()]
+        public void Buy_Wine_Distil_And_Gauge_In_September_Blend_And_Bottle_In_October_Make_Brandy_Under_170_And_Test_September_Production()
+        {
+            // Arrange
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tupleL = new List<Tuple<int, Table>>();
+            int spiritId = 0;
+            int vendorId = 0;
+            int storageId = 0;
+            int wineMaterialId = 0;
+            int waterMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            // reporting time range
+            DateTime start = new DateTime(2017, 09, 01);
+            DateTime end = new DateTime(2017, 09, 30);
+
+            try
+            {
+                #region Dictionary
+                //  dictionary setup
+                SpiritObject spirit = new SpiritObject();
+                spirit.SpiritName = "Brandy Under 170";
+                spirit.ProcessingReportTypeID = 12;
+
+                spiritId = _dl.CreateSpirit(_userId, spirit);
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tupleL.Add(Tuple.Create(storageId, Table.Storage));
+
+
+                // setup Material Object
+                // wine
+                {
+                    RawMaterialObject wineMaterial = new RawMaterialObject();
+                    wineMaterial.RawMaterialName = "Wine For Brandy";
+                    wineMaterial.MaterialCategoryID = 2;
+                    wineMaterial.UnitType = "gal";
+                    wineMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermented = true;
+                    wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    tupleL.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
+                }
+
+                // water
+                {
+                    RawMaterialObject waterMaterial = new RawMaterialObject();
+                    waterMaterial.RawMaterialName = "Water";
+                    waterMaterial.UnitType = "gal";
+                    waterMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Additive = true;
+                    waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+                }
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "test7Purchase";
+                purchO.PurchaseType = "Fermented";
+                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.Quantity = 100f; // 100 gallons
+                purchO.VolumeByWeight = 0f;
+                purchO.AlcoholContent = 9f;
+                purchO.ProofGallon = 18f;
+                purchO.RecordId = wineMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> stoL = new List<StorageObject>();
+                StorageObject sto = new StorageObject();
+                sto.StorageId = storageId;
+                stoL.Add(sto);
+                purchO.Storage = stoL;
+
+                purchO.SpiritTypeReportingID = 11;
+                purchO.Gauged = true;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
+                #endregion
+
+                #region Production
+                // create 1st Production Distillation Record and don't mark it as Gauged
+                ProductionObject prodO = new ProductionObject();
+                prodO.BatchName = "test1stDistillRun";
+                prodO.ProductionDate = new DateTime(2017, 09, 3);
+                prodO.ProductionStart = new DateTime(2017, 09, 3);
+                prodO.ProductionEnd = new DateTime(2017, 09, 3);
+                prodO.SpiritCutId = 11; // mixed
+                prodO.Gauged = false;
+                prodO.ProductionType = "Distillation";
+                prodO.Quantity = 50f; //50 gallons of alcohol
+                prodO.VolumeByWeight = 0f;
+                prodO.AlcoholContent = 80f; // 80%
+                prodO.ProofGallon = 80f; // 80pfg
+                prodO.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.SpiritTypeReportingID = 3; // brandy under 170
+                prodO.MaterialKindReportingID = 94; // grape brandy
+                prodO.ProductionTypeId = 2;
+
+                List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
+                uMat.ID = purchaseId;
+                uMat.OldVal = 0f;
+                uMat.NewVal = purchO.Quantity;
+                uMat.DistillableOrigin = "pur";
+                uMat.BurningDownMethod = "volume";
+
+                usedMats.Add(uMat);
+
+                prodO.UsedMats = usedMats;
+
+                productionId = _dl.CreateProduction(prodO, _userId);
+                tupleL.Add(Tuple.Create(productionId, Table.Production));
+
+                // create 2nd Production Distillation Record and mark it as Gauged
+                ProductionObject prodO2 = new ProductionObject();
+                prodO2.BatchName = "testGaugedDistillRun";
+                prodO2.ProductionDate = new DateTime(2017, 09, 4);
+                prodO2.ProductionStart = new DateTime(2017, 09, 4);
+                prodO2.ProductionEnd = new DateTime(2017, 09, 4);
+                prodO2.SpiritCutId = 9; // hearts
+                prodO2.Gauged = true;
+                prodO2.ProductionType = "Distillation";
+                prodO2.Quantity = 15f; // 15 gallons of alcohol
+                prodO2.VolumeByWeight = 0f;
+                prodO2.AlcoholContent = 60f; // 60%
+                prodO2.ProofGallon = 18f; // 18pfg
+                prodO2.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO2.SpiritTypeReportingID = 3; // brandy under 170
+                prodO2.MaterialKindReportingID = 94; // grape brandy
+                prodO2.ProductionTypeId = 2;
+
+                List<ObjInfo4Burndwn> usedMats4Gauge = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat4Gauged = new ObjInfo4Burndwn();
+                uMat4Gauged.ID = productionId;
+                uMat4Gauged.OldVal = 0f;
+                uMat4Gauged.NewVal = prodO.Quantity;
+                uMat4Gauged.DistillableOrigin = "prod";
+                uMat4Gauged.BurningDownMethod = "volume";
+
+                usedMats4Gauge.Add(uMat4Gauged);
+                prodO2.UsedMats = usedMats4Gauge;
+
+                productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                tupleL.Add(Tuple.Create(productionId, Table.Production));
+
+
+
+                // create Production Blending Record
+                ProductionObject prodBlend = new ProductionObject();
+                prodBlend.BatchName = "testProdBlend";
+                prodBlend.ProductionDate = new DateTime(2017, 10, 6);
+                prodBlend.ProductionStart = new DateTime(2017, 10, 6);
+                prodBlend.ProductionEnd = new DateTime(2017, 10, 6);
+                prodBlend.Gauged = true;
+                prodBlend.ProductionType = "Blending";
+                prodBlend.Quantity = 22.5f; // 22.5 gallons of alcohol
+                prodBlend.VolumeByWeight = 0f;
+                prodBlend.AlcoholContent = 40f; // 40%
+                prodBlend.ProofGallon = 18f; // 18pfg
+                prodBlend.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodBlend.SpiritTypeReportingID = 3; // brandy under 170
+                prodBlend.MaterialKindReportingID = 94; // grape brandy
+                prodBlend.SpiritId = spiritId;
+                prodBlend.ProductionTypeId = 3;
+
+                List<ObjInfo4Burndwn> usedMats4Blend = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat4Blend = new ObjInfo4Burndwn();
+                uMat4Blend.ID = productionId;
+                uMat4Blend.OldVal = 0f;
+                uMat4Blend.NewVal = prodO2.Quantity;
+                uMat4Blend.DistillableOrigin = "prod";
+                uMat4Blend.BurningDownMethod = "volume";
+
+                usedMats4Blend.Add(uMat4Blend);
+                prodBlend.UsedMats = usedMats4Blend;
+
+                List<BlendingAdditive> blendAdditives = new List<BlendingAdditive>();
+                BlendingAdditive blendAd = new BlendingAdditive();
+                blendAd.RawMaterialId = waterMaterialId;
+                blendAd.RawMaterialQuantity = 7.5f;
+                blendAd.RawMaterialName = "Water";
+                blendAd.UnitOfMeasurement = "gal";
+
+                blendAdditives.Add(blendAd);
+
+                prodBlend.BlendingAdditives = blendAdditives;
+
+                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                tupleL.Add(Tuple.Create(productionId, Table.Production));
+
+                // create Production Bottling Record
+                ProductionObject prodBottl = new ProductionObject();
+                prodBottl.BatchName = "testProdBottling ";
+                prodBottl.ProductionDate = new DateTime(2017, 10, 6);
+                prodBottl.ProductionStart = new DateTime(2017, 10, 6);
+                prodBottl.ProductionEnd = new DateTime(2017, 10, 6);
+                prodBottl.Gauged = true;
+                prodBottl.ProductionType = "Bottling";
+                prodBottl.Quantity = 22.39f; // 22.39 gallons of alcohol
+                prodBottl.VolumeByWeight = 0f;
+                prodBottl.AlcoholContent = 40f; // 40%
+                prodBottl.ProofGallon = 17.9f; // 17.9 pfg
+                prodBottl.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodBottl.SpiritTypeReportingID = 3; // brandy under 170
+                prodBottl.MaterialKindReportingID = 94; // grape brandy
+                prodBottl.SpiritId = spiritId;
+                prodO.ProductionTypeId = 4;
+
+                List<ObjInfo4Burndwn> usedMats4Bottl = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat4Bottl = new ObjInfo4Burndwn();
+                uMat4Bottl.ID = productionId;
+                uMat4Bottl.OldVal = 0f;
+                uMat4Bottl.NewVal = prodBlend.Quantity;
+                uMat4Bottl.DistillableOrigin = "prod";
+                uMat4Bottl.BurningDownMethod = "volume";
+
+                usedMats4Bottl.Add(uMat4Bottl);
+                prodBottl.UsedMats = usedMats4Bottl;
+
+                BottlingObject bottlingObj = new BottlingObject();
+                bottlingObj.CaseCapacity = 12;
+                bottlingObj.CaseQuantity = 9.42f;
+                bottlingObj.BottleCapacity = 750f;
+                bottlingObj.BottleQuantity = 113;
+
+                prodBottl.BottlingInfo = bottlingObj;
+
+                prodBottl.GainLoss = .10f;
+
+                prodBottl.FillTestList = null;
+
+                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                tupleL.Add(Tuple.Create(productionId, Table.Production));
+
+                #endregion
+
+                #region Reports setup
+
+                // Report Header
+                ReportHeader reportHeaderE = new ReportHeader();
+                reportHeaderE.ProprietorName = "Test Distillery";
+                reportHeaderE.EIN = "12-3456789";
+                reportHeaderE.ReportDate = "September 2017";
+                reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
+                reportHeaderE.DSP = "DSP-WA-21086";
+
+                /* PRODUCTION REPORT */
+
+                ProdReportPart1 part1E = new ProdReportPart1();
+                part1E.ProccessingAcct = 0f;
+                part1E.ProducedTotal = 18f;
+                part1E.Recd4RedistilL17 = 0f;
+                part1E.Recd4RedistilaltionL15 = 0f;
+                part1E.StorageAcct = 18f;
+                part1E.SpiritTypeReportingID = 3;
+                part1E.UnfinishedSpiritsEndOfQuarterL17 = 0f;
+
+                ProdReportParts2Through4 part2thru4 = new ProdReportParts2Through4();
+                part2thru4.KindOfMaterial = "GrapeBrandy";
+                part2thru4.MaterialKindReportingID = 94;
+                part2thru4.NewCoop = false;
+                part2thru4.UsedCoop = false;
+                part2thru4.ProofGallons = 18f;
+                part2thru4.SpiritTypeReportingID = 3;
+                part2thru4.Tanks = false;
+
+                ProdReportPart6 part6 = new ProdReportPart6();
+                part6.KindOfMaterial = "Wine For Brandy";
+                part6.ProdReportMaterialCategoryID = 2;
+                part6.Volume = 0f;
+                part6.Weight = 0f;
+
+                ProdReportPart5 part5 = new ProdReportPart5();
+                part5.KindofSpirits = "";
+                part5.Proof = 0f;
+
+                ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
+
+
+                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+
+                #endregion
+
+                // Assert
+
+                #region Production Report
+
+                Tuple<int, float> accumulatedProofGL4SpiritTypeReportingId = new Tuple<int, float>(11, purchO.ProofGallon);
+
+                List<Tuple<int, float>> accumulatedProofGL4SpiritTypeReportingIdL = new List<Tuple<int, float>>();
+
+                accumulatedProofGL4SpiritTypeReportingIdL.Add(accumulatedProofGL4SpiritTypeReportingId);
+
+                // verify Production report header
+                Assert.AreEqual(reportHeaderE.DSP, actualProdReportObject.Header.DSP);
+                Assert.AreEqual(reportHeaderE.EIN, actualProdReportObject.Header.EIN);
+                Assert.AreEqual(reportHeaderE.PlantAddress, actualProdReportObject.Header.PlantAddress);
+                Assert.AreEqual(reportHeaderE.ProprietorName, actualProdReportObject.Header.ProprietorName);
+                Assert.AreEqual(reportHeaderE.ReportDate, actualProdReportObject.Header.ReportDate);
+
+                // verify Production report Part 1
+                Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1List[0].ProccessingAcct);
+                Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1List[0].StorageAcct);
+                Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1List[0].ProducedTotal);
+                Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1List[0].Recd4RedistilL17);
+
+                var expectedWine = accumulatedProofGL4SpiritTypeReportingIdL.Find(l => l.Item1 == 11);
+                var actualWine = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == expectedWine.Item1);
+
+                if (actualWine == null)
+                {
+                    Assert.AreNotEqual(null, expectedWine, "No records in actualAlcohol190Plus for SpiritTypeID");
+                }
+                else
+                {
+                    Assert.AreEqual(expectedWine.Item2, actualWine.Recd4RedistilaltionL15);
+                    Assert.AreEqual("Wine", actualWine.SpiritCatName);
+                }
+
+                Assert.AreEqual(part1E.UnfinishedSpiritsEndOfQuarterL17, actualProdReportObject.Part1List[0].UnfinishedSpiritsEndOfQuarterL17);
+
+                // verify Production report Part 2 trough 4
+                Assert.AreEqual(part2thru4.KindOfMaterial, actualProdReportObject.Part2Through4List[0].KindOfMaterial);
+                Assert.AreEqual(part2thru4.MaterialKindReportingID, actualProdReportObject.Part2Through4List[0].MaterialKindReportingID);
+                Assert.AreEqual(part2thru4.NewCoop, actualProdReportObject.Part2Through4List[0].NewCoop);
+                Assert.AreEqual(part2thru4.UsedCoop, actualProdReportObject.Part2Through4List[0].UsedCoop);
+                Assert.AreEqual(part2thru4.ProofGallons, actualProdReportObject.Part2Through4List[0].ProofGallons);
+                Assert.AreEqual(part2thru4.SpiritTypeReportingID, actualProdReportObject.Part2Through4List[0].SpiritTypeReportingID);
+                Assert.AreEqual(part2thru4.Tanks, actualProdReportObject.Part2Through4List[0].Tanks);
+
+                // verify part 5
+                Assert.AreEqual("Wine", actualProdReportObject.part5List[0].KindofSpirits);
+                Assert.AreEqual(18, actualProdReportObject.part5List[0].Proof);
+
+                // verify Production report Part 6
+                Assert.AreEqual(part6.KindOfMaterial, actualProdReportObject.ProdReportPart6List[0].KindOfMaterial);
+                Assert.AreEqual(part6.ProdReportMaterialCategoryID, actualProdReportObject.ProdReportPart6List[0].ProdReportMaterialCategoryID);
+                Assert.AreEqual(part6.Volume, actualProdReportObject.ProdReportPart6List[0].Volume);
+                Assert.AreEqual(part6.Weight, actualProdReportObject.ProdReportPart6List[0].Weight);
+
+                // Test October Production report
+                ProductionReportingObject actualProdReportObjectOctober = new ProductionReportingObject();
+
+                actualProdReportObjectOctober = _dl.GetProductionReportData(new DateTime(2017, 10, 01), new DateTime(2017, 10, 31), _userId);
+                // verify Production report header
+                Assert.AreEqual(reportHeaderE.DSP, actualProdReportObjectOctober.Header.DSP);
+                Assert.AreEqual(reportHeaderE.EIN, actualProdReportObjectOctober.Header.EIN);
+                Assert.AreEqual(reportHeaderE.PlantAddress, actualProdReportObjectOctober.Header.PlantAddress);
+                Assert.AreEqual(reportHeaderE.ProprietorName, actualProdReportObjectOctober.Header.ProprietorName);
+                Assert.AreEqual("October 2017", actualProdReportObjectOctober.Header.ReportDate);
+
+                // verify Production report Part 1
+                Assert.AreEqual(0, actualProdReportObjectOctober.Part1List.Count);
+                // verify Production report Part 2 trough 4
+                Assert.AreEqual(0, actualProdReportObjectOctober.Part2Through4List.Count);
+                // verify part 5
+                Assert.AreEqual(0, actualProdReportObjectOctober.part5List.Count);
+                // verify Production report Part 6
+                Assert.AreEqual(0, actualProdReportObjectOctober.ProdReportPart6List.Count);
+                #endregion
+            }
+            finally
+            {
+                // Cleanup
+                foreach (var i in tupleL)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
         }
 
         /// <summary>
