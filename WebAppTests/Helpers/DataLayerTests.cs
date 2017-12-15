@@ -485,7 +485,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part2thru4.Tanks, actualProdReportObject.Part2Through4List[0].Tanks);
 
                 // verify part 5
-                Assert.AreEqual("Wine", actualProdReportObject.part5List[0].KindofSpirits);
+                Assert.AreEqual("Wine<190", actualProdReportObject.part5List[0].KindofSpirits);
                 Assert.AreEqual(18, actualProdReportObject.part5List[0].Proof);
 
                 // verify Production report Part 6
@@ -903,7 +903,6 @@ namespace WebApp.Helpers.Tests
         {
             // A dictionary to log database test records for later clean-up
             Dictionary<int, Table> testRecords = new Dictionary<int, Table>();
-
             try
             {
                 // Arrange
@@ -2222,6 +2221,9 @@ namespace WebApp.Helpers.Tests
             // List used in assertions for entered into Storage
             List<Tuple<int, float>> enteredInStorageList = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
 
+            // List used in assertions for entered into Storage
+            List<Tuple<string, float>> part5List = new List<Tuple<string, float>>(); // <SpiritTypeID, ProofGallons>
+
             try
             {
                 #region Dictionary
@@ -2320,6 +2322,7 @@ namespace WebApp.Helpers.Tests
                 prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
                 prodO.SpiritTypeReportingID = 11; // Wine
                 prodO.MaterialKindReportingID = 0;
+                prodO.SpiritCutName = "Wine";
 
                 List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
                 ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
@@ -2397,6 +2400,21 @@ namespace WebApp.Helpers.Tests
                 else
                 {
                     Assert.AreEqual(wineE.Item2, wineA.Recd4RedistilaltionL15);
+                }
+
+                // Assert that we get Wine and 72 PFGals in Part5
+                part5List.Add(new Tuple<string, float>("Wine<190", prodO.ProofGallon));
+
+                var part5E = part5List.Find(x => x.Item1 == "Wine<190");
+                var part5A = actualProdReportObject.part5List.Find(x => x.KindofSpirits == part5E.Item1);
+
+                if (part5A == null)
+                {
+                    Assert.AreNotEqual(null, part5A, "No records for Spirit Type Name");
+                }
+                else
+                {
+                    Assert.AreEqual(part5E.Item2, part5A.Proof);
                 }
 
                 #endregion
@@ -3154,7 +3172,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part2thru4.Tanks, actualProdReportObject.Part2Through4List[0].Tanks);
 
                 // verify part 5
-                Assert.AreEqual("Wine", actualProdReportObject.part5List[0].KindofSpirits);
+                Assert.AreEqual("Wine<190", actualProdReportObject.part5List[0].KindofSpirits);
                 Assert.AreEqual(18, actualProdReportObject.part5List[0].Proof);
 
                 // verify Production report Part 6

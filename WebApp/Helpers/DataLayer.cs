@@ -5947,11 +5947,11 @@ namespace WebApp.Helpers
                 {
                     if (k.IsProductionComponent == true)
                     {
-                        GetProductionRedistilledRecords(k.ProductionContentId, k.Proof, ref tempRepObjList, ref part1List, ref prodRPart5L);
+                        GetProductionRedistilledRecords(k.ProductionContentId, k.Proof, ref part1List, ref prodRPart5L);
                     }
                     else if (k.IsProductionComponent == false)
                     {
-                        GetPurchasedRedistilledRecords(k.ProductionContentId, k.Proof, ref tempRepObjList, ref part1List, ref prodRPart5L);
+                        GetPurchasedRedistilledRecords(k.ProductionContentId, k.Proof, ref part1List, ref prodRPart5L);
                     }
                 }
             }
@@ -6054,7 +6054,7 @@ namespace WebApp.Helpers
             }
         }
 
-        private void GetProductionRedistilledRecords(int prodContentId, float proof, ref List<ProductionReportHelper> tempRepObjList, ref List<ProdReportPart1> part1List, ref List<ProdReportPart5> prodRPart5L)
+        private void GetProductionRedistilledRecords(int prodContentId, float proof, ref List<ProdReportPart1> part1List, ref List<ProdReportPart5> prodRPart5L)
         {
             try
             {
@@ -6080,11 +6080,33 @@ namespace WebApp.Helpers
                         if (spRec != null)
                         {
                             spRec.Recd4RedistilaltionL15 += proof;
-                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritCatName);
+
+                            // this is a temporary workaround to rename "Wine" into "Wine<190" for display on Production report
+                            // beginning of the work around
+                            string newSpiritNameForWineOnly = String.Empty;
+                            if (spRec.SpiritTypeReportingID == 11)
+                            {
+                                newSpiritNameForWineOnly = "Wine<190";
+                            }
+                            else
+                            {
+                                newSpiritNameForWineOnly = productionSpiritType.SpiritShortName;
+                            }
+                            // end of the work around
+
+                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == newSpiritNameForWineOnly);
 
                             if (prod5Rec != null)
                             {
                                 prod5Rec.Proof += proof;
+                            }
+                            else
+                            {
+                                ProdReportPart5 prod5Inst = new ProdReportPart5();
+                                prod5Inst.KindofSpirits = newSpiritNameForWineOnly;
+                                prod5Inst.Proof = proof;
+
+                                prodRPart5L.Add(prod5Inst);
                             }
                         }
                         else
@@ -6092,12 +6114,24 @@ namespace WebApp.Helpers
                             ProdReportPart1 part1Obj = new ProdReportPart1();
                             part1Obj.Recd4RedistilaltionL15 = proof;
                             part1Obj.SpiritTypeReportingID = (int)productionSpiritType.SpiritTypeReportingID;
-                            part1Obj.SpiritCatName = (string)productionSpiritType.SpiritShortName;
+                            part1Obj.SpiritCatName = productionSpiritType.SpiritShortName;
 
                             part1List.Add(part1Obj);
 
+                            // this is a temporary workaround to rename "Wine" into "Wine<190" for display on Production report
+                            // beginning of the work around
+                            string newSpiritNameForWineOnly = String.Empty;
+                            if (part1Obj.SpiritTypeReportingID == 11)
+                            {
+                                newSpiritNameForWineOnly = "Wine<190";
+                            }
+                            else
+                            {
+                                newSpiritNameForWineOnly = part1Obj.SpiritCatName;
+                            }
+                            // end of the work around
                             ProdReportPart5 prod5Inst = new ProdReportPart5();
-                            prod5Inst.KindofSpirits = part1Obj.SpiritCatName;
+                            prod5Inst.KindofSpirits = newSpiritNameForWineOnly;
                             prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
 
                             prodRPart5L.Add(prod5Inst);
@@ -6111,7 +6145,7 @@ namespace WebApp.Helpers
             }
         }
 
-        public void GetPurchasedRedistilledRecords(int productionContentId, float proof, ref List<ProductionReportHelper> tempRepObjList, ref List<ProdReportPart1> part1List, ref List<ProdReportPart5> prodRPart5L)
+        public void GetPurchasedRedistilledRecords(int productionContentId, float proof, ref List<ProdReportPart1> part1List, ref List<ProdReportPart5> prodRPart5L)
         {
             try
             {
@@ -6138,11 +6172,32 @@ namespace WebApp.Helpers
                         {
                             spRec.Recd4RedistilaltionL15 += proof;
 
-                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == spRec.SpiritCatName);
+                            // this is a temporary workaround to rename "Wine" into "Wine<190" for display on Production report
+                            // beginning of the work around
+                            string newSpiritNameForWineOnly = String.Empty;
+                            if (spRec.SpiritTypeReportingID == 11)
+                            {
+                                newSpiritNameForWineOnly = "Wine<190";
+                            }
+                            else
+                            {
+                                newSpiritNameForWineOnly = purchaseSpiritType.SpiritShortName;
+                            }
+                            // end of the work around
+
+                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == newSpiritNameForWineOnly);
 
                             if (prod5Rec != null)
                             {
                                 prod5Rec.Proof += proof;
+                            }
+                            else
+                            {
+                                ProdReportPart5 prod5Inst = new ProdReportPart5();
+                                prod5Inst.KindofSpirits = newSpiritNameForWineOnly;
+                                prod5Inst.Proof = proof;
+
+                                prodRPart5L.Add(prod5Inst);
                             }
                         }
                         else
@@ -6154,8 +6209,21 @@ namespace WebApp.Helpers
 
                             part1List.Add(part1Obj);
 
+                            // this is a temporary workaround to rename "Wine" into "Wine<190" for display on Production report
+                            // beginning of the work around
+                            string newSpiritNameForWineOnly = String.Empty;
+                            if (part1Obj.SpiritTypeReportingID == 11)
+                            {
+                                newSpiritNameForWineOnly = "Wine<190";
+                            }
+                            else
+                            {
+                                newSpiritNameForWineOnly = part1Obj.SpiritCatName;
+                            }
+                            // end of the work around
+
                             ProdReportPart5 prod5Inst = new ProdReportPart5();
-                            prod5Inst.KindofSpirits = part1Obj.SpiritCatName;
+                            prod5Inst.KindofSpirits = newSpiritNameForWineOnly;
                             prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
 
                             prodRPart5L.Add(prod5Inst);
