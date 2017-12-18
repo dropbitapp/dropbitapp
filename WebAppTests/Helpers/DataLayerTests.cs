@@ -485,7 +485,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part2thru4.Tanks, actualProdReportObject.Part2Through4List[0].Tanks);
 
                 // verify part 5
-                Assert.AreEqual("Wine<190", actualProdReportObject.part5List[0].KindofSpirits);
+                Assert.AreEqual("Wine", actualProdReportObject.part5List[0].KindofSpirits);
                 Assert.AreEqual(18, actualProdReportObject.part5List[0].Proof);
 
                 // verify Production report Part 6
@@ -2403,9 +2403,9 @@ namespace WebApp.Helpers.Tests
                 }
 
                 // Assert that we get Wine and 72 PFGals in Part5
-                part5List.Add(new Tuple<string, float>("Wine<190", prodO.ProofGallon));
+                part5List.Add(new Tuple<string, float>("Wine", prodO.ProofGallon));
 
-                var part5E = part5List.Find(x => x.Item1 == "Wine<190");
+                var part5E = part5List.Find(x => x.Item1 == "Wine");
                 var part5A = actualProdReportObject.part5List.Find(x => x.KindofSpirits == part5E.Item1);
 
                 if (part5A == null)
@@ -3172,7 +3172,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part2thru4.Tanks, actualProdReportObject.Part2Through4List[0].Tanks);
 
                 // verify part 5
-                Assert.AreEqual("Wine<190", actualProdReportObject.part5List[0].KindofSpirits);
+                Assert.AreEqual("Wine", actualProdReportObject.part5List[0].KindofSpirits);
                 Assert.AreEqual(18, actualProdReportObject.part5List[0].Proof);
 
                 // verify Production report Part 6

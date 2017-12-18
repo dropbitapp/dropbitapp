@@ -6081,20 +6081,7 @@ namespace WebApp.Helpers
                         {
                             spRec.Recd4RedistilaltionL15 += proof;
 
-                            // this is a temporary workaround to rename "Wine" into "Wine<190" for display on Production report
-                            // beginning of the work around
-                            string newSpiritNameForWineOnly = String.Empty;
-                            if (spRec.SpiritTypeReportingID == 11)
-                            {
-                                newSpiritNameForWineOnly = "Wine<190";
-                            }
-                            else
-                            {
-                                newSpiritNameForWineOnly = productionSpiritType.SpiritShortName;
-                            }
-                            // end of the work around
-
-                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == newSpiritNameForWineOnly);
+                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == productionSpiritType.SpiritShortName);
 
                             if (prod5Rec != null)
                             {
@@ -6103,7 +6090,7 @@ namespace WebApp.Helpers
                             else
                             {
                                 ProdReportPart5 prod5Inst = new ProdReportPart5();
-                                prod5Inst.KindofSpirits = newSpiritNameForWineOnly;
+                                prod5Inst.KindofSpirits = productionSpiritType.SpiritShortName;
                                 prod5Inst.Proof = proof;
 
                                 prodRPart5L.Add(prod5Inst);
@@ -6118,20 +6105,8 @@ namespace WebApp.Helpers
 
                             part1List.Add(part1Obj);
 
-                            // this is a temporary workaround to rename "Wine" into "Wine<190" for display on Production report
-                            // beginning of the work around
-                            string newSpiritNameForWineOnly = String.Empty;
-                            if (part1Obj.SpiritTypeReportingID == 11)
-                            {
-                                newSpiritNameForWineOnly = "Wine<190";
-                            }
-                            else
-                            {
-                                newSpiritNameForWineOnly = part1Obj.SpiritCatName;
-                            }
-                            // end of the work around
                             ProdReportPart5 prod5Inst = new ProdReportPart5();
-                            prod5Inst.KindofSpirits = newSpiritNameForWineOnly;
+                            prod5Inst.KindofSpirits = part1Obj.SpiritCatName;
                             prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
 
                             prodRPart5L.Add(prod5Inst);
@@ -6172,20 +6147,7 @@ namespace WebApp.Helpers
                         {
                             spRec.Recd4RedistilaltionL15 += proof;
 
-                            // this is a temporary workaround to rename "Wine" into "Wine<190" for display on Production report
-                            // beginning of the work around
-                            string newSpiritNameForWineOnly = String.Empty;
-                            if (spRec.SpiritTypeReportingID == 11)
-                            {
-                                newSpiritNameForWineOnly = "Wine<190";
-                            }
-                            else
-                            {
-                                newSpiritNameForWineOnly = purchaseSpiritType.SpiritShortName;
-                            }
-                            // end of the work around
-
-                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == newSpiritNameForWineOnly);
+                            var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == purchaseSpiritType.SpiritShortName);
 
                             if (prod5Rec != null)
                             {
@@ -6194,7 +6156,7 @@ namespace WebApp.Helpers
                             else
                             {
                                 ProdReportPart5 prod5Inst = new ProdReportPart5();
-                                prod5Inst.KindofSpirits = newSpiritNameForWineOnly;
+                                prod5Inst.KindofSpirits = purchaseSpiritType.SpiritShortName;
                                 prod5Inst.Proof = proof;
 
                                 prodRPart5L.Add(prod5Inst);
@@ -6209,21 +6171,8 @@ namespace WebApp.Helpers
 
                             part1List.Add(part1Obj);
 
-                            // this is a temporary workaround to rename "Wine" into "Wine<190" for display on Production report
-                            // beginning of the work around
-                            string newSpiritNameForWineOnly = String.Empty;
-                            if (part1Obj.SpiritTypeReportingID == 11)
-                            {
-                                newSpiritNameForWineOnly = "Wine<190";
-                            }
-                            else
-                            {
-                                newSpiritNameForWineOnly = part1Obj.SpiritCatName;
-                            }
-                            // end of the work around
-
                             ProdReportPart5 prod5Inst = new ProdReportPart5();
-                            prod5Inst.KindofSpirits = newSpiritNameForWineOnly;
+                            prod5Inst.KindofSpirits = part1Obj.SpiritCatName;
                             prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
 
                             prodRPart5L.Add(prod5Inst);
