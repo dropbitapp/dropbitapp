@@ -71,6 +71,7 @@ namespace WebApp.Helpers.Tests
                 spirit.ProcessingReportTypeID = 12;
 
                 spiritId = _dl.CreateSpirit(_userId, spirit);
+                tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
@@ -1416,7 +1417,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1List[0].ProccessingAcct);
                 Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1List[0].ProducedTotal);
                 Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1List[0].Recd4RedistilL17);
-                
+
 
                 Assert.AreEqual(part1E.Recd4RedistilaltionL15, actualProdReportObject.Part1List[1].Recd4RedistilaltionL15);
                 Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1List[0].StorageAcct);
