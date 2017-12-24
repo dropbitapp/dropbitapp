@@ -190,6 +190,10 @@
     <Compile Include="Migrations\201711150114224_Initial.Designer.cs">
       <DependentUpon>201711150114224_Initial.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201712232314556_addingPersistentReportTables.cs" />
+    <Compile Include="Migrations\201712232314556_addingPersistentReportTables.Designer.cs">
+      <DependentUpon>201712232314556_addingPersistentReportTables.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
@@ -1111,6 +1115,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201711150114224_Initial.resx">
       <DependentUpon>201711150114224_Initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201712232314556_addingPersistentReportTables.resx">
+      <DependentUpon>201712232314556_addingPersistentReportTables.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
