@@ -845,6 +845,71 @@ namespace WebApp.Models
         public string Name { get; set; } // possible values {Fermentation, Distillation, Blending, Bottling}
     }
 
+    /// <summary>
+    /// PersistentReport table contains reporting data for all production and purchase activity which would result
+    /// in a update to report values. All reports are generated using the values in this table.
+    /// ReportIdentifier, ReportPart, ReportRow and ReportColumn columns are used to map value from the table to exact report cells on the front end.
+    /// See ReportIdentifier, ReportPart, ReportRow and ReportColumn tables for exact mapping between integers and actual report row and columns.
+    /// </summary>
+    public class PersistentReport
+    {
+        [Key]
+        public int PersistentReportID { get; set; }
+        public int IdentifierID { get; set; }
+        public int PartID { get; set; }
+        public int RowID { get; set; }
+        public int ColumnID { get; set; }
+        public float Value { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime Date { get; set; }
+        public int DistillerID { get; set; }
+        public string Custom { get; set; }
+    }
+
+    /// <summary>
+    /// ReportIdentifier table contains static mapping between report names and integer values which are used in PersistentReport table.
+    /// </summary>
+    public class ReportIdentifier
+    {
+        [Key]
+        public int ReportIdentifierID { get; set; }
+        public string ReportName { get; set; }
+        public int IdentifierID { get; set; } 
+    }
+
+    /// <summary>
+    /// ReportPart table contains static mapping between report part numbers and integer values which are used in PersistentReport table. 
+    /// </summary>
+    public class ReportPart
+    {
+        [Key]
+        public int ReportPartID { get; set; }
+        public string PartName { get; set; }
+        public int PartID { get; set; }
+    }
+
+    /// <summary>
+    /// ReportRow table contains static mapping between report rows and integer values which are used in PersistentReport table. 
+    /// </summary>
+    public class ReportRow
+    {
+        [Key]
+        public int ReportRowID { get; set; }
+        public string RowName { get; set; }
+        public int RowID { get; set; }
+    }
+
+    /// <summary>
+    /// ReportColumn table contains static mapping between report columns and integer values which are used in PersistentReport table. 
+    /// </summary>
+    public class ReportColumn
+    {
+        [Key]
+        public int ReportColumnID { get; set; }
+        public string ColumnName { get; set; }
+        public int ColumnID { get; set; } 
+    }
+
     public class DistilDBContext : DbContext
     {
         public DbSet<ProcessingReportType> ProcessingReportType { get; set; }
@@ -900,6 +965,11 @@ namespace WebApp.Models
         public DbSet<SpiritType2MaterialKindReporting> SpiritType2MaterialKindReporting { get; set; }
         public DbSet<MaterialDict2MaterialCategory> MaterialDict2MaterialCategory { get; set; }
         public DbSet<FillTest> FillTest { get; set; }
+        public DbSet<PersistentReport> PersistentReport { get; set; }
+        public DbSet<ReportIdentifier> ReportIdentifier { get; set; }
+        public DbSet<ReportPart> ReportPart { get; set; }
+        public DbSet<ReportRow> ReportRow { get; set; }
+        public DbSet<ReportColumn> ReportColumn { get; set; }
 
         // Remove table name pluralization before context(table) creation. Called only once when context(table) is created.
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
