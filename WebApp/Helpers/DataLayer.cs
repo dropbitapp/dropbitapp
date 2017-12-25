@@ -1752,7 +1752,7 @@ namespace WebApp.Helpers
                         }
                     }
 
-                    if (purchaseObject.PurchaseType == "Distilled")
+                    if (purchaseObject.PurchaseType == "Distilled" || purchaseObject.PurchaseType == "Fermented")
                     {
                         // Alcohol Content
                         if (purchT.AlcoholID != 0 && purchaseObject.AlcoholContent != null)
@@ -1801,6 +1801,8 @@ namespace WebApp.Helpers
                             db.SaveChanges();
                             purchT.ProofID = newPrfRec.ProofID;
                         }
+
+                        // call Update Storage report table here
                     }
 
                     // update storages
@@ -3613,6 +3615,8 @@ namespace WebApp.Helpers
                     pstr.SpiritTypeReportingID = purchaseObject.SpiritTypeReportingID;
                     db.PurchaseToSpiritTypeReporting.Add(pstr);
                     db.SaveChanges();
+
+                    // call Update Storage Report method here
                 }
 
                 //update StorageToRecord
@@ -3661,7 +3665,7 @@ namespace WebApp.Helpers
             catch (Exception e)
             {
                 retMthdExecResult = 0;
-                throw;
+                throw e;
             }
 
             return retMthdExecResult;
