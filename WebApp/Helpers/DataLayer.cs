@@ -4018,6 +4018,8 @@ namespace WebApp.Helpers
                 {
                     // handle updating records that are being used for creating this production record
                     UpdateRecordsUsedInProductionWorkflow(prodObject.UsedMats, prod.ProductionID, userId);
+
+                    // call Update Storage report table method here
                 }
             }
 
@@ -4039,12 +4041,19 @@ namespace WebApp.Helpers
                             db.ProductionToSpiritCut.Add(prodToSCut);
                             db.SaveChanges();
                         }
+
+                        // analyze prodObject.UsedMats contents here (Perhaps, method returning waht reports should be udpated with some extra information?)
+                        // extract Spirit Information from prodObject.UsedMats so we know what we need to update in Storage Report and Production reports
+                            // some of the questions to be answered:
+                               // 1. Is the material being used Wine that was produced in-house? then we need to update wine column in Storage report, Line 25 in Production report, Part 5 of Production Report, Part 6 of Production Report
+                               // 2. Is this gauged distil and the quarter end reporting month? If so, weneed to aslo update Line 17 (a and b) 
+                        // call Update Storage and Production reports table method here
                     }
                 }
                 catch (Exception e)
                 {
                     retMthdExecResult = 0;
-                    throw;
+                    throw e;
                 }
             }
 
@@ -4078,6 +4087,13 @@ namespace WebApp.Helpers
                             db.SaveChanges();
                         }
                     }
+
+                    // analyze prodObject.UsedMats contents here. (Perhaps, method returning waht reports should be udpated with some extra information?)
+                    // extract Spirit Information from prodObject.UsedMats so we know what we need to update in Storage Report and Production reports
+                    // some of the questions to be answered:
+                    // 1. Is the material being used was entered in his reporting period or previous? If it's from current reporting period, then we update Line 9 of Production report. If from previous reporting period, then we need to update line 17 of Storage report.
+                    // 2. 
+                    // call Update Storage, Production and Processing reports table method here
                 }
             }
 
@@ -4153,6 +4169,13 @@ namespace WebApp.Helpers
                             db.SaveChanges();
                         }
                     }
+
+                    // analyze prodObject.UsedMats contents here
+                    // extract Spirit Information from prodObject.UsedMats so we know what we need to update Processing report
+                    // some of the questions to be answered:
+                    // 1. 
+                    // 2. 
+                    // call Update Processing report table method here
                 }
             }
             try
@@ -7798,25 +7821,12 @@ namespace WebApp.Helpers
                 #endregion
 
                 db.SaveChanges();
+
+                retMthdExecResult = true;
             }
-            catch (DbUpdateException e)
+            catch (Exception e)
             {
-                throw e;
-            }
-            catch (DbEntityValidationException e)
-            {
-                throw e;
-            }
-            catch (NotSupportedException e)
-            {
-                throw e;
-            }
-            catch (ObjectDisposedException e)
-            {
-                throw e;
-            }
-            catch (InvalidOperationException e)
-            {
+                retMthdExecResult = false;
                 throw e;
             }
             return retMthdExecResult;
