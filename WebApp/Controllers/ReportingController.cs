@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNet.Identity;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using WebApp.Helpers;
 
@@ -7,6 +8,7 @@ namespace WebApp.Controllers
     public class ReportingController : Controller
     {
         private DataLayer dl = new DataLayer();
+        private bool _enableNewReportingImplementation = false;
 
         // GET: Production Operations
         public ActionResult Production()
@@ -96,6 +98,15 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
+                    IEnumerable<ReportDto> report;
+
+                    if (_enableNewReportingImplementation)
+                    {
+                        report = dl.GetReportData(startOfReporting, endOfReporting, userId, ReportType.Storage);
+
+                        return Json(report, JsonRequestBehavior.AllowGet);
+                    }
+
                     var storageReport = dl.GetStorageReportData(startOfReporting, endOfReporting, userId);
                     return Json(storageReport, JsonRequestBehavior.AllowGet);
                 }

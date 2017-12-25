@@ -45,15 +45,18 @@ namespace WebApp.Helpers
         RawMaterial,
     }
 
-    public enum State // as in State of the Raw Material
-    {
-
-    }
-
     public enum RecordType
     {
         Purchase = 1,
         Production
+    }
+
+    public enum ReportType
+    {
+        Default,
+        Production,
+        Processing,
+        Storage
     }
 
     /// <summary>
@@ -153,6 +156,18 @@ namespace WebApp.Helpers
             serialRec.Serial = newSerial;
             db.GaugeSerial.Add(serialRec);
             db.SaveChanges();
+        }
+
+        /// <summary>
+        /// Method queries for a set of reporting records from persistent report table
+        /// </summary>
+        /// <param name="startOfReporting"></param>
+        /// <param name="endOfReporting"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public IEnumerable<ReportDto> GetReportData(DateTime startOfReporting, DateTime endOfReporting, int userId, ReportType reportType)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
