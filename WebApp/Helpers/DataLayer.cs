@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using WebApp.Models;
+using WebApp.Persistence.BusinessLogicEnums;
 
 namespace WebApp.Helpers
 {
@@ -49,14 +50,6 @@ namespace WebApp.Helpers
     {
         Purchase = 1,
         Production
-    }
-
-    public enum ReportType
-    {
-        Default,
-        Production,
-        Processing,
-        Storage
     }
 
     /// <summary>

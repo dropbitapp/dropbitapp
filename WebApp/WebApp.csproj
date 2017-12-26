@@ -185,6 +185,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\DataLayer.cs" />
+    <Compile Include="Helpers\DTO.cs" />
     <Compile Include="Helpers\Helpers.cs" />
     <Compile Include="Migrations\201711150114224_Initial.cs" />
     <Compile Include="Migrations\201711150114224_Initial.Designer.cs">
@@ -199,7 +200,9 @@
     <Compile Include="Models\Base_Spirit.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Persistence\BusinessLogicEnums\ReportEnums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Persistence\Repositories\ReportRepository.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -1170,7 +1173,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>51299</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

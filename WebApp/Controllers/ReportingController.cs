@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Web.Mvc;
 using WebApp.Helpers;
+using WebApp.Persistence.BusinessLogicEnums;
 
 namespace WebApp.Controllers
 {
