@@ -6665,7 +6665,7 @@ namespace WebApp.Helpers
                      && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
-                     productionDate = production.ProductionEndTime,
+                     productionDate = (DateTime?)production.ProductionEndTime,
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                      proof = (float?)proof.Value ?? 0,
@@ -6687,7 +6687,7 @@ namespace WebApp.Helpers
                         cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
                         {
                             cat.r1_OnHandFirstOfMonth += rec.productionContentProof;
                         }
@@ -6696,7 +6696,7 @@ namespace WebApp.Helpers
                     else
                     {
                         category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
                         {
                             category.r1_OnHandFirstOfMonth += rec.productionContentProof;
                         }
@@ -7397,7 +7397,7 @@ namespace WebApp.Helpers
                      && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
-                     productionDate = production.ProductionEndTime,
+                     productionDate = (DateTime?)production.ProductionEndTime,
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                      proof = (float?)proof.Value ?? 0,
@@ -7419,7 +7419,7 @@ namespace WebApp.Helpers
                         cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
                         cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
                         {
                             cat.r23_OnHandEndOfMonth += rec.productionContentProof;
                         }
@@ -7428,7 +7428,7 @@ namespace WebApp.Helpers
                     else
                     {
                         category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
                         {
                             category.r23_OnHandEndOfMonth += rec.productionContentProof;
                         }
