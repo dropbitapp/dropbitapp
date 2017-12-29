@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
-using System.Data.Entity.Validation;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -43,11 +41,6 @@ namespace WebApp.Helpers
     {
         Default,
         RawMaterial,
-    }
-
-    public enum State // as in State of the Raw Material
-    {
-
     }
 
     public enum RecordType
@@ -1737,7 +1730,7 @@ namespace WebApp.Helpers
                         }
                     }
 
-                    if (purchaseObject.PurchaseType == "Distilled")
+                    if (purchaseObject.PurchaseType == "Distilled" || purchaseObject.PurchaseType == "Fermented")
                     {
                         // Alcohol Content
                         if (purchT.AlcoholID != 0 && purchaseObject.AlcoholContent != null)
@@ -3646,7 +3639,7 @@ namespace WebApp.Helpers
             catch (Exception e)
             {
                 retMthdExecResult = 0;
-                throw;
+                throw e;
             }
 
             return retMthdExecResult;
@@ -4025,7 +4018,7 @@ namespace WebApp.Helpers
                 catch (Exception e)
                 {
                     retMthdExecResult = 0;
-                    throw;
+                    throw e;
                 }
             }
 
@@ -6627,13 +6620,12 @@ namespace WebApp.Helpers
                      distiller.UserId == userId
                      && (purchase.PurchaseTypeID == 2 || purchase.PurchaseTypeID == 3)
                      && purchase.PurchaseDate < startDate
-                     && (production == null || (production != null && (production.ProductionEndTime >= startDate)))
-                     && (production == null || (production != null && (production.ProductionEndTime <= endDate)))
                      && ((purchase.StatusID == 1 || purchase.StatusID == 2 || purchase.StatusID == 3) || (purchase.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
                      && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 16 || productionContent.ContentFieldID == 18)))
                      && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
+                     productionDate = production.ProductionEndTime,
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                      proof = (float?)proof.Value ?? 0,
@@ -6654,12 +6646,20 @@ namespace WebApp.Helpers
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            cat.r1_OnHandFirstOfMonth += rec.productionContentProof;
+                        }
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            category.r1_OnHandFirstOfMonth += rec.productionContentProof;
+                        }
                     }
                 }
             }
@@ -7352,13 +7352,12 @@ namespace WebApp.Helpers
                      distiller.UserId == userId
                      && (purchase.PurchaseTypeID == 2 || purchase.PurchaseTypeID == 3)
                      && purchase.PurchaseDate < startDate
-                     && (production == null || (production != null && (production.ProductionEndTime >= startDate)))
-                     && (production == null || (production != null && (production.ProductionEndTime <= endDate)))
                      && ((purchase.StatusID == 1 || purchase.StatusID == 2 || purchase.StatusID == 3) || (purchase.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
                      && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 16 || productionContent.ContentFieldID == 18)))
                      && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
+                     productionDate = production.ProductionEndTime,
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                      proof = (float?)proof.Value ?? 0,
@@ -7379,12 +7378,20 @@ namespace WebApp.Helpers
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            cat.r23_OnHandEndOfMonth += rec.productionContentProof;
+                        }
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            category.r23_OnHandEndOfMonth += rec.productionContentProof;
+                        }
                     }
                 }
             }
@@ -7779,25 +7786,12 @@ namespace WebApp.Helpers
                 #endregion
 
                 db.SaveChanges();
+
+                retMthdExecResult = true;
             }
-            catch (DbUpdateException e)
+            catch (Exception e)
             {
-                throw e;
-            }
-            catch (DbEntityValidationException e)
-            {
-                throw e;
-            }
-            catch (NotSupportedException e)
-            {
-                throw e;
-            }
-            catch (ObjectDisposedException e)
-            {
-                throw e;
-            }
-            catch (InvalidOperationException e)
-            {
+                retMthdExecResult = false;
                 throw e;
             }
             return retMthdExecResult;
