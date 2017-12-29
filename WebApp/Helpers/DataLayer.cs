@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
-using System.Data.Entity.Validation;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -4037,9 +4035,9 @@ namespace WebApp.Helpers
 
                         // analyze prodObject.UsedMats contents here (Perhaps, method returning waht reports should be udpated with some extra information?)
                         // extract Spirit Information from prodObject.UsedMats so we know what we need to update in Storage Report and Production reports
-                            // some of the questions to be answered:
-                               // 1. Is the material being used Wine that was produced in-house? then we need to update wine column in Storage report, Line 25 in Production report, Part 5 of Production Report, Part 6 of Production Report
-                               // 2. Is this gauged distil and the quarter end reporting month? If so, weneed to aslo update Line 17 (a and b) 
+                        // some of the questions to be answered:
+                        // 1. Is the material being used Wine that was produced in-house? then we need to update wine column in Storage report, Line 25 in Production report, Part 5 of Production Report, Part 6 of Production Report
+                        // 2. Is this gauged distil and the quarter end reporting month? If so, weneed to aslo update Line 17 (a and b) 
                         // call Update Storage and Production reports table method here
                     }
                 }
@@ -6662,13 +6660,12 @@ namespace WebApp.Helpers
                      distiller.UserId == userId
                      && (purchase.PurchaseTypeID == 2 || purchase.PurchaseTypeID == 3)
                      && purchase.PurchaseDate < startDate
-                     && (production == null || (production != null && (production.ProductionEndTime >= startDate)))
-                     && (production == null || (production != null && (production.ProductionEndTime <= endDate)))
                      && ((purchase.StatusID == 1 || purchase.StatusID == 2 || purchase.StatusID == 3) || (purchase.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
                      && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 16 || productionContent.ContentFieldID == 18)))
                      && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
+                     productionDate = production.ProductionEndTime,
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                      proof = (float?)proof.Value ?? 0,
@@ -6689,12 +6686,20 @@ namespace WebApp.Helpers
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            cat.r1_OnHandFirstOfMonth += rec.productionContentProof;
+                        }
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            category.r1_OnHandFirstOfMonth += rec.productionContentProof;
+                        }
                     }
                 }
             }
@@ -7387,13 +7392,12 @@ namespace WebApp.Helpers
                      distiller.UserId == userId
                      && (purchase.PurchaseTypeID == 2 || purchase.PurchaseTypeID == 3)
                      && purchase.PurchaseDate < startDate
-                     && (production == null || (production != null && (production.ProductionEndTime >= startDate)))
-                     && (production == null || (production != null && (production.ProductionEndTime <= endDate)))
                      && ((purchase.StatusID == 1 || purchase.StatusID == 2 || purchase.StatusID == 3) || (purchase.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
                      && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 16 || productionContent.ContentFieldID == 18)))
                      && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
+                     productionDate = production.ProductionEndTime,
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                      proof = (float?)proof.Value ?? 0,
@@ -7414,12 +7418,20 @@ namespace WebApp.Helpers
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            cat.r23_OnHandEndOfMonth += rec.productionContentProof;
+                        }
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            category.r23_OnHandEndOfMonth += rec.productionContentProof;
+                        }
                     }
                 }
             }
