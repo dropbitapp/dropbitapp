@@ -553,13 +553,18 @@
                 $('#FillTestCreateButton').click(function () {
                     fillTestObject = {};
                     fillTestObject.FillAlcoholContent = $('#FillAlcoholContent').val();
-                    fillTestObject.FillDate = genericWorkflowHelper.convertUTC($('#FillTestDate').jqxDateTimeInput('val'),true);
+                    fillTestObject.FillDate = $('#FillTestDate').jqxDateTimeInput('val');
                     fillTestObject.FillVariation = $('#FillVariation').val();
-                    fillTestObject.CorrectiveAction = $('#CorrectiveAction').val();
-                    fillTestArray.push(fillTestObject);
+                    fillTestObject.CorrectiveAction = $( '#CorrectiveAction' ).val();
+
                     $('#FillTestList').append($("<tr><td>" + "Fill Test " + fillTestArray.length + ": " + "AlcCont: " +
-                        fillTestObject.FillAlcoholContent + "%" + " Date: " + fillTestObject.FillDate.getMonth() + "/" +
-                        fillTestObject.FillDate.getDate() + "</td></tr>"));
+                        fillTestObject.FillAlcoholContent + "%" + " Date: " + fillTestObject.FillDate + "</td></tr>" ) );
+
+                    // convert fill date to UTC since this is how we store dates in the db
+                    fillTestObject.FillDate = genericWorkflowHelper.convertUTC( fillTestObject.FillDate, true );
+
+                    fillTestArray.push( fillTestObject );
+
                     genericWorkflowHelper.emptyFillTest();
                 });
                 // Listen to fillTest remove button and delete fillTest objects.
@@ -801,7 +806,7 @@
                 var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStart").jqxDateTimeInput('val'), true);
                 var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProductionEnd").jqxDateTimeInput('val'), true);
 
-                var gainLoss = $('#LossesInput').jqxNumberInput('val') * -1;
+                var gainLoss = $( '#LossesInput' ).jqxNumberInput( 'val' ) * -1;
 
                 var ProductionObject = {
                     ProductionId: "",
