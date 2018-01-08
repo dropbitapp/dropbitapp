@@ -185,17 +185,24 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\DataLayer.cs" />
+    <Compile Include="Helpers\DTO.cs" />
     <Compile Include="Helpers\Helpers.cs" />
     <Compile Include="Migrations\201711150114224_Initial.cs" />
     <Compile Include="Migrations\201711150114224_Initial.Designer.cs">
       <DependentUpon>201711150114224_Initial.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201712250035292_persistentReport.cs" />
+    <Compile Include="Migrations\201712250035292_persistentReport.Designer.cs">
+      <DependentUpon>201712250035292_persistentReport.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Persistence\BusinessLogicEnums\ReportEnums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Persistence\Repositories\ReportRepository.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -1109,6 +1116,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201711150114224_Initial.resx">
       <DependentUpon>201711150114224_Initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201712250035292_persistentReport.resx">
+      <DependentUpon>201712250035292_persistentReport.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

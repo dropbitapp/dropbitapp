@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
-using System.Data.Entity.Validation;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using WebApp.Models;
+using WebApp.Persistence.BusinessLogicEnums;
 
 namespace WebApp.Helpers
 {
@@ -43,11 +42,6 @@ namespace WebApp.Helpers
     {
         Default,
         RawMaterial,
-    }
-
-    public enum State // as in State of the Raw Material
-    {
-
     }
 
     public enum RecordType
@@ -153,6 +147,18 @@ namespace WebApp.Helpers
             serialRec.Serial = newSerial;
             db.GaugeSerial.Add(serialRec);
             db.SaveChanges();
+        }
+
+        /// <summary>
+        /// Method queries for a set of reporting records from persistent report table
+        /// </summary>
+        /// <param name="startOfReporting"></param>
+        /// <param name="endOfReporting"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public IEnumerable<ReportDto> GetReportData(DateTime startOfReporting, DateTime endOfReporting, int userId, ReportType reportType)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -1737,7 +1743,7 @@ namespace WebApp.Helpers
                         }
                     }
 
-                    if (purchaseObject.PurchaseType == "Distilled")
+                    if (purchaseObject.PurchaseType == "Distilled" || purchaseObject.PurchaseType == "Fermented")
                     {
                         // Alcohol Content
                         if (purchT.AlcoholID != 0 && purchaseObject.AlcoholContent != null)
@@ -1786,6 +1792,8 @@ namespace WebApp.Helpers
                             db.SaveChanges();
                             purchT.ProofID = newPrfRec.ProofID;
                         }
+
+                        // call Update Storage report table here
                     }
 
                     // update storages
@@ -3598,6 +3606,8 @@ namespace WebApp.Helpers
                     pstr.SpiritTypeReportingID = purchaseObject.SpiritTypeReportingID;
                     db.PurchaseToSpiritTypeReporting.Add(pstr);
                     db.SaveChanges();
+
+                    // call Update Storage Report method here
                 }
 
                 //update StorageToRecord
@@ -3646,7 +3656,7 @@ namespace WebApp.Helpers
             catch (Exception e)
             {
                 retMthdExecResult = 0;
-                throw;
+                throw e;
             }
 
             return retMthdExecResult;
@@ -3999,6 +4009,8 @@ namespace WebApp.Helpers
                 {
                     // handle updating records that are being used for creating this production record
                     UpdateRecordsUsedInProductionWorkflow(prodObject.UsedMats, prod.ProductionID, userId);
+
+                    // call Update Storage report table method here
                 }
             }
 
@@ -4020,12 +4032,19 @@ namespace WebApp.Helpers
                             db.ProductionToSpiritCut.Add(prodToSCut);
                             db.SaveChanges();
                         }
+
+                        // analyze prodObject.UsedMats contents here (Perhaps, method returning waht reports should be udpated with some extra information?)
+                        // extract Spirit Information from prodObject.UsedMats so we know what we need to update in Storage Report and Production reports
+                        // some of the questions to be answered:
+                        // 1. Is the material being used Wine that was produced in-house? then we need to update wine column in Storage report, Line 25 in Production report, Part 5 of Production Report, Part 6 of Production Report
+                        // 2. Is this gauged distil and the quarter end reporting month? If so, weneed to aslo update Line 17 (a and b) 
+                        // call Update Storage and Production reports table method here
                     }
                 }
                 catch (Exception e)
                 {
                     retMthdExecResult = 0;
-                    throw;
+                    throw e;
                 }
             }
 
@@ -4059,6 +4078,13 @@ namespace WebApp.Helpers
                             db.SaveChanges();
                         }
                     }
+
+                    // analyze prodObject.UsedMats contents here. (Perhaps, method returning waht reports should be udpated with some extra information?)
+                    // extract Spirit Information from prodObject.UsedMats so we know what we need to update in Storage Report and Production reports
+                    // some of the questions to be answered:
+                    // 1. Is the material being used was entered in his reporting period or previous? If it's from current reporting period, then we update Line 9 of Production report. If from previous reporting period, then we need to update line 17 of Storage report.
+                    // 2. 
+                    // call Update Storage, Production and Processing reports table method here
                 }
             }
 
@@ -4134,6 +4160,13 @@ namespace WebApp.Helpers
                             db.SaveChanges();
                         }
                     }
+
+                    // analyze prodObject.UsedMats contents here
+                    // extract Spirit Information from prodObject.UsedMats so we know what we need to update Processing report
+                    // some of the questions to be answered:
+                    // 1. 
+                    // 2. 
+                    // call Update Processing report table method here
                 }
             }
             try
@@ -6627,13 +6660,12 @@ namespace WebApp.Helpers
                      distiller.UserId == userId
                      && (purchase.PurchaseTypeID == 2 || purchase.PurchaseTypeID == 3)
                      && purchase.PurchaseDate < startDate
-                     && (production == null || (production != null && (production.ProductionEndTime >= startDate)))
-                     && (production == null || (production != null && (production.ProductionEndTime <= endDate)))
                      && ((purchase.StatusID == 1 || purchase.StatusID == 2 || purchase.StatusID == 3) || (purchase.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
                      && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 16 || productionContent.ContentFieldID == 18)))
                      && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
+                     productionDate = (DateTime?)production.ProductionEndTime,
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                      proof = (float?)proof.Value ?? 0,
@@ -6654,12 +6686,20 @@ namespace WebApp.Helpers
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            cat.r1_OnHandFirstOfMonth += rec.productionContentProof;
+                        }
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            category.r1_OnHandFirstOfMonth += rec.productionContentProof;
+                        }
                     }
                 }
             }
@@ -7352,13 +7392,12 @@ namespace WebApp.Helpers
                      distiller.UserId == userId
                      && (purchase.PurchaseTypeID == 2 || purchase.PurchaseTypeID == 3)
                      && purchase.PurchaseDate < startDate
-                     && (production == null || (production != null && (production.ProductionEndTime >= startDate)))
-                     && (production == null || (production != null && (production.ProductionEndTime <= endDate)))
                      && ((purchase.StatusID == 1 || purchase.StatusID == 2 || purchase.StatusID == 3) || (purchase.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
                      && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 16 || productionContent.ContentFieldID == 18)))
                      && uOm.UnitOfMeasurementID != 2 // != "lb"
                  select new
                  {
+                     productionDate = (DateTime?)production.ProductionEndTime,
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                      proof = (float?)proof.Value ?? 0,
@@ -7379,12 +7418,20 @@ namespace WebApp.Helpers
                         StorageReportCategory cat = new StorageReportCategory();
                         cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                         cat.CategoryName = rec.reportingCategoryName;
-                        cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            cat.r23_OnHandEndOfMonth += rec.productionContentProof;
+                        }
                         storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        {
+                            category.r23_OnHandEndOfMonth += rec.productionContentProof;
+                        }
                     }
                 }
             }
@@ -7779,25 +7826,12 @@ namespace WebApp.Helpers
                 #endregion
 
                 db.SaveChanges();
+
+                retMthdExecResult = true;
             }
-            catch (DbUpdateException e)
+            catch (Exception e)
             {
-                throw e;
-            }
-            catch (DbEntityValidationException e)
-            {
-                throw e;
-            }
-            catch (NotSupportedException e)
-            {
-                throw e;
-            }
-            catch (ObjectDisposedException e)
-            {
-                throw e;
-            }
-            catch (InvalidOperationException e)
-            {
+                retMthdExecResult = false;
                 throw e;
             }
             return retMthdExecResult;
