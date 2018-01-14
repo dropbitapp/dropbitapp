@@ -6682,27 +6682,20 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proof + rec.destroyedProof;
-
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
                         if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
                         {
-                            total += rec.productionContentProof;
+                            cat.r1_OnHandFirstOfMonth += rec.productionContentProof;
                         }
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r1_OnHandFirstOfMonth += total;
-                            storageReportBody.Add(cat);
-                        }
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
                         category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
-
                         if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
                         {
                             category.r1_OnHandFirstOfMonth += rec.productionContentProof;
@@ -6742,14 +6735,15 @@ namespace WebApp.Helpers
                      distiller.UserId == userId
                      && (sourceProduction.ProductionTypeID == 1 || sourceProduction.ProductionTypeID == 2)
                      && sourceProduction.ProductionEndTime < startDate
+                     && (outputProduction.ProductionEndTime == null || (outputProduction != null && (outputProduction.ProductionEndTime >= startDate)))
+                     && (outputProduction.ProductionEndTime == null || (outputProduction != null && (outputProduction.ProductionEndTime <= endDate)))
                      && sourceProduction.Gauged == true
                      && ((sourceProduction.StatusID == 1 || sourceProduction.StatusID == 2 || sourceProduction.StatusID == 3) || (sourceProduction.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
                      && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 20 || productionContent.ContentFieldID == 23)))
                  select new
                  {
-                     productionDate = (DateTime?)outputProduction.ProductionEndTime,
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
-                     spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proof = (float?)proof.Value ?? 0,
                      destroyedProof = (float?)dest.ProofGallons ?? 0,
                      productionContentProof = (float?)productionContent.ContentValue ?? 0
@@ -6764,31 +6758,16 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proof + rec.destroyedProof;
-
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
-                        {
-                            total += rec.productionContentProof;
-                        }
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r1_OnHandFirstOfMonth += total;
-                            storageReportBody.Add(cat);
-                        }
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
-
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
-                        {
-                            category.r1_OnHandFirstOfMonth += rec.productionContentProof;
-                        }
+                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
                     }
                 }
             }
@@ -6860,17 +6839,12 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.purchaseProof + rec.productionProof + rec.destroyedProof;
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r2_DepositedInBulkStorage += total;
-                            storageReportBody.Add(cat);
-                        }
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
@@ -6944,20 +6918,17 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proof + rec.destroyedProof + rec.productionContentProof;
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r2_DepositedInBulkStorage += total;
-                            storageReportBody.Add(cat);
-                        }
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r2_DepositedInBulkStorage += rec.productionContentProof;
+                        cat.r2_DepositedInBulkStorage += rec.proof + rec.destroyedProof;
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
+                        category.r2_DepositedInBulkStorage += rec.productionContentProof;
                         category.r2_DepositedInBulkStorage += rec.proof + rec.productionContentProof + rec.destroyedProof;
                     }
                 }
@@ -7037,17 +7008,12 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proofGal;
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r17_TransferredToProcessingAccount += total;
-                            storageReportBody.Add(cat);
-                        }
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r17_TransferredToProcessingAccount += rec.proofGal;
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
@@ -7111,17 +7077,12 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proofGal;
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r17_TransferredToProcessingAccount += total;
-                            storageReportBody.Add(cat);
-                        }
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r17_TransferredToProcessingAccount += rec.proofGal;
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
@@ -7194,17 +7155,12 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proofGal;
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r18_TransferredToProductionAccount += total;
-                            storageReportBody.Add(cat);
-                        }
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r18_TransferredToProductionAccount += rec.proofGal;
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
@@ -7269,17 +7225,12 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proofGal;
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r18_TransferredToProductionAccount += total;
-                            storageReportBody.Add(cat);
-                        }
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r18_TransferredToProductionAccount += rec.proofGal;
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
@@ -7333,17 +7284,12 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proof;
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r20_Destroyed += total;
-                            storageReportBody.Add(cat);
-                        }
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r20_Destroyed += rec.proof;
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
@@ -7393,17 +7339,12 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proof;
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given purchased distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r20_Destroyed += total;
-                            storageReportBody.Add(cat);
-                        }
+                        // Add category to the list with given purchased distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r20_Destroyed += rec.proof;
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
@@ -7473,27 +7414,20 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proof + rec.destroyedProof;
-
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
                         if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
                         {
-                            total += rec.productionContentProof;
+                            cat.r23_OnHandEndOfMonth += rec.productionContentProof;
                         }
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r23_OnHandEndOfMonth += total;
-                            storageReportBody.Add(cat);
-                        }
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
                         category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
-
                         if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
                         {
                             category.r23_OnHandEndOfMonth += rec.productionContentProof;
@@ -7523,14 +7457,15 @@ namespace WebApp.Helpers
                      distiller.UserId == userId
                      && (sourceProduction.ProductionTypeID == 1 || sourceProduction.ProductionTypeID == 2)
                      && sourceProduction.ProductionEndTime < startDate
+                     && (outputProduction.ProductionEndTime == null || (outputProduction != null && (outputProduction.ProductionEndTime >= startDate)))
+                     && (outputProduction.ProductionEndTime == null || (outputProduction != null && (outputProduction.ProductionEndTime <= endDate)))
                      && sourceProduction.Gauged == true
                      && ((sourceProduction.StatusID == 1 || sourceProduction.StatusID == 2 || sourceProduction.StatusID == 3) || (sourceProduction.StatusID == 9 && dest.EndTime > startDate && dest.EndTime < endDate))
                      && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 20 || productionContent.ContentFieldID == 23)))
                  select new
                  {
-                     productionDate = (DateTime?)outputProduction.ProductionEndTime,
                      reportingCategoryName = str.ProductTypeName ?? string.Empty,
-                     spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
+                     spiritTypeReportingId = str.SpiritTypeReportingID,
                      proof = (float?)proof.Value ?? 0,
                      destroyedProof = (float?)dest.ProofGallons ?? 0,
                      productionContentProof = (float?)productionContent.ContentValue ?? 0
@@ -7545,31 +7480,16 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proof + rec.destroyedProof;
-
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
-                        {
-                            total += rec.productionContentProof;
-                        }
-
-                        if (total > 0)
-                        {
-                            // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
-                            StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
-                            cat.r23_OnHandEndOfMonth += total;
-                            storageReportBody.Add(cat);
-                        }
+                        // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
+                        StorageReportCategory cat = new StorageReportCategory();
+                        cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
+                        cat.CategoryName = rec.reportingCategoryName;
+                        cat.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        storageReportBody.Add(cat);
                     }
                     else
                     {
-                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
-
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
-                        {
-                            category.r23_OnHandEndOfMonth += rec.productionContentProof;
-                        }
+                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof + rec.productionContentProof;
                     }
                 }
             }

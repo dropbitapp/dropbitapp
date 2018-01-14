@@ -255,24 +255,20 @@ The IDs of elements should follow the pattern: Part of the report + cell number
 
             function createElements() {
                 var date = new Date();
-                var month = date.getMonth();
-                var monthIndex = 0;
-                var monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-                monthIndex = month == 0 ? monthList.length - 1 : month - 1;
 
+                var monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
                 $("#ReportingMonth").jqxDropDownList({
-                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList, selectedIndex: monthIndex
+                    theme: 'bootstrap', height: '26px', width: '130px', source: monthList, selectedIndex: (date.getMonth() - 1)
                 });
 
                 var yearList = [];
+                
                 var year = date.getFullYear();
                 for (i = 0; i < (year - 1900) ; i++) {
                     yearList.push(year - i);
                 }
-                var yearIndex = 0;
-                yearIndex = month == 0 ? yearIndex + 1 : yearIndex;
                 $("#ReportingYear").jqxDropDownList({
-                    theme: 'bootstrap', height: '26px', width: '130px', source: yearList, selectedIndex: yearIndex
+                    theme: 'bootstrap', height: '26px', width: '130px', source: yearList, selectedIndex: 0
                 });
 
                 $("#GenerateReportBtn").jqxButton({ theme: 'bootstrap' });
