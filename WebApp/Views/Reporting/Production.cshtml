@@ -377,25 +377,25 @@
                     else {
                         // Line: 9 - update processing for a single SpiritType
                         let curProcess = $( '#p1_9k_Other' ).val();
-                        $( '#p1_9k_Other' ).val( parseFloat(curProcess + result.Part1List[i].ProccessingAcct ) );
+                        $( '#p1_9k_Other' ).val( parseFloat( curProcess ) + parseFloat( result.Part1List[i].ProccessingAcct ) );
 
                         // Line: 11 - update storage for a single SpiritType
-                        let curSto =  $( '#p1_11k_Other' ).val();
-                        $( '#p1_11k_Other' ).val( parseFloat(curSto + result.Part1List[i].StorageAcct) );
+                        let curSto = $( '#p1_11k_Other' ).val();
+                        $( '#p1_11k_Other' ).val( parseFloat( curSto ) + parseFloat( result.Part1List[i].StorageAcct ) );
 
                         // Line: 14 - update totals for line 14 for all applicable rows
                         let curL14Other = $( '#p1_14k_Other' ).val();
-                        $( '#p1_14k_Other' ).val( parseFloat(curL14Other + result.Part1List[i].StorageAcct + result.Part1List[i].ProccessingAcct) );
+                        $( '#p1_14k_Other' ).val( parseFloat( curL14Other ) + parseFloat( result.Part1List[i].StorageAcct ) + parseFloat( result.Part1List[i].ProccessingAcct ) );
 
                         // Line: 15 - update Received for Redistillation for a single SpiritType
                         let curRecd4RedistilaltionL15 = $( '#p1_15k_Other' ).val();
-                        $( '#p1_15k_Other' ).val( parseFloat(curRecd4RedistilaltionL15 + result.Part1List[i].Recd4RedistilaltionL15 ) );
+                        $( '#p1_15k_Other' ).val( parseFloat( curRecd4RedistilaltionL15 ) + parseFloat( result.Part1List[i].Recd4RedistilaltionL15 ) );
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         let curUnifinishedSpiritsEndOfQuarter = $( '#p1_17b_k_Other' ).val();
-                        $( '#p1_17b_k_Other' ).val( parseFloat(curUnifinishedSpiritsEndOfQuarter + result.Part1List[i].UnfinishedSpiritsEndOfQuarter ) );
+                        $( '#p1_17b_k_Other' ).val( parseFloat( curUnifinishedSpiritsEndOfQuarter ) + parseFloat( result.Part1List[i].UnfinishedSpiritsEndOfQuarter ) );
 
-                        computeColLTotals( result.Part1List[i] );
+                        computeColLTotals(parseFloat(result.Part1List[i]));
                     }
                 }
 
