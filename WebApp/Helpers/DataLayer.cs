@@ -5796,9 +5796,15 @@ namespace WebApp.Helpers
                         prodRP2T4.KindOfMaterial = rec.MaterialKindReportingName;
                         prodRP2T4.MaterialKindReportingID = (int)rec.MaterialKindReportingID;
 
-                        var part1Record = part1List.Find(x => x.SpiritTypeReportingID == rec.SpiritTypeReportingID);
+                        var part4 =
+                            (from prodForRep in db.Production4Reporting
+                             where prodForRep.ProductionID == rec.ProductionID
+                             select new
+                             {
+                               Proof = (float?)prodForRep.Proof ?? (float?) 0
+                             }).FirstOrDefault();
 
-                        prodRP2T4.ProofGallons = (part1Record.ProducedTotal > 0) ? part1Record.ProducedTotal : 0;
+                        prodRP2T4.ProofGallons = (float)part4.Proof;
 
                         prodRP2T4.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
 
@@ -5806,7 +5812,15 @@ namespace WebApp.Helpers
                     }
                     else
                     {
-                        materialKind.ProofGallons += (float)rec.Proof;
+                        var part4 =
+                            (from prodForRep in db.Production4Reporting
+                             where prodForRep.ProductionID == rec.ProductionID
+                             select new
+                             {
+                                 Proof = (float?)prodForRep.Proof ?? (float?)0
+                             }).FirstOrDefault();
+
+                        materialKind.ProofGallons += (float)part4.Proof;
                     }
                 }
             }
@@ -6247,9 +6261,6 @@ namespace WebApp.Helpers
                  where
                    distillers.UserId == userId &&
                    prod.Gauged == true &&
-                   //(prod.StatusID == 1 ||
-                   //prod.StatusID == 2) &&
-                   //(new int[] { 3, 4, 5 }).Contains(prod.StateID) &&
                    (new int[] { 3 }).Contains(prod.StateID) &&
                    prod.ProductionEndTime >= start &&
                    prod.ProductionEndTime <= end
@@ -6369,7 +6380,7 @@ namespace WebApp.Helpers
             }
             catch (Exception e)
             {
-                throw;
+                throw e;
             }
         }
 
