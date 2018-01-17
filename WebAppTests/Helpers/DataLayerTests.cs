@@ -3850,6 +3850,246 @@ namespace WebApp.Helpers.Tests
         }
 
         /// <summary>
+        /// This test verifies part 4 of Production report when two different distills are distilled
+        /// in Brandy Under 170 category but under different Material Categories
+        /// So, in this case:
+        /// Distil 1: Brandy Under 170 with Material Category of Grape Brandy
+        /// Distil 2: Brandy Under 170 with Material Category of All Other Brandy
+        /// </summary>
+        [TestMethod()]
+        public void Distill_Brandy_Under_170_Twice_Under_Two_Different_MaterialCategroires_Test()
+        {
+            // Arrange
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+            int spiritId = 0;
+            int vendorId = 0;
+            int storageId = 0;
+            int wineMaterialId = 0;
+            int waterMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            try
+            {
+                #region Arrange
+                //  dictionary setup
+                SpiritObject spirit = new SpiritObject();
+                spirit.SpiritName = "Brandy Under 170";
+                spirit.ProcessingReportTypeID = 12;
+
+                spiritId = _dl.CreateSpirit(_userId, spirit);
+                tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                // wine
+                {
+                    RawMaterialObject wineMaterial = new RawMaterialObject();
+                    wineMaterial.RawMaterialName = "Wine For Brandy";
+                    wineMaterial.MaterialCategoryID = 2;
+                    wineMaterial.UnitType = "gal";
+                    wineMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermented = true;
+                    wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
+                }
+
+                // water
+                {
+                    RawMaterialObject waterMaterial = new RawMaterialObject();
+                    waterMaterial.RawMaterialName = "Water";
+                    waterMaterial.UnitType = "gal";
+                    waterMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Additive = true;
+                    waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+                }
+
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "test7Purchase";
+                purchO.PurchaseType = "Fermented";
+                purchO.PurchaseDate = new DateTime(2017, 11, 1);
+                purchO.Quantity = 100f; // 100 gallons
+                purchO.VolumeByWeight = 0f;
+                purchO.AlcoholContent = 98f;
+                purchO.ProofGallon = 196f;
+                purchO.RecordId = wineMaterialId;
+                purchO.Price = 1000f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchO.SpiritTypeReportingID = 10;
+                purchO.Gauged = true;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                // create 1st Production Distillation Record and mark it as Gauged
+                ProductionObject prodO = new ProductionObject();
+                prodO.BatchName = "test1stDistillRun";
+                prodO.ProductionDate = new DateTime(2017, 11, 3);
+                prodO.ProductionStart = new DateTime(2017, 11, 3);
+                prodO.ProductionEnd = new DateTime(2017, 11, 3);
+                prodO.SpiritCutId = 11; // mixed
+                prodO.Gauged = true;
+                prodO.ProductionType = "Distillation";
+                prodO.Quantity = 100f; //100 gallons of alcohol
+                prodO.VolumeByWeight = 0f;
+                prodO.AlcoholContent = 98f; // 80%
+                prodO.ProofGallon = 196f; // 80pfg
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.SpiritTypeReportingID = 3; // brandy under 170
+                prodO.MaterialKindReportingID = 94; // grape brandy
+                prodO.ProductionTypeId = 2;
+
+                List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
+                uMat.ID = purchaseId;
+                uMat.OldVal = 0f;
+                uMat.NewVal = purchO.Quantity;
+                uMat.DistillableOrigin = "pur";
+                uMat.BurningDownMethod = "volume";
+
+                usedMats.Add(uMat);
+
+                prodO.UsedMats = usedMats;
+
+                productionId = _dl.CreateProduction(prodO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO1 = new PurchaseObject();
+                purchO1.PurBatchName = "test7Purchase";
+                purchO1.PurchaseType = "Fermented";
+                purchO1.PurchaseDate = new DateTime(2017, 11, 1);
+                purchO1.Quantity = 100f; // 100 gallons
+                purchO1.VolumeByWeight = 0f;
+                purchO1.AlcoholContent = 98f;
+                purchO1.ProofGallon = 196f;
+                purchO1.RecordId = wineMaterialId;
+                purchO1.Price = 1000f;
+                purchO1.VendorId = vendorId;
+
+                List<StorageObject> storageList1 = new List<StorageObject>();
+                StorageObject storageObject1 = new StorageObject();
+                storageObject1.StorageId = storageId;
+                storageList1.Add(storageObject1);
+                purchO1.Storage = storageList1;
+
+                purchO1.SpiritTypeReportingID = 10;
+                purchO1.Gauged = true;
+
+                purchaseId = _dl.CreatePurchase(purchO1, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                // create 1st Production Distillation Record and mark it as Gauged
+                ProductionObject prodO1 = new ProductionObject();
+                prodO1.BatchName = "test1stDistill2";
+                prodO1.ProductionDate = new DateTime(2017, 11, 3);
+                prodO1.ProductionStart = new DateTime(2017, 11, 3);
+                prodO1.ProductionEnd = new DateTime(2017, 11, 3);
+                prodO1.SpiritCutId = 11; // mixed
+                prodO1.Gauged = true;
+                prodO1.ProductionType = "Distillation";
+                prodO1.Quantity = 50f; //50 gallons of alcohol
+                prodO1.VolumeByWeight = 0f;
+                prodO1.AlcoholContent = 98f; // 98%
+                prodO1.ProofGallon = 98f; // 98pfg
+                prodO1.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO1.SpiritTypeReportingID = 3; // brandy under 170
+                prodO1.MaterialKindReportingID = 95; // all other brandy
+                prodO1.ProductionTypeId = 2;
+
+                List<ObjInfo4Burndwn> usedMats1 = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat1 = new ObjInfo4Burndwn();
+                uMat1.ID = purchaseId;
+                uMat1.OldVal = 0f;
+                uMat1.NewVal = purchO.Quantity;
+                uMat1.DistillableOrigin = "pur";
+                uMat1.BurningDownMethod = "volume";
+
+                usedMats.Add(uMat1);
+
+                prodO1.UsedMats = usedMats1;
+
+                productionId = _dl.CreateProduction(prodO1, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                #endregion
+
+                #region Act
+
+                int novDays = DateTime.DaysInMonth(2017, 11);
+                var novStart = new DateTime(2017, 11, 1);
+                var novEnd = new DateTime(2017, 11, novDays);
+
+                ProductionReportingObject productionReport = _dl.GetProductionReportData(novStart, novEnd, _userId);
+
+                #endregion
+
+                #region Assert
+
+                // Test October Production Report
+                // production report Part 4
+                Dictionary<int, float> materialKindAmmounts = new Dictionary<int, float>();
+                materialKindAmmounts.Add(94, prodO.ProofGallon); //Grape Brandy
+                materialKindAmmounts.Add(95, prodO1.ProofGallon); //All Other Brandy
+
+                // check Grape Brandy
+                var actual = productionReport.Part2Through4List.Find(x => x.MaterialKindReportingID == 94);
+                var expectedGrapeBrandyProof = materialKindAmmounts.FirstOrDefault(x => x.Key == 94).Value;
+
+                Assert.IsNotNull(actual, "actual is null since Part4 returned no records for MaterialKindReportingID: " + 94);
+                Assert.AreEqual(expectedGrapeBrandyProof, actual.ProofGallons);
+                Assert.AreEqual("GrapeBrandy", actual.KindOfMaterial);
+
+                // check All Other Brandy
+                actual = productionReport.Part2Through4List.Find(x => x.MaterialKindReportingID == 95);
+                var expectedAllOtherBrandyProof = materialKindAmmounts.FirstOrDefault(x => x.Key == 95).Value;
+
+                Assert.IsNotNull(actual, "actual is null since Part4 returned no records for MaterialKindReportingID: " + 95);
+                Assert.AreEqual(expectedAllOtherBrandyProof, actual.ProofGallons);
+                Assert.AreEqual("AllOtherBrandy", actual.KindOfMaterial);
+
+                #endregion
+            }
+            finally
+            {
+                // Cleanup
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
         /// TestRecordCleanup method cleans up test data from tables
         /// </summary>
         /// <param name="id"></param>
