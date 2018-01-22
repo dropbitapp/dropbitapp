@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
+using WebApp.Persistence.Repositories;
 
 namespace WebApp.Helpers
 {
@@ -156,7 +157,7 @@ namespace WebApp.Helpers
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public IEnumerable<ReportDto> GetReportData(DateTime startOfReporting, DateTime endOfReporting, int userId, ReportType reportType)
+        public IEnumerable<ReportDto> GetReportData(DateTime startOfReporting, DateTime endOfReporting, int userId, PersistReportType reportType)
         {
             throw new NotImplementedException();
         }
@@ -3608,6 +3609,8 @@ namespace WebApp.Helpers
                     db.SaveChanges();
 
                     // call Update Storage Report method here
+                    ReportRepository reportRepository = new ReportRepository();
+                    reportRepository.UpdateReportDataDuringPurchase(purchaseObject, userId);
                 }
 
                 //update StorageToRecord

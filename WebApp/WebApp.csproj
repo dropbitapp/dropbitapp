@@ -185,7 +185,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\DataLayer.cs" />
-    <Compile Include="Helpers\DTO.cs" />
+    <Compile Include="DTO\ReportDTO.cs" />
     <Compile Include="Helpers\Helpers.cs" />
     <Compile Include="Migrations\201711150114224_Initial.cs" />
     <Compile Include="Migrations\201711150114224_Initial.Designer.cs">

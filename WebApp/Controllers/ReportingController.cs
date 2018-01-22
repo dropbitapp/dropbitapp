@@ -103,7 +103,7 @@ namespace WebApp.Controllers
 
                     if (_enableNewReportingImplementation)
                     {
-                        report = dl.GetReportData(startOfReporting, endOfReporting, userId, ReportType.Storage);
+                        report = dl.GetReportData(startOfReporting, endOfReporting, userId, PersistReportType.Storage);
 
                         return Json(report, JsonRequestBehavior.AllowGet);
                     }
