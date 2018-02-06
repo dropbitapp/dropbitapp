@@ -6,6 +6,7 @@ using System.Text;
 using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
 using WebApp.Persistence.Repositories;
+using WebApp.ReportDTO;
 
 namespace WebApp.Helpers
 {
@@ -157,9 +158,13 @@ namespace WebApp.Helpers
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public IEnumerable<ReportDto> GetReportData(DateTime startOfReporting, DateTime endOfReporting, int userId, PersistReportType reportType)
+        public ReportData GetReportData(DateTime endOfReporting, int userId, PersistReportType reportType)
         {
-            throw new NotImplementedException();
+            // Persistent Reporting: get persistent report storage data.
+            ReportRepository reportRepository = new ReportRepository();
+            ReportData reportData = new ReportData();
+            reportData = reportRepository.GetPersistentStorageReportData(endOfReporting, userId);
+            return reportData;
         }
 
         /// <summary>
@@ -3608,7 +3613,7 @@ namespace WebApp.Helpers
                     db.PurchaseToSpiritTypeReporting.Add(pstr);
                     db.SaveChanges();
 
-                    // call Update Storage Report method here
+                    // Persistent Reporting: call Update Storage Report method here
                     ReportRepository reportRepository = new ReportRepository();
                     reportRepository.UpdateReportDataDuringPurchase(purchaseObject, userId);
                 }
@@ -7932,4 +7937,7 @@ namespace WebApp.Helpers
         }
         #endregion
     }
+
+    namespace WebApp.ReportDTO { }
+
 }

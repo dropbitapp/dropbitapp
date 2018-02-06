@@ -5,13 +5,13 @@ using System.Web;
 using WebApp.Helpers;
 using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
+using WebApp.ReportDTO;
 
 namespace WebApp.Persistence.Repositories
-{ 
+{
     public class ReportRepository
     {
         private readonly DistilDBContext _context;
-        private List<ReportDto> _reportDtoList = new List<ReportDto>();
 
         // <summary>
         /// GetDistillerID retrieves DistillerId for given UserId
@@ -57,25 +57,13 @@ namespace WebApp.Persistence.Repositories
                 {
                     throw e;
                 }
-                
+
             }
         }
 
         public ReportRepository()
         {
-           _context = new DistilDBContext();
-        }
-
-        /// <summary>
-        /// Method queries for a set of reporting records from persistent report table
-        /// </summary>
-        /// <param name="startOfReporting"></param>
-        /// <param name="endOfReporting"></param>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        public IEnumerable<ReportDto> GetReportData(DateTime startOfReporting, DateTime endOfReporting, int userId, PersistReportType reportType)
-        {
-            throw new NotImplementedException();
+            _context = new DistilDBContext();
         }
 
         public bool UpdateReportDataDuringPurchase(PurchaseObject purchaseData, int userId)
@@ -101,15 +89,10 @@ namespace WebApp.Persistence.Repositories
             // call private method here that determines what reports should be updated
             GetDataToBeInsertedInPersistentTableFormat(RecordType.Purchase, userId, productionData: productionData);
 
-            // run actual db update
-            foreach (var i in _reportDtoList)
-            {
-
-            }
             throw new NotImplementedException();
         }
 
-        
+
         private void UpdateStorageReportCellValue(PurchaseObject purchaseData, int userId, int reportRowId, int reportColId = 0 /*reportColId is optional*/)
         {
             int IdentifierId = (int)PersistReportType.Storage;
@@ -129,7 +112,7 @@ namespace WebApp.Persistence.Repositories
             if (purchaseData != null)
             {
                 try
-                {   
+                {
                     // checking for existing row with these values
                     var reportRec =
                         (from rec in _context.PersistentReport
@@ -151,7 +134,8 @@ namespace WebApp.Persistence.Repositories
                                  rec.Date.Month == nextMonth.Month)
                                  select rec).FirstOrDefault();
 
-                    if (rowId == (int)PersistReportRow.OnHandFirstOfMonth && firstOfMonthRec != null) {
+                    if (rowId == (int)PersistReportRow.OnHandFirstOfMonth && firstOfMonthRec != null)
+                    {
                         firstOfMonthRec.Value += proofGal;
                     }
                     else if (reportRec == null)
@@ -161,7 +145,7 @@ namespace WebApp.Persistence.Repositories
                         cellValue.PartID = PartId;
                         cellValue.RowID = rowId;
                         cellValue.ColumnID = colId;
-                        cellValue.Value = purchaseData.ProofGallon; 
+                        cellValue.Value = purchaseData.ProofGallon;
                         if (rowId == (int)PersistReportRow.OnHandFirstOfMonth)
                         {
                             cellValue.Date = nextMonth;
@@ -189,6 +173,138 @@ namespace WebApp.Persistence.Repositories
         private void CompleteDbTransaction()
         {
             _context.SaveChanges();
+        }
+
+
+        #region Data Retrieval
+
+        /// <summary>
+        /// Method queries for a set of storage reporting records from persistent report table
+        /// </summary>
+        /// <param name="startOfReporting"></param>
+        /// <param name="endOfReporting"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public ReportData GetPersistentStorageReportData(DateTime endDate, int userId)
+        {
+
+            int identifierId = (int)PersistReportType.Storage;
+            int partId = (int)PersistReportPart.Part1;
+            int endYear = endDate.Year;
+            int endMonth = endDate.Month;
+            int distillerID = GetDistillerId(userId);
+            ReportData reportData = new ReportData();
+
+            try
+            {
+                var records =
+                        (from storageRec in _context.PersistentReport
+                         where (storageRec.DistillerID == distillerID &&
+                         storageRec.IdentifierID == identifierId &&
+                         storageRec.PartID == partId &&
+                         storageRec.Date.Year == endYear &&
+                         storageRec.Date.Month == endMonth)
+                         select storageRec).DefaultIfEmpty();
+
+                if (records != null)
+                {
+                    // fill header
+                    reportData.Header = GetDistillerInfoForReportHeader(distillerID, endDate);
+
+                    PersistRepType reportType = new PersistRepType();
+                    PersistRepPart reportPart = new PersistRepPart();
+                    List<PersistRepType> reportTypeList = new List<PersistRepType>();
+                    List<PersistRepPart> reportPartList = new List<PersistRepPart>();
+                    List<PersistRepColumn> reportColumnList = new List<PersistRepColumn>();
+
+                    // these values are static for storage report
+                    reportType.ReportTypeId = identifierId;
+                    reportPart.PartId = partId;
+
+                    foreach (var item in records)
+                    {
+                        PersistRepColumn reportColumn = new PersistRepColumn();
+                        PersistRepRow reportRow = new PersistRepRow();
+                        List<PersistRepRow> reportRowList = new List<PersistRepRow>();
+
+                        var match = reportColumnList.Find(x => x.ColumnId == item.ColumnID);
+                        if (match == null)
+                        {
+                            // fill reportRow object
+                            reportRow.RowId = item.RowID;
+                            reportRow.Value = item.Value;
+
+                            // fill reportRowList with reportRow objects
+                            reportRowList.Add(reportRow);
+
+                            // fill reportColumn object 
+                            reportColumn.ColumnId = item.ColumnID;
+                            reportColumn.RowSpaceList = reportRowList;
+
+                            // fill reportColumnList with reportColumn objects
+                            reportColumnList.Add(reportColumn);
+                        }
+                        else
+                        {
+                            // fill reportRow object
+                            reportRow.RowId = item.RowID;
+                            reportRow.Value = item.Value;
+
+                            // add to existing columns row list
+                            match.RowSpaceList.Add(reportRow);
+                        }
+                    }
+                    // fill reportPart object
+                    reportPart.ColumnSpaceList = reportColumnList;
+                    // fill reportPartList with reportPart objects
+                    reportPartList.Add(reportPart);
+                    // fill reportType object
+                    reportType.ReportPartList = reportPartList;
+                    // fill reportTypeList with reportType objects
+                    reportTypeList.Add(reportType);
+                    // fill reportData object
+                    reportData.ReportTypeList = reportTypeList;
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        return reportData;
+        }
+
+    #endregion
+
+    private ReportHeader GetDistillerInfoForReportHeader(int distillerID, DateTime startDate)
+        {
+            try
+            {
+                ReportHeader header = new ReportHeader();
+
+                var res =
+                    (from distT in _context.Distiller
+                     join distDT in _context.DistillerDetail on distT.DistillerID equals distDT.DistillerID
+                     where distDT.DistillerID == distillerID
+                     select new
+                     {
+                         DistillerName = distT.Name,
+                         EIN = distDT.EIN,
+                         DSP = distDT.DSP,
+                         Address = distDT.StreetAddress + " " + distDT.City + " " + distDT.State + " " + distDT.Zip
+                     }).FirstOrDefault();
+
+                header.ProprietorName = res.DistillerName;
+                header.EIN = res.EIN;
+                header.DSP = res.DSP;
+                header.PlantAddress = res.Address;
+                header.ReportDate = startDate.ToString("Y");
+
+                return header;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
     }
 }
