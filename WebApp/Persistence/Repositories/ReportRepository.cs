@@ -5,60 +5,306 @@ using System.Web;
 using WebApp.Helpers;
 using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
+using WebApp.ReportDTO;
 
-namespace WebApp.Repositories
-{ 
+namespace WebApp.Persistence.Repositories
+{
     public class ReportRepository
     {
-        private readonly ApplicationDbContext _context;
-        private List<ReportDto> _reportDtoList = new List<ReportDto>(); 
+        private readonly DistilDBContext _context;
 
-        private void GetDataToBeInsertedInPersistentTableFormat(RecordType recordType, ref List<ReportDto> _reportDtoList, PurchaseObject purchaseData = null, ProductionObject productionData = null)
+        // <summary>
+        /// GetDistillerID retrieves DistillerId for given UserId
+        /// </summary>
+        public int GetDistillerId(int userId)
         {
+            int distillerId = (from rec in _context.AspNetUserToDistiller
+                               where rec.UserId == userId
+                               select rec.DistillerID).FirstOrDefault();
+            return distillerId;
+        }
+
+        private void GetDataToBeInsertedInPersistentTableFormat(RecordType recordType, int userId, PurchaseObject purchaseData = null, ProductionObject productionData = null)
+        {
+            //update storage report
+            if (purchaseData != null)
+            {
+                try
+                {
+                    // update line 2
+                    UpdateStorageReportCellValue(purchaseData, userId, (int)PersistReportRow.DepositedInBulkStorage);
+                    // update line 2 row total
+                    UpdateStorageReportCellValue(purchaseData, userId, (int)PersistReportRow.DepositedInBulkStorage, (int)PersistReportColumn.Total);
+                    // update line 6
+                    UpdateStorageReportCellValue(purchaseData, userId, (int)PersistReportRow.TotalLines_1_Through_5);
+                    // update line 6 row total
+                    UpdateStorageReportCellValue(purchaseData, userId, (int)PersistReportRow.TotalLines_1_Through_5, (int)PersistReportColumn.Total);
+                    // update line 23 (= line 6 - line 17 - line 18)
+
+                    // update line 23 (= line 6 - line 17 - line 18) row total
+
+                    // update line 24
+                    UpdateStorageReportCellValue(purchaseData, userId, (int)PersistReportRow.TotalLines_7_Through_23);
+                    // update line 24 row total
+                    UpdateStorageReportCellValue(purchaseData, userId, (int)PersistReportRow.TotalLines_7_Through_23, (int)PersistReportColumn.Total);
+                    // update line 1 for next month
+                    UpdateStorageReportCellValue(purchaseData, userId, (int)PersistReportRow.OnHandFirstOfMonth);
+                    // update line 1 row total for next month
+                    UpdateStorageReportCellValue(purchaseData, userId, (int)PersistReportRow.OnHandFirstOfMonth, (int)PersistReportColumn.Total);
+                    CompleteDbTransaction();
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+
+            }
+        }
+
+        public ReportRepository()
+        {
+            _context = new DistilDBContext();
+        }
+
+        public bool UpdateReportDataDuringPurchase(PurchaseObject purchaseData, int userId)
+        {
+            bool retMthdExecResult = false;
+            // call private method here that determines what reports should be updated
+            try
+            {
+                GetDataToBeInsertedInPersistentTableFormat(RecordType.Purchase, userId, purchaseData: purchaseData);
+                retMthdExecResult = true;
+            }
+            catch (Exception e)
+            {
+                retMthdExecResult = false;
+                throw e;
+            }
+
+            return retMthdExecResult;
+        }
+
+        public bool UpdateReportDataDuringProduction(ProductionObject productionData, int userId)
+        {
+            // call private method here that determines what reports should be updated
+            GetDataToBeInsertedInPersistentTableFormat(RecordType.Purchase, userId, productionData: productionData);
+
             throw new NotImplementedException();
         }
 
-        public ReportRepository(ApplicationDbContext context)
+
+        private void UpdateStorageReportCellValue(PurchaseObject purchaseData, int userId, int reportRowId, int reportColId = 0 /*reportColId is optional*/)
         {
-            _context = context;
+            int IdentifierId = (int)PersistReportType.Storage;
+            int PartId = (int)PersistReportPart.Part1;
+            int rowId = reportRowId;
+            int colId = reportColId == 0 ? purchaseData.SpiritTypeReportingID : reportColId;
+            if (rowId == 0 || colId == 0)
+            {
+                throw new ArgumentOutOfRangeException("Reporting row ID and column ID must be greater than 0");
+            }
+            // converting to PST
+            DateTime purchDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(purchaseData.PurchaseDate, "Pacific Standard Time");
+            // adding 1 month to update OnHandFirstOfMonth for next month
+            DateTime nextMonth = purchDate.AddMonths(1);
+            float proofGal = purchaseData.ProofGallon;
+
+            if (purchaseData != null)
+            {
+                try
+                {
+                    // checking for existing row with these values
+                    var reportRec =
+                        (from rec in _context.PersistentReport
+                         where (rec.IdentifierID == IdentifierId &&
+                                rec.PartID == PartId &&
+                                rec.RowID == rowId &&
+                                rec.ColumnID == colId &&
+                                rec.Date.Year == purchDate.Year &&
+                                rec.Date.Month == purchDate.Month)
+                         select rec).FirstOrDefault();
+
+                    var firstOfMonthRec =
+                                (from rec in _context.PersistentReport
+                                 where (rec.IdentifierID == IdentifierId &&
+                                 rec.PartID == PartId &&
+                                 rec.RowID == rowId &&
+                                 rec.ColumnID == colId &&
+                                 rec.Date.Year == nextMonth.Year &&
+                                 rec.Date.Month == nextMonth.Month)
+                                 select rec).FirstOrDefault();
+
+                    if (rowId == (int)PersistReportRow.OnHandFirstOfMonth && firstOfMonthRec != null)
+                    {
+                        firstOfMonthRec.Value += proofGal;
+                    }
+                    else if (reportRec == null)
+                    {
+                        PersistentReport cellValue = new PersistentReport();
+                        cellValue.IdentifierID = IdentifierId;
+                        cellValue.PartID = PartId;
+                        cellValue.RowID = rowId;
+                        cellValue.ColumnID = colId;
+                        cellValue.Value = purchaseData.ProofGallon;
+                        if (rowId == (int)PersistReportRow.OnHandFirstOfMonth)
+                        {
+                            cellValue.Date = nextMonth;
+                        }
+                        else
+                        {
+                            cellValue.Date = purchDate;
+                        }
+                        cellValue.DistillerID = GetDistillerId(userId);
+
+                        _context.PersistentReport.Add(cellValue);
+                    }
+                    else
+                    {
+                        reportRec.Value += proofGal;
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }
         }
 
+        private void CompleteDbTransaction()
+        {
+            _context.SaveChanges();
+        }
+
+
+        #region Data Retrieval
+
         /// <summary>
-        /// Method queries for a set of reporting records from persistent report table
+        /// Method queries for a set of storage reporting records from persistent report table
         /// </summary>
         /// <param name="startOfReporting"></param>
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public IEnumerable<ReportDto> GetReportData(DateTime startOfReporting, DateTime endOfReporting, int userId, ReportType reportType)
+        public ReportData GetPersistentStorageReportData(DateTime endDate, int userId)
         {
-            throw new NotImplementedException();
+
+            int identifierId = (int)PersistReportType.Storage;
+            int partId = (int)PersistReportPart.Part1;
+            int endYear = endDate.Year;
+            int endMonth = endDate.Month;
+            int distillerID = GetDistillerId(userId);
+            ReportData reportData = new ReportData();
+
+            try
+            {
+                var records =
+                        (from storageRec in _context.PersistentReport
+                         where (storageRec.DistillerID == distillerID &&
+                         storageRec.IdentifierID == identifierId &&
+                         storageRec.PartID == partId &&
+                         storageRec.Date.Year == endYear &&
+                         storageRec.Date.Month == endMonth)
+                         select storageRec).DefaultIfEmpty();
+
+                if (records != null)
+                {
+                    // fill header
+                    reportData.Header = GetDistillerInfoForReportHeader(distillerID, endDate);
+
+                    PersistRepType reportType = new PersistRepType();
+                    PersistRepPart reportPart = new PersistRepPart();
+                    List<PersistRepType> reportTypeList = new List<PersistRepType>();
+                    List<PersistRepPart> reportPartList = new List<PersistRepPart>();
+                    List<PersistRepColumn> reportColumnList = new List<PersistRepColumn>();
+
+                    // these values are static for storage report
+                    reportType.ReportTypeId = identifierId;
+                    reportPart.PartId = partId;
+
+                    foreach (var item in records)
+                    {
+                        PersistRepColumn reportColumn = new PersistRepColumn();
+                        PersistRepRow reportRow = new PersistRepRow();
+                        List<PersistRepRow> reportRowList = new List<PersistRepRow>();
+
+                        var match = reportColumnList.Find(x => x.ColumnId == item.ColumnID);
+                        if (match == null)
+                        {
+                            // fill reportRow object
+                            reportRow.RowId = item.RowID;
+                            reportRow.Value = item.Value;
+
+                            // fill reportRowList with reportRow objects
+                            reportRowList.Add(reportRow);
+
+                            // fill reportColumn object 
+                            reportColumn.ColumnId = item.ColumnID;
+                            reportColumn.RowSpaceList = reportRowList;
+
+                            // fill reportColumnList with reportColumn objects
+                            reportColumnList.Add(reportColumn);
+                        }
+                        else
+                        {
+                            // fill reportRow object
+                            reportRow.RowId = item.RowID;
+                            reportRow.Value = item.Value;
+
+                            // add to existing columns row list
+                            match.RowSpaceList.Add(reportRow);
+                        }
+                    }
+                    // fill reportPart object
+                    reportPart.ColumnSpaceList = reportColumnList;
+                    // fill reportPartList with reportPart objects
+                    reportPartList.Add(reportPart);
+                    // fill reportType object
+                    reportType.ReportPartList = reportPartList;
+                    // fill reportTypeList with reportType objects
+                    reportTypeList.Add(reportType);
+                    // fill reportData object
+                    reportData.ReportTypeList = reportTypeList;
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        return reportData;
         }
 
-        public bool UpdateReportDataDuringPurchase(PurchaseObject purchaseData)
+    #endregion
+
+    private ReportHeader GetDistillerInfoForReportHeader(int distillerID, DateTime startDate)
         {
-            // call private method here that determines what reports should be updated
-            GetDataToBeInsertedInPersistentTableFormat(RecordType.Purchase, ref _reportDtoList, purchaseData: purchaseData);
-
-            // run actual db update
-            foreach (var i in _reportDtoList)
+            try
             {
+                ReportHeader header = new ReportHeader();
 
+                var res =
+                    (from distT in _context.Distiller
+                     join distDT in _context.DistillerDetail on distT.DistillerID equals distDT.DistillerID
+                     where distDT.DistillerID == distillerID
+                     select new
+                     {
+                         DistillerName = distT.Name,
+                         EIN = distDT.EIN,
+                         DSP = distDT.DSP,
+                         Address = distDT.StreetAddress + " " + distDT.City + " " + distDT.State + " " + distDT.Zip
+                     }).FirstOrDefault();
+
+                header.ProprietorName = res.DistillerName;
+                header.EIN = res.EIN;
+                header.DSP = res.DSP;
+                header.PlantAddress = res.Address;
+                header.ReportDate = startDate.ToString("Y");
+
+                return header;
             }
-            throw new NotImplementedException();
-        }
-
-        public bool UpdateReportDataDuringProduction(ProductionObject productionData)
-        {
-            // call private method here that determines what reports should be updated
-            GetDataToBeInsertedInPersistentTableFormat(RecordType.Purchase, ref _reportDtoList, productionData: productionData);
-
-            // run actual db update
-            foreach (var i in _reportDtoList)
+            catch (Exception e)
             {
-
+                throw e;
             }
-            throw new NotImplementedException();
         }
     }
 }

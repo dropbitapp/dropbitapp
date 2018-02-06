@@ -99,11 +99,10 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    IEnumerable<ReportDto> report;
 
                     if (_enableNewReportingImplementation)
                     {
-                        report = dl.GetReportData(startOfReporting, endOfReporting, userId, ReportType.Storage);
+                        var report = dl.GetReportData(endOfReporting, userId, PersistReportType.Storage);
 
                         return Json(report, JsonRequestBehavior.AllowGet);
                     }

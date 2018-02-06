@@ -57,6 +57,10 @@
                 CorrectiveAction: ""
             };
 
+            function _getUsedMatsList() {
+                return usedMatsList;
+            };
+
             function _addEventListeners() {
                 // Material Burndown state machine
                 // on burndown dialog open event
@@ -697,6 +701,23 @@
                             input: "#BlendList", message: "Please Pick A Batch for Bottling", action: 'click', rule: function (input, commit) {
                                 var selectedItems = $('#BlendList').jqxListBox('getSelectedItems');
                                 return selectedItems.length > 0 ? true : false;
+                            }
+                        },
+                        {
+                            input: "#ProofInput",
+                            message: "#Proof gallon quantity should be less or equal to the sum of all blended batches used in bottling",
+                            action: 'blur',
+                            rule: function (input, commit) {
+                                var usedMatsList = _getUsedMatsList();
+                                var usedMatsTotal = 0;
+                                for (var i = 0; i < usedMatsList.length; i++) {
+                                    if (usedMatsList[i].BurnDownMethod === 'volume') {
+                                        var proofGal = distillCompInstance.calculateProof(usedMatsList[i].NewVal, usedMatsList[i].AlcoholContent);
+                                        usedMatsTotal += proofGal;
+                                    } // else handle weight proof gallon calculation and addition
+                                }
+                                var proofInput = $('#ProofInput').val();
+                                return usedMatsTotal >= proofInput;
                             }
                         },
                         {
