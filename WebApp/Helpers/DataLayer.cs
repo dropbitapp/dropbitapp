@@ -4811,7 +4811,7 @@ namespace WebApp.Helpers
             }
         }
 
-        internal bool DeleteProduction(ProductionObject productionObject, int userId)
+        public bool DeleteProduction(ProductionObject productionObject, int userId)
         {
             bool retMthdExecResult = false;
             if (productionObject.ProductionId >= 0)
@@ -4836,6 +4836,7 @@ namespace WebApp.Helpers
                         if (prod4Rep != null)
                         {
                             db.Production4Reporting.Remove(prod4Rep);
+                            db.SaveChanges();
                         }
 
                         var prodC =
@@ -4846,6 +4847,7 @@ namespace WebApp.Helpers
                         if (prodC != null)
                         {
                             db.ProductionContent.Remove(prodC);
+                            db.SaveChanges();
                         }
 
                         if (productionObject.ProductionType == "Distillation")
@@ -4858,6 +4860,7 @@ namespace WebApp.Helpers
                             if (p2scRec != null)
                             {
                                 db.ProductionToSpiritCut.Remove(p2scRec);
+                                db.SaveChanges();
                             }
 
                             var prod2SpiTypeRep =
@@ -4868,6 +4871,7 @@ namespace WebApp.Helpers
                             if (prod2SpiTypeRep != null)
                             {
                                 db.ProductionToSpiritTypeReporting.Remove(prod2SpiTypeRep);
+                                db.SaveChanges();
                             }
                         }
 
@@ -4881,6 +4885,7 @@ namespace WebApp.Helpers
                             if (prod2SpiTypeRep != null)
                             {
                                 db.ProductionToSpiritTypeReporting.Remove(prod2SpiTypeRep);
+                                db.SaveChanges();
                             }
 
                             var p2sRec =
@@ -4891,6 +4896,7 @@ namespace WebApp.Helpers
                             if (p2sRec != null)
                             {
                                 db.ProductionToSpirit.Remove(p2sRec);
+                                db.SaveChanges();
                             }
 
                             var blendedComp =
@@ -4901,6 +4907,7 @@ namespace WebApp.Helpers
                             if (blendedComp != null)
                             {
                                 db.BlendedComponent.Remove(blendedComp);
+                                db.SaveChanges();
                             }
                         }
 
@@ -4914,6 +4921,7 @@ namespace WebApp.Helpers
                             if (p2sRec != null)
                             {
                                 db.ProductionToSpirit.Remove(p2sRec);
+                                db.SaveChanges();
                             }
                         }
 
@@ -4925,6 +4933,7 @@ namespace WebApp.Helpers
                         if (qtyRec != null)
                         {
                             db.Volume.Remove(qtyRec);
+                            db.SaveChanges();
                         }
 
                         var vbwRec =
@@ -4935,6 +4944,7 @@ namespace WebApp.Helpers
                         if (vbwRec != null)
                         {
                             db.Weight.Remove(vbwRec);
+                            db.SaveChanges();
                         }
 
                         var alcRec =
@@ -4945,6 +4955,7 @@ namespace WebApp.Helpers
                         if (alcRec != null)
                         {
                             db.Alcohol.Remove(alcRec);
+                            db.SaveChanges();
                         }
 
                         var prfRec =
@@ -4955,6 +4966,7 @@ namespace WebApp.Helpers
                         if (prfRec != null)
                         {
                             db.Proof.Remove(prfRec);
+                            db.SaveChanges();
                         }
 
                         var strRecs =
@@ -4968,6 +4980,7 @@ namespace WebApp.Helpers
                             {
                                 db.StorageToRecord.Remove(rec);
                             }
+                            db.SaveChanges();
                         }
 
                         db.Production.Remove(prodRec);
@@ -5809,7 +5822,7 @@ namespace WebApp.Helpers
                              where prodForRep.ProductionID == rec.ProductionID
                              select new
                              {
-                               Proof = (float?)prodForRep.Proof ?? (float?) 0
+                                 Proof = (float?)prodForRep.Proof ?? (float?)0
                              }).FirstOrDefault();
 
                         prodRP2T4.ProofGallons = (float)part4.Proof;

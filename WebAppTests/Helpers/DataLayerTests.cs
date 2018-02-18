@@ -3422,6 +3422,67 @@ namespace WebApp.Helpers.Tests
         }
 
         [TestMethod()]
+        public void DeleteProductionTest()
+        {
+            // Arrange
+            ProductionObject prodObject = new ProductionObject
+            {
+                AlcoholContent = 39f,
+                BatchName = "TEST",
+                Gauged = true,
+                MaterialKindReportingID = 92,
+                ProductionDate = new DateTime(2018, 1, 1),
+                ProductionEnd = new DateTime(2018, 1, 1),
+                ProductionStart = new DateTime(2018, 1, 1),
+                ProductionType = "Distillation",
+                ProofGallon = 78f,
+                Quantity = 100f,
+                SpiritCutId = 9,
+                SpiritTypeReportingID = 2,
+                Storage = new List<StorageObject>
+                {
+                    new StorageObject
+                    {
+                        StorageId = 16,
+                        StorageName = "Storage1"
+                    }
+                },
+                UsedMats = new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn
+                    {
+                        ID = 1526,
+                        BurningDownMethod = "volume",
+                        DistillableOrigin = "pur",
+                        NewVal = 100,
+                        OldVal = 0,
+                        Proof = 0
+                    }
+                }
+            };
+
+            int productionId = _dl.CreateProduction(prodObject, _userId);
+
+            ProductionObject deleteObject = new ProductionObject
+            {
+                ProductionType = "Distillation",
+                ProductionId = productionId
+            };
+
+            // Act
+            _dl.DeleteProduction(deleteObject, _userId);
+
+            var prodQuery =
+            (from production in _db.Production
+             where production.ProductionID == productionId
+             select production).FirstOrDefault();
+
+            // Assert
+            Assert.IsNull(prodQuery);
+
+            TestRecordCleanup(productionId, Table.Production);
+        }
+
+        [TestMethod()]
         public void CreateStorageTest()
         {
             // Arrange
