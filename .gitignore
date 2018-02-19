@@ -3,9 +3,12 @@
 ################################################################################
 
 /.vs/config
+/WebApp/Web.config
 /WebApp/bin
+/WebAppTests/App.config
 /WebApp/obj/Debug
 /WebAppTests/obj/Debug
+
 *.suo
 *.xml
 *.cache

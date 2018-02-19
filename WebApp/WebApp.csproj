@@ -187,6 +187,7 @@
     <Compile Include="Helpers\DataLayer.cs" />
     <Compile Include="DTO\ReportDTO.cs" />
     <Compile Include="Helpers\Helpers.cs" />
+    <Compile Include="Helpers\ProductionPart6DataForParsingInProductionReportWorklfow.cs" />
     <Compile Include="Migrations\201711150114224_Initial.cs" />
     <Compile Include="Migrations\201711150114224_Initial.Designer.cs">
       <DependentUpon>201711150114224_Initial.cs</DependentUpon>
@@ -195,12 +196,17 @@
     <Compile Include="Migrations\201712250035292_persistentReport.Designer.cs">
       <DependentUpon>201712250035292_persistentReport.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201802160531532_Feb15.cs" />
+    <Compile Include="Migrations\201802160531532_Feb15.Designer.cs">
+      <DependentUpon>201802160531532_Feb15.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Persistence\BusinessLogicEnums\ReportEnums.cs" />
+    <Compile Include="Persistence\BusinessLogicEnums\ProductionWorkflowEnums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Persistence\Repositories\ReportRepository.cs" />
     <Compile Include="Startup.cs" />
@@ -1121,6 +1127,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201712250035292_persistentReport.resx">
       <DependentUpon>201712250035292_persistentReport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201802160531532_Feb15.resx">
+      <DependentUpon>201802160531532_Feb15.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
