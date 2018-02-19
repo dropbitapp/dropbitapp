@@ -141,6 +141,11 @@ namespace WebApp.Models
         public float Proof { get; set; }
         public float Alcohol { get; set; }
         public bool Redistilled { get; set; } // this flag is needed to indicate whether this production records is a re-distillation of the existing record
+        // we need to add ProductionID here to be able to differentiate where is Purchase amount is being burnt down on. 
+        // that is during Production Report part 6 data gathering, this would help us to get the right row for a give PurchaseID and
+        // ProductionID. Otherwise, there may be cases when single Purchase is being burnt down for two different productions and 
+        // there is no way for us to know which Row to pick without knowing which productionID that particular row entry is associated
+        public int ProductionID { get; set; }
 
         public virtual Purchase Purchase { get; set; }
     }
