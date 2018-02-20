@@ -140,7 +140,7 @@ namespace WebApp.Helpers
 
     public class StorageReportCategory
     {
-        public string CategoryName { get; set; }
+        public string CategoryName { get; set; } // extracted from SpiritTypeReporting table, column ProductTypeName
         public int SpiritTypeReportingID { get; set; }
         public float r1_OnHandFirstOfMonth { get; set; }
         public float r2_DepositedInBulkStorage { get; set; }
