@@ -6111,7 +6111,7 @@ namespace WebApp.Helpers
 
                 foreach (var i in tempRepObjList)
                 {
-                    GetRedistilledProductionContentRecordsForProcessing(ref prodContentIteratorList, i.ProductionID /*productionID or recordID*/);
+                    GetRedistilledProductionContentRecordsForProcessing(start, end, ref prodContentIteratorList, i.ProductionID /*productionID or recordID*/);
                 }
 
                 foreach (var k in prodContentIteratorList)
@@ -6132,7 +6132,7 @@ namespace WebApp.Helpers
             }
         }
 
-        private void GetRedistilledProductionContentRecordsForProcessing(ref List<ProductionContentIterator> prodContentIteratorList, int currRecordId/*if it's a first iteration then it is productionOD else it is recordID*/)
+        private void GetRedistilledProductionContentRecordsForProcessing(DateTime start, DateTime end, ref List<ProductionContentIterator> prodContentIteratorList, int currRecordId/*if it's a first iteration then it is productionOD else it is recordID*/)
         {
             bool parentGauged = false;
             int parentState = 0;
@@ -6148,6 +6148,8 @@ namespace WebApp.Helpers
                     where
                        prodContent.ProductionID == currRecordId
                        && (new int[] { 16, 18, 20, 22, 23 }).Contains(prodContent.ContentFieldID)
+                       && prod.ProductionStartTime >= start
+                       && prod.ProductionEndTime <= end
                     select new
                     {
                         prodContent.isProductionComponent, // the record that went into making this production record is from either Purchase or Prod
@@ -6213,7 +6215,7 @@ namespace WebApp.Helpers
                             var skipNextRecrusiveCall = prodContentIteratorList.Find(x => x.ProductionId == parentProductionId);
                             if (!(skipNextRecrusiveCall != null))
                             {
-                                GetRedistilledProductionContentRecordsForProcessing(ref prodContentIteratorList, current.RecordID);
+                                GetRedistilledProductionContentRecordsForProcessing( start, end, ref prodContentIteratorList, current.RecordID);
                             }
                         }
                     }
