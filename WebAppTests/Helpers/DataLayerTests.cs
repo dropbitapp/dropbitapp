@@ -3151,13 +3151,12 @@ namespace WebApp.Helpers.Tests
                 {
                     RawMaterialObject grapeMaterial = new RawMaterialObject();
                     grapeMaterial.RawMaterialName = "Grapes";
-                    grapeMaterial.MaterialCategoryID = 2;
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;;
                     grapeMaterial.UnitType = "lb";
                     grapeMaterial.UnitTypeId = 2;
                     PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
-                    grapeMaterial.MaterialCategoryID = 2;
 
                     grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
@@ -3383,13 +3382,12 @@ namespace WebApp.Helpers.Tests
                 {
                     RawMaterialObject grapeMaterial = new RawMaterialObject();
                     grapeMaterial.RawMaterialName = "Grapes";
-                    grapeMaterial.MaterialCategoryID = 2;
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
                     grapeMaterial.UnitType = "lb";
                     grapeMaterial.UnitTypeId = 2;
                     PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
-                    grapeMaterial.MaterialCategoryID = 2;
 
                     grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
@@ -3615,13 +3613,12 @@ namespace WebApp.Helpers.Tests
                 {
                     RawMaterialObject grapeMaterial = new RawMaterialObject();
                     grapeMaterial.RawMaterialName = "Grapes";
-                    grapeMaterial.MaterialCategoryID = 2;
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
                     grapeMaterial.UnitType = "lb";
                     grapeMaterial.UnitTypeId = 2;
                     PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
-                    grapeMaterial.MaterialCategoryID = 2;
 
                     grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
 
@@ -3810,13 +3807,12 @@ namespace WebApp.Helpers.Tests
                 {
                     RawMaterialObject grapeMaterial = new RawMaterialObject();
                     grapeMaterial.RawMaterialName = "Grapes";
-                    grapeMaterial.MaterialCategoryID = 2;
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
                     grapeMaterial.UnitType = "lb";
                     grapeMaterial.UnitTypeId = 2;
                     PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
-                    grapeMaterial.MaterialCategoryID = 2;
 
                     grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
 
@@ -4004,13 +4000,12 @@ namespace WebApp.Helpers.Tests
                 {
                     RawMaterialObject grapeMaterial = new RawMaterialObject();
                     grapeMaterial.RawMaterialName = "Grapes";
-                    grapeMaterial.MaterialCategoryID = 2;
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
                     grapeMaterial.UnitType = "lb";
                     grapeMaterial.UnitTypeId = 2;
                     PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
-                    grapeMaterial.MaterialCategoryID = 2;
 
                     grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
 
@@ -4333,6 +4328,477 @@ namespace WebApp.Helpers.Tests
             Assert.AreEqual(dbResult.PurchaseMaterialTypes.Supply, distilledMaterial.PurchaseMaterialTypes.Supply);
             // Cleanup
             TestRecordCleanup(result, Table.MaterialDict);
+        }
+
+        /// <summary>
+        /// This test checks that all relevant records in all tables are deleted 
+        /// when Fermentable Purchase record is deleted
+        /// </summary>
+        [TestMethod()]
+        public void Delete_Purchase_Fermentable_Record_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int grapeMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "VendorTest";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                // grapes
+                {
+                    RawMaterialObject grapeMaterial = new RawMaterialObject();
+                    grapeMaterial.RawMaterialName = "Grapes";
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    grapeMaterial.UnitType = "lb";
+                    grapeMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermentable = true;
+                    grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Riesling Grapes ";
+                purchO.PurchaseType = "Fermentable";
+                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.Quantity = 0f;
+                purchO.VolumeByWeight = 2000f;
+                purchO.RecordId = grapeMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                _dl.DeletePurchase(purchO, _userId);
+
+                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+
+                var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
+
+                Assert.IsNull(purchaseFound);
+
+                #endregion
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that all relevant records in all tables are deleted 
+        /// when Fermented Purchase record is deleted
+        /// </summary>
+        [TestMethod()]
+        public void Delete_Purchase_Fermented_Record_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int wineMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "VendorTest";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject wineMaterial = new RawMaterialObject();
+                    wineMaterial.RawMaterialName = "Wine";
+                    wineMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    wineMaterial.UnitType = "gal";
+                    wineMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermented = true;
+                    wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Riesling Wine ";
+                purchO.PurchaseType = "Fermented";
+                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.Quantity = 2000f;
+                purchO.VolumeByWeight = 0f;
+                purchO.RecordId = wineMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                _dl.DeletePurchase(purchO, _userId);
+
+                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+
+                var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
+
+                Assert.IsNull(purchaseFound);
+
+                #endregion
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that all relevant records in all tables are deleted 
+        /// when Distilled Purchase record is deleted
+        /// </summary>
+        [TestMethod()]
+        public void Delete_Purchase_Distilled_Record_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int distilledMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "VendorTest";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject gnsMaterial = new RawMaterialObject();
+                    gnsMaterial.RawMaterialName = "GNS";
+                    gnsMaterial.UnitType = "gal";
+                    gnsMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Distilled = true;
+                    gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    distilledMaterialId = _dl.CreateRawMaterial(_userId, gnsMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(distilledMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "GNS ";
+                purchO.PurchaseType = "Distilled";
+                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.Quantity = 2000f;
+                purchO.VolumeByWeight = 0f;
+                purchO.ProofGallon = 96f;
+                purchO.RecordId = distilledMaterialId;
+                purchO.Price = 3500f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                _dl.DeletePurchase(purchO, _userId);
+
+                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+
+                var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
+
+                Assert.IsNull(purchaseFound);
+
+                #endregion
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that all relevant records in all tables are deleted 
+        /// when Additive Purchase record is deleted
+        /// </summary>
+        [TestMethod()]
+        public void Delete_Purchase_Additive_Record_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int additiveMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "VendorTest";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject additiveMaterial = new RawMaterialObject();
+                    additiveMaterial.RawMaterialName = "Honey";
+                    additiveMaterial.UnitType = "lb";
+                    additiveMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Additive = true;
+                    additiveMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    additiveMaterialId = _dl.CreateRawMaterial(_userId, additiveMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(additiveMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Honey";
+                purchO.PurchaseType = "Additive";
+                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.Quantity = 0f;
+                purchO.VolumeByWeight = 500f;
+                purchO.ProofGallon = 0f;
+                purchO.RecordId = additiveMaterialId;
+                purchO.Price = 3500f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                _dl.DeletePurchase(purchO, _userId);
+
+                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+
+                var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
+
+                Assert.IsNull(purchaseFound);
+
+                #endregion
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that all relevant records in all tables are deleted 
+        /// when Supply Purchase record is deleted
+        /// </summary>
+        [TestMethod()]
+        public void Delete_Purchase_Supply_Record_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int supplyMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "VendorTest";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject additiveMaterial = new RawMaterialObject();
+                    additiveMaterial.RawMaterialName = "Bottles";
+                    additiveMaterial.UnitType = "pc";
+                    additiveMaterial.UnitTypeId = 7;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Supply = true;
+                    additiveMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    supplyMaterialId = _dl.CreateRawMaterial(_userId, additiveMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(supplyMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Packaging Bottles";
+                purchO.PurchaseType = "Supply";
+                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.Quantity = 200f;
+                purchO.VolumeByWeight = 0f;
+                purchO.ProofGallon = 0f;
+                purchO.RecordId = supplyMaterialId;
+                purchO.Price = 500f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                _dl.DeletePurchase(purchO, _userId);
+
+                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+
+                var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
+
+                Assert.IsNull(purchaseFound);
+
+                #endregion
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
         }
 
         [TestMethod()]

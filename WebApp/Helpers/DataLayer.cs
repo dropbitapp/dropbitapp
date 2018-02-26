@@ -1853,7 +1853,13 @@ namespace WebApp.Helpers
             return retMthdExecResult;
         }
 
-        internal bool DeletePurchase(PurchaseObject purchaseObject, int userId)
+        /// <summary>
+        /// This method removes all relevant records in the DB in all associated tables
+        /// </summary>
+        /// <param name="purchaseObject"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public bool DeletePurchase(PurchaseObject purchaseObject, int userId)
         {
             bool retMthdExecResult = false;
             if (purchaseObject.PurchaseId >= 0)
@@ -1932,6 +1938,35 @@ namespace WebApp.Helpers
                         {
                             db.StorageToRecord.Remove(strRec);
                         }
+
+                        var purToSpiritTypeReporting =
+                            (from rec in db.PurchaseToSpiritTypeReporting
+                             where rec.PurchaseID == purRec.PurchaseID
+                             select rec);
+
+                        if (purToSpiritTypeReporting != null)
+                        {
+                            foreach(var i in purToSpiritTypeReporting)
+                            {
+                                db.PurchaseToSpiritTypeReporting.Remove(i);
+                            }
+                        }
+
+                        var prodContent =
+                            (from rec in db.ProductionContent
+                             where rec.RecordID == purRec.PurchaseID
+                             && rec.isProductionComponent == false
+                             select rec);
+
+                        if (prodContent != null)
+                        {
+                            foreach(var k in prodContent)
+                            {
+                                db.ProductionContent.Remove(k);
+                            }
+                        }
+
+                        db.Purchase.Remove(purRec);
 
                         db.SaveChanges();
                     }
@@ -2762,7 +2797,6 @@ namespace WebApp.Helpers
 
                     if (rawMObject.PurchaseMaterialTypes.Fermentable)
                     {
-
                         MaterialType matType = new MaterialType();
                         matType.MaterialDictID = materialDictID;
                         matType.Name = "Fermentable";
@@ -2777,7 +2811,6 @@ namespace WebApp.Helpers
 
                     if (rawMObject.PurchaseMaterialTypes.Fermented)
                     {
-
                         MaterialType matType = new MaterialType();
                         matType.MaterialDictID = materialDictID;
                         matType.Name = "Fermented";
