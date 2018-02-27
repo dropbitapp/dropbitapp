@@ -426,8 +426,6 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Tequila = 0f;
                 processingReportP4.Vodka = 0f;
 
-
-
                 actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
                 #endregion
 
@@ -3744,7 +3742,7 @@ namespace WebApp.Helpers.Tests
 
                 // verify no Production Report Part 6
                 // we shouldn't have any data shown up in this test
-                Assert.AreEqual(0,actualProductionReport.ProdReportPart6List.Count);
+                Assert.AreEqual(0, actualProductionReport.ProdReportPart6List.Count);
 
                 #endregion
             }
