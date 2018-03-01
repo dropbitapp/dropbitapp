@@ -1853,7 +1853,13 @@ namespace WebApp.Helpers
             return retMthdExecResult;
         }
 
-        internal bool DeletePurchase(PurchaseObject purchaseObject, int userId)
+        /// <summary>
+        /// This method removes all relevant records in the DB in all associated tables
+        /// </summary>
+        /// <param name="purchaseObject"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public bool DeletePurchase(PurchaseObject purchaseObject, int userId)
         {
             bool retMthdExecResult = false;
             if (purchaseObject.PurchaseId >= 0)
@@ -1932,6 +1938,35 @@ namespace WebApp.Helpers
                         {
                             db.StorageToRecord.Remove(strRec);
                         }
+
+                        var purToSpiritTypeReporting =
+                            (from rec in db.PurchaseToSpiritTypeReporting
+                             where rec.PurchaseID == purRec.PurchaseID
+                             select rec);
+
+                        if (purToSpiritTypeReporting != null)
+                        {
+                            foreach(var i in purToSpiritTypeReporting)
+                            {
+                                db.PurchaseToSpiritTypeReporting.Remove(i);
+                            }
+                        }
+
+                        var prodContent =
+                            (from rec in db.ProductionContent
+                             where rec.RecordID == purRec.PurchaseID
+                             && rec.isProductionComponent == false
+                             select rec);
+
+                        if (prodContent != null)
+                        {
+                            foreach(var k in prodContent)
+                            {
+                                db.ProductionContent.Remove(k);
+                            }
+                        }
+
+                        db.Purchase.Remove(purRec);
 
                         db.SaveChanges();
                     }
@@ -2762,7 +2797,6 @@ namespace WebApp.Helpers
 
                     if (rawMObject.PurchaseMaterialTypes.Fermentable)
                     {
-
                         MaterialType matType = new MaterialType();
                         matType.MaterialDictID = materialDictID;
                         matType.Name = "Fermentable";
@@ -2777,7 +2811,6 @@ namespace WebApp.Helpers
 
                     if (rawMObject.PurchaseMaterialTypes.Fermented)
                     {
-
                         MaterialType matType = new MaterialType();
                         matType.MaterialDictID = materialDictID;
                         matType.Name = "Fermented";
@@ -5754,32 +5787,32 @@ namespace WebApp.Helpers
                         {
                             var originalRawMaterialAmount =
                             (from purchaseForReporting in db.Purchase4Reporting
-                            where
-                            purchaseForReporting.PurchaseID == k.PurchaseId
-                            && purchaseForReporting.ProductionID == k.ProductionIdAssociatedWithPurchase
-                            select new
-                            {
-                                originalRawMaterialAmmt = purchaseForReporting.Weight > 0 ? purchaseForReporting.Weight : purchaseForReporting.Volume
-                            }).FirstOrDefault();
+                             where
+                             purchaseForReporting.PurchaseID == k.PurchaseId
+                             && purchaseForReporting.ProductionID == k.ProductionIdAssociatedWithPurchase
+                             select new
+                             {
+                                 originalRawMaterialAmmt = purchaseForReporting.Weight > 0 ? purchaseForReporting.Weight : purchaseForReporting.Volume
+                             }).FirstOrDefault();
 
                             var originalFermentedAmount =
                             (from prodForReporting in db.Production4Reporting
-                            where
-                            prodForReporting.ProductionID == k.ProductionIdAssociatedWithPurchase
-                            select new
-                            {
-                                originalFermentedAmmt = prodForReporting.Weight > 0 ? prodForReporting.Weight : prodForReporting.Volume,
-                            }).FirstOrDefault();
+                             where
+                             prodForReporting.ProductionID == k.ProductionIdAssociatedWithPurchase
+                             select new
+                             {
+                                 originalFermentedAmmt = prodForReporting.Weight > 0 ? prodForReporting.Weight : prodForReporting.Volume,
+                             }).FirstOrDefault();
 
                             var fermentedAmountWentToProduction =
                             (from prodContent in db.ProductionContent
-                            where
-                            prodContent.RecordID == k.ProductionIdAssociatedWithPurchase
-                            && (new int[] { 5, 6 }).Contains(prodContent.ContentFieldID)
-                            select new
-                            {
-                                fermentedInProductionAmmt = prodContent.ContentValue
-                            }).FirstOrDefault();
+                             where
+                             prodContent.RecordID == k.ProductionIdAssociatedWithPurchase
+                             && (new int[] { 5, 6 }).Contains(prodContent.ContentFieldID)
+                             select new
+                             {
+                                 fermentedInProductionAmmt = prodContent.ContentValue
+                             }).FirstOrDefault();
 
                             if (originalRawMaterialAmount != null && originalFermentedAmount != null && fermentedAmountWentToProduction != null)
                             {
@@ -5803,7 +5836,7 @@ namespace WebApp.Helpers
                                 prt6.KindOfMaterial = (string)t.MaterialName;
                                 prt6.ProdReportMaterialCategoryID = (int)t.ProductionReportMaterialCategoryID;
 
-                                if (k.ContentFieldId == 1 )
+                                if (k.ContentFieldId == 1)
                                 {
                                     prt6.Volume = updatedRawMaterialAmmt;
                                 }
@@ -5816,7 +5849,7 @@ namespace WebApp.Helpers
                             }
                             else // case where Material already exists
                             {
-                                if (k.ContentFieldId == 1 )
+                                if (k.ContentFieldId == 1)
                                 {
                                     mater.Volume += updatedRawMaterialAmmt;
                                 }
@@ -5835,21 +5868,21 @@ namespace WebApp.Helpers
                         {
                             var l =
                             (from prodContent in db.ProductionContent
-                            join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.ProductionID equals prod2SpiritType.ProductionID into prod2SpiritType_join
-                            from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
-                            join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
-                            from matKindRep in matKindRep_join.DefaultIfEmpty()
-                            join prodRepMatCat2MatKind in db.ProdRepMatCat2MaterialKind on matKindRep.MaterialKindReportingID equals prodRepMatCat2MatKind.MaterialKindReportingID into prodRepMatCat2MatKind_join
-                            from prodRepMatCat2MatKind in prodRepMatCat2MatKind_join.DefaultIfEmpty()
-                            join prodRepMatCat in db.ProductionReportMaterialCategory on prodRepMatCat2MatKind.ProductionReportMaterialCategoryID equals prodRepMatCat.ProductionReportMaterialCategoryID into prodRepMatCat_join
-                            from prodRepMatCat in prodRepMatCat_join.DefaultIfEmpty()
-                            where
-                            prodContent.isProductionComponent == true &&
-                            prodContent.RecordID == mat.ProductionID
-                            select new
-                            {
-                                ProductionReportMaterialCategoryID = (int?)prodRepMatCat.ProductionReportMaterialCategoryID
-                            }).FirstOrDefault();
+                             join prod2SpiritType in db.ProductionToSpiritTypeReporting on prodContent.ProductionID equals prod2SpiritType.ProductionID into prod2SpiritType_join
+                             from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
+                             join matKindRep in db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
+                             from matKindRep in matKindRep_join.DefaultIfEmpty()
+                             join prodRepMatCat2MatKind in db.ProdRepMatCat2MaterialKind on matKindRep.MaterialKindReportingID equals prodRepMatCat2MatKind.MaterialKindReportingID into prodRepMatCat2MatKind_join
+                             from prodRepMatCat2MatKind in prodRepMatCat2MatKind_join.DefaultIfEmpty()
+                             join prodRepMatCat in db.ProductionReportMaterialCategory on prodRepMatCat2MatKind.ProductionReportMaterialCategoryID equals prodRepMatCat.ProductionReportMaterialCategoryID into prodRepMatCat_join
+                             from prodRepMatCat in prodRepMatCat_join.DefaultIfEmpty()
+                             where
+                             prodContent.isProductionComponent == true &&
+                             prodContent.RecordID == mat.ProductionID
+                             select new
+                             {
+                                 ProductionReportMaterialCategoryID = (int?)prodRepMatCat.ProductionReportMaterialCategoryID
+                             }).FirstOrDefault();
 
                             if (l != null)
                             {
@@ -5877,7 +5910,7 @@ namespace WebApp.Helpers
 
             if (records != null)
             {
-                foreach(var record in records)
+                foreach (var record in records)
                 {
                     ProductionPart6DataForParsingInProductionReportWorklfow part6ObjectForParsing = new ProductionPart6DataForParsingInProductionReportWorklfow();
 
@@ -6111,7 +6144,7 @@ namespace WebApp.Helpers
 
                 foreach (var i in tempRepObjList)
                 {
-                    GetRedistilledProductionContentRecordsForProcessing(ref prodContentIteratorList, i.ProductionID /*productionID or recordID*/);
+                    GetRedistilledProductionContentRecordsForProcessing(start, end, ref prodContentIteratorList, i.ProductionID /*productionID or recordID*/);
                 }
 
                 foreach (var k in prodContentIteratorList)
@@ -6132,7 +6165,7 @@ namespace WebApp.Helpers
             }
         }
 
-        private void GetRedistilledProductionContentRecordsForProcessing(ref List<ProductionContentIterator> prodContentIteratorList, int currRecordId/*if it's a first iteration then it is productionOD else it is recordID*/)
+        private void GetRedistilledProductionContentRecordsForProcessing(DateTime start, DateTime end, ref List<ProductionContentIterator> prodContentIteratorList, int currRecordId/*if it's a first iteration then it is productionOD else it is recordID*/)
         {
             bool parentGauged = false;
             int parentState = 0;
@@ -6148,6 +6181,8 @@ namespace WebApp.Helpers
                     where
                        prodContent.ProductionID == currRecordId
                        && (new int[] { 16, 18, 20, 22, 23 }).Contains(prodContent.ContentFieldID)
+                       && prod.ProductionStartTime >= start
+                       && prod.ProductionEndTime <= end
                     select new
                     {
                         prodContent.isProductionComponent, // the record that went into making this production record is from either Purchase or Prod
@@ -6213,7 +6248,7 @@ namespace WebApp.Helpers
                             var skipNextRecrusiveCall = prodContentIteratorList.Find(x => x.ProductionId == parentProductionId);
                             if (!(skipNextRecrusiveCall != null))
                             {
-                                GetRedistilledProductionContentRecordsForProcessing(ref prodContentIteratorList, current.RecordID);
+                                GetRedistilledProductionContentRecordsForProcessing( start, end, ref prodContentIteratorList, current.RecordID);
                             }
                         }
                     }
@@ -7052,14 +7087,15 @@ namespace WebApp.Helpers
                      distiller.UserId == userId
                      && (production.ProductionTypeID == 1
                         || production.ProductionTypeID == 2)
-                     && production.ProductionEndTime >= startDate
-                     && production.ProductionEndTime <= endDate
-                     && production.Gauged == true
-                     && ((production.StatusID == 1
-                        || production.StatusID == 2
-                        || (production.StatusID == 3 && productionOutput.ProductionEndTime >= endDate && productionOutput.ProductionTypeID == 3))
-                        || (production.StatusID == 9 && destruction.EndTime > endDate))
-                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 20 || productionContent.ContentFieldID == 23))) // 20 = ProdDistilledProofGal, 23 = ProdFermentedProofGal
+                 && production.ProductionEndTime >= startDate
+                 && production.ProductionEndTime <= endDate
+                 && production.Gauged == true
+                 && (production.StatusID == 1
+                    || production.StatusID == 2
+                    || (production.StatusID == 3 && productionOutput.ProductionTypeID == 2)
+                    || (production.StatusID == 3 && productionOutput.ProductionTypeID == 3 && productionOutput.ProductionEndTime > endDate)
+                    || (production.StatusID == 9 && destruction.EndTime > endDate))
+                 && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 20 || productionContent.ContentFieldID == 23))) // 20 = ProdDistilledProofGal, 23 = ProdFermentedProofGal
                  select new
                  {
                      productionStatus = (int?)production.StatusID ?? 0,
@@ -7378,16 +7414,14 @@ namespace WebApp.Helpers
                  from spiritType in spiritType_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && sourceProductionRecord.ProductionTypeID == 2
+                     && (sourceProductionRecord.ProductionTypeID == 1 || sourceProductionRecord.ProductionTypeID == 2)
                      && outputProductionRecord.ProductionTypeID == 2
-                     && (sourceProductionRecord.StatusID == 1
-                        || sourceProductionRecord.StatusID == 2
-                        || sourceProductionRecord.StatusID == 3)
-                     && productionContent.ContentFieldID == 20 // ProdDistlledProofGal
-                     && sourceProductionRecord.ProductionEndTime < startDate
-                     && outputProductionRecord.ProductionEndTime >= startDate
-                     && outputProductionRecord.ProductionEndTime <= endDate
-                     && sourceProductionRecord.Gauged == true
+                     && (sourceProductionRecord.StatusID == 1 || sourceProductionRecord.StatusID == 2 || sourceProductionRecord.StatusID == 3)
+                 && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 20 || productionContent.ContentFieldID == 23))) // ProdDistlledProofGal
+                 && sourceProductionRecord.ProductionEndTime <= endDate
+                 && outputProductionRecord.ProductionEndTime >= startDate
+                 && outputProductionRecord.ProductionEndTime <= endDate
+                 && sourceProductionRecord.Gauged == true
                  select new
                  {
                      reportingCategoryName = spiritType.ProductTypeName ?? string.Empty,
