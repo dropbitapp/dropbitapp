@@ -9,6 +9,7 @@
             // initialize helper classes
             var distillCompInstance = new distillCompute();
             var genericWorkflowHelper = new genWHelpers();
+            var dateModificationHelper = new dateHelper();
 
             // spirit ID for a spirit Name currently selected from Blend's selection
             var spiritId;
@@ -198,6 +199,8 @@
                     $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( '' );
                     $("#MatBurnDwnDialog").jqxWindow('close');
                     $("#BlendList").jqxListBox('uncheckIndex', curRawMatIndex);
+                    // set prdouction min date based on purchase/prod object used.
+                    genericWorkflowHelper.constrainProductionDate('ProductionStart', 'ProductionEnd', 'BlendList');
                 } );
 
                 $( '#MatBurnDwnDialogQuantityInput' ).on( 'change', function ( e ) {
@@ -349,6 +352,8 @@
                             $("#SpiritTypeInput").val(blendingDataAdapter.records[index].SpiritName);
                             spiritId = blendingDataAdapter.records[index].SpiritId;
                         }
+                        // set prdouction min date based on purchase/prod object used.
+                        genericWorkflowHelper.constrainProductionDate('ProductionStart', 'ProductionEnd', 'BlendList');
                     }
                 });
 
@@ -777,6 +782,7 @@
                     dataType: "json",
                     dataFields: [
                         { name: 'ProductionId', type: 'number' },
+                        { name: 'ProductionEndDate'},
                         { name: 'BatchName', type: 'string' },
                         { name: 'Quantity', type: 'float' },
                         { name: 'AlcoholContent', type: 'float' },

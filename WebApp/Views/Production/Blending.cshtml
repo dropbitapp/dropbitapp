@@ -9,6 +9,7 @@
             //helper classes declarations
             var distillCompInstance = new distillCompute();
             var genericWorkflowHelper = new genWHelpers();
+            var dateModificationHelper = new dateHelper();
 
             // data adapters
             var rawMaterialTypeAdapter;
@@ -189,6 +190,8 @@
                     $("#MatBurnDwnDialogQuantityInputOriginal").val('');
                     $("#MatBurnDwnDialog").jqxWindow('close');
                     $("#DistilList").jqxListBox('uncheckIndex', curRawMatIndex);
+                    // set prdouction min date based on purchase/prod object used.
+                    genericWorkflowHelper.constrainProductionDate('ProductionStartDate', 'ProductionEndDate', 'DistilList', 'Blending');
                 });
 
                 $('#MatBurnDwnDialogQuantityInput').on('change', function (e) {
@@ -213,6 +216,27 @@
                         var index = args.index;
                         if ( distilsAdapter.records[index].Quantity !== undefined && distilsAdapter.records[index].VolumeByWeight !== undefined ) {
                             initializeDialogs();
+                            
+                            var minDate = new Date();
+                            var recordDate;
+                            // set prdouction min date based on purchase/prod object used.
+                            var checkedItems = $("#DistilList").jqxListBox('getCheckedItems');
+                            $.each(checkedItems, function (index) {
+                                if (this.originalItem.DistillableOrigin == 'pur') {
+                                    recordDate = dateModificationHelper.setMinDate(this.originalItem.PurchaseDate)
+                                }
+                                if (this.originalItem.DistillableOrigin == 'prod') {
+                                    recordDate = dateModificationHelper.setMinDate(this.originalItem.ProductionEndDate)
+                                }
+                                minDate = recordDate < minDate ? recordDate : minDate;
+                            });
+                            $('#ProductionStartDate').jqxDateTimeInput({
+                                min: minDate
+                            })
+                            $('#ProductionEndDate').jqxDateTimeInput({
+                                min: minDate
+                            })
+
 
                             if ( distilsAdapter.records[index].DistillableOrigin == 'pur' ) {
                                 usedMat.ID = distilsAdapter.records[index].PurchaseId;
@@ -238,6 +262,8 @@
                             $( "#DistilList" ).jqxListBox( 'uncheckIndex', index);
                             alert( "Both values for selected record are undefined, you can't burn down records with non existing quantities" );
                         }
+                        // set prdouction min date based on purchase/prod object used.
+                        genericWorkflowHelper.constrainProductionDate('ProductionStartDate', 'ProductionEndDate', 'DistilList', 'Blending');
                     }
                 });
 
@@ -962,7 +988,9 @@
                         { name: 'productionType' },
                         { name: 'DistillableOrigin' },
                         { name: 'VolumeByWeight' },
-                        { name: 'Quantity' }
+                        { name: 'Quantity' },
+                        { name: 'PurchaseDate' },
+                        { name: 'ProductionEndDate'}
                     ],
                     id: 'RecordId',
                     url: url,

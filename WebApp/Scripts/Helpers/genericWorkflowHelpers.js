@@ -1,7 +1,7 @@
 ﻿var genWHelpers = function () {
     //genWHelpers - Generic Workflow Helpers is the class that will contain misc functions that we could not allocate anywhere else
 
-
+    var dateModificationHelper = new dateHelper();
     // Function maps AdditiveName or AdditiveId to Units that should be used for this particular Additive
     /*
     params: AdditiveName - optional if AdditiveId is provided,
@@ -185,5 +185,38 @@
         }
         
         return proofTotal;
+    }
+
+    this.constrainProductionDate = function (prodStartDate, prodEndDate, listBox, workflow) {
+        var minDate = new Date();
+        var recordDate;
+        // var listBoxName = '#' + listBox;
+        // set prdouction min date based on purchase/prod object used.
+        var checkedItems = $('#' + listBox).jqxListBox('getCheckedItems');
+        $.each(checkedItems, function (index) {
+            if (workflow == 'Distillation' || workflow == 'Blending') {
+                if (this.originalItem.DistillableOrigin == 'pur') {
+                    recordDate = dateModificationHelper.setMinDate(this.originalItem.PurchaseDate)
+                }
+                if (this.originalItem.DistillableOrigin == 'prod') {
+                    recordDate = dateModificationHelper.setMinDate(this.originalItem.ProductionEndDate)
+                }
+            } else {
+                if (this.label.includes('PUR')) {
+                    recordDate = dateModificationHelper.setMinDate(this.originalItem.PurchaseDate)
+                }
+                if (this.label.includes('PROD')) {
+                    recordDate = dateModificationHelper.setMinDate(this.originalItem.ProductionEndDate)
+                }
+            }
+            
+            minDate = recordDate < minDate ? recordDate : minDate;
+        });
+        $('#' + prodStartDate).jqxDateTimeInput({
+            min: minDate
+        })
+        $('#' + prodEndDate).jqxDateTimeInput({
+            min: minDate
+        })
     }
 };

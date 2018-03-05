@@ -249,6 +249,7 @@ namespace WebApp.Helpers
                 {
                     PurchaseID = ((System.Int32?)purch.PurchaseID ?? (System.Int32?)0),
                     PurchaseBatchName = purch.PurchaseName ?? string.Empty,
+                    PurchaseDate = purch.PurchaseDate,
                     StatusID = ((System.Int32?)purch.StatusID ?? (System.Int32?)0),
                     RawMaterialName = matDic.Name ?? string.Empty,
                     MaterialDictID = ((System.Int32?)matDic.MaterialDictID ?? (System.Int32?)0),
@@ -262,8 +263,9 @@ namespace WebApp.Helpers
                 foreach (var i in fermentables)
                 {
                     PurMatObject obj = new PurMatObject();
-                    obj.PurchaseBatchName = i.PurchaseBatchName;
                     obj.PurchaseId = (int)i.PurchaseID;
+                    obj.PurchaseBatchName = i.PurchaseBatchName;
+                    obj.PurchaseDate = i.PurchaseDate;
                     obj.RawMaterialId = (int)i.MaterialDictID;
                     obj.MaterialName = i.RawMaterialName;
                     obj.QtyGal = (float)i.Quantity;
@@ -298,34 +300,30 @@ namespace WebApp.Helpers
 
             // 1(c) previous month
             var onHands1stMoC =
-                (from prod in
-                    (from prod in db.Production
-                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
-                     from proof in proof_join.DefaultIfEmpty()
-                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                     from distillers in distillers_join.DefaultIfEmpty()
-                     where
-                       distillers.UserId == userId &&
-                       prod.ProductionTypeID == 3 &&
-                       prod.Gauged == true &&
-                       prod.ProductionEndTime < startOfReporting &&
-                       (prod.StatusID == 1 ||
-                        prod.StatusID == 2 ||
-                        prod.StateID == 4)
-                     select new
-                     {
-                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
-                         Dummy = "x"
-                     })
-                 group prod by new { prod.Dummy } into g
-                 select new
-                 {
-                     OnHandFirstOfMonthBulk = g.Sum(p => p.Value)
-                 }).FirstOrDefault();
+                (from prod in db.Production
+                    join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
+                    from proof in proof_join.DefaultIfEmpty()
+                    join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
+                    from prod4Rep in prod4Rep_join.DefaultIfEmpty()
+                    join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                    from distillers in distillers_join.DefaultIfEmpty()
+                    where
+                    distillers.UserId == userId &&
+                    prod.Gauged == true &&
+                    prod.ProductionEndTime < startOfReporting &&
+                    prod.StateID == 4
+                    && prod.StatusID == 3
+                    select new
+                    {
+                        Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0
+                    }).ToList();
 
             if (onHands1stMoC != null)
             {
-                procRepP1.OnHandFirstofMonth = (float)onHands1stMoC.OnHandFirstOfMonthBulk;
+               foreach (var i in onHands1stMoC)
+                {
+                    procRepP1.OnHandFirstofMonth += (float)i.Value;
+                }
             }
 
             line8RunningSum += (float)procRepP1.OnHandFirstofMonth;
@@ -407,9 +405,9 @@ namespace WebApp.Helpers
                  where
                  distillers.UserId == userId &&
                  prod.Gauged == true &&
-                 prod.StateID == 5 &&
-                 prod.ProductionEndTime >= startOfReporting &&
-                 prod.ProductionEndTime <= endOfReporting
+                 prod.StateID == 5
+                 && prod.ProductionEndTime >= startOfReporting
+                 && prod.ProductionEndTime <= endOfReporting
                  select new
                  {
                      Quantity = (System.Single?)gl.Quantity ?? (System.Single?)0,
@@ -1616,6 +1614,7 @@ namespace WebApp.Helpers
                    {
                        ProductionName = prod.ProductionName,
                        ProductionID = ((System.Int32?)prod.ProductionID ?? (System.Int32?)0),
+                       ProductionEndDate = prod.ProductionEndTime,
                        StatusName = status.Name,
                        StateName = state.Name,
                        Quantity = ((System.Single?)quants.Value ?? (System.Single?)0),
@@ -1634,6 +1633,7 @@ namespace WebApp.Helpers
                         pobj.DistillableOrigin = "prod";
                         pobj.BatchName = rec.ProductionName;
                         pobj.ProductionId = (int)rec.ProductionID;
+                        pobj.ProductionEndDate = rec.ProductionEndDate;
                         pobj.Quantity = (float)rec.Quantity;
                         pobj.VolumeByWeight = (float)rec.VolumeByWeight;
                         pobj.AlcoholContent = (float)rec.Alcohol;
@@ -2021,7 +2021,8 @@ namespace WebApp.Helpers
                         Quantity = ((System.Single?)qty.Value ?? (System.Single?)0),
                         AlcoholContent = ((System.Single?)alc.Value ?? (System.Single?)0),
                         VolumeByWeight = ((System.Single?)vbw.Value ?? (System.Single?)0),
-                        BurningDownMethod = pur.BurningDownMethod ?? null
+                        BurningDownMethod = pur.BurningDownMethod ?? null,
+                        PurchaseDate = pur.PurchaseDate
                     };
 
                 if (purchaseQueryResult != null)
@@ -2037,6 +2038,7 @@ namespace WebApp.Helpers
                         prodObj.VolumeByWeight = (float)i.VolumeByWeight;
                         prodObj.BurningDownMethod = i.BurningDownMethod;
                         prodObj.AlcoholContent = (float)i.AlcoholContent;
+                        prodObj.PurchaseDate = i.PurchaseDate;
                         list.Add(prodObj);
                         combinedId++;
                     }
@@ -2064,7 +2066,8 @@ namespace WebApp.Helpers
                         Quantity = ((System.Single?)qty.Value ?? (System.Single?)0),
                         VolumeByWeight = ((System.Single?)vbw.Value ?? (System.Single?)0),
                         AlcoholContent = ((System.Single?)alc.Value ?? (System.Single?)0),
-                        BurningDownMethod = prod.BurningDownMethod ?? null
+                        BurningDownMethod = prod.BurningDownMethod ?? null,
+                        ProductionEndDate = prod.ProductionEndTime
                     };
 
                 if (productionQueryResult != null)
@@ -2080,6 +2083,7 @@ namespace WebApp.Helpers
                         prodObj.VolumeByWeight = (float)i.VolumeByWeight;
                         prodObj.AlcoholContent = (float)i.AlcoholContent;
                         prodObj.BurningDownMethod = i.BurningDownMethod;
+                        prodObj.ProductionEndDate = i.ProductionEndDate;
                         list.Add(prodObj);
                         combinedId++;
                     }
@@ -2106,6 +2110,7 @@ namespace WebApp.Helpers
                   {
                       PurchaseID = ((System.Int32?)purch.PurchaseID ?? (System.Int32?)0),
                       PurchaseBatchName = purch.PurchaseName ?? string.Empty,
+                      PurchaseDate = purch.PurchaseDate,
                       StatusID = ((System.Int32?)purch.StatusID ?? (System.Int32?)0),
                       StateID = ((System.Int32?)purch.StateID ?? (System.Int32?)0),
                       Quantity = ((System.Single?)quant.Value ?? (System.Single?)0),
@@ -2121,6 +2126,7 @@ namespace WebApp.Helpers
                         prodO.BatchName = i.PurchaseBatchName;
                         prodO.RecordId = combinedId;
                         prodO.PurchaseId = (int)i.PurchaseID;
+                        prodO.PurchaseDate = i.PurchaseDate;
                         prodO.DistillableOrigin = "pur";
                         prodO.BurningDownMethod = i.BurningDownMethod;
                         prodO.Quantity = (float)i.Quantity;
@@ -2147,6 +2153,7 @@ namespace WebApp.Helpers
                     {
                         ProductionID = ((System.Int32?)prod.ProductionID ?? (System.Int32?)0),
                         ProductionName = prod.ProductionName ?? string.Empty,
+                        ProductonEndDate = prod.ProductionEndTime,
                         StatusID = ((System.Int32?)prod.StatusID ?? (System.Int32?)0),
                         StateID = ((System.Int32?)prod.StateID ?? (System.Int32?)0),
                         Quantity = ((System.Single?)quant.Value ?? (System.Single?)0),
@@ -2163,6 +2170,7 @@ namespace WebApp.Helpers
                         prodO.DistillableOrigin = "prod";
                         prodO.RecordId = combinedId;
                         prodO.ProductionId = (int)i.ProductionID;
+                        prodO.ProductionEndDate = i.ProductonEndDate;
                         prodO.BurningDownMethod = i.BurningDownMethod;
                         prodO.Quantity = (float)i.Quantity;
                         prodO.VolumeByWeight = (float)i.VolumeByWeight;

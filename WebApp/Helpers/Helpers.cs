@@ -165,6 +165,7 @@ namespace WebApp.Helpers
     {
         public int PurchaseId { get; set; }
         public string PurchaseBatchName { get; set; }
+        public DateTime PurchaseDate { get; set; }
         public int RawMaterialId { get; set; }
         public string MaterialName { get; set; }
         public float VBW { get; set; }
@@ -192,6 +193,8 @@ namespace WebApp.Helpers
         public float ProofGallon { get; set; }
         public int SpiritId { get; set; }
         public string SpiritName { get; set; }
+        public DateTime PurchaseDate { get; set; }
+        public DateTime ProductionEndDate { get; set; }
         public string Note { get; set; }
         public string BurningDownMethod { get; set; } // this is used in distillation when at the time of burning down used materials. Currently, possible values are {"lb", "gal"}
     }
