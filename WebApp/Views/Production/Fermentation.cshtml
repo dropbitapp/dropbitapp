@@ -10,6 +10,7 @@
             // initialize helper classes
             var distillCompInstance = new distillCompute();
             var genericWorkflowHelper = new genWHelpers();
+            var dateModificationHelper = new dateHelper();
 
             // declare an array that will be used to keep selected rawMateral Ids
             var rawMaterialIdsSelected = []; // here we keep rawMaterial Ids of Raw Materials selected
@@ -152,6 +153,8 @@
                     $('#MatBurnDwnDialogQuantityInputOriginal').val('');
                     $('#MatBurnDwnDialog').jqxWindow('close');
                     $('#RawMaterialInput').jqxListBox('uncheckIndex', curRawMatIndex);
+                    // set prdouction min date based on purchase/prod object used.
+                    genericWorkflowHelper.constrainProductionDate('ProdStartDate', 'ProdEndDate', 'RawMaterialInput');
                 });
 
                 $('#MatBurnDwnDialogQuantityInput').on('change', function (e) {
@@ -183,6 +186,8 @@
                         } else {
                             removeBurnDownMaterialRecord(curRawMatIndex);
                         }
+                        // set prdouction min date based on purchase/prod object used.
+                        genericWorkflowHelper.constrainProductionDate('ProdStartDate', 'ProdEndDate', 'RawMaterialInput');
                     }
                 });
 
@@ -464,6 +469,7 @@
                         { name: 'PurchaseId' },
                         { name: 'RawMaterialId' },
                         { name: 'PurchaseBatchName' },
+                        { name: 'PurchaseDate'},
                         { name: 'MaterialName' },
                         { name: 'Note' },
                         { name: 'VBW' },

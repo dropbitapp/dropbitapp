@@ -249,6 +249,7 @@ namespace WebApp.Helpers
                 {
                     PurchaseID = ((System.Int32?)purch.PurchaseID ?? (System.Int32?)0),
                     PurchaseBatchName = purch.PurchaseName ?? string.Empty,
+                    PurchaseDate = purch.PurchaseDate,
                     StatusID = ((System.Int32?)purch.StatusID ?? (System.Int32?)0),
                     RawMaterialName = matDic.Name ?? string.Empty,
                     MaterialDictID = ((System.Int32?)matDic.MaterialDictID ?? (System.Int32?)0),
@@ -262,8 +263,9 @@ namespace WebApp.Helpers
                 foreach (var i in fermentables)
                 {
                     PurMatObject obj = new PurMatObject();
-                    obj.PurchaseBatchName = i.PurchaseBatchName;
                     obj.PurchaseId = (int)i.PurchaseID;
+                    obj.PurchaseBatchName = i.PurchaseBatchName;
+                    obj.PurchaseDate = i.PurchaseDate;
                     obj.RawMaterialId = (int)i.MaterialDictID;
                     obj.MaterialName = i.RawMaterialName;
                     obj.QtyGal = (float)i.Quantity;
@@ -1616,6 +1618,7 @@ namespace WebApp.Helpers
                    {
                        ProductionName = prod.ProductionName,
                        ProductionID = ((System.Int32?)prod.ProductionID ?? (System.Int32?)0),
+                       ProductionEndDate = prod.ProductionEndTime,
                        StatusName = status.Name,
                        StateName = state.Name,
                        Quantity = ((System.Single?)quants.Value ?? (System.Single?)0),
@@ -1634,6 +1637,7 @@ namespace WebApp.Helpers
                         pobj.DistillableOrigin = "prod";
                         pobj.BatchName = rec.ProductionName;
                         pobj.ProductionId = (int)rec.ProductionID;
+                        pobj.ProductionEndDate = rec.ProductionEndDate;
                         pobj.Quantity = (float)rec.Quantity;
                         pobj.VolumeByWeight = (float)rec.VolumeByWeight;
                         pobj.AlcoholContent = (float)rec.Alcohol;
@@ -2021,7 +2025,8 @@ namespace WebApp.Helpers
                         Quantity = ((System.Single?)qty.Value ?? (System.Single?)0),
                         AlcoholContent = ((System.Single?)alc.Value ?? (System.Single?)0),
                         VolumeByWeight = ((System.Single?)vbw.Value ?? (System.Single?)0),
-                        BurningDownMethod = pur.BurningDownMethod ?? null
+                        BurningDownMethod = pur.BurningDownMethod ?? null,
+                        PurchaseDate = pur.PurchaseDate
                     };
 
                 if (purchaseQueryResult != null)
@@ -2037,6 +2042,7 @@ namespace WebApp.Helpers
                         prodObj.VolumeByWeight = (float)i.VolumeByWeight;
                         prodObj.BurningDownMethod = i.BurningDownMethod;
                         prodObj.AlcoholContent = (float)i.AlcoholContent;
+                        prodObj.PurchaseDate = i.PurchaseDate;
                         list.Add(prodObj);
                         combinedId++;
                     }
@@ -2064,7 +2070,8 @@ namespace WebApp.Helpers
                         Quantity = ((System.Single?)qty.Value ?? (System.Single?)0),
                         VolumeByWeight = ((System.Single?)vbw.Value ?? (System.Single?)0),
                         AlcoholContent = ((System.Single?)alc.Value ?? (System.Single?)0),
-                        BurningDownMethod = prod.BurningDownMethod ?? null
+                        BurningDownMethod = prod.BurningDownMethod ?? null,
+                        ProductionEndDate = prod.ProductionEndTime
                     };
 
                 if (productionQueryResult != null)
@@ -2080,6 +2087,7 @@ namespace WebApp.Helpers
                         prodObj.VolumeByWeight = (float)i.VolumeByWeight;
                         prodObj.AlcoholContent = (float)i.AlcoholContent;
                         prodObj.BurningDownMethod = i.BurningDownMethod;
+                        prodObj.ProductionEndDate = i.ProductionEndDate;
                         list.Add(prodObj);
                         combinedId++;
                     }
@@ -2106,6 +2114,7 @@ namespace WebApp.Helpers
                   {
                       PurchaseID = ((System.Int32?)purch.PurchaseID ?? (System.Int32?)0),
                       PurchaseBatchName = purch.PurchaseName ?? string.Empty,
+                      PurchaseDate = purch.PurchaseDate,
                       StatusID = ((System.Int32?)purch.StatusID ?? (System.Int32?)0),
                       StateID = ((System.Int32?)purch.StateID ?? (System.Int32?)0),
                       Quantity = ((System.Single?)quant.Value ?? (System.Single?)0),
@@ -2121,6 +2130,7 @@ namespace WebApp.Helpers
                         prodO.BatchName = i.PurchaseBatchName;
                         prodO.RecordId = combinedId;
                         prodO.PurchaseId = (int)i.PurchaseID;
+                        prodO.PurchaseDate = i.PurchaseDate;
                         prodO.DistillableOrigin = "pur";
                         prodO.BurningDownMethod = i.BurningDownMethod;
                         prodO.Quantity = (float)i.Quantity;
@@ -2147,6 +2157,7 @@ namespace WebApp.Helpers
                     {
                         ProductionID = ((System.Int32?)prod.ProductionID ?? (System.Int32?)0),
                         ProductionName = prod.ProductionName ?? string.Empty,
+                        ProductonEndDate = prod.ProductionEndTime,
                         StatusID = ((System.Int32?)prod.StatusID ?? (System.Int32?)0),
                         StateID = ((System.Int32?)prod.StateID ?? (System.Int32?)0),
                         Quantity = ((System.Single?)quant.Value ?? (System.Single?)0),
@@ -2163,6 +2174,7 @@ namespace WebApp.Helpers
                         prodO.DistillableOrigin = "prod";
                         prodO.RecordId = combinedId;
                         prodO.ProductionId = (int)i.ProductionID;
+                        prodO.ProductionEndDate = i.ProductonEndDate;
                         prodO.BurningDownMethod = i.BurningDownMethod;
                         prodO.Quantity = (float)i.Quantity;
                         prodO.VolumeByWeight = (float)i.VolumeByWeight;

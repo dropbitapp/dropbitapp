@@ -23,4 +23,17 @@
         var normalizedDate = yearObj + '-' + monthObj + '-' + dayObj;
         return normalizedDate;
     }
+
+    // convert JSON date to javasript date
+    this.convertJSONdatetoJS = function (jsonDate) {
+        var date = new Date(parseInt(jsonDate.substr(6)));
+        return date;
+    }
+
+    // configures minimum date for production workflow 
+    this.setMinDate = function (jsonDate) {
+        var minDate = this.convertJSONdatetoJS(jsonDate);
+        minDate.setDate(minDate.getDate() - 1);
+        return minDate;
+    }
 };

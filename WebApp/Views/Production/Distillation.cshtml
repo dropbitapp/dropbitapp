@@ -10,6 +10,7 @@
             // initialize helper classes
             var distillCompInstance = new distillCompute();
             var genericWorkflowHelper = new genWHelpers();
+            var dateModificationHelper = new dateHelper();
 
             // this index is used to keep index value of the current selected material that will be used in production
             var curRawMatIndex; 
@@ -175,6 +176,8 @@
                     $("#MatBurnDwnDialogQuantityInputOriginal").val('');
                     $("#MatBurnDwnDialog").jqxWindow('close');
                     $("#DistillationSourceBatchListBox").jqxListBox('uncheckIndex', curRawMatIndex);
+                    // set prdouction min date based on purchase/prod object used.
+                    genericWorkflowHelper.constrainProductionDate('ProdStartDateInput', 'ProdEndDateInput', 'DistillationSourceBatchListBox', 'Distillation');
                 });
 
                 $('#MatBurnDwnDialogQuantityInput').on('change', function (e) {
@@ -196,7 +199,8 @@
                     var args = event.args;
                     if (args) {
                         var index = args.index;
-                        if ( distillationSourceBatchAdapter.records[index].Quantity > 0 || distillationSourceBatchAdapter.records[index].VolumeByWeight > 0 ) {
+                        if (distillationSourceBatchAdapter.records[index].Quantity > 0
+                            || distillationSourceBatchAdapter.records[index].VolumeByWeight > 0) {
 
                             if(distillationSourceBatchAdapter.records[index].DistillableOrigin == 'pur')
                             {
@@ -223,6 +227,8 @@
                         else if (distillationSourceBatchAdapter.records[index].Quantity <= 0  && distillationSourceBatchAdapter.records[index].VolumeByWeight <= 0) {
                             alert("This batch doesn't have any gallon quantity or volume by weight quantity associated with it. Add at least one value to use in production!");
                         }
+                        // set prdouction min date based on purchase/prod object used.
+                        genericWorkflowHelper.constrainProductionDate('ProdStartDateInput', 'ProdEndDateInput', 'DistillationSourceBatchListBox', 'Distillation');
                     }
                 });
 
@@ -541,6 +547,7 @@
                         closeOnClick: true,
                         onSuccess: function () {
                             var itemsToDistill = $("#DistillationSourceBatchListBox").jqxListBox('getItems');
+
                             if (!(itemsToDistill == undefined || itemsToDistill == "")) {
                                 _createRecord();
                             }
@@ -678,7 +685,9 @@
                             { name: 'BurningDownMethod' },
                             { name: 'VolumeByWeight' },
                             { name: 'Quantity' },
-                            { name: 'AlcoholContent'}
+                            { name: 'AlcoholContent' },
+                            { name: 'PurchaseDate' },
+                            { name: 'ProductionEndDate'}
                         ],
                         id: 'RecordId',
                         url: url,
