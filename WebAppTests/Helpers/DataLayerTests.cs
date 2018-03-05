@@ -1670,6 +1670,286 @@ namespace WebApp.Helpers.Tests
         }
 
         /// <summary>
+        /// 1. Purchase 196(100 gallons @98 %alcohol) proof gallons of GNS on 06/1/2018
+        /// 2. Redistill half of purchased GNS, 98(50@98) proof gallons as GIN on 06/02/2018
+        /// 3. Blend the GIN batch with 50 gallons of additive for a total of 98(100@49) proof gallons on 6/3/2018
+        /// 4. Bottle all of it on 6/4/2018
+        /// 5. Pull Processing Report
+        /// </summary>
+        [TestMethod()]
+        public void BuyGNS_RedistilHalfIntoGin_Blend_Bottle_MakeSure_Processing_Doesnt_throw()
+        {
+            // Tuple<recordId, table enum value>
+            List<Tuple<int, Table>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            int spiritId = 0;
+            int vendorId = 0;
+            int storageId = 0;
+            int gnsMaterialId = 0;
+            int waterMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            try
+            {
+                #region Arrange
+                //  dictionary setup
+                SpiritObject spirit = new SpiritObject();
+                spirit.SpiritName = "GIN";
+                spirit.ProcessingReportTypeID = 18;
+
+                spiritId = _dl.CreateSpirit(_userId, spirit);
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                // GNS
+                {
+                    RawMaterialObject gnsMaterial = new RawMaterialObject();
+                    gnsMaterial.RawMaterialName = "GNS for GIN";
+                    gnsMaterial.UnitType = "gal";
+                    gnsMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Distilled = true;
+                    gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    gnsMaterialId = _dl.CreateRawMaterial(_userId, gnsMaterial);
+                    tablesForCleanupTupleList.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
+                }
+
+                // water
+                {
+                    RawMaterialObject waterMaterial = new RawMaterialObject();
+                    waterMaterial.RawMaterialName = "Water";
+                    waterMaterial.UnitType = "gal";
+                    waterMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Additive = true;
+                    waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+                }
+
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "GNS";
+                purchO.PurchaseType = "Distilled";
+                purchO.PurchaseDate = new DateTime(2018, 03, 01);
+                purchO.Quantity = 100f; // 100 gallons
+                purchO.VolumeByWeight = 0f;
+                purchO.AlcoholContent = 98f;
+                purchO.ProofGallon = 196f;
+                purchO.RecordId = gnsMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+                purchO.Gauged = true;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchO.SpiritTypeReportingID = 9;
+                purchO.Gauged = true;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                // Redistil GNS into GIN and mark it as Gauged
+                ProductionObject prodO = new ProductionObject();
+                prodO.BatchName = "RedistilledGns";
+                prodO.ProductionDate = new DateTime(2018, 04, 02);
+                prodO.ProductionStart = new DateTime(2018, 04, 02);
+                prodO.ProductionEnd = new DateTime(2018, 04, 02);
+                prodO.SpiritCutId = 11; // mixed
+                prodO.Gauged = true;
+                prodO.ProductionType = "Distillation";
+                prodO.Quantity = 50f; // 50 gallons of alcohol
+                prodO.VolumeByWeight = 0f;
+                prodO.AlcoholContent = 98f; // 98%
+                prodO.ProofGallon = 98f; // 98 pfg
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.SpiritTypeReportingID = 6; // Gin
+                prodO.ProductionTypeId = 2;
+
+                List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
+                uMat.ID = purchaseId;
+                uMat.OldVal = 50f;
+                uMat.NewVal = 50f;
+                uMat.Proof = 98f;
+                uMat.DistillableOrigin = "pur";
+                uMat.BurningDownMethod = "volume";
+
+                usedMats.Add(uMat);
+
+                prodO.UsedMats = usedMats;
+
+                productionId = _dl.CreateProduction(prodO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                // create Production Blending Record
+                ProductionObject prodBlend = new ProductionObject();
+                prodBlend.BatchName = "Gin";
+                prodBlend.ProductionDate = new DateTime(2018, 05, 03);
+                prodBlend.ProductionStart = new DateTime(2018, 05, 03);
+                prodBlend.ProductionEnd = new DateTime(2018, 05, 03);
+                prodBlend.Gauged = true;
+                prodBlend.ProductionType = "Blending";
+                prodBlend.Quantity = 100f; // 100 gallons of alcohol
+                prodBlend.VolumeByWeight = 0f;
+                prodBlend.AlcoholContent = 49f; // 49%
+                prodBlend.ProofGallon = 98f; // 98pfg
+                prodBlend.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodBlend.SpiritTypeReportingID = 6; // GIN
+                prodBlend.SpiritId = spiritId;
+                prodBlend.ProductionTypeId = 3;
+
+                List<ObjInfo4Burndwn> usedMats4Blend = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat4Blend = new ObjInfo4Burndwn();
+                uMat4Blend.ID = productionId;
+                uMat4Blend.OldVal = 0f;
+                uMat4Blend.NewVal = 50f;
+                uMat4Blend.DistillableOrigin = "prod";
+                uMat4Blend.BurningDownMethod = "volume";
+
+                usedMats4Blend.Add(uMat4Blend);
+                prodBlend.UsedMats = usedMats4Blend;
+
+                List<BlendingAdditive> blendAdditives = new List<BlendingAdditive>();
+                BlendingAdditive blendAd = new BlendingAdditive();
+                blendAd.RawMaterialId = waterMaterialId;
+                blendAd.RawMaterialQuantity = 50f;
+                blendAd.RawMaterialName = "Water";
+                blendAd.UnitOfMeasurement = "gal";
+
+                blendAdditives.Add(blendAd);
+
+                prodBlend.BlendingAdditives = blendAdditives;
+
+                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                // create Production Bottling Record
+                ProductionObject prodBottl = new ProductionObject();
+                prodBottl.BatchName = "GIN Bottling Test ";
+                prodBottl.ProductionDate = new DateTime(2018, 06, 4);
+                prodBottl.ProductionStart = new DateTime(2018, 06, 4);
+                prodBottl.ProductionEnd = new DateTime(2018, 06, 4);
+                prodBottl.Gauged = true;
+                prodBottl.ProductionType = "Bottling";
+                prodBottl.Quantity = 150f; // 150 gallons of alcohol
+                prodBottl.VolumeByWeight = 0f;
+                prodBottl.AlcoholContent = 32.5f; // 45%
+                prodBottl.ProofGallon = 97.5f; // 97.5 pfg
+                prodBottl.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodBottl.SpiritTypeReportingID = 6; // Gin
+                prodBottl.SpiritId = spiritId;
+                prodO.ProductionTypeId = 4;
+
+                List<ObjInfo4Burndwn> usedMats4Bottl = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat4Bottl = new ObjInfo4Burndwn();
+                uMat4Bottl.ID = productionId;
+                uMat4Bottl.OldVal = 0f;
+                uMat4Bottl.NewVal = prodBlend.Quantity;
+                uMat4Bottl.DistillableOrigin = "prod";
+                uMat4Bottl.BurningDownMethod = "volume";
+
+                usedMats4Bottl.Add(uMat4Bottl);
+                prodBottl.UsedMats = usedMats4Bottl;
+
+                BottlingObject bottlingObj = new BottlingObject();
+                bottlingObj.CaseCapacity = 10;
+                bottlingObj.CaseQuantity = 113f;
+                bottlingObj.BottleCapacity = 500f;
+                bottlingObj.BottleQuantity = 1130;
+
+                prodBottl.BottlingInfo = bottlingObj;
+
+                prodBottl.GainLoss = .4f;
+
+                prodBottl.FillTestList = null;
+
+                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+                #endregion
+
+                #region Processing Report
+                // Report Header
+                ReportHeader reportHeaderE = new ReportHeader();
+                reportHeaderE.ProprietorName = "Test Distillery";
+                reportHeaderE.EIN = "12-3456789";
+                reportHeaderE.ReportDate = "June 2018";
+                reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
+                reportHeaderE.DSP = "DSP-WA-21086";
+
+                DateTime start = new DateTime(2018, 06, 01);
+                DateTime end = new DateTime(2018, 06, 30);
+
+                ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
+
+                actualProcessingReportObject = _dl.GetProcessingReportData(start, end,_userId);
+
+                Assert.AreEqual(reportHeaderE.DSP, actualProcessingReportObject.Header.DSP);
+                Assert.AreEqual(reportHeaderE.EIN, actualProcessingReportObject.Header.EIN);
+                Assert.AreEqual(reportHeaderE.PlantAddress, actualProcessingReportObject.Header.PlantAddress);
+                Assert.AreEqual(reportHeaderE.ProprietorName, actualProcessingReportObject.Header.ProprietorName);
+                Assert.AreEqual(reportHeaderE.ReportDate, actualProcessingReportObject.Header.ReportDate);
+
+                Assert.AreEqual(97.5f, actualProcessingReportObject.Part1.AmtBottledPackaged);
+                Assert.AreEqual("spirit", actualProcessingReportObject.Part1.BulkIngredients);
+                Assert.AreEqual(0, actualProcessingReportObject.Part1.Destroyed);
+                Assert.AreEqual(0, actualProcessingReportObject.Part1.Dumped4Processing);
+                Assert.AreEqual(0, actualProcessingReportObject.Part1.Gains);
+                Assert.AreEqual(0.4f, actualProcessingReportObject.Part1.Losses);
+                Assert.AreEqual(0.0999984741f, actualProcessingReportObject.Part1.OnHandEndofMonth);
+                Assert.AreEqual(98, actualProcessingReportObject.Part1.OnHandFirstofMonth);
+                Assert.AreEqual(0f, actualProcessingReportObject.Part1.Recd4Process);
+                Assert.AreEqual(0, actualProcessingReportObject.Part1.Transf2Prod4Redistil);
+                Assert.AreEqual(0, actualProcessingReportObject.Part1.Used4Redistil);
+                Assert.AreEqual(0, actualProcessingReportObject.Part1.WineMixedWithSpirit);
+
+                Assert.AreEqual(97.5, actualProcessingReportObject.Part2.AmtBottledPackaged);
+                Assert.AreEqual(0, actualProcessingReportObject.Part2.Destroyed);
+                Assert.AreEqual(0, actualProcessingReportObject.Part2.Dumped4Processing);
+                Assert.AreEqual("bottled", actualProcessingReportObject.Part2.FinishedProduct);
+                Assert.AreEqual(0, actualProcessingReportObject.Part2.InventoryOverage);
+                Assert.AreEqual(0, actualProcessingReportObject.Part2.InventoryShortage);
+                Assert.AreEqual(97.5f, actualProcessingReportObject.Part2.OnHandEndofMonth);
+                Assert.AreEqual(0, actualProcessingReportObject.Part2.OnHandFirstofMonth);
+                Assert.AreEqual(0, actualProcessingReportObject.Part2.Recd4Process);
+                Assert.AreEqual(0, actualProcessingReportObject.Part2.RecordedLosses);
+                Assert.AreEqual(0, actualProcessingReportObject.Part2.TaxWithdrawn);
+                Assert.AreEqual(0, actualProcessingReportObject.Part2.Transf2Prod4Redistil);
+
+                #endregion
+            }
+            finally
+            {
+                // Cleanup
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
         /// This test tests workflow: Buy GNS -> Redistil -> Blend -> Bottle
         /// </summary>
         [TestMethod()]

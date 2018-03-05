@@ -300,34 +300,30 @@ namespace WebApp.Helpers
 
             // 1(c) previous month
             var onHands1stMoC =
-                (from prod in
-                    (from prod in db.Production
-                     join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
-                     from proof in proof_join.DefaultIfEmpty()
-                     join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                     from distillers in distillers_join.DefaultIfEmpty()
-                     where
-                       distillers.UserId == userId &&
-                       prod.ProductionTypeID == 3 &&
-                       prod.Gauged == true &&
-                       prod.ProductionEndTime < startOfReporting &&
-                       (prod.StatusID == 1 ||
-                        prod.StatusID == 2 ||
-                        prod.StateID == 4)
-                     select new
-                     {
-                         Value = (System.Single?)proof.Value ?? (System.Single?)0,
-                         Dummy = "x"
-                     })
-                 group prod by new { prod.Dummy } into g
-                 select new
-                 {
-                     OnHandFirstOfMonthBulk = g.Sum(p => p.Value)
-                 }).FirstOrDefault();
+                (from prod in db.Production
+                    join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
+                    from proof in proof_join.DefaultIfEmpty()
+                    join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
+                    from prod4Rep in prod4Rep_join.DefaultIfEmpty()
+                    join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                    from distillers in distillers_join.DefaultIfEmpty()
+                    where
+                    distillers.UserId == userId &&
+                    prod.Gauged == true &&
+                    prod.ProductionEndTime < startOfReporting &&
+                    prod.StateID == 4
+                    && prod.StatusID == 3
+                    select new
+                    {
+                        Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0
+                    }).ToList();
 
             if (onHands1stMoC != null)
             {
-                procRepP1.OnHandFirstofMonth = (float)onHands1stMoC.OnHandFirstOfMonthBulk;
+               foreach (var i in onHands1stMoC)
+                {
+                    procRepP1.OnHandFirstofMonth += (float)i.Value;
+                }
             }
 
             line8RunningSum += (float)procRepP1.OnHandFirstofMonth;
@@ -409,9 +405,9 @@ namespace WebApp.Helpers
                  where
                  distillers.UserId == userId &&
                  prod.Gauged == true &&
-                 prod.StateID == 5 &&
-                 prod.ProductionEndTime >= startOfReporting &&
-                 prod.ProductionEndTime <= endOfReporting
+                 prod.StateID == 5
+                 && prod.ProductionEndTime >= startOfReporting
+                 && prod.ProductionEndTime <= endOfReporting
                  select new
                  {
                      Quantity = (System.Single?)gl.Quantity ?? (System.Single?)0,
