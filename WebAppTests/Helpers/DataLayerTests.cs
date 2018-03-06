@@ -886,8 +886,8 @@ namespace WebApp.Helpers.Tests
         [TestMethod()]
         public void PurchaseDistilled_Blend_GenerateProcessingReport()
         {
-            // A dictionary to log database test records for later clean-up
-            Dictionary<int, Table> testRecords = new Dictionary<int, Table>();
+            // A tuple to log database test records for later clean-up
+            List<Tuple<int, Table>> testRecords = new List<Tuple<int, Table>>();
 
             try
             {
@@ -901,7 +901,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int spiritId = _dl.CreateSpirit(_userId, spirit);
-                testRecords.Add(spiritId, Table.Spirit);
+                testRecords.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // Create Raw Material dictionary item
                 RawMaterialObject rawMaterial = new RawMaterialObject
@@ -913,7 +913,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int rawMaterialId = _dl.CreateRawMaterial(_userId, rawMaterial);
-                testRecords.Add(rawMaterialId, Table.MaterialDict);
+                testRecords.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
 
                 // Create Vendor dictionary item
                 VendorObject vendor = new VendorObject
@@ -922,7 +922,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int vendorId = _dl.CreateVendor(_userId, vendor);
-                testRecords.Add(vendorId, Table.Vendor);
+                testRecords.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // Create Storage dictionary item
                 StorageObject storage = new StorageObject
@@ -931,7 +931,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int storageId = _dl.CreateStorage(_userId, storage);
-                testRecords.Add(storageId, Table.Storage);
+                testRecords.Add(Tuple.Create(storageId, Table.Storage));
 
                 // Create Distilled Purchase record
                 PurchaseObject purchase = new PurchaseObject
@@ -954,7 +954,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int purchaseId = _dl.CreatePurchase(purchase, _userId);
-                testRecords.Add(purchaseId, Table.Purchase);
+                testRecords.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Create Production Blending record
                 ProductionObject production = new ProductionObject
@@ -989,7 +989,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int productionId = _dl.CreateProduction(production, _userId);
-                testRecords.Add(productionId, Table.Production);
+                testRecords.Add(Tuple.Create(productionId, Table.Production));
 
                 // Act
 
@@ -1007,7 +1007,7 @@ namespace WebApp.Helpers.Tests
                 // Perform table cleanup
                 foreach (var rec in testRecords)
                 {
-                    TestRecordCleanup(rec.Key, rec.Value);
+                    TestRecordCleanup(rec.Item1, rec.Item2);
                 }
             }
         }
@@ -1020,8 +1020,8 @@ namespace WebApp.Helpers.Tests
         [TestMethod]
         public void PurchaseDistilled_Blend_Bottle()
         {
-            // A dictionary to log database test records for later clean-up
-            Dictionary<int, Table> testRecords = new Dictionary<int, Table>();
+            // A tuple to log database test records for later clean-up
+            List<Tuple<int, Table>> testRecords = new List<Tuple<int, Table>>();
 
             try
             {
@@ -1035,7 +1035,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int spiritId = _dl.CreateSpirit(_userId, spirit);
-                testRecords.Add(spiritId, Table.Spirit);
+                testRecords.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // Create Raw Material dictionary item
                 RawMaterialObject rawMaterial = new RawMaterialObject
@@ -1048,7 +1048,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int rawMaterialId = _dl.CreateRawMaterial(_userId, rawMaterial);
-                testRecords.Add(rawMaterialId, Table.MaterialDict);
+                testRecords.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
 
                 // Create Vendor dictionary item
                 VendorObject vendor = new VendorObject
@@ -1057,7 +1057,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int vendorId = _dl.CreateVendor(_userId, vendor);
-                testRecords.Add(vendorId, Table.Vendor);
+                testRecords.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // Create Storage dictionary item
                 StorageObject storage = new StorageObject
@@ -1066,7 +1066,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int storageId = _dl.CreateStorage(_userId, storage);
-                testRecords.Add(storageId, Table.Storage);
+                testRecords.Add(Tuple.Create(storageId, Table.Storage));
 
                 // Distilled purchase
                 PurchaseObject purchase = new PurchaseObject
@@ -1088,7 +1088,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int purchaseId = _dl.CreatePurchase(purchase, _userId);
-                testRecords.Add(purchaseId, Table.Purchase);
+                testRecords.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Blend and gauge
                 ProductionObject blending = new ProductionObject
@@ -1123,7 +1123,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int productionId1 = _dl.CreateProduction(blending, _userId);
-                testRecords.Add(productionId1, Table.Production);
+                testRecords.Add(Tuple.Create(productionId1, Table.Production));
 
                 // Bottle
                 ProductionObject bottling = new ProductionObject
@@ -1158,7 +1158,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int productionId2 = _dl.CreateProduction(bottling, _userId);
-                testRecords.Add(productionId2, Table.Production);
+                testRecords.Add(Tuple.Create(productionId2, Table.Production));
 
                 // Act
 
@@ -1177,7 +1177,7 @@ namespace WebApp.Helpers.Tests
                 // Perform table cleanup
                 foreach (var rec in testRecords)
                 {
-                    TestRecordCleanup(rec.Key, rec.Value);
+                    TestRecordCleanup(rec.Item1, rec.Item2);
                 }
             }
         }
@@ -1189,8 +1189,9 @@ namespace WebApp.Helpers.Tests
         [TestMethod()]
         public void BuyFermentedPomace_Distill_Redistill()
         {
-            // A dictionary to log database test records for later clean-up
-            Dictionary<int, Table> testRecords = new Dictionary<int, Table>();
+            // A tuple to log database test records for later clean-up
+            List<Tuple<int, Table>> testRecords = new List<Tuple<int, Table>>();
+
             try
             {
                 // Arrange
@@ -1203,7 +1204,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int spiritId = _dl.CreateSpirit(_userId, spirit);
-                testRecords.Add(spiritId, Table.Spirit);
+                testRecords.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // Create Raw Material dictionary item
                 RawMaterialObject rawMaterial = new RawMaterialObject
@@ -1216,7 +1217,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int rawMaterialId = _dl.CreateRawMaterial(_userId, rawMaterial);
-                testRecords.Add(rawMaterialId, Table.MaterialDict);
+                testRecords.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
 
                 // Create Vendor dictionary item
                 VendorObject vendor = new VendorObject
@@ -1225,7 +1226,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int vendorId = _dl.CreateVendor(_userId, vendor);
-                testRecords.Add(vendorId, Table.Vendor);
+                testRecords.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // Create Storage dictionary item
                 StorageObject storage = new StorageObject
@@ -1234,7 +1235,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int storageId = _dl.CreateStorage(_userId, storage);
-                testRecords.Add(storageId, Table.Storage);
+                testRecords.Add(Tuple.Create(storageId, Table.Storage));
 
                 // Create Fermented Purchase record
                 PurchaseObject purchase = new PurchaseObject
@@ -1254,7 +1255,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int purchaseId = _dl.CreatePurchase(purchase, _userId);
-                testRecords.Add(purchaseId, Table.Purchase);
+                testRecords.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Create Production Distillation record and Gauged to true
                 ProductionObject production = new ProductionObject
@@ -1291,7 +1292,7 @@ namespace WebApp.Helpers.Tests
                 };
 
                 int productionId = _dl.CreateProduction(production, _userId);
-                testRecords.Add(productionId, Table.Production);
+                testRecords.Add(Tuple.Create(productionId, Table.Production));
 
                 // Act
 
@@ -1325,7 +1326,7 @@ namespace WebApp.Helpers.Tests
                 // Perform table cleanup
                 foreach (var rec in testRecords)
                 {
-                    TestRecordCleanup(rec.Key, rec.Value);
+                    TestRecordCleanup(rec.Item1, rec.Item2);
                 }
             }
         }
@@ -3429,7 +3430,7 @@ namespace WebApp.Helpers.Tests
                 {
                     RawMaterialObject grapeMaterial = new RawMaterialObject();
                     grapeMaterial.RawMaterialName = "Grapes";
-                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;;
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
                     grapeMaterial.UnitType = "lb";
                     grapeMaterial.UnitTypeId = 2;
                     PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
@@ -5082,62 +5083,125 @@ namespace WebApp.Helpers.Tests
         [TestMethod()]
         public void DeleteProductionTest()
         {
-            // Arrange
-            ProductionObject prodObject = new ProductionObject
+            List<Tuple<int, Table>> cleanupList = new List<Tuple<int, Table>>();
+            int storageId = 0;
+            int materialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+            int vendorId = 0;
+
+            try
             {
-                AlcoholContent = 39f,
-                BatchName = "TEST",
-                Gauged = true,
-                MaterialKindReportingID = 92,
-                ProductionDate = new DateTime(2018, 1, 1),
-                ProductionEnd = new DateTime(2018, 1, 1),
-                ProductionStart = new DateTime(2018, 1, 1),
-                ProductionType = "Distillation",
-                ProofGallon = 78f,
-                Quantity = 100f,
-                SpiritCutId = 9,
-                SpiritTypeReportingID = 2,
-                Storage = new List<StorageObject>
+                // Storage
+                StorageObject storage = new StorageObject()
                 {
-                    new StorageObject
-                    {
-                        StorageId = 16,
-                        StorageName = "Storage1"
-                    }
-                },
-                UsedMats = new List<ObjInfo4Burndwn> {
-                    new ObjInfo4Burndwn
-                    {
-                        ID = 1526,
-                        BurningDownMethod = "volume",
-                        DistillableOrigin = "pur",
-                        NewVal = 100,
-                        OldVal = 0,
-                        Proof = 0
-                    }
-                }
-            };
+                    StorageName = "DeleteProductionTest_Storage",
+                    SerialNumber = "2H29NNS"
+                };
 
-            int productionId = _dl.CreateProduction(prodObject, _userId);
+                storageId = _dl.CreateStorage(_userId, storage);
+                cleanupList.Add(Tuple.Create(storageId, Table.Storage));
 
-            ProductionObject deleteObject = new ProductionObject
+                // Vendor
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "DeleteProductionTest_Vendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                cleanupList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // Raw material
+                RawMaterialObject material = new RawMaterialObject();
+                material.RawMaterialName = "DeleteProductionTest_RawMaterial";
+                material.MaterialCategoryID = 2;
+                material.UnitType = "gal";
+                material.UnitTypeId = 1;
+                PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                materialBoolTypes.Fermented = true;
+                material.PurchaseMaterialTypes = materialBoolTypes;
+
+                materialId = _dl.CreateRawMaterial(_userId, material);
+                cleanupList.Add(Tuple.Create(materialId, Table.MaterialDict));
+
+                // Purchase
+                PurchaseObject purchase = new PurchaseObject();
+                purchase.PurBatchName = "DeleteProductionTest_Purchase";
+                purchase.PurchaseType = "Fermented";
+                purchase.PurchaseDate = new DateTime(2017, 09, 1);
+                purchase.Quantity = 1000f; // 100 gallons
+                purchase.VolumeByWeight = 0f;
+                purchase.AlcoholContent = 10f;
+                purchase.ProofGallon = 100f;
+                purchase.RecordId = materialId;
+                purchase.Price = 2500f;
+                purchase.VendorId = vendorId;
+
+                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                cleanupList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                // Production
+                ProductionObject prodObject = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "TEST",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritCutId = 9,
+                    SpiritTypeReportingID = 2,
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject
+                        {
+                            StorageId = storageId,
+                            StorageName = "DeleteProductionTestStorage"
+                        }
+                    },
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    }
+                };
+
+                productionId = _dl.CreateProduction(prodObject, _userId);
+                cleanupList.Add(Tuple.Create(productionId, Table.Production));
+
+                ProductionObject deleteObject = new ProductionObject
+                {
+                    ProductionType = "Distillation",
+                    ProductionId = productionId
+                };
+
+                // Act
+                _dl.DeleteProduction(deleteObject, _userId);
+
+                var prodQuery =
+                (from production in _db.Production
+                 where production.ProductionID == productionId
+                 select production).FirstOrDefault();
+
+                // Assert
+                Assert.IsNull(prodQuery);
+            }
+            finally
             {
-                ProductionType = "Distillation",
-                ProductionId = productionId
-            };
-
-            // Act
-            _dl.DeleteProduction(deleteObject, _userId);
-
-            var prodQuery =
-            (from production in _db.Production
-             where production.ProductionID == productionId
-             select production).FirstOrDefault();
-
-            // Assert
-            Assert.IsNull(prodQuery);
-
-            TestRecordCleanup(productionId, Table.Production);
+                // Cleanup
+                foreach (var i in cleanupList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
         }
 
         [TestMethod()]
