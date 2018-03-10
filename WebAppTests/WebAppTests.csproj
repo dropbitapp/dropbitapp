@@ -107,6 +107,9 @@
     <Content Include="bin\Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
+    <None Include="connections.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

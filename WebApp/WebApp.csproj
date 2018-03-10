@@ -993,6 +993,9 @@
     <Content Include="Documents\DB Diagram.vsdx" />
     <Content Include="Documents\workflow.vsdx" />
     <Content Include="ClassDiagram1.cd" />
+    <Content Include="connections.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Properties\PublishProfiles\DistilleryStage - FTP %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\DistilleryStage - FTP %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\DistilleryStage - FTP %284%29.pubxml" />

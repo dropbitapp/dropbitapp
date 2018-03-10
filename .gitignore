@@ -21,3 +21,5 @@
 /Public/obj/
 /Public/Properties/PublishProfiles/
 /packages
+/WebApp/connections.config
+/WebAppTests/connections.config
