@@ -1904,7 +1904,7 @@ namespace WebApp.Helpers.Tests
 
                 ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
 
-                actualProcessingReportObject = _dl.GetProcessingReportData(start, end,_userId);
+                actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
 
                 Assert.AreEqual(reportHeaderE.DSP, actualProcessingReportObject.Header.DSP);
                 Assert.AreEqual(reportHeaderE.EIN, actualProcessingReportObject.Header.EIN);
@@ -4225,6 +4225,291 @@ namespace WebApp.Helpers.Tests
             {
                 // Cleanup created records
                 foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        // January:
+        // 1) FermentedPurchase-1: Purchase grapes (10000 pounds)
+        // 2) FermentedProduction-1: Ferment 40% of FermentedPurchase-1 (4000/10000 pounds into 400 wine gallons at 10% alcohol)
+        // 3) DistilledProduction-1: Distill 50% of FermentedProduction-1 and mark as Brandy (200/400 wine gallons at 50% alcohol)
+
+        // February:
+        // 1) FermentedProduction-2: Ferment 30% of FermentedPurchase-1 (3000/10000 pounds into 300 wine gallons at 10% alcohol)
+        // 2) DistilledProduction-2: Distill 50% of FermentedProduction-1 and mark as Brandy (200/400 wine gallons at 50% alcohol)
+
+        // March:
+        // 1) FermentedProduction-3: Ferment 30% of FermentedPurchase-1 (3000/10000 pounds into 300 wine gallons at 10% alcohol)
+        // 2) DistilledProduction-3: Distill all of FermentedProduction-2/FermentedProduction-3 and mark as Brandy (600/600 wine gallons at 50% alcohol)
+
+        // April:
+        // 1) DistilledProduction-2: Redistill all three DistilledProductions into single Brandy batch (1000/1000 wine gallons at 50% alcohol)
+
+        /// <summary>
+        /// This test validates the following:
+        /// Buy Grapes in January
+        /// Ferment half of Grapes in January
+        /// Distil half of Fermented Grapes in January as Brandy Under 170
+        /// Storage report should be showing Wine as well as Brandy Under 170 columns 
+        /// </summary>
+        [TestMethod()]
+        public void BuyGrapes_MakeWinePartial_DistilBrandyPartial_MakeSure_WineAndBrandyBothShowUpInStorageReport()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int grapeMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            // reporting time range
+            DateTime start = new DateTime(2018, 01, 01);
+            DateTime end = new DateTime(2018, 01, 31);
+
+            // int - table row id
+            // Table - enum identifying table type
+            List<Tuple<int, Table>> garbage = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "VendorTest";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                garbage.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                garbage.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                // grapes
+                {
+                    RawMaterialObject grapeMaterial = new RawMaterialObject();
+                    grapeMaterial.RawMaterialName = "Grapes";
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    grapeMaterial.UnitType = "lb";
+                    grapeMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermentable = true;
+                    grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+
+                    garbage.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Riesling Grapes ";
+                purchO.PurchaseType = "Fermentable";
+                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.Quantity = 0f;
+                purchO.VolumeByWeight = 2000f;
+                purchO.RecordId = grapeMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                garbage.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Production
+                // create Fermented record
+                ProductionObject prodO = new ProductionObject();
+                prodO.BatchName = "Riesling Wine";
+                prodO.ProductionDate = new DateTime(2018, 01, 15);
+                prodO.ProductionStart = new DateTime(2018, 01, 15);
+                prodO.ProductionEnd = new DateTime(2018, 01, 15);
+                prodO.Gauged = true;
+                prodO.ProductionType = "Fermentation";
+                prodO.ProductionTypeId = 1;
+                prodO.Quantity = 150f; // 150 gallons of wine
+                prodO.VolumeByWeight = 0f;
+                prodO.AlcoholContent = 10f; // %
+                prodO.ProofGallon = 30f; // pfg
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.SpiritTypeReportingID = 11; // Wine
+                prodO.MaterialKindReportingID = 0;
+
+                List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
+                uMat.ID = purchaseId;
+                uMat.OldVal = 0f;
+                uMat.NewVal = purchO.VolumeByWeight;
+                uMat.DistillableOrigin = "pur";
+                uMat.BurningDownMethod = "weight";
+
+                usedMats.Add(uMat);
+
+                prodO.UsedMats = usedMats;
+
+                productionId = _dl.CreateProduction(prodO, _userId);
+
+                garbage.Add(Tuple.Create(productionId, Table.Production));
+
+                // create Production Distillation Record and mark it as Gauged
+                ProductionObject prodO1 = new ProductionObject();
+                prodO1.BatchName = "DistilRunAndGauged";
+                prodO1.ProductionDate = new DateTime(2018, 01, 20);
+                prodO1.ProductionStart = new DateTime(2018, 01, 20);
+                prodO1.ProductionEnd = new DateTime(2018, 01, 20);
+                prodO1.SpiritCutId = 11; // mixed
+                prodO1.Gauged = true;
+                prodO1.ProductionType = "Distillation";
+                prodO1.ProductionTypeId = 2;
+                prodO1.Quantity = 50f;
+                prodO1.VolumeByWeight = 0f;
+                prodO1.AlcoholContent = 50f;
+                prodO1.ProofGallon = 50f;
+                prodO1.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO1.SpiritTypeReportingID = 3; // Brandy 170-
+                prodO1.MaterialKindReportingID = 94; // grape brandy
+
+                List<ObjInfo4Burndwn> usedMats1 = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat1 = new ObjInfo4Burndwn();
+                uMat1.ID = productionId;
+                uMat1.OldVal = prodO.Quantity / 2;
+                uMat1.NewVal = prodO.Quantity / 2;
+                uMat1.Proof = prodO.ProofGallon / 2;
+                uMat1.DistillableOrigin = "prod";
+                uMat1.BurningDownMethod = "volume";
+
+                usedMats1.Add(uMat1);
+
+                prodO1.UsedMats = usedMats1;
+
+                productionId = _dl.CreateProduction(prodO1, _userId);
+
+                garbage.Add(Tuple.Create(productionId, Table.Production));
+
+                #endregion
+
+                #region Reports
+
+                // Report Header
+                ReportHeader reportHeaderE = new ReportHeader();
+                reportHeaderE.ProprietorName = "Test Distillery";
+                reportHeaderE.EIN = "12-3456789";
+                reportHeaderE.ReportDate = "January 2018";
+                reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
+                reportHeaderE.DSP = "DSP-WA-21086";
+
+                StorageReport expectedStorageReport = new StorageReport();
+
+                List<StorageReportCategory> reportList = new List<StorageReportCategory>();
+
+                StorageReportCategory expectedStorageReportBodyWine = new StorageReportCategory();
+                expectedStorageReportBodyWine.CategoryName = "Wine";
+                expectedStorageReportBodyWine.r17_TransferredToProcessingAccount = 0f;
+                expectedStorageReportBodyWine.r18_TransferredToProductionAccount = 15f;
+                expectedStorageReportBodyWine.r19_TransferredToOtherBondedPremises = 0;
+                expectedStorageReportBodyWine.r1_OnHandFirstOfMonth = 0f;
+                expectedStorageReportBodyWine.r20_Destroyed = 0f;
+                expectedStorageReportBodyWine.r22_OtherLosses = 0f;
+                expectedStorageReportBodyWine.r23_OnHandEndOfMonth = 15f;
+                expectedStorageReportBodyWine.r24_Lines7Through23 = 30f;
+                expectedStorageReportBodyWine.r2_DepositedInBulkStorage = 30f;
+                expectedStorageReportBodyWine.r4_ReturnedToBulkStorage = 0f;
+                expectedStorageReportBodyWine.r6_TotalLines1Through5 = 30f;
+                expectedStorageReportBodyWine.r7_TaxPaid = 0f;
+
+                reportList.Add(expectedStorageReportBodyWine);
+
+                StorageReportCategory expectedStorageReportBodyBrandy = new StorageReportCategory();
+                expectedStorageReportBodyBrandy.CategoryName = "BrandyUnder170";
+                expectedStorageReportBodyBrandy.r17_TransferredToProcessingAccount = 0f;
+                expectedStorageReportBodyBrandy.r18_TransferredToProductionAccount = 0f;
+                expectedStorageReportBodyBrandy.r19_TransferredToOtherBondedPremises = 0;
+                expectedStorageReportBodyBrandy.r1_OnHandFirstOfMonth = 0f;
+                expectedStorageReportBodyBrandy.r20_Destroyed = 0f;
+                expectedStorageReportBodyBrandy.r22_OtherLosses = 0f;
+                expectedStorageReportBodyBrandy.r23_OnHandEndOfMonth = 50f;
+                expectedStorageReportBodyBrandy.r24_Lines7Through23 = 50f;
+                expectedStorageReportBodyBrandy.r2_DepositedInBulkStorage = 50f;
+                expectedStorageReportBodyBrandy.r4_ReturnedToBulkStorage = 0f;
+                expectedStorageReportBodyBrandy.r6_TotalLines1Through5 = 50f;
+                expectedStorageReportBodyBrandy.r7_TaxPaid = 0f;
+
+                reportList.Add(expectedStorageReportBodyBrandy);
+
+                expectedStorageReport.ReportBody = reportList;
+
+                StorageReport actualStorageReport = new StorageReport();
+
+                //get actual storage data
+                actualStorageReport = _dl.GetStorageReportData(start, end, _userId);
+
+                // verify Storage report Header
+                Assert.AreEqual(reportHeaderE.DSP, actualStorageReport.Header.DSP);
+                Assert.AreEqual(reportHeaderE.EIN, actualStorageReport.Header.EIN);
+                Assert.AreEqual(reportHeaderE.PlantAddress, actualStorageReport.Header.PlantAddress);
+                Assert.AreEqual(reportHeaderE.ProprietorName, actualStorageReport.Header.ProprietorName);
+                Assert.AreEqual(reportHeaderE.ReportDate, actualStorageReport.Header.ReportDate);
+
+                Assert.AreEqual(2, actualStorageReport.ReportBody.Count); // make sure number of spirit entries (columns) in the report is two
+
+                var wineColumn = actualStorageReport.ReportBody.Find(x => x.CategoryName == "Wine"); // wine should be there
+                var brandyUnder170Column = actualStorageReport.ReportBody.Find(x => x.CategoryName == "BrandyUnder170"); // brandy should be there
+
+                Assert.IsNotNull(wineColumn);
+                Assert.IsNotNull(brandyUnder170Column);
+
+                // now, let's compare cells in the report for Wine column
+                Assert.AreEqual(expectedStorageReportBodyWine.CategoryName, wineColumn.CategoryName);
+                Assert.AreEqual(expectedStorageReportBodyWine.r17_TransferredToProcessingAccount, wineColumn.r17_TransferredToProcessingAccount);
+                Assert.AreEqual(expectedStorageReportBodyWine.r18_TransferredToProductionAccount, wineColumn.r18_TransferredToProductionAccount);
+                Assert.AreEqual(expectedStorageReportBodyWine.r19_TransferredToOtherBondedPremises, wineColumn.r19_TransferredToOtherBondedPremises);
+                Assert.AreEqual(expectedStorageReportBodyWine.r1_OnHandFirstOfMonth, wineColumn.r1_OnHandFirstOfMonth);
+                Assert.AreEqual(expectedStorageReportBodyWine.r20_Destroyed, wineColumn.r20_Destroyed);
+                Assert.AreEqual(expectedStorageReportBodyWine.r22_OtherLosses, wineColumn.r22_OtherLosses);
+                Assert.AreEqual(expectedStorageReportBodyWine.r23_OnHandEndOfMonth, wineColumn.r23_OnHandEndOfMonth);
+                Assert.AreEqual(expectedStorageReportBodyWine.r24_Lines7Through23, wineColumn.r24_Lines7Through23);
+                Assert.AreEqual(expectedStorageReportBodyWine.r2_DepositedInBulkStorage, wineColumn.r2_DepositedInBulkStorage);
+                Assert.AreEqual(expectedStorageReportBodyWine.r4_ReturnedToBulkStorage, wineColumn.r4_ReturnedToBulkStorage);
+                Assert.AreEqual(expectedStorageReportBodyWine.r6_TotalLines1Through5, wineColumn.r6_TotalLines1Through5);
+                Assert.AreEqual(expectedStorageReportBodyWine.r7_TaxPaid, wineColumn.r7_TaxPaid);
+
+                // now, let's compare cells in the report for Brandy Under170 column
+                Assert.AreEqual(expectedStorageReportBodyBrandy.CategoryName, brandyUnder170Column.CategoryName);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r17_TransferredToProcessingAccount, brandyUnder170Column.r17_TransferredToProcessingAccount);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r18_TransferredToProductionAccount, brandyUnder170Column.r18_TransferredToProductionAccount);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r19_TransferredToOtherBondedPremises, brandyUnder170Column.r19_TransferredToOtherBondedPremises);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r1_OnHandFirstOfMonth, brandyUnder170Column.r1_OnHandFirstOfMonth);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r20_Destroyed, brandyUnder170Column.r20_Destroyed);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r22_OtherLosses, brandyUnder170Column.r22_OtherLosses);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r23_OnHandEndOfMonth, brandyUnder170Column.r23_OnHandEndOfMonth);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r24_Lines7Through23, brandyUnder170Column.r24_Lines7Through23);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r2_DepositedInBulkStorage, brandyUnder170Column.r2_DepositedInBulkStorage);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r4_ReturnedToBulkStorage, brandyUnder170Column.r4_ReturnedToBulkStorage);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r6_TotalLines1Through5, brandyUnder170Column.r6_TotalLines1Through5);
+                Assert.AreEqual(expectedStorageReportBodyBrandy.r7_TaxPaid, brandyUnder170Column.r7_TaxPaid);
+                #endregion
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in garbage)
                 {
                     TestRecordCleanup(i.Item1, i.Item2);
                 }
