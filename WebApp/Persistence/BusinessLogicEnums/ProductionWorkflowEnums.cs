@@ -26,9 +26,9 @@ namespace WebApp.Persistence.BusinessLogicEnums
         Active = 1,
         Processing,
         Processed,
-        Deleted,
-        Archived,
-        Destroyed
+        Deleted = 6,
+        Archived = 7,
+        Destroyed = 9
     }
 
     public enum State

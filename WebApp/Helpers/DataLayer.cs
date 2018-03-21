@@ -4283,9 +4283,20 @@ namespace WebApp.Helpers
                              select rec).FirstOrDefault();
 
                         // all of the batch volume/weight used in the distillation
-                        if (k.OldVal <= 0)
+                        if (k.OldVal == 0)
                         {
                             status = "Processed";
+                            var statusId =
+                                (from rec in db.Status
+                                 where rec.Name == status
+                                 select rec.StatusID).FirstOrDefault();
+
+                            purch.StatusID = statusId;
+                            purObj.Status = status;
+                        }
+                        else if (k.OldVal > 0)
+                        {
+                            status = "Processing";
                             var statusId =
                                 (from rec in db.Status
                                  where rec.Name == status
@@ -4490,7 +4501,17 @@ namespace WebApp.Helpers
 
                             prodObj.StatusName = status;
                         }
+                        else if (k.OldVal > 0)
+                        {
+                            status = "Processing";
+                            var statusId =
+                                (from rec in db.Status
+                                 where rec.Name == status
+                                 select rec.StatusID).FirstOrDefault();
 
+                            prodRec.StatusID = statusId;
+                            prodObj.StatusName = status;
+                        }
                         // we need to make sure that if the used material that was produced by us is a distilate and being re-distiled again,
                         // it needs to be marked as redistilled for reporting purposes if all of the proof gallons are used. Else, we need to insert
                         // another record into Production4Reporting with the same ProductionID but with different Proof and volume/weight values.
@@ -7382,7 +7403,7 @@ namespace WebApp.Helpers
         }
 
         /// <summary>
-        /// 2. Deposited in bulk storage (Produced)
+        /// 2. Deposited in bulk storage 
         /// </summary>
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
@@ -7393,31 +7414,23 @@ namespace WebApp.Helpers
             // Query distilled production records transferred to storage account
             var records =
                 (from production in db.Production
-                 join distiller in db.AspNetUserToDistiller
-                    on production.DistillerID equals distiller.DistillerID into distiller_join
+                 join distiller in db.AspNetUserToDistiller on production.DistillerID equals distiller.DistillerID into distiller_join
                  from distiller in distiller_join.DefaultIfEmpty()
-                 join destruction in db.Destruction
-                    on production.ProductionID equals destruction.RecordID into destruction_join
+                 join destruction in db.Destruction on production.ProductionID equals destruction.RecordID into destruction_join
                  from destruction in destruction_join.DefaultIfEmpty()
-                 join productionContent in db.ProductionContent
-                    on production.ProductionID equals productionContent.RecordID into productionContent_join
+                 join productionContent in db.ProductionContent on production.ProductionID equals productionContent.RecordID into productionContent_join // gets amounts of materials used in production
                  from productionContent in productionContent_join.DefaultIfEmpty()
-                 join productionOutput in db.Production
-                    on productionContent.ProductionID equals productionOutput.ProductionID into productionOutput_join
+                 join productionOutput in db.Production on productionContent.ProductionID equals productionOutput.ProductionID into productionOutput_join
                  from productionOutput in productionOutput_join.DefaultIfEmpty()
-                 join proof in db.Proof
-                    on production.ProofID equals proof.ProofID into proof_join
+                 join proof in db.Proof on production.ProofID equals proof.ProofID into proof_join
                  from proof in proof_join.DefaultIfEmpty()
-                 join productionToSpiritType in db.ProductionToSpiritTypeReporting
-                    on production.ProductionID equals productionToSpiritType.ProductionID into productionToSpiritType_join
+                 join productionToSpiritType in db.ProductionToSpiritTypeReporting on production.ProductionID equals productionToSpiritType.ProductionID into productionToSpiritType_join
                  from productionToSpiritType in productionToSpiritType_join.DefaultIfEmpty()
-                 join spiritTypeReporting in db.SpiritTypeReporting
-                    on productionToSpiritType.SpiritTypeReportingID equals spiritTypeReporting.SpiritTypeReportingID into spiritTypeReporting_join
+                 join spiritTypeReporting in db.SpiritTypeReporting on productionToSpiritType.SpiritTypeReportingID equals spiritTypeReporting.SpiritTypeReportingID into spiritTypeReporting_join
                  from spiritTypeReporting in spiritTypeReporting_join.DefaultIfEmpty()
                  where
-                     distiller.UserId == userId
-                     && (production.ProductionTypeID == 1
-                        || production.ProductionTypeID == 2)
+                    distiller.UserId == userId
+                 && (production.ProductionTypeID == 1 || production.ProductionTypeID == 2)
                  && production.ProductionEndTime >= startDate
                  && production.ProductionEndTime <= endDate
                  && production.Gauged == true
@@ -7425,11 +7438,13 @@ namespace WebApp.Helpers
                     || production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
                     || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && productionOutput.ProductionTypeID == 2)
                     || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && productionOutput.ProductionTypeID == 3 && productionOutput.ProductionEndTime > endDate)
-                    || (production.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && destruction.EndTime > endDate))
+                    || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && destruction.EndTime > endDate))
                  && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 20 || productionContent.ContentFieldID == 23))) // 20 = ProdDistilledProofGal, 23 = ProdFermentedProofGal
                  select new
                  {
-                     productionStatus = (int?)production.StatusID ?? 0,
+                     productionStatusId = (int?)production.StatusID ?? 0,
+                     productionStateId = (int?)production.StateID ?? 0,
+                     productionOutputStausId = (int?)productionOutput.StatusID ?? 0,
                      reportingCategoryName = spiritTypeReporting.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)spiritTypeReporting.SpiritTypeReportingID ?? 0,
                      proof = (float?)proof.Value ?? 0,
@@ -7446,7 +7461,23 @@ namespace WebApp.Helpers
 
                     if (category == null)
                     {
-                        var total = rec.proof + rec.destroyedProof + rec.productionContentProof;
+                        float total = 0f;
+
+                        if (rec.productionStatusId == (int)Persistence.BusinessLogicEnums.Status.Active || rec.productionStatusId == (int)Persistence.BusinessLogicEnums.Status.Processed)
+                        {
+                            total += rec.proof + rec.destroyedProof + rec.productionContentProof; 
+                        }
+                        else if (rec.productionStatusId == (int)Persistence.BusinessLogicEnums.Status.Processing)
+                        {
+                            if (rec.proof != 0f && rec.productionStateId != (int)Persistence.BusinessLogicEnums.State.Fermented)
+                            {
+                                total += rec.proof + rec.destroyedProof;
+                            }
+                            else
+                            {
+                                total += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                            }
+                        }
 
                         if (total > 0)
                         {
