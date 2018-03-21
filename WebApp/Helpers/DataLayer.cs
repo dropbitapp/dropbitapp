@@ -301,26 +301,32 @@ namespace WebApp.Helpers
             // 1(c) previous month
             var onHands1stMoC =
                 (from prod in db.Production
-                    join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
-                    from proof in proof_join.DefaultIfEmpty()
-                    join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
-                    from prod4Rep in prod4Rep_join.DefaultIfEmpty()
-                    join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                    from distillers in distillers_join.DefaultIfEmpty()
-                    where
-                    distillers.UserId == userId &&
-                    prod.Gauged == true &&
-                    prod.ProductionEndTime < startOfReporting &&
-                    prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
-                    && prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed
-                    select new
-                    {
-                        Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0
-                    }).ToList();
+                 join productionContent in db.ProductionContent on prod.ProductionID equals productionContent.RecordID into productionContent_join
+                 from productionContent in productionContent_join.DefaultIfEmpty()
+                 join outputProduction in db.Production on productionContent.ProductionID equals outputProduction.ProductionID into outputProduction_join
+                 from outputProduction in outputProduction_join.DefaultIfEmpty()
+                 join proof in db.Proof on prod.ProofID equals proof.ProofID into proof_join
+                 from proof in proof_join.DefaultIfEmpty()
+                 join prod4Rep in db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
+                 from prod4Rep in prod4Rep_join.DefaultIfEmpty()
+                 join distillers in db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 where
+                 distillers.UserId == userId &&
+                 prod.Gauged == true &&
+                 prod.ProductionEndTime < startOfReporting &&
+                 prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
+                 && (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
+                 || prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
+                 || (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && outputProduction.ProductionEndTime > startOfReporting && productionContent.ContentFieldID == 22))
+                 select new
+                 {
+                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0
+                 }).ToList();
 
             if (onHands1stMoC != null)
             {
-               foreach (var i in onHands1stMoC)
+                foreach (var i in onHands1stMoC)
                 {
                     procRepP1.OnHandFirstofMonth += (float)i.Value;
                 }
@@ -432,7 +438,7 @@ namespace WebApp.Helpers
             }
 
             // 25(c) On hand end of month
-            procRepP1.OnHandEndofMonth = line8RunningSum - line26RunningSum;
+            procRepP1.OnHandEndofMonth = (float)Math.Round(Convert.ToDouble(line8RunningSum - line26RunningSum), 3);
 
             // Processing Report Part 2 Section
             // Bottled Column(b)
@@ -1946,7 +1952,7 @@ namespace WebApp.Helpers
 
                         if (purToSpiritTypeReporting != null)
                         {
-                            foreach(var i in purToSpiritTypeReporting)
+                            foreach (var i in purToSpiritTypeReporting)
                             {
                                 db.PurchaseToSpiritTypeReporting.Remove(i);
                             }
@@ -1960,7 +1966,7 @@ namespace WebApp.Helpers
 
                         if (prodContent != null)
                         {
-                            foreach(var k in prodContent)
+                            foreach (var k in prodContent)
                             {
                                 db.ProductionContent.Remove(k);
                             }
@@ -5190,7 +5196,7 @@ namespace WebApp.Helpers
                             // update the status of the record we are restoring 
                             // depending on whether all of its original value is being restored or no. If entire original value is restored
                             // we need to set status to active else, set status to Processing
-                            if ( setActiveStatus)
+                            if (setActiveStatus)
                             {
                                 productionValues.StatusID = (int)Persistence.BusinessLogicEnums.Status.Active;
                             }
@@ -6468,7 +6474,7 @@ namespace WebApp.Helpers
 
                     foreach (var i in ress)
                     {
-                        GetRedistilledProductionContentRecordsForProcessing(start, end, ref prodContentIteratorList,(int)i.ProductionID /*productionID or recordID*/);
+                        GetRedistilledProductionContentRecordsForProcessing(start, end, ref prodContentIteratorList, (int)i.ProductionID /*productionID or recordID*/);
                     }
 
                     foreach (var k in prodContentIteratorList)
@@ -6573,7 +6579,7 @@ namespace WebApp.Helpers
                             var skipNextRecrusiveCall = prodContentIteratorList.Find(x => x.ProductionId == parentProductionId);
                             if (!(skipNextRecrusiveCall != null))
                             {
-                                GetRedistilledProductionContentRecordsForProcessing( start, end, ref prodContentIteratorList, current.RecordID);
+                                GetRedistilledProductionContentRecordsForProcessing(start, end, ref prodContentIteratorList, current.RecordID);
                             }
                         }
                     }
