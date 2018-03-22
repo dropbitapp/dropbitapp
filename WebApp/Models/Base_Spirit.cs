@@ -109,7 +109,7 @@ namespace WebApp.Models
 
     /// <summary>
     /// Production4Reporting table is used to keep track of the original production
-    /// quantities, for reprorting purposes. 
+    /// amounts, and new amounts for the original production for reprorting purposes. 
     /// </summary>
     public class Production4Reporting
     {

@@ -3,8 +3,7 @@ namespace WebApp.Persistence.BusinessLogicEnums
 {
     public enum ProductinWorkflowType
     {
-        Default = 0,
-        Fermentation,
+        Fermentation = 1,
         Distillation,
         Blending,
         Bottling
@@ -16,10 +15,30 @@ namespace WebApp.Persistence.BusinessLogicEnums
     /// </summary>
     public enum ProductionReportMaterialCategory
     {
-        Default =0,
-        Grain,
+        Grain = 1,
         Fruit,
         Cane,
         Other
+    }
+
+    public enum Status
+    {
+        Active = 1,
+        Processing,
+        Processed,
+        Deleted = 6,
+        Archived = 7,
+        Destroyed = 9
+    }
+
+    public enum State
+    {
+        Fermentable = 1,
+        Fermented,
+        Distilled,
+        Blended,
+        Bottled,
+        Supply,
+        Additive
     }
 }
