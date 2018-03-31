@@ -98,7 +98,7 @@
     }
     else
     {
-        Assert.IsNotNull(productionPart1Object, "Rum object should be null");
+        Assert.IsNull(productionPart1Object, "Rum object should be null");
 
         Assert.AreEqual(0, productionPart1Object.SpiritCatName);
         Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
