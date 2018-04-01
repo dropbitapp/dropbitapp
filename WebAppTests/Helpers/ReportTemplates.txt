@@ -1,0 +1,1028 @@
+﻿#region Production Report
+{
+    /* Production Report 
+       Update expected values accordingly to the expected result if needed
+    */
+
+    /* 
+       Production report Part 1
+       Default values for Spirit Objects are to be null
+    */
+
+    #region Production Part 1
+    // Whisky Under 160
+    var productionPart1Object = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.WhiskyUnder160);
+
+    if (productionPart1Object == null)
+    {
+        Assert.IsNull(productionPart1Object, "Whisky Under 160 Object should be null");
+    }
+    else
+    {
+        Assert.IsNull(productionPart1Object, "Whisky Under 160 Object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+
+    // Whisky Over 160
+    productionPart1Object = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.WhiskyOver160);
+
+    if (productionPart1Object == null)
+    {
+        Assert.IsNull(productionPart1Object, "Whisky Over 160 Object should be null");
+    }
+    else
+    {
+        Assert.IsNull(whiskyUnder160Actual, "Whisky Over 160 Object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+    // Brandy Under 170
+    productionPart1Object = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.BrandyUnder170);
+
+    if (productionPart1Object == null)
+    {    
+        Assert.IsNull(productionPart1Object, "Brandy Under 170 object should be null");
+    }
+    else
+    {
+        Assert.IsNull(productionPart1Object, "Brandy Under 170 object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+
+    // Brandy Over 170
+    productionPart1Object = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.BrandyOver170);
+
+    if (productionPart1Object == null)
+    {
+        Assert.IsNull(productionPart1Object, "Brandy Over 170 object should be null");
+    }
+    else
+    {
+        Assert.IsNull(productionPart1Object, "Brandy Over 170 object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+
+    // Rum
+    productionPart1Object = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.Rum);
+
+    if (productionPart1Object == null)
+    {
+        Assert.IsNull(productionPart1Object, "Rum object should be null");
+    }
+    else
+    {
+        Assert.IsNull(productionPart1Object, "Rum object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+
+    // Gin
+    productionPart1Object = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.Gin);
+
+    if (productionPart1Object == null)
+    {
+        Assert.IsNull(productionPart1Object, "Gin object should be null");
+    }
+    else
+    {
+        Assert.IsNull(ginActual, "Gin object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+
+    // Vodka
+    productionPart1Object = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.Vodka);
+
+    if (productionPart1Object == null)
+    {
+        Assert.IsNull(productionPart1Object, "Vodka object should be null");
+    }
+    else
+    {
+        Assert.IsNull(vodkaActual, "Vodka object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+
+    // Alcohol Under 190
+    productionPart1Object= actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.AlcoholUnder190);
+
+    if (productionPart1Object == null)
+    {
+        Assert.IsNull(productionPart1Object, "Alcohol Under 190 object should be null");
+    }
+    else
+    {
+        Assert.IsNull(productionPart1Object, "Alcohol Under 190 object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+
+    // Alcohol Over 190
+    productionPart1Object = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.AlcoholOver190);
+
+    if (productionPart1Object == null)
+    {
+        Assert.IsNull(productionPart1Object, "Alcohol Over 190 object should be null");
+    }
+    else
+    {
+        Assert.IsNull(productionPart1Object, "Alcohol Over 190 object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+
+    // Other
+    productionPart1Object = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.Other);
+
+    if (productionPart1Object == null)
+    {
+        Assert.IsNull(productionPart1Object, "Other object should be null");
+    }
+    else
+    {
+        Assert.IsNull(productionPart1Object, "Other object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+
+    // Wine
+    productionPart1Object = actualProdReportObject.Part1List.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.Wine);
+
+    if (productionPart1Object == null)
+    {
+        Assert.IsNull(productionPart1Object, "Wine object should be null");
+    }
+    else
+    {
+        Assert.IsNull(wineActual, "Wine object should be null");
+
+        Assert.AreEqual(0, productionPart1Object.SpiritCatName);
+        Assert.AreEqual(0, productionPart1Object.ProccessingAcct);
+        Assert.AreEqual(0, productionPart1Object.StorageAcct);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilaltionL15);
+        Assert.AreEqual(0, productionPart1Object.Recd4RedistilL17);
+        Assert.AreEqual(0, productionPart1Object.UnfinishedSpiritsEndOfQuarterL17);
+        Assert.AreEqual(0, productionPart1Object.ProducedTotal);
+    }
+#endregion End of Production Part 1
+
+    /* 
+       Production report Part 2 - 4
+       Default value is 0
+    */
+    #region Production Part 2 to 4
+    {
+        var prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Grain);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Grain production part 2 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Grain production part 2 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Fruit);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Fruit production part 2 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Fruit production part 2 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Molasses);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Molasses production part 2 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Molasses production part 2 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.EthylSulfate);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Ethyl Sulfate production part 2 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Ethyl Sulfate production part 2 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.EthyleneGas);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Ethylene Gas production part 2 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Ethylene Gas production part 2 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.SulphiteLiquor);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Sulphite Liquor production part 2 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Sulphite Liquor production part 2 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.FromRedistillation);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "From Redistillation production part 2 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "From Redistillation production part 2 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Bourbon_New_Cooperage);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Bourbon New Cooperage production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Bourbon New Cooperage production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Bourbon_Used_Cooperage);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Bourbon New Cooperage production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Bourbon Used Cooperage production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Bourbon_Deposited_in_Tanks);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Bourbon Deposited In Tanks production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Bourbon Deposited In Tanks production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Corn_New_Cooperage);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Corn New Cooperage production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Corn New Cooperage production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Corn_Used_Cooperage);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Corn Used Cooperage production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Corn Used Cooperage production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Corn_Deposited_in_Tanks);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Corn Deposited In Tanks production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Corn Deposited In Tanks production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Rye_New_Cooperage);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Rye New Cooperage production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Rye New Cooperage production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Rye_Used_Cooperage);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Rye Used Cooperage production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Rye Used Cooperage production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Rye_Deposited_in_Tanks);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Rye Deposited In Tanks production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Rye Deposited In Tanks production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Light_New_Cooperage);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Light New Cooperage production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Light New Cooperage production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Light_Used_Cooperage);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Light Used Cooperage production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Light Used Cooperage production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.Light_Deposited_in_Tanks);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Light Deposited In Tanks Cooperage production part 3 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Light Deposited In Tanks Cooperage production part 3 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.GrapeBrandy);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Grape Brandy production part 4 object should be null");
+        }
+        else
+        {
+            //Assert.IsNull(prouctionObjectpart2Through4Expected, "Grape Brandy production part 4 object should be null");
+
+            Assert.AreEqual(0f, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.AllOtherBrandy);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "All Other Brandy production part 4 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "All Other Brandy production part 4 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.NeutralGrapeBrandy);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Neutral Grape Brandy production part 4 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "Neutral Grape Brandy production part 4 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+
+        prouctionObjectpart2Through4Expected = actualProdReportObject.Part2Through4List.Find(x => x.MaterialKindReportingID == (int)ReportMaterialKinds.AllOtherNeutralBrandy);
+
+        if (prouctionObjectpart2Through4Expected == null)
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "All Other Neutral Grape Brandy production part 4 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(prouctionObjectpart2Through4Expected, "All Other Neutral Grape Brandy production part 4 object should be null");
+
+            Assert.AreEqual(0, prouctionObjectpart2Through4Expected.ProofGallons);
+        }
+    }
+#endregion End of Production Part 2 to 4
+
+    /*
+        Production report Part 5
+        Default value is null
+     */
+#region Production Part 5
+    {
+        var part5Object = actualProdReportObject.part5List.Find(x => x.KindofSpirits == "Wine");
+
+        if (part5Object == null)
+        {
+            Assert.IsNull(part5Object, "Wine Part 5 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(part5Object, "Wine Part 5 object should be null");
+
+            Assert.AreEqual(0, part5Object.Proof);
+        }
+
+        part5Object = actualProdReportObject.part5List.Find(x => x.KindofSpirits == "WhiskyUnder160");
+
+        if (part5Object == null)
+        {
+            Assert.IsNull(part5Object, "Whisky Under 160 Part 5 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(part5Object, "Whisky Under 160 Part 5 object should be null");
+
+            Assert.AreEqual(0, part5Object.Proof);
+        }
+
+        part5Object = actualProdReportObject.part5List.Find(x => x.KindofSpirits == "WhiskyOver160");
+
+        if (part5Object == null)
+        {
+            Assert.IsNull(part5Object, "Whisky Over 160 Part 5 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(part5Object, "Whisky Over 160 Part 5 object should be null");
+
+            Assert.AreEqual(0, part5Object.Proof);
+        }
+
+        part5Object = actualProdReportObject.part5List.Find(x => x.KindofSpirits == "BrandyUnder170");
+
+        if (part5Object == null)
+        {
+            Assert.IsNull(part5Object, "Brandy Under 170 Part 5 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(part5Object, "Brandy Under 170 Part 5 object should be null");
+
+            Assert.AreEqual(0, part5Object.Proof);
+        }
+
+        part5Object = actualProdReportObject.part5List.Find(x => x.KindofSpirits == "BrandyOver170");
+
+        if (part5Object == null)
+        {
+            Assert.IsNull(part5Object, "Brandy Over 170 Part 5 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(part5Object, "Brandy Over 170 Part 5 object should be null");
+
+            Assert.AreEqual(0, part5Object.Proof);
+        }
+
+        part5Object = actualProdReportObject.part5List.Find(x => x.KindofSpirits == "Rum");
+
+        if (part5Object == null)
+        {
+            Assert.IsNull(part5Object, "Rum Part 5 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(part5Object, "Rum Part 5 object should be null");
+
+            Assert.AreEqual(0, part5Object.Proof);
+        }
+
+        part5Object = actualProdReportObject.part5List.Find(x => x.KindofSpirits == "Vodka");
+
+        if (part5Object == null)
+        {
+            Assert.IsNull(part5Object, "Vodka Part 5 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(part5Object, "Vodka Part 5 object should be null");
+
+            Assert.AreEqual(0, part5Object.Proof);
+        }
+
+        part5Object = actualProdReportObject.part5List.Find(x => x.KindofSpirits == "AlcoholUnder190");
+
+        if (part5Object == null)
+        {
+            Assert.IsNull(part5Object, "Alcohol Under 190 Part 5 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(part5Object, "Alcohol Under 190 Part 5 object should be null");
+
+            Assert.AreEqual(0, part5Object.Proof);
+        }
+
+        part5Object = actualProdReportObject.part5List.Find(x => x.KindofSpirits == "AlcoholOver190");
+
+        if (part5Object == null)
+        {
+            Assert.IsNull(part5Object, "Alcohol Over 190 Part 5 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(part5Object, "Alcohol Over 190 Part 5 object should be null");
+
+            Assert.AreEqual(0, part5Object.Proof);
+        }
+
+        part5Object = actualProdReportObject.part5List.Find(x => x.KindofSpirits == "Other");
+
+        if (part5Object == null)
+        {
+            Assert.IsNull(part5Object, "Other Part 5 object should be null");
+        }
+        else
+        {
+            Assert.IsNull(part5Object, "Other Part 5 object should be null");
+
+            Assert.AreEqual(0, part5Object.Proof);
+        }
+    }
+#endregion End of Production Part 5
+
+    /*
+        Production report Part 6
+        Default value is null objects for all categories: Cane, Fruit, Grain and Other
+    */
+#region Production Part 6
+    {
+
+        var part6CategoryExpected = actualProdReportObject.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Cane);
+
+        if (part6CategoryExpected == null)
+        {
+            Assert.IsNull(part6CategoryExpected, "There should be no records for Cane category");
+        }
+        else
+        {
+            Assert.IsNull(part6CategoryExpected, "There should be no records for Cane category");
+
+            Assert.Equals(0, part6CategoryExpected.Weight);
+            Assert.Equals(0, part6CategoryExpected.Volume);
+        }
+
+        part6CategoryExpected = actualProdReportObject.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit);
+
+        if (part6CategoryExpected == null)
+        {
+            Assert.IsNull(part6CategoryExpected, "There should be no records for Fruit category");
+        }
+        else
+        {
+            Assert.IsNull(part6CategoryExpected, "There should be no records for Fruit category");
+
+            Assert.Equals(0, part6CategoryExpected.Weight);
+            Assert.Equals(0, part6CategoryExpected.Volume);
+        }
+
+        part6CategoryExpected = actualProdReportObject.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Grain);
+
+        if (part6CategoryExpected == null)
+        {
+            Assert.IsNull(part6CategoryExpected, "There should be no records for Grain category");
+        }
+        else
+        {
+            Assert.IsNull(part6CategoryExpected, "There should be no records for Grain category");
+
+            Assert.Equals(0, part6CategoryExpected.Weight);
+            Assert.Equals(0, part6CategoryExpected.Volume);
+        }
+
+        part6CategoryExpected = actualProdReportObject.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Other);
+
+        if (part6CategoryExpected == null)
+        {
+            Assert.IsNull(part6CategoryExpected, "There should be no records for Other category");
+        }
+        else
+        {
+            Assert.IsNull(part6CategoryExpected, "There should be no records for Other category");
+
+            Assert.Equals(0, part6CategoryExpected.Weight);
+            Assert.Equals(0, part6CategoryExpected.Volume);
+        }
+    }
+#endregion Production Part 6
+}
+#endregion End of Production Report
+
+
+#region Storage Report
+{
+    /* Storage report object are by default null*/
+    StorageReport actualStorageReportObject = new StorageReport();
+actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+
+    // Whisky Under 160
+    var storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.WhiskyUnder160);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Whisky Under 160 Object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Whisky Under 160 Object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+
+    // Whisky Over 160
+    storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.WhiskyOver160);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Whisky Over 160 Object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Whisky Over 160 Object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+
+    // Brandy Under 170
+    storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.BrandyUnder170);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Brandy Under 170 object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Brandy Under 170 object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+
+    // Brandy Over 170
+    storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.BrandyOver170);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Brandy Over 170 object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Brandy Over 170 object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+
+    // Rum
+    storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.Rum);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Rum object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Rum object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+
+
+    // Gin
+    storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.Gin);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Gin object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Gin object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+
+    // Vodka
+    storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.Vodka);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Vodka object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Vodka object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+
+    // Alcohol Under 190
+    storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.AlcoholUnder190);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Alcohol Under 190 object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Alcohol Under 190 object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+
+    // Alcohol Over 190
+    storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.AlcoholOver190);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Alcohol Over 190 object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Alcohol Over 190 object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+
+    // Other
+    storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.Other);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Other object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Other object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+
+    // Wine
+    storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.Wine);
+
+    if (storageSpiritObject == null)
+    {
+        Assert.IsNull(storageSpiritObject, "Wine object should be null");
+    }
+    else
+    {
+        Assert.IsNull(storageSpiritObject, "Wine object should be null");
+
+        Assert.AreEqual(0, storageSpiritObject.r1_OnHandFirstOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r2_DepositedInBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r4_ReturnedToBulkStorage);
+        Assert.AreEqual(0, storageSpiritObject.r6_TotalLines1Through5);
+        Assert.AreEqual(0, storageSpiritObject.r7_TaxPaid);
+        Assert.AreEqual(0, storageSpiritObject.r17_TransferredToProcessingAccount);
+        Assert.AreEqual(0, storageSpiritObject.r18_TransferredToProductionAccount);
+        Assert.AreEqual(0, storageSpiritObject.r19_TransferredToOtherBondedPremises);
+        Assert.AreEqual(0, storageSpiritObject.r20_Destroyed);
+        Assert.AreEqual(0, storageSpiritObject.r22_OtherLosses);
+        Assert.AreEqual(0, storageSpiritObject.r23_OnHandEndOfMonth);
+        Assert.AreEqual(0, storageSpiritObject.r24_Lines7Through23);
+    }
+}
+#endregion End of Storage Report

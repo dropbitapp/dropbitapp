@@ -97,6 +97,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Helpers\ReportTemplates.txt" />
     <None Include="App.config" />
     <Content Include="bin\Web.config">
       <SubType>Designer</SubType>
