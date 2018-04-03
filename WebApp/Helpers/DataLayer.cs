@@ -3280,81 +3280,142 @@ namespace WebApp.Helpers
             return storageList;
         }
 
-        internal bool DeleteDictionaryRecord(int userId, DeleteRecordObject deleteObject)
+        public ReturnObject DeleteDictionaryRecord(int userId, DeleteRecordObject deleteObject)
         {
             int RecordID = deleteObject.DeleteRecordID;
             string RecordType = deleteObject.DeleteRecordType;
-            bool retMthdExecResult = false;
+            int distillerId = GetDistillerId(userId);
+            ReturnObject delReturn = new ReturnObject();
             if (RecordID > 0)
             {
                 try
                 {
                     if (RecordType == "RawMaterial")
                     {
-                        var res = from rec in db.Purchase
-                                  where rec.MaterialDictID == RecordID
-                                  select rec;
+                        // check is material used in purchase
+                        var res1 = from rec in db.Purchase
+                                   where rec.MaterialDictID == RecordID && rec.DistillerID == distillerId
+                                   select rec;
+                        // check is material used in blending
+                        var res2 = (from rec in db.BlendedComponent
+                                    where rec.RecordId == RecordID
+                                    select rec).ToList();
 
-                        var recCount = res.Count();
-
-                        if (recCount == 0)
-                            retMthdExecResult = DeleteRawMaterial(userId, RecordID);
-                        else
-                            retMthdExecResult = false;
+                        if (res1.Count() == 0 && res2.Count() == 0)
+                        {
+                            delReturn.ExecuteResult = DeleteRawMaterial(userId, RecordID);
+                        }
+                        if (res1.Count() != 0)
+                        {
+                            foreach (var item in res1)
+                            {
+                                delReturn.ExecuteMessage = item.PurchaseName;
+                            }
+                        } else if (res2.Count() != 0)
+                        {
+                            string recordName;
+                            foreach (var item in res2)
+                            {
+                                recordName = 
+                                        (from rec in db.Production
+                                        where rec.ProductionID == item.ProductionID && rec.DistillerID == distillerId
+                                        select rec.ProductionName).FirstOrDefault();
+                                delReturn.ExecuteMessage = recordName;
+                            }
+                        }
                     }
                     else if (RecordType == "Spirit")
                     {
-                        var res = from rec in db.ProductionToSpirit
-                                  where rec.SpiritID == RecordID
-                                  select rec;
-                        var recCount = res.Count();
 
-                        if (recCount == 0)
-                            retMthdExecResult = DeleteSpirit(userId, RecordID);
+                        var res =
+                            from rec in db.ProductionToSpirit
+                            join prod2Name in db.Production on rec.ProductionID equals prod2Name.ProductionID into prod2Name_join
+                            where rec.SpiritID == RecordID
+                            from prod2Name in prod2Name_join.DefaultIfEmpty()
+                            select new
+                            {
+                                ProductionID = (int?)prod2Name.ProductionID ?? 0,
+                                ProductionName = prod2Name.ProductionName ?? string.Empty
+                            };
+
+                        if (res.Count() == 0)
+                        {
+                            delReturn.ExecuteResult = DeleteSpirit(userId, RecordID);
+                        }
                         else
-                            retMthdExecResult = false;
+                        {
+                            foreach (var item in res)
+                            {
+                                delReturn.ExecuteMessage = item.ProductionName;
+                            }
+                        }
                     }
                     else if (RecordType == "Storage")
                     {
-                        var res = from rec in db.StorageToRecord
+                        var res = (from rec in db.StorageToRecord
                                   where rec.StorageID == RecordID
-                                  select rec;
-                        var recCount = res.Count();
+                                  select rec).ToList();
 
-                        if (recCount == 0)
-                            retMthdExecResult = DeleteStorage(userId, RecordID);
+                        if (res.Count() == 0)
+                        {
+                            delReturn.ExecuteResult = DeleteStorage(userId, RecordID);
+                        }
                         else
-                            retMthdExecResult = false;
+                        {
+                            string recordName;
+                            foreach (var item in res)
+                            {
+                                if (item.TableIdentifier == "pur")
+                                {
+                                    recordName = (from rec in db.Purchase
+                                                         where rec.PurchaseID == item.RecordId && rec.DistillerID == distillerId
+                                                         select rec.PurchaseName).FirstOrDefault();
+                                    delReturn.ExecuteMessage = recordName;
+                                }
+                                if (item.TableIdentifier == "prod")
+                                {
+                                    recordName = (from rec in db.Production
+                                                  where rec.ProductionID == item.RecordId && rec.DistillerID == distillerId
+                                                  select rec.ProductionName).FirstOrDefault();
+                                    delReturn.ExecuteMessage = recordName;
+                                }
+                            }
+                        }
                     }
                     else if (RecordType == "Vendor")
                     {
                         var res = from rec in db.Purchase
-                                  where rec.VendorID == RecordID
+                                  where rec.VendorID == RecordID && rec.DistillerID == distillerId
                                   select rec;
 
-                        var recCount = res.Count();
-
-                        if (recCount == 0)
-                            retMthdExecResult = DeleteVendor(userId, RecordID);
+                        if (res.Count() == 0)
+                        {
+                            delReturn.ExecuteResult = DeleteVendor(userId, RecordID);
+                        }
                         else
-                            retMthdExecResult = false;
+                        {
+                            foreach (var item in res)
+                            {
+                                delReturn.ExecuteMessage = item.PurchaseName;
+                            }
+                        }
                     }
                     else
                     {
-                        retMthdExecResult = false;
+                        delReturn.ExecuteResult = false;
                     }
                 }
                 catch (Exception e)
                 {
                     Debug.WriteLine("Failed to delete " + RecordType + ": " + e);
-                    retMthdExecResult = false;
+                    delReturn.ExecuteResult = false;
                 }
             }
             else
             {
-                retMthdExecResult = false;
+                delReturn.ExecuteResult = false;
             }
-            return retMthdExecResult;
+            return delReturn;
         }
 
         private bool DeleteVendor(int userId, int vendorID)
@@ -3365,25 +3426,25 @@ namespace WebApp.Helpers
             {
                 try
                 {
-                    var recs =
+                    var recs1 =
                         (from rec in db.VendorDetail
                          where rec.VendorID == vendorID
                          select rec).FirstOrDefault();
 
-                    if (recs != null)
+                    if (recs1 != null)
                     {
-                        db.VendorDetail.Remove(recs);
+                        db.VendorDetail.Remove(recs1);
                         db.SaveChanges();
                     }
 
-                    var recs1 =
-                        (from rec1 in db.Vendor
-                         where rec1.VendorID == vendorID && rec1.DistillerID == distillerId
-                         select rec1).FirstOrDefault();
+                    var recs2 =
+                        (from rec2 in db.Vendor
+                         where rec2.VendorID == vendorID && rec2.DistillerID == distillerId
+                         select rec2).FirstOrDefault();
 
-                    if (recs1 != null)
+                    if (recs2 != null)
                     {
-                        db.Vendor.Remove(recs1);
+                        db.Vendor.Remove(recs2);
                         db.SaveChanges();
                     }
 
@@ -3391,8 +3452,7 @@ namespace WebApp.Helpers
                 }
                 catch (Exception e)
                 {
-                    // Spirit?
-                    Debug.WriteLine("Failed to delete Spirit: " + e);
+                    Debug.WriteLine("Failed to delete Vendor: " + e);
                     retMthdExecResult = false;
                 }
             }
@@ -3443,13 +3503,21 @@ namespace WebApp.Helpers
             {
                 try
                 {
-                    var recs =
+                    var recs1 = (from rec in db.StorageState
+                                 where rec.StorageID == storageID
+                                 select rec).FirstOrDefault();
+                    if (recs1 != null)
+                    {
+                        db.StorageState.Remove(recs1);
+                        db.SaveChanges();
+                    }
+                    var recs2 =
                         (from rec in db.Storage
                          where rec.StorageID == storageID && rec.DistillerID == distillerId
                          select rec).FirstOrDefault();
-                    if (recs != null)
+                    if (recs2 != null)
                     {
-                        db.Storage.Remove(recs);
+                        db.Storage.Remove(recs2);
                         db.SaveChanges();
                     }
                     retMthdExecResult = true;
@@ -3476,21 +3544,30 @@ namespace WebApp.Helpers
                 try
                 {
                     var recs1 =
+                          (from rec in db.MaterialDict2MaterialCategory
+                           where rec.MaterialDictID == rawMaterialID
+                           select rec).FirstOrDefault();
+                    if (recs1 != null)
+                    {
+                        db.MaterialDict2MaterialCategory.Remove(recs1);
+                        db.SaveChanges();
+                    }
+                    var recs2 = 
                         (from rec in db.MaterialDict
                          where rec.MaterialDictID == rawMaterialID && rec.DistillerID == distillerId
                          select rec).FirstOrDefault();
-                    if (recs1 != null)
+                    if (recs2 != null)
                     {
-                        db.MaterialDict.Remove(recs1);
+                        db.MaterialDict.Remove(recs2);
                         db.SaveChanges();
                     }
-                    var recs2 =
+                    var recs3 =
                         (from rec in db.MaterialType
                          where rec.MaterialDictID == rawMaterialID
                          select rec).FirstOrDefault();
-                    if (recs2 != null)
+                    if (recs3 != null)
                     {
-                        db.MaterialType.Remove(recs2);
+                        db.MaterialType.Remove(recs3);
                         db.SaveChanges();
                     }
                     retMthdExecResult = true;
@@ -5369,7 +5446,7 @@ namespace WebApp.Helpers
         }
 
         /// <summary>
-        /// GetProductionList queries DB for Prodiction data for a particular production type
+        /// GetProductionList queries DB for Production data for a particular production type
         /// </summary>
         /// <returns></returns>
         public List<ProductionObject> GetProductionList(int userId, string prodType)

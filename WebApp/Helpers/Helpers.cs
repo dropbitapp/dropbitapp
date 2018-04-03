@@ -291,6 +291,23 @@ namespace WebApp.Helpers
     }
 
     /// <summary>
+    /// Generic workflow return object which contains 
+    /// a bool and string.
+    /// </summary>
+    public class ReturnObject
+    {
+        private bool _executeResult = false;
+        private string _executeMessage = string.Empty;
+        public bool ExecuteResult { get; set; }
+        public string ExecuteMessage { get; set; }
+
+        public ReturnObject ()
+        {
+            this.ExecuteResult = _executeResult;
+            this.ExecuteMessage = _executeMessage;
+        }
+    }
+    /// <summary>
     /// It destroys things!
     /// </summary>
     public class DestructionObject

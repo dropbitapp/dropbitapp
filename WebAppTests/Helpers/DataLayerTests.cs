@@ -5918,6 +5918,726 @@ namespace WebApp.Helpers.Tests
             }
         }
 
+        /// <summary>
+        /// This test checks that a Vendor record cannot be deleted when
+        /// tied to a Purchase record
+        /// </summary>
+        [TestMethod()]
+        public void Delete_Dictionary_Vendor_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int grapeMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                // grapes
+                {
+                    RawMaterialObject grapeMaterial = new RawMaterialObject();
+                    grapeMaterial.RawMaterialName = "Grapes";
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    grapeMaterial.UnitType = "lb";
+                    grapeMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermentable = true;
+                    grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Vendor_Deletion_Test";
+                purchO.PurchaseType = "Fermentable";
+                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.Quantity = 0f;
+                purchO.VolumeByWeight = 2000f;
+                purchO.RecordId = grapeMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Assertions
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = vendorId;
+                deleteObject.DeleteRecordType = "Vendor";
+
+                // Attempt to delete vendor even though it's being used by purchase record
+                ReturnObject returnResult = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+
+                var vendorList = _dl.GetVendorData(_userId);
+
+                var vendorFound = vendorList.Find(x => x.VendorId == vendorId);
+                // Assert Vendor can't be deleted when used by purchase record.
+                Assert.IsNotNull(vendorFound);
+                // Assert Purchase record name used by vendor is correctly surfaced to user.
+                Assert.AreEqual(returnResult.ExecuteMessage, purchO.PurBatchName);
+
+                // Delete purchase record to ensure Vendor can be deleted when not used by other record.
+                _dl.DeletePurchase(purchO, _userId);
+
+                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+
+                var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert purchase record is deleted.
+                Assert.IsNull(purchaseFound);
+
+                // Attempt to delete Vendor record now that it's no longer used by purchase record
+                _dl.DeleteDictionaryRecord(_userId, deleteObject);
+
+                var vendorList2 = _dl.GetVendorData(_userId);
+
+                var vendorFound2 = vendorList2.Find(x => x.VendorId == vendorId);
+                // Assert Vendor can be deleted when not used by purchase record.
+                Assert.IsNull(vendorFound2);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Storage record cannot be deleted when
+        /// tied to a Purchase or Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Delete_Dictionary_Storage_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int grapeMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                // grapes
+                {
+                    RawMaterialObject grapeMaterial = new RawMaterialObject();
+                    grapeMaterial.RawMaterialName = "Grapes";
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    grapeMaterial.UnitType = "lb";
+                    grapeMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermentable = true;
+                    grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Storage_Deletion_Test";
+                purchO.PurchaseType = "Fermentable";
+                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.Quantity = 0f;
+                purchO.VolumeByWeight = 2000f;
+                purchO.RecordId = grapeMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Assertions: Purchase
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = storageId;
+                deleteObject.DeleteRecordType = "Storage";
+
+                // Attempt to delete storage even though it's being used by Purchase record
+                ReturnObject returnResult1 = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+
+                var storList1 = _dl.GetStorageData(_userId);
+
+                var storageFound1 = storList1.Find(x => x.StorageId == storageId);
+                // Assert Storage can't be deleted when used by Purchase record.
+                Assert.IsNotNull(storageFound1);
+                // Assert Purchase record name used by Storage is correctly surfaced to user.
+                Assert.AreEqual(returnResult1.ExecuteMessage, purchO.PurBatchName);
+
+                // Delete Purchase record to ensure Storage can be deleted when not used by other record.
+                _dl.DeletePurchase(purchO, _userId);
+
+                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+
+                var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is deleted.
+                Assert.IsNull(purchaseFound);
+
+                #endregion
+
+                #region Production
+
+                // Creating temporary Purchase object in order to create Production object.
+                PurchaseObject purchase = new PurchaseObject();
+                purchase.PurBatchName = "Delete_Storage_Purchase";
+                purchase.PurchaseType = "Fermented";
+                purchase.PurchaseDate = new DateTime(2017, 09, 1);
+                purchase.Quantity = 1000f; // 100 gallons
+                purchase.VolumeByWeight = 0f;
+                purchase.AlcoholContent = 10f;
+                purchase.ProofGallon = 100f;
+                purchase.RecordId = grapeMaterialId;
+                purchase.Price = 2500f;
+                purchase.VendorId = vendorId;
+
+                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                // Production
+                ProductionObject prodObject = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "TEST",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritCutId = 9,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    }
+                };
+
+                productionId = _dl.CreateProduction(prodObject, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                #endregion
+
+                #region Assertions: Production
+
+                // Attempt to delete storage even though it's being used by Production record
+                ReturnObject returnResult2 = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+
+                var storList2 = _dl.GetStorageData(_userId);
+
+                var storageFound2 = storList2.Find(x => x.StorageId == storageId);
+                // Assert Storage can't be deleted when used by Purchase record.
+                Assert.IsNotNull(storageFound2);
+                // Assert Production record name used by Storage is correctly surfaced to user.
+                Assert.AreEqual(returnResult2.ExecuteMessage, prodObject.BatchName);
+                // Delete Production record to ensure Storage can be deleted when not used by other record.
+                _dl.DeleteProduction(prodObject, _userId);
+
+                var prodList = _dl.GetProductionList(_userId, "Distillation");
+
+                var prodFound = prodList.Find(x => x.ProductionId == prodObject.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound);
+
+                #endregion
+
+                #region Assertions: Storage
+
+                // Attempt to delete Storage record now that it's no longer used by any other record
+                _dl.DeleteDictionaryRecord(_userId, deleteObject);
+
+                var storList3 = _dl.GetStorageData(_userId);
+
+                var storFound3 = storList3.Find(x => x.StorageId == storageId);
+                // Assert Storage can be deleted when not used by purchase record.
+                Assert.IsNull(storFound3);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Spirit record cannot be deleted when
+        /// tied to a Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Delete_Dictionary_Spirit_Test()
+        {
+            // Arrange
+            int spiritId = 0;
+            int vendorId = 0;
+            int storageId = 0;
+            int grapeMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Spirit Object
+                SpiritObject spirit = new SpiritObject();
+                spirit.SpiritName = "testSpirit";
+                spirit.ProcessingReportTypeID = 19;
+
+                spiritId = _dl.CreateSpirit(_userId, spirit);
+                tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
+
+                // setup Material Object
+                // grapes
+                {
+                    RawMaterialObject grapeMaterial = new RawMaterialObject();
+                    grapeMaterial.RawMaterialName = "Grapes";
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    grapeMaterial.UnitType = "lb";
+                    grapeMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermentable = true;
+                    grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Production
+
+                // Creating temporary Purchase object in order to create Production object.
+                PurchaseObject purchase = new PurchaseObject();
+                purchase.PurBatchName = "Delete_Spirit_Purchase";
+                purchase.PurchaseType = "Fermented";
+                purchase.PurchaseDate = new DateTime(2017, 09, 1);
+                purchase.Quantity = 1000f; // 100 gallons
+                purchase.VolumeByWeight = 0f;
+                purchase.AlcoholContent = 10f;
+                purchase.ProofGallon = 100f;
+                purchase.RecordId = grapeMaterialId;
+                purchase.Price = 2500f;
+                purchase.VendorId = vendorId;
+
+                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+
+                // Production
+                ProductionObject prodObject = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "TEST",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Blending",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritCutId = 9,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                    SpiritId = spiritId
+                };
+
+                productionId = _dl.CreateProduction(prodObject, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                #endregion
+
+                #region Assertions: Production
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = spiritId;
+                deleteObject.DeleteRecordType = "Spirit";
+
+                // Attempt to delete Spirit even though it's being used by Production record
+                ReturnObject returnResult = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+
+                var spiritList1 = _dl.GetSpiritTypeList(_userId);
+
+                var spiritFound1 = spiritList1.Find(x => x.SpiritId == spiritId);
+                // Assert Spirit can't be deleted when used by Production record.
+                Assert.IsNotNull(spiritFound1);
+                // Assert Production record name used by Spirit is correctly surfaced to user.
+                Assert.AreEqual(returnResult.ExecuteMessage, prodObject.BatchName);
+                // Delete Production record to ensure Spirit can be deleted when not used by other record.
+                _dl.DeleteProduction(prodObject, _userId);
+
+                var prodList = _dl.GetProductionList(_userId, "Blending");
+
+                var prodFound = prodList.Find(x => x.ProductionId == prodObject.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound);
+
+                #endregion
+
+                #region Assertions
+
+                // Attempt to delete Spirit record now that it's no longer used by purchase record
+                _dl.DeleteDictionaryRecord(_userId, deleteObject);
+
+                var spiritList2 = _dl.GetSpiritTypeList(_userId);
+
+                var spiritFound2 = spiritList2.Find(x => x.SpiritId == spiritId);
+                // Assert Spirit can be deleted when not used by Production record.
+                Assert.IsNull(spiritFound2);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Vendor record cannot be deleted when
+        /// tied to a Purchase record
+        /// </summary>
+        [TestMethod()]
+        public void Delete_Dictionary_RawMaterial_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int rawMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                // grapes
+                {
+                    RawMaterialObject grapeMaterial = new RawMaterialObject();
+                    grapeMaterial.RawMaterialName = "Grapes";
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    grapeMaterial.UnitType = "lb";
+                    grapeMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermentable = true;
+                    grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    rawMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "RawMaterial_Deletion_Test";
+                purchO.PurchaseType = "Fermentable";
+                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.Quantity = 0f;
+                purchO.VolumeByWeight = 2000f;
+                purchO.RecordId = rawMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Assertions: Purchase
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = rawMaterialId;
+                deleteObject.DeleteRecordType = "RawMaterial";
+
+                // Attempt to delete Raw Material even though it's being used by Purchase record
+                ReturnObject returnResult1 = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+
+                var rawMaterialList1 = _dl.GetRawMaterialListDict(_userId);
+
+                var rawMaterialFound1 = rawMaterialList1.Find(x => x.RawMaterialId == rawMaterialId);
+                // Assert Raw Material can't be deleted when used by Purchase record.
+                Assert.IsNotNull(rawMaterialFound1);
+                // Assert Purchase record name which uses Raw Material is correctly surfaced to user.
+                Assert.AreEqual(returnResult1.ExecuteMessage, purchO.PurBatchName);
+
+                // Delete Purchase record to ensure Raw Material can be deleted when not used by other record.
+                _dl.DeletePurchase(purchO, _userId);
+
+                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+
+                var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert purchase record is deleted.
+                Assert.IsNull(purchaseFound);
+
+                #endregion
+
+                #region Production
+
+                // Creating temporary Purchase object in order to create Production object.
+                PurchaseObject purchase = new PurchaseObject();
+                purchase.PurBatchName = "Delete_RawMaterial_Purchase";
+                purchase.PurchaseType = "Fermented";
+                purchase.PurchaseDate = new DateTime(2017, 09, 1);
+                purchase.Quantity = 1000f; // 100 gallons
+                purchase.VolumeByWeight = 0f;
+                purchase.AlcoholContent = 10f;
+                purchase.ProofGallon = 100f;
+                purchase.Price = 2500f;
+                purchase.VendorId = vendorId;
+
+                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                // set up blending additive list
+                List<BlendingAdditive> blendingAddiveList = new List<BlendingAdditive>();
+                BlendingAdditive additiveObject = new BlendingAdditive();
+                additiveObject.RawMaterialId = rawMaterialId;
+                blendingAddiveList.Add(additiveObject);
+
+                // Production
+                ProductionObject prodObject = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "TEST",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Blending",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritCutId = 9,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    BlendingAdditives = blendingAddiveList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    }
+                };
+
+                productionId = _dl.CreateProduction(prodObject, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                #endregion
+
+                #region: Assertions: Production
+
+                // Attempt to delete Raw Material even though it's being used by Production record
+                ReturnObject returnResult2 = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+
+                var rawMaterialList2 = _dl.GetRawMaterialListDict(_userId);
+
+                var rawMaterialFound2 = rawMaterialList2.Find(x => x.RawMaterialId == rawMaterialId);
+                // Assert Raw Material can't be deleted when used by Production record.
+                Assert.IsNotNull(rawMaterialFound2);
+                // Assert Production record name which uses Raw Material is correctly surfaced to user.
+                Assert.AreEqual(returnResult2.ExecuteMessage, prodObject.BatchName);
+                // Delete Production record to ensure Raw Material can be deleted when not used by other record.
+                _dl.DeleteProduction(prodObject, _userId);
+
+                var prodList = _dl.GetProductionList(_userId, "Blending");
+
+                var prodFound = prodList.Find(x => x.ProductionId == prodObject.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound);
+
+                #endregion
+
+                #region Assertion
+
+                // Attempt to delete Raw Material record now that it's no longer used by other records
+                _dl.DeleteDictionaryRecord(_userId, deleteObject);
+
+                var rawMaterialList3 = _dl.GetRawMaterialListDict(_userId);
+
+                var rawMaterialFound3 = rawMaterialList3.Find(x => x.RawMaterialId == rawMaterialId);
+                // Assert Vendor can be deleted when not used by purchase record.
+                Assert.IsNull(rawMaterialFound3);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
         [TestMethod()]
         public void DeleteProductionTest()
         {
