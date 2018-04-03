@@ -4918,11 +4918,11 @@ namespace WebApp.Helpers
                         var prodC =
                             (from rec in db.ProductionContent
                              where rec.ProductionID == prodRec.ProductionID
-                             select rec).FirstOrDefault();
+                             select rec);
 
                         if (prodC != null)
                         {
-                            db.ProductionContent.Remove(prodC);
+                            db.ProductionContent.RemoveRange(prodC);
                         }
 
                         if (productionObject.ProductionType == "Distillation")
@@ -4973,11 +4973,11 @@ namespace WebApp.Helpers
                             var blendedComp =
                                 (from rec in db.BlendedComponent
                                  where rec.ProductionID == prodRec.ProductionID
-                                 select rec).FirstOrDefault();
+                                 select rec);
 
                             if (blendedComp != null)
                             {
-                                db.BlendedComponent.Remove(blendedComp);
+                                db.BlendedComponent.RemoveRange(blendedComp);
                             }
                         }
 
@@ -5064,17 +5064,19 @@ namespace WebApp.Helpers
                             db.StorageToRecord.RemoveRange(strRecs);
                         }
 
-                        db.Production.Remove(prodRec);
+                            db.SaveChanges();
+
+                        retMthdExecResult = true;
                     }
 
+                    db.Production.Remove(prodRec);
                     db.SaveChanges();
-
-                    retMthdExecResult = true;
                 }
                 catch (Exception e)
                 {
                     Debug.WriteLine("Failed to delete Production: " + e);
                     retMthdExecResult = false;
+                    db.Database.BeginTransaction().Rollback();
                 }
             }
             else
@@ -5084,9 +5086,15 @@ namespace WebApp.Helpers
             return retMthdExecResult;
         }
 
+        /// <summary>
+        /// This methd restores records that were used up for the record, being deleted
+        /// </summary>
+        /// <param name="productionId"></param>
         private void RestoreBurntdownRecords(int productionId)
         {
-            var prodContentRecords =
+            try
+            {
+                var prodContentRecords =
                 (from prodCont in db.ProductionContent
                  where prodCont.ProductionID == productionId
                  select new
@@ -5097,263 +5105,266 @@ namespace WebApp.Helpers
                      valueKind = prodCont.ContentFieldID
                  }).ToList();
 
-            if (prodContentRecords != null)
-            {
-                foreach (var i in prodContentRecords)
+                if (prodContentRecords != null)
                 {
-                    bool setActiveStatus = false;
-
-                    if (i.isProductionComponent) // burntdown record is a production record
+                    foreach (var i in prodContentRecords)
                     {
-                        var prod4Reporting =
-                        (from prod4Rep in db.Production4Reporting
-                         where prod4Rep.ProductionID == i.recordId
-                         select prod4Rep).FirstOrDefault();
+                        bool setActiveStatus = false;
 
-                        var productionValues =
-                        (from prod in db.Production
-                         where prod.ProductionID == i.recordId
-                         select prod).FirstOrDefault();
-
-                        if (productionValues != null)
+                        if (i.isProductionComponent) // burntdown record is a production record
                         {
-                            if (i.valueKind == 11 || i.valueKind == 13 || i.valueKind == 15) // Volume
-                            {
-                                var vol =
-                                    (from volume in db.Volume
-                                     where volume.VolumeID == productionValues.VolumeID
-                                     select volume).FirstOrDefault();
+                            var prod4Reporting =
+                            (from prod4Rep in db.Production4Reporting
+                             where prod4Rep.ProductionID == i.recordId
+                             select prod4Rep).FirstOrDefault();
 
-                                if (vol != null)
+                            var productionValues =
+                            (from prod in db.Production
+                             where prod.ProductionID == i.recordId
+                             select prod).FirstOrDefault();
+
+                            if (productionValues != null)
+                            {
+                                if (i.valueKind == 11 || i.valueKind == 13 || i.valueKind == 15) // Volume
                                 {
-                                    vol.Value = i.value;
+                                    var vol =
+                                        (from volume in db.Volume
+                                         where volume.VolumeID == productionValues.VolumeID
+                                         select volume).FirstOrDefault();
+
+                                    if (vol != null)
+                                    {
+                                        vol.Value = i.value;
+                                    }
+
+                                    if (prod4Reporting != null)
+                                    {
+                                        if (prod4Reporting.Volume == i.value)
+                                        {
+                                            setActiveStatus = true;
+                                        }
+                                        else
+                                        {
+                                            setActiveStatus = false;
+                                        }
+                                    }
+                                }
+                                else if (i.valueKind == 6 || i.valueKind == 12 || i.valueKind == 14) // Weight
+                                {
+                                    var weight =
+                                        (from weigh in db.Weight
+                                         where weigh.WeightID == productionValues.WeightID
+                                         select weigh).FirstOrDefault();
+
+                                    if (weight != null)
+                                    {
+                                        weight.Value = i.value;
+                                    }
+
+                                    if (prod4Reporting != null)
+                                    {
+                                        if (prod4Reporting.Weight == i.value)
+                                        {
+                                            setActiveStatus = true;
+                                        }
+                                        else
+                                        {
+                                            setActiveStatus = false;
+                                        }
+                                    }
+                                }
+                                else if (i.valueKind == 19 || i.valueKind == 21 || i.valueKind == 24) // Alcohol
+                                {
+                                    var alc =
+                                        (from alcohol in db.Alcohol
+                                         where alcohol.AlcoholID == productionValues.AlcoholID
+                                         select alcohol).FirstOrDefault();
+
+                                    if (alc != null)
+                                    {
+                                        alc.Value = i.value;
+                                    }
+
+                                    if (prod4Reporting != null)
+                                    {
+                                        if (prod4Reporting.Alcohol == i.value)
+                                        {
+                                            setActiveStatus = true;
+                                        }
+                                        else
+                                        {
+                                            setActiveStatus = false;
+                                        }
+                                    }
+                                }
+                                else if (i.valueKind == 20 || i.valueKind == 22 || i.valueKind == 23) // Proof
+                                {
+                                    var prf =
+                                        (from proof in db.Proof
+                                         where proof.ProofID == productionValues.ProofID
+                                         select proof).FirstOrDefault();
+
+                                    if (prf != null)
+                                    {
+                                        prf.Value = i.value;
+                                    }
+
+                                    if (prod4Reporting != null)
+                                    {
+                                        if (prod4Reporting.Proof == i.value)
+                                        {
+                                            setActiveStatus = true;
+                                        }
+                                        else
+                                        {
+                                            setActiveStatus = false;
+                                        }
+                                    }
                                 }
 
-                                if (prod4Reporting != null)
+                                // update the status of the record we are restoring 
+                                // depending on whether all of its original value is being restored or no. If entire original value is restored
+                                // we need to set status to active else, set status to Processing
+                                if (setActiveStatus)
                                 {
-                                    if (prod4Reporting.Volume == i.value)
-                                    {
-                                        setActiveStatus = true;
-                                    }
-                                    else
-                                    {
-                                        setActiveStatus = false;
-                                    }
+                                    productionValues.StatusID = (int)Persistence.BusinessLogicEnums.Status.Active;
+                                }
+                                else
+                                {
+                                    productionValues.StatusID = (int)Persistence.BusinessLogicEnums.Status.Processing;
                                 }
                             }
-                            else if (i.valueKind == 6 || i.valueKind == 12 || i.valueKind == 14) // Weight
+                        }
+                        else // burntdown record is a purchase record
+                        {
+                            var purch4Reporting =
+                            (from pur4Rep in db.Purchase4Reporting
+                             where pur4Rep.PurchaseID == i.recordId
+                             select pur4Rep).FirstOrDefault();
+
+                            var purchaseValues =
+                            (from purch in db.Purchase
+                             where purch.PurchaseID == i.recordId
+                             select purch).FirstOrDefault();
+
+                            if (purchaseValues != null)
                             {
-                                var weight =
-                                    (from weigh in db.Weight
-                                     where weigh.WeightID == productionValues.WeightID
-                                     select weigh).FirstOrDefault();
-
-                                if (weight != null)
+                                if (i.valueKind == 1 || i.valueKind == 3 || i.valueKind == 7 || i.valueKind == 9) // Volume
                                 {
-                                    weight.Value = i.value;
-                                }
+                                    var vol =
+                                        (from volume in db.Volume
+                                         where volume.VolumeID == purchaseValues.VolumeID
+                                         select volume).FirstOrDefault();
 
-                                if (prod4Reporting != null)
-                                {
-                                    if (prod4Reporting.Weight == i.value)
+                                    if (vol != null)
                                     {
-                                        setActiveStatus = true;
+                                        vol.Value = i.value;
                                     }
-                                    else
-                                    {
-                                        setActiveStatus = false;
-                                    }
-                                }
-                            }
-                            else if (i.valueKind == 19 || i.valueKind == 21 || i.valueKind == 24) // Alcohol
-                            {
-                                var alc =
-                                    (from alcohol in db.Alcohol
-                                     where alcohol.AlcoholID == productionValues.AlcoholID
-                                     select alcohol).FirstOrDefault();
 
-                                if (alc != null)
-                                {
-                                    alc.Value = i.value;
-                                }
-
-                                if (prod4Reporting != null)
-                                {
-                                    if (prod4Reporting.Alcohol == i.value)
+                                    if (purch4Reporting != null)
                                     {
-                                        setActiveStatus = true;
-                                    }
-                                    else
-                                    {
-                                        setActiveStatus = false;
+                                        if (purch4Reporting.Volume == i.value)
+                                        {
+                                            setActiveStatus = true;
+                                        }
+                                        else
+                                        {
+                                            setActiveStatus = false;
+                                        }
                                     }
                                 }
-                            }
-                            else if (i.valueKind == 20 || i.valueKind == 22 || i.valueKind == 23) // Proof
-                            {
-                                var prf =
-                                    (from proof in db.Proof
-                                     where proof.ProofID == productionValues.ProofID
-                                     select proof).FirstOrDefault();
-
-                                if (prf != null)
+                                else if (i.valueKind == 2 || i.valueKind == 4 || i.valueKind == 8 || i.valueKind == 10) // Weight
                                 {
-                                    prf.Value = i.value;
+                                    var weight =
+                                        (from weigh in db.Weight
+                                         where weigh.WeightID == purchaseValues.WeightID
+                                         select weigh).FirstOrDefault();
+
+                                    if (weight != null)
+                                    {
+                                        weight.Value = i.value;
+                                    }
+
+                                    if (purch4Reporting != null)
+                                    {
+                                        if (purch4Reporting.Weight == i.value)
+                                        {
+                                            setActiveStatus = true;
+                                        }
+                                        else
+                                        {
+                                            setActiveStatus = false;
+                                        }
+                                    }
+                                }
+                                else if (i.valueKind == 15 || i.valueKind == 17) // Alcohol
+                                {
+                                    var alc =
+                                        (from alcohol in db.Alcohol
+                                         where alcohol.AlcoholID == purchaseValues.AlcoholID
+                                         select alcohol).FirstOrDefault();
+
+                                    if (alc != null)
+                                    {
+                                        alc.Value = i.value;
+                                    }
+
+                                    if (purch4Reporting != null)
+                                    {
+                                        if (purch4Reporting.Alcohol == i.value)
+                                        {
+                                            setActiveStatus = true;
+                                        }
+                                        else
+                                        {
+                                            setActiveStatus = false;
+                                        }
+                                    }
+                                }
+                                else if (i.valueKind == 16 || i.valueKind == 18) // Proof
+                                {
+                                    var prf =
+                                        (from proof in db.Proof
+                                         where proof.ProofID == purchaseValues.ProofID
+                                         select proof).FirstOrDefault();
+
+                                    if (prf != null)
+                                    {
+                                        prf.Value = i.value;
+                                    }
+
+                                    if (purch4Reporting != null)
+                                    {
+                                        if (purch4Reporting.Proof == i.value)
+                                        {
+                                            setActiveStatus = true;
+                                        }
+                                        else
+                                        {
+                                            setActiveStatus = false;
+                                        }
+                                    }
                                 }
 
-                                if (prod4Reporting != null)
+                                // update the status of the record we are restoring 
+                                // depending on whether all of its original value is being restored or no. If entire original value is restored
+                                // we need to set status to active else, set status to Processing
+                                if (setActiveStatus)
                                 {
-                                    if (prod4Reporting.Proof == i.value)
-                                    {
-                                        setActiveStatus = true;
-                                    }
-                                    else
-                                    {
-                                        setActiveStatus = false;
-                                    }
+                                    purchaseValues.StatusID = (int)Persistence.BusinessLogicEnums.Status.Active;
                                 }
-                            }
-
-                            // update the status of the record we are restoring 
-                            // depending on whether all of its original value is being restored or no. If entire original value is restored
-                            // we need to set status to active else, set status to Processing
-                            if (setActiveStatus)
-                            {
-                                productionValues.StatusID = (int)Persistence.BusinessLogicEnums.Status.Active;
-                            }
-                            else
-                            {
-                                productionValues.StatusID = (int)Persistence.BusinessLogicEnums.Status.Processing;
+                                else
+                                {
+                                    purchaseValues.StatusID = (int)Persistence.BusinessLogicEnums.Status.Processing;
+                                }
                             }
                         }
                     }
-                    else // burntdown record is a purchase record
-                    {
-                        var purch4Reporting =
-                        (from pur4Rep in db.Purchase4Reporting
-                         where pur4Rep.PurchaseID == i.recordId
-                         select pur4Rep).FirstOrDefault();
-
-                        var purchaseValues =
-                        (from purch in db.Purchase
-                         where purch.PurchaseID == i.recordId
-                         select purch).FirstOrDefault();
-
-                        if (purchaseValues != null)
-                        {
-                            if (i.valueKind == 1 || i.valueKind == 3 || i.valueKind == 7 || i.valueKind == 9) // Volume
-                            {
-                                var vol =
-                                    (from volume in db.Volume
-                                     where volume.VolumeID == purchaseValues.VolumeID
-                                     select volume).FirstOrDefault();
-
-                                if (vol != null)
-                                {
-                                    vol.Value = i.value;
-                                }
-
-                                if (purch4Reporting != null)
-                                {
-                                    if (purch4Reporting.Volume == i.value)
-                                    {
-                                        setActiveStatus = true;
-                                    }
-                                    else
-                                    {
-                                        setActiveStatus = false;
-                                    }
-                                }
-                            }
-                            else if (i.valueKind == 2 || i.valueKind == 4 || i.valueKind == 8 || i.valueKind == 10) // Weight
-                            {
-                                var weight =
-                                    (from weigh in db.Weight
-                                     where weigh.WeightID == purchaseValues.WeightID
-                                     select weigh).FirstOrDefault();
-
-                                if (weight != null)
-                                {
-                                    weight.Value = i.value;
-                                }
-
-                                if (purch4Reporting != null)
-                                {
-                                    if (purch4Reporting.Weight == i.value)
-                                    {
-                                        setActiveStatus = true;
-                                    }
-                                    else
-                                    {
-                                        setActiveStatus = false;
-                                    }
-                                }
-                            }
-                            else if (i.valueKind == 15 || i.valueKind == 17) // Alcohol
-                            {
-                                var alc =
-                                    (from alcohol in db.Alcohol
-                                     where alcohol.AlcoholID == purchaseValues.AlcoholID
-                                     select alcohol).FirstOrDefault();
-
-                                if (alc != null)
-                                {
-                                    alc.Value = i.value;
-                                }
-
-                                if (purch4Reporting != null)
-                                {
-                                    if (purch4Reporting.Alcohol == i.value)
-                                    {
-                                        setActiveStatus = true;
-                                    }
-                                    else
-                                    {
-                                        setActiveStatus = false;
-                                    }
-                                }
-                            }
-                            else if (i.valueKind == 16 || i.valueKind == 18) // Proof
-                            {
-                                var prf =
-                                    (from proof in db.Proof
-                                     where proof.ProofID == purchaseValues.ProofID
-                                     select proof).FirstOrDefault();
-
-                                if (prf != null)
-                                {
-                                    prf.Value = i.value;
-                                }
-
-                                if (purch4Reporting != null)
-                                {
-                                    if (purch4Reporting.Proof == i.value)
-                                    {
-                                        setActiveStatus = true;
-                                    }
-                                    else
-                                    {
-                                        setActiveStatus = false;
-                                    }
-                                }
-                            }
-
-                            // update the status of the record we are restoring 
-                            // depending on whether all of its original value is being restored or no. If entire original value is restored
-                            // we need to set status to active else, set status to Processing
-                            if (setActiveStatus)
-                            {
-                                purchaseValues.StatusID = (int)Persistence.BusinessLogicEnums.Status.Active;
-                            }
-                            else
-                            {
-                                purchaseValues.StatusID = (int)Persistence.BusinessLogicEnums.Status.Processing;
-                            }
-                        }
-                    }
-
-                    db.SaveChanges();
                 }
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
 
