@@ -12,48 +12,6 @@ using WebApp.ReportDTO;
 namespace WebApp.Helpers
 {
     /// <summary>
-    /// TypeIdentifer keeps mapping of TableType ids and associated Table Types,
-    /// FYI - when updating this enm please be sure to update TableTypeIdentifier table in the db
-    /// </summary>
-    public enum TypeIdentifier
-    {
-        Default, // 0
-        /*Dictionary Types*/
-        RawMaterial,
-        Supply,
-        Vendor,
-        Additive,
-        Storage,
-        Spirit,
-        /*Purchase Types*/
-        FermentablePur,
-        Distillable,
-        FermentedPur,
-        DistilledPur,
-        SupplyPur,
-        AdditivePur,
-        /*Production Types*/
-        FermentableProd,
-        FermentedProd,
-        DistilledProd,
-        BlendingProd,
-        BlendedComponentProd,
-        BottlingProd
-    }
-
-    public enum TableTypeIdentifer
-    {
-        Default,
-        RawMaterial,
-    }
-
-    public enum RecordType
-    {
-        Purchase = 1,
-        Production
-    }
-
-    /// <summary>
     /// ProductionContentIterator class is used for tracking when we iterate through 
     /// ProductionContent table to get all relevant records for given ProductionID
     /// </summary>
@@ -92,6 +50,20 @@ namespace WebApp.Helpers
     {
         // Initialize Model Object so we can interact with it
         private DistilDBContext db = new DistilDBContext();
+
+        // integer month representation
+        private const int january = 1;
+        private const int february = 2;
+        private const int march = 3;
+        private const int april = 4;
+        private const int may = 5;
+        private const int june = 6;
+        private const int july = 7;
+        private const int august = 8;
+        private const int september = 9;
+        private const int october = 10;
+        private const int november = 11;
+        private const int december = 12;
 
         #region Shared Methods
 
@@ -183,10 +155,10 @@ namespace WebApp.Helpers
                        from production in production_join.DefaultIfEmpty()
                        join purchase in db.Purchase on rec.RecordID equals purchase.PurchaseID into purchase_join
                        from purchase in purchase_join.DefaultIfEmpty()
-                       where (rec.RecordType == 1 &&
+                       where (rec.RecordType == (int)RecordType.Purchase &&
                              purchase.PurchaseDate > start &&
                              purchase.PurchaseDate < end)
-                             || (rec.RecordType == 2 &&
+                             || (rec.RecordType == (int)RecordType.Production &&
                              production.ProductionDate > start &&
                              production.ProductionDate < end)
                        select rec).DefaultIfEmpty();
@@ -318,7 +290,7 @@ namespace WebApp.Helpers
                  prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
                  && (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                  || prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
-                 || (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && outputProduction.ProductionEndTime > startOfReporting && productionContent.ContentFieldID == 22))
+                 || (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && outputProduction.ProductionEndTime > startOfReporting && productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedProofGal))
                  select new
                  {
                      Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0
@@ -377,7 +349,7 @@ namespace WebApp.Helpers
                  where
                    distillers.UserId == userId &&
                    prod.Gauged == true &&
-                   prod.StateID == 5 &&
+                   prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled &&
                    (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                    prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing) &&
                    prod.ProductionEndTime >= startOfReporting &&
@@ -411,7 +383,7 @@ namespace WebApp.Helpers
                  where
                  distillers.UserId == userId &&
                  prod.Gauged == true &&
-                 prod.StateID == 5
+                 prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled
                  && prod.ProductionEndTime >= startOfReporting
                  && prod.ProductionEndTime <= endOfReporting
                  select new
@@ -454,12 +426,12 @@ namespace WebApp.Helpers
                      from distillers in distillers_join.DefaultIfEmpty()
                      where
                        distillers.UserId == userId &&
-                       prod.ProductionTypeID == 4 &&
+                       prod.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Bottling &&
                        prod.Gauged == true &&
                        prod.ProductionEndTime < startOfReporting &&
                        (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                        prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing ||
-                       prod.StateID == 5)
+                       prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled)
                      select new
                      {
                          Value = (System.Single?)proof.Value ?? (System.Single?)0,
@@ -491,7 +463,7 @@ namespace WebApp.Helpers
                         prod.ProductionEndTime <= endOfReporting &&
                         (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                         prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing) &&
-                        prod.StateID == 5
+                        prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled
                      select new
                      {
                          Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
@@ -518,12 +490,12 @@ namespace WebApp.Helpers
                      from distillers in distillers_join.DefaultIfEmpty()
                      where
                        distillers.UserId == userId &&
-                       prod.ProductionTypeID == 4 &&
+                       prod.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Bottling &&
                        prod.ProductionEndTime <= endOfReporting &&
                        prod.Gauged == true &&
                        (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                        prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing ||
-                       prod.StateID == 5)
+                       prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled)
                      select new
                      {
                          Value = (System.Single?)proof.Value ?? (System.Single?)0,
@@ -584,7 +556,7 @@ namespace WebApp.Helpers
                     (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                     prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing ||
                     prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) &&
-                    (new int[] { 4, 5 }).Contains(prod.StateID) &&
+                    (new int[] { (int)Persistence.BusinessLogicEnums.State.Blended, (int)Persistence.BusinessLogicEnums.State.Bottled }).Contains(prod.StateID) &&
                     prod.ProductionEndTime >= startOfReporting &&
                     prod.ProductionEndTime <= endOfReporting
                  select new
@@ -940,7 +912,7 @@ namespace WebApp.Helpers
                             }
                         }
                     }
-                    else if (rec.StateID == 5) // processing bottling record
+                    else if (rec.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled) // processing bottling record
                     {
                         if (rec.ProcessingType == "ALCOHOL AND NEUTRAL SPIRITS (Other than vodka)")
                         {
@@ -2234,10 +2206,9 @@ namespace WebApp.Helpers
         /// GetRawMaterialListForPurchase method is used to view RawMaterials list in Purchase workflows
         /// </summary>
         /// <param name="optimized"></param>
-        /// <param name="identifierId"></param>
         /// <param name="purchaseMatType"></param>
         /// <returns></returns>
-        public List<RawMaterialObject> GetRawMaterialListForPurchase(int identifierId, int userId, string purchaseMatType = "")
+        public List<RawMaterialObject> GetRawMaterialListForPurchase(int userId, string purchaseMatType = "")
         {
             List<RawMaterialObject> rawMaterialList = new List<RawMaterialObject>();
 
@@ -3730,7 +3701,7 @@ namespace WebApp.Helpers
                 db.SaveChanges();
 
                 // Only fermented and distilled purchase records can be reported on storage report
-                if ((pTypes.PurchaseTypeID == 2 || pTypes.PurchaseTypeID == 3) && purchaseObject?.SpiritTypeReportingID != null && purchaseObject?.SpiritTypeReportingID != 0)
+                if ((pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled) && purchaseObject?.SpiritTypeReportingID != null && purchaseObject?.SpiritTypeReportingID != 0)
                 {
                     PurchaseToSpiritTypeReporting pstr = new PurchaseToSpiritTypeReporting();
                     pstr.PurchaseID = purchT.PurchaseID;
@@ -3757,7 +3728,7 @@ namespace WebApp.Helpers
                     }
                 }
 
-                if (purchT.PurchaseTypeID == 1 /*fermentable*/ || purchT.PurchaseTypeID == 2 /*fermented*/ || purchT.PurchaseTypeID == 3 /*distilled*/|| purchT.PurchaseTypeID == 5/*additive*/)
+                if (purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermentable || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented|| purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Additive)
                 {
                     try
                     {
@@ -4456,30 +4427,30 @@ namespace WebApp.Helpers
 
                         if (k.BurningDownMethod == "volume" && purch.VolumeID > 0)
                         {
-                            if (purch.PurchaseTypeID == 1)
+                            if (purch.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermentable)
                             {
                                 // PurFermentableVolume
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 1, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume, false, k.NewVal);
                                 prodContentL.Add(prodContent);
                             }
 
-                            if (purch.PurchaseTypeID == 2)
+                            if (purch.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented)
                             {
                                 // PurFermentedVolume
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 3, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedVolume, false, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 16, false, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal, false, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
-                            if (purch.PurchaseTypeID == 3)
+                            if (purch.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
                             {
                                 // PurDistilledVolume
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 9, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledVolume, false, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 18, false, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal, false, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
@@ -4498,24 +4469,24 @@ namespace WebApp.Helpers
 
                         if (k.BurningDownMethod == "weight" && purch.WeightID > 0)
                         {
-                            if (purch.PurchaseTypeID == 1)
+                            if (purch.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermentable)
                             {
                                 // PurFermentableWeight
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 2, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight, false, k.NewVal);
                                 prodContentL.Add(prodContent);
                             }
 
-                            if (purch.PurchaseTypeID == 2)
+                            if (purch.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented)
                             {
                                 // PurFermentedWeight
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 4, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight, false, k.NewVal);
                                 prodContentL.Add(prodContent);
                             }
 
-                            if (purch.PurchaseTypeID == 3)
+                            if (purch.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
                             {
                                 // PurDistilledWeight
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 10, false, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledWeight, false, k.NewVal);
                                 prodContentL.Add(prodContent);
                             }
 
@@ -4656,33 +4627,33 @@ namespace WebApp.Helpers
 
                         if (k.BurningDownMethod == "volume" && prodRec.VolumeID > 0)
                         {
-                            if (prodRec.ProductionTypeID == 1)
+                            if (prodRec.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation)
                             {
                                 // ProdFermentedVolume
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 5, true, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedVolume, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 23, true, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
-                            if (prodRec.ProductionTypeID == 2)
+                            if (prodRec.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
                             {
                                 // ProdDistilledVolume
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 11, true, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledVolume, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 20, true, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
-                            if (prodRec.ProductionTypeID == 3)
+                            if (prodRec.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Blending)
                             {
                                 // ProdBlendedVolume
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 13, true, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedVolume, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 22, true, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedProofGal, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
@@ -4705,33 +4676,33 @@ namespace WebApp.Helpers
 
                         if (k.BurningDownMethod == "weight" && prodRec.WeightID > 0)
                         {
-                            if (prodRec.ProductionTypeID == 1)
+                            if (prodRec.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation)
                             {
                                 // ProdFermentedWeight
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 6, true, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedWeight, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 23, true, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
-                            if (prodRec.ProductionTypeID == 2)
+                            if (prodRec.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
                             {
                                 // ProdDistilledWeight
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 12, true, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledWeight, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 20, true, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
-                            if (prodRec.ProductionTypeID == 3)
+                            if (prodRec.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Blending)
                             {
                                 // ProdBlendedWeight
-                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 14, true, k.NewVal);
+                                ProductionContent prodContent = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedWeight, true, k.NewVal);
                                 prodContentL.Add(prodContent);
 
-                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, 22, true, tempProofGHolder);
+                                ProductionContent prodContent4ProofG = PrepareProductionContentTableInfo4Saving(productionIDBeingCreated, k.ID, (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedProofGal, true, tempProofGHolder);
                                 prodContentL.Add(prodContent4ProofG);
                             }
 
@@ -5202,7 +5173,7 @@ namespace WebApp.Helpers
 
                             if (productionValues != null)
                             {
-                                if (i.valueKind == 11 || i.valueKind == 13 || i.valueKind == 15) // Volume
+                                if (i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledVolume || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedVolume || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedAlcohol) // Volume
                                 {
                                     var vol =
                                         (from volume in db.Volume
@@ -5226,7 +5197,7 @@ namespace WebApp.Helpers
                                         }
                                     }
                                 }
-                                else if (i.valueKind == 6 || i.valueKind == 12 || i.valueKind == 14) // Weight
+                                else if (i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedWeight || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledWeight || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedWeight) // Weight
                                 {
                                     var weight =
                                         (from weigh in db.Weight
@@ -5250,7 +5221,7 @@ namespace WebApp.Helpers
                                         }
                                     }
                                 }
-                                else if (i.valueKind == 19 || i.valueKind == 21 || i.valueKind == 24) // Alcohol
+                                else if (i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedAlcohol || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedAlcohol || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledAlcohol) // Alcohol
                                 {
                                     var alc =
                                         (from alcohol in db.Alcohol
@@ -5274,7 +5245,7 @@ namespace WebApp.Helpers
                                         }
                                     }
                                 }
-                                else if (i.valueKind == 20 || i.valueKind == 22 || i.valueKind == 23) // Proof
+                                else if (i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedProofGal || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal) // Proof
                                 {
                                     var prf =
                                         (from proof in db.Proof
@@ -5326,7 +5297,7 @@ namespace WebApp.Helpers
 
                             if (purchaseValues != null)
                             {
-                                if (i.valueKind == 1 || i.valueKind == 3 || i.valueKind == 7 || i.valueKind == 9) // Volume
+                                if (i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedVolume || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurAdditiveVolume || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledVolume) // Volume
                                 {
                                     var vol =
                                         (from volume in db.Volume
@@ -5350,7 +5321,7 @@ namespace WebApp.Helpers
                                         }
                                     }
                                 }
-                                else if (i.valueKind == 2 || i.valueKind == 4 || i.valueKind == 8 || i.valueKind == 10) // Weight
+                                else if (i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurAdditiveWeight || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledWeight) // Weight
                                 {
                                     var weight =
                                         (from weigh in db.Weight
@@ -5374,7 +5345,7 @@ namespace WebApp.Helpers
                                         }
                                     }
                                 }
-                                else if (i.valueKind == 15 || i.valueKind == 17) // Alcohol
+                                else if (i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedAlcohol || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledAlcohol) // Alcohol
                                 {
                                     var alc =
                                         (from alcohol in db.Alcohol
@@ -5398,7 +5369,7 @@ namespace WebApp.Helpers
                                         }
                                     }
                                 }
-                                else if (i.valueKind == 16 || i.valueKind == 18) // Proof
+                                else if (i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal) // Proof
                                 {
                                     var prf =
                                         (from proof in db.Proof
@@ -6107,7 +6078,7 @@ namespace WebApp.Helpers
 
             // we need this for line 17(b) of Part 1
             // we only need to get Unfinished Spirit during the quartely returns so doing the check here. Months could change from year to year. Need to check with TTB every year
-            if (start.Month == 1 && end.Month == 1 || start.Month == 4 && end.Month == 4 || start.Month == 7 && end.Month == 7 || start.Month == 10 && end.Month == 10)
+            if (start.Month == january && end.Month == january || start.Month == april && end.Month == april || start.Month == july && end.Month == july || start.Month == october && end.Month == october)
             {
                 GetUnfinishedSpiritsForProductionReport(userId, start, end, ref tempRepObjList);
             }
@@ -6135,9 +6106,9 @@ namespace WebApp.Helpers
 
             int[] contentFieldId = new int[23]; // making it the same size as ContentField table
 
-            contentFieldId[0] = 1; // PurFermentableVolume 
-            contentFieldId[1] = 2; // PurFermentableWeight
-            contentFieldId[2] = 4; // PurFermentedWeight
+            contentFieldId[0] = (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume;
+            contentFieldId[1] = (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight;
+            contentFieldId[2] = (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight;
 
             foreach (var i in tempRepObjList)
             {
@@ -6213,7 +6184,7 @@ namespace WebApp.Helpers
                             (from prodContent in db.ProductionContent
                              where
                              prodContent.RecordID == k.ProductionIdAssociatedWithPurchase
-                             && (new int[] { 5, 6 }).Contains(prodContent.ContentFieldID)
+                             && (new int[] { (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedVolume, (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedWeight }).Contains(prodContent.ContentFieldID)
                              select new
                              {
                                  fermentedInProductionAmmt = prodContent.ContentValue
@@ -6241,11 +6212,11 @@ namespace WebApp.Helpers
                                 prt6.KindOfMaterial = (string)t.MaterialName;
                                 prt6.ProdReportMaterialCategoryID = (int)t.ProductionReportMaterialCategoryID;
 
-                                if (k.ContentFieldId == 1)
+                                if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume)
                                 {
                                     prt6.Volume = updatedRawMaterialAmmt;
                                 }
-                                else if (k.ContentFieldId == 2 || k.ContentFieldId == 4)
+                                else if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight || k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight)
                                 {
                                     prt6.Weight = updatedRawMaterialAmmt;
                                 }
@@ -6254,11 +6225,11 @@ namespace WebApp.Helpers
                             }
                             else // case where Material already exists
                             {
-                                if (k.ContentFieldId == 1)
+                                if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume)
                                 {
                                     mater.Volume += updatedRawMaterialAmmt;
                                 }
-                                else if (k.ContentFieldId == 2 || k.ContentFieldId == 4)
+                                else if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight || k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight)
                                 {
                                     mater.Weight += updatedRawMaterialAmmt;
                                 }
@@ -6559,7 +6530,7 @@ namespace WebApp.Helpers
                  from prodRepMatCat in prodRepMatCat_join.DefaultIfEmpty()
                  where
                    distillers.UserId == userId &&
-                   (new int[] { 3 }).Contains(prod.StateID) &&
+                   (new int[] { (int)Persistence.BusinessLogicEnums.State.Distilled }).Contains(prod.StateID) &&
                    prod.ProductionEndTime >= start &&
                    prod.ProductionEndTime <= end
                  select new
@@ -6860,7 +6831,7 @@ namespace WebApp.Helpers
                  where
                    distillers.UserId == userId &&
                    prod.Gauged == true &&
-                   (new int[] { 3 }).Contains(prod.StateID) &&
+                   (new int[] { (int)Persistence.BusinessLogicEnums.State.Distilled }).Contains(prod.StateID) &&
                    prod.ProductionEndTime >= start &&
                    prod.ProductionEndTime <= end
                  select new
@@ -6995,27 +6966,23 @@ namespace WebApp.Helpers
             // this section of code checks the reporting month to determine whether we need to report
             // line 17 of production report
             // for February reporting
-            const int february = 2;
-            const int may = 5;
-            const int august = 8;
-            const int november = 11;
             DateTime[] startAndEndDates = new DateTime[2]; // [startDate, endDate]
 
             if (end.Month == february)
             {
-                start = new DateTime(end.Year - 1, 12, 1);
+                start = new DateTime(end.Year - 1, december, 1);
             }
             else if (end.Month == may)
             {
-                start = new DateTime(end.Year, 3, 1);
+                start = new DateTime(end.Year, march, 1);
             }
             else if (end.Month == august)
             {
-                start = new DateTime(end.Year, 6, 1);
+                start = new DateTime(end.Year, june, 1);
             }
             else if (end.Month == november)
             {
-                start = new DateTime(end.Year, 9, 1);
+                start = new DateTime(end.Year, september, 1);
             }
 
             try
@@ -7045,7 +7012,7 @@ namespace WebApp.Helpers
                    prod.Gauged == false &&
                    (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                    prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing) &&
-                   (new int[] { 3, 4, 5 }).Contains(prod.StateID) &&
+                   (new int[] { (int)Persistence.BusinessLogicEnums.State.Distilled, (int)Persistence.BusinessLogicEnums.State.Blended, (int)Persistence.BusinessLogicEnums.State.Bottled }).Contains(prod.StateID) &&
                    prod.ProductionEndTime >= start &&
                    prod.ProductionEndTime <= end
                  select new
@@ -7268,11 +7235,11 @@ namespace WebApp.Helpers
                  from str in str_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && (purchase.PurchaseTypeID == 2 || purchase.PurchaseTypeID == 3)
+                     && (purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
                      && purchase.PurchaseDate < startDate
                      && ((purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (purchase.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
-                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 16 || productionContent.ContentFieldID == 18)))
-                     && uOm.UnitOfMeasurementID != 2 // != "lb"
+                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)))
+                     && uOm.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
                  select new
                  {
                      productionDate = (DateTime?)production.ProductionEndTime,
@@ -7350,11 +7317,11 @@ namespace WebApp.Helpers
                  from str in str_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && (sourceProduction.ProductionTypeID == 1 || sourceProduction.ProductionTypeID == 2)
+                     && (sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
                      && sourceProduction.ProductionEndTime < startDate
                      && sourceProduction.Gauged == true
                      && ((sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (sourceProduction.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
-                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 20 || productionContent.ContentFieldID == 23)))
+                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal)))
                  select new
                  {
                      productionDate = (DateTime?)outputProduction.ProductionEndTime,
@@ -7442,16 +7409,16 @@ namespace WebApp.Helpers
                  from spiritTypeReporting in spiritTypeReporting_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && (purchase.PurchaseTypeID == 2
-                        || purchase.PurchaseTypeID == 3)
+                     && (purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented
+                        || purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
                      && (purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
                      && purchase.PurchaseDate >= startDate
                      && purchase.PurchaseDate <= endDate
                      && (productionContent == null
-                        || (productionContent != null && (productionContent.ContentFieldID == 16 || productionContent.ContentFieldID == 18))) // 16 = PurFermentedProofGal, 18 = PurDistilledProofGal
-                     && unitOfMeasurement.UnitOfMeasurementID != 2 // != "lb"
+                        || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal))) // 16 = PurFermentedProofGal, 18 = PurDistilledProofGal
+                     && unitOfMeasurement.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
                  select new
                  {
                      reportingCategoryName = spiritTypeReporting.ProductTypeName ?? string.Empty,
@@ -7518,16 +7485,16 @@ namespace WebApp.Helpers
                  from spiritTypeReporting in spiritTypeReporting_join.DefaultIfEmpty()
                  where
                     distiller.UserId == userId
-                 && (production.ProductionTypeID == 1 || production.ProductionTypeID == 2)
+                 && (production.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || production.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
                  && production.ProductionEndTime >= startDate
                  && production.ProductionEndTime <= endDate
                  && production.Gauged == true
                  && (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                     || production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
-                    || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && productionOutput.ProductionTypeID == 2)
-                    || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && productionOutput.ProductionTypeID == 3 && productionOutput.ProductionEndTime > endDate)
+                    || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && productionOutput.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
+                    || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && productionOutput.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Blending && productionOutput.ProductionEndTime > endDate)
                     || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && destruction.EndTime > endDate))
-                 && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 20 || productionContent.ContentFieldID == 23))) // 20 = ProdDistilledProofGal, 23 = ProdFermentedProofGal
+                 && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal))) // 20 = ProdDistilledProofGal, 23 = ProdFermentedProofGal
                  select new
                  {
                      productionStatusId = (int?)production.StatusID ?? 0,
@@ -7632,16 +7599,16 @@ namespace WebApp.Helpers
                  from spiritTypeReporting in spiritTypeReporting_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && purchase.PurchaseTypeID == 3
-                     && production.ProductionTypeID == 3
+                     && purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled
+                     && production.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Blending
                      && (purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
                      && purchase.PurchaseDate < endDate
                      && production.ProductionEndTime >= startDate
                      && production.ProductionEndTime <= endDate
-                     && productionContent.ContentFieldID == 18 // PurDistilledProofGal
-                     && unitOfMeasurement.UnitOfMeasurementID != 2 // != "lb"
+                     && productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal
+                     && unitOfMeasurement.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
                  select new
                  {
                      reportingCategoryName = spiritTypeReporting.ProductTypeName ?? string.Empty,
@@ -7707,12 +7674,12 @@ namespace WebApp.Helpers
                  from spiritType in spiritType_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && sourceProductionRecord.ProductionTypeID == 2
-                     && outputProductionRecord.ProductionTypeID == 3
+                     && sourceProductionRecord.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation
+                     && outputProductionRecord.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Blending
                      && (sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                         || sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
                         || sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
-                     && productionContent.ContentFieldID == 20 // ProdDistilledProofGal
+                     && productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal // ProdDistilledProofGal
                      && sourceProductionRecord.ProductionEndTime < startDate
                      && outputProductionRecord.ProductionEndTime >= startDate
                      && outputProductionRecord.ProductionEndTime <= endDate
@@ -7787,18 +7754,18 @@ namespace WebApp.Helpers
                  from spiritType in spiritType_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && (purchase.PurchaseTypeID == 2
-                        || purchase.PurchaseTypeID == 3)
-                     && production.ProductionTypeID == 2
+                     && (purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented
+                        || purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
+                     && production.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation
                      && (purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
                      && purchase.PurchaseDate < endDate
                      && production.ProductionEndTime >= startDate
                      && production.ProductionEndTime <= endDate
-                     && (productionContent.ContentFieldID == 16 // PurFermentedProofGal
-                     || productionContent.ContentFieldID == 18) // PurDistilledProofGal
-                     && unitOfMeasurement.UnitOfMeasurementID != 2 // != "lb"
+                     && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal
+                     || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)
+                     && unitOfMeasurement.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
                  select new
                  {
                      reportingCategoryName = spiritType.ProductTypeName ?? string.Empty,
@@ -7864,10 +7831,10 @@ namespace WebApp.Helpers
                  from spiritType in spiritType_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && (sourceProductionRecord.ProductionTypeID == 1 || sourceProductionRecord.ProductionTypeID == 2)
-                     && outputProductionRecord.ProductionTypeID == 2
+                     && (sourceProductionRecord.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || sourceProductionRecord.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
+                     && outputProductionRecord.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation
                      && (sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
-                 && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 20 || productionContent.ContentFieldID == 23))) // ProdDistlledProofGal
+                 && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal))) // ProdDistlledProofGal
                  && sourceProductionRecord.ProductionEndTime <= endDate
                  && outputProductionRecord.ProductionEndTime >= startDate
                  && outputProductionRecord.ProductionEndTime <= endDate
@@ -7929,7 +7896,7 @@ namespace WebApp.Helpers
                                     on productionToSpiritType.SpiritTypeReportingID equals spiritType.SpiritTypeReportingID
                                  where
                                     distiller.UserId == userId
-                                    && production.ProductionTypeID == 2
+                                    && production.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation
                                     && production.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed
                                     && production.StateID == (int)Persistence.BusinessLogicEnums.State.Distilled
                                     && production.Gauged == true
@@ -7989,13 +7956,13 @@ namespace WebApp.Helpers
                                     on pur_str.SpiritTypeReportingID equals spiritType.SpiritTypeReportingID
                                 where
                                     dist.UserId == userId
-                                    && (pur.PurchaseTypeID == 2 || pur.PurchaseTypeID == 3)
+                                    && (pur.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || pur.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
                                     && pur.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed
                                     && (pur.StateID == (int)Persistence.BusinessLogicEnums.State.Fermented || pur.StateID == (int)Persistence.BusinessLogicEnums.State.Distilled)
                                     && dest.EndTime > startDate
                                     && dest.EndTime < endDate
                                     && dest.WorkflowType == "Purchase"
-                                    && uOm.UnitOfMeasurementID != 2 // != "lb"
+                                    && uOm.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
                                 select new
                                 {
                                     reportingCategoryName = spiritType.ProductTypeName ?? string.Empty,
@@ -8068,11 +8035,11 @@ namespace WebApp.Helpers
                  from str in str_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && (purchase.PurchaseTypeID == 2 || purchase.PurchaseTypeID == 3)
+                     && (purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
                      && purchase.PurchaseDate < startDate
                      && ((purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (purchase.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
-                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 16 || productionContent.ContentFieldID == 18)))
-                     && uOm.UnitOfMeasurementID != 2 // != "lb"
+                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)))
+                     && uOm.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
                  select new
                  {
                      productionDate = (DateTime?)production.ProductionEndTime,
@@ -8140,11 +8107,11 @@ namespace WebApp.Helpers
                  from str in str_join.DefaultIfEmpty()
                  where
                      distiller.UserId == userId
-                     && (sourceProduction.ProductionTypeID == 1 || sourceProduction.ProductionTypeID == 2)
+                     && (sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
                      && sourceProduction.ProductionEndTime < startDate
                      && sourceProduction.Gauged == true
                      && ((sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (sourceProduction.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
-                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == 20 || productionContent.ContentFieldID == 23)))
+                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal)))
                  select new
                  {
                      productionDate = (DateTime?)outputProduction.ProductionEndTime,
