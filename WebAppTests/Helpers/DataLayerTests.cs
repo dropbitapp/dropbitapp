@@ -7034,7 +7034,7 @@ namespace WebApp.Helpers.Tests
                 {
                     Assert.AreEqual(25f, actualStoGrapeBrandy.r2_DepositedInBulkStorage);
                     Assert.AreEqual(25f, actualStoGrapeBrandy.r6_TotalLines1Through5);
-                    Assert.AreEqual(25, actualStoGrapeBrandy.r23_OnHandEndOfMonth);
+                    Assert.AreEqual(25f, actualStoGrapeBrandy.r23_OnHandEndOfMonth);
                     Assert.AreEqual(0f, actualStoGrapeBrandy.r1_OnHandFirstOfMonth);
                     Assert.AreEqual(25f, actualStoGrapeBrandy.r24_Lines7Through23);
                 }

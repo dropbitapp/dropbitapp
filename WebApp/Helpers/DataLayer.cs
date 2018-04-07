@@ -3282,15 +3282,16 @@ namespace WebApp.Helpers
                             {
                                 delReturn.ExecuteMessage = item.PurchaseName;
                             }
-                        } else if (res2.Count() != 0)
+                        }
+                        else if (res2.Count() != 0)
                         {
                             string recordName;
                             foreach (var item in res2)
                             {
-                                recordName = 
+                                recordName =
                                         (from rec in db.Production
-                                        where rec.ProductionID == item.ProductionID && rec.DistillerID == distillerId
-                                        select rec.ProductionName).FirstOrDefault();
+                                         where rec.ProductionID == item.ProductionID && rec.DistillerID == distillerId
+                                         select rec.ProductionName).FirstOrDefault();
                                 delReturn.ExecuteMessage = recordName;
                             }
                         }
@@ -3324,8 +3325,8 @@ namespace WebApp.Helpers
                     else if (RecordType == "Storage")
                     {
                         var res = (from rec in db.StorageToRecord
-                                  where rec.StorageID == RecordID
-                                  select rec).ToList();
+                                   where rec.StorageID == RecordID
+                                   select rec).ToList();
 
                         if (res.Count() == 0)
                         {
@@ -3339,8 +3340,8 @@ namespace WebApp.Helpers
                                 if (item.TableIdentifier == "pur")
                                 {
                                     recordName = (from rec in db.Purchase
-                                                         where rec.PurchaseID == item.RecordId && rec.DistillerID == distillerId
-                                                         select rec.PurchaseName).FirstOrDefault();
+                                                  where rec.PurchaseID == item.RecordId && rec.DistillerID == distillerId
+                                                  select rec.PurchaseName).FirstOrDefault();
                                     delReturn.ExecuteMessage = recordName;
                                 }
                                 if (item.TableIdentifier == "prod")
@@ -3523,7 +3524,7 @@ namespace WebApp.Helpers
                         db.MaterialDict2MaterialCategory.Remove(recs1);
                         db.SaveChanges();
                     }
-                    var recs2 = 
+                    var recs2 =
                         (from rec in db.MaterialDict
                          where rec.MaterialDictID == rawMaterialID && rec.DistillerID == distillerId
                          select rec).FirstOrDefault();
@@ -3728,7 +3729,7 @@ namespace WebApp.Helpers
                     }
                 }
 
-                if (purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermentable || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented|| purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Additive)
+                if (purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermentable || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Additive)
                 {
                     try
                     {
@@ -5112,7 +5113,7 @@ namespace WebApp.Helpers
                             db.StorageToRecord.RemoveRange(strRecs);
                         }
 
-                            db.SaveChanges();
+                        db.SaveChanges();
 
                         retMthdExecResult = true;
                     }
@@ -7520,7 +7521,7 @@ namespace WebApp.Helpers
 
                         if (rec.productionStatusId == (int)Persistence.BusinessLogicEnums.Status.Active || rec.productionStatusId == (int)Persistence.BusinessLogicEnums.Status.Processed)
                         {
-                            total += rec.proof + rec.destroyedProof + rec.productionContentProof; 
+                            total += rec.proof + rec.destroyedProof + rec.productionContentProof;
                         }
                         else if (rec.productionStatusId == (int)Persistence.BusinessLogicEnums.Status.Processing)
                         {
@@ -8009,8 +8010,8 @@ namespace WebApp.Helpers
         private void GetStorageOnHandEndOfMonth(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             // On hand end of the month is the same as on hand first of the next month
-            startDate = startDate.AddMonths(1);
-            endDate = endDate.AddMonths(1);
+            var nextStartDate = startDate.AddMonths(1);
+            var nextEndDate = endDate.AddMonths(1);
 
             // Query fermented and distilled purchase records on hand end of the month
             var purchaseRecords =
@@ -8036,8 +8037,8 @@ namespace WebApp.Helpers
                  where
                      distiller.UserId == userId
                      && (purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
-                     && purchase.PurchaseDate < startDate
-                     && ((purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (purchase.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
+                     && purchase.PurchaseDate < nextStartDate
+                     && ((purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (purchase.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > nextStartDate && dest.EndTime < nextEndDate))
                      && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)))
                      && uOm.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
                  select new
@@ -8061,7 +8062,7 @@ namespace WebApp.Helpers
                     {
                         var total = rec.proof + rec.destroyedProof;
 
-                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= nextStartDate && rec.productionDate <= nextEndDate)
                         {
                             total += rec.productionContentProof;
                         }
@@ -8080,7 +8081,7 @@ namespace WebApp.Helpers
                     {
                         category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
 
-                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= nextStartDate && rec.productionDate <= nextEndDate)
                         {
                             category.r23_OnHandEndOfMonth += rec.productionContentProof;
                         }
@@ -8108,9 +8109,12 @@ namespace WebApp.Helpers
                  where
                      distiller.UserId == userId
                      && (sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
-                     && sourceProduction.ProductionEndTime < startDate
+                     && sourceProduction.ProductionEndTime < nextStartDate
                      && sourceProduction.Gauged == true
-                     && ((sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (sourceProduction.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
+                     && ((sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
+                        || (sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing)
+                        || (sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && (outputProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation || (outputProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Blending && !(sourceProduction.ProductionEndTime >= startDate && outputProduction.ProductionEndTime <= endDate)))))
+                        || (sourceProduction.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > nextStartDate && dest.EndTime < nextEndDate))
                      && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal)))
                  select new
                  {
@@ -8133,7 +8137,7 @@ namespace WebApp.Helpers
                     {
                         var total = rec.proof + rec.destroyedProof;
 
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.productionContentProof > 0 && rec.productionDate >= nextStartDate && rec.productionDate <= nextEndDate)
                         {
                             total += rec.productionContentProof;
                         }
@@ -8152,7 +8156,7 @@ namespace WebApp.Helpers
                     {
                         category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
 
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.productionContentProof > 0 && rec.productionDate >= nextStartDate && rec.productionDate <= nextEndDate)
                         {
                             category.r23_OnHandEndOfMonth += rec.productionContentProof;
                         }
