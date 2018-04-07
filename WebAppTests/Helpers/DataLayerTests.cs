@@ -44,6 +44,326 @@ namespace WebApp.Helpers.Tests
             Production
         }
 
+        /// <summary>
+        /// 1) Purchase Red Wine, 100@10%20 on 4/6/2016
+        /// 2) Distill 30/100 of wine as other 15@50%15 on 7/8/2016
+        /// 3) Distill 70/100 of wine as other 35@50%35 on 8/13/2016
+        /// </summary>
+        [TestMethod()]
+        public void Buy_Wine_Partial_Distill_Plus_Three_Month_Partial_Distill_Plus_One_Month()
+        {
+            // Arrange
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+            int spiritId = 0;
+            int vendorId = 0;
+            int storageId = 0;
+            int wineMaterialId = 0;
+            int waterMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+            try
+            {
+                #region Dictionary Arrange
+                //  dictionary setup
+                SpiritObject spirit = new SpiritObject();
+                spirit.SpiritName = "SpecialDistill";
+                spirit.ProcessingReportTypeID = 20;
+
+                spiritId = _dl.CreateSpirit(_userId, spirit);
+                tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+
+                // setup Material Object
+                // wine
+                {
+                    RawMaterialObject wineMaterial = new RawMaterialObject();
+                    wineMaterial.RawMaterialName = "Wine";
+                    wineMaterial.MaterialCategoryID = 2;
+                    wineMaterial.UnitType = "gal";
+                    wineMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermented = true;
+                    wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
+                }
+
+                // water
+                {
+                    RawMaterialObject waterMaterial = new RawMaterialObject();
+                    waterMaterial.RawMaterialName = "Water";
+                    waterMaterial.UnitType = "gal";
+                    waterMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Additive = true;
+                    waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+                }
+                #endregion
+
+                #region Purchase Arrange
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Red Wine";
+                purchO.PurchaseType = "Fermented";
+                purchO.PurchaseDate = new DateTime(2016, 4, 6);
+                purchO.Quantity = 100f;
+                purchO.VolumeByWeight = 0f;
+                purchO.AlcoholContent = 10f;
+                purchO.ProofGallon = 20f;
+                purchO.RecordId = wineMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchO.SpiritTypeReportingID = 10;
+                purchO.Gauged = true;
+
+                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+                #endregion
+
+                #region Production Arrange
+                // create 1st Production Distillation Record
+                ProductionObject prodO = new ProductionObject();
+                prodO.BatchName = "Distillation 1";
+                prodO.ProductionDate = new DateTime(2016, 7, 8);
+                prodO.ProductionStart = new DateTime(2016, 7, 8);
+                prodO.ProductionEnd = new DateTime(2016, 7, 8);
+                prodO.SpiritCutId = 11; // mixed
+                prodO.Gauged = true;
+                prodO.ProductionType = "Distillation";
+                prodO.Quantity = 15f;
+                prodO.VolumeByWeight = 0f;
+                prodO.AlcoholContent = 50f;
+                prodO.ProofGallon = 15f;
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.SpiritTypeReportingID = 10; // other
+                prodO.MaterialKindReportingID = 20; // CORDIALS, LIQUEURS, AND SPECIALTIES
+                prodO.ProductionTypeId = 2;
+
+                List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
+                uMat.ID = purchaseId;
+                uMat.OldVal = 70f;
+                uMat.NewVal = 30f;
+                uMat.DistillableOrigin = "pur";
+                uMat.BurningDownMethod = "volume";
+
+                usedMats.Add(uMat);
+
+                prodO.UsedMats = usedMats;
+
+                productionId = _dl.CreateProduction(prodO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                // create 2nd Production Distillation Record
+                ProductionObject prodO2 = new ProductionObject();
+                prodO2.BatchName = "Distillation 2";
+                prodO2.ProductionDate = new DateTime(2016, 8, 13);
+                prodO2.ProductionStart = new DateTime(2016, 8, 13);
+                prodO2.ProductionEnd = new DateTime(2016, 8, 13);
+                prodO2.SpiritCutId = 11; // mixed
+                prodO2.Gauged = true;
+                prodO2.ProductionType = "Distillation";
+                prodO2.Quantity = 35f;
+                prodO2.VolumeByWeight = 0f;
+                prodO2.AlcoholContent = 50f;
+                prodO2.ProofGallon = 35f;
+                prodO2.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO2.SpiritTypeReportingID = 10; // other
+                prodO2.MaterialKindReportingID = 20; // CORDIALS, LIQUEURS, AND SPECIALTIES
+                prodO2.ProductionTypeId = 2;
+
+                List<ObjInfo4Burndwn> usedMats4Gauge = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat4Gauged = new ObjInfo4Burndwn();
+                uMat4Gauged.ID = productionId;
+                uMat4Gauged.OldVal = 0f;
+                uMat4Gauged.NewVal = 70f;
+                uMat4Gauged.DistillableOrigin = "prod";
+                uMat4Gauged.BurningDownMethod = "volume";
+
+                usedMats4Gauge.Add(uMat4Gauged);
+                prodO2.UsedMats = usedMats4Gauge;
+
+                productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                #endregion
+
+                #region Act
+
+                ReportHeader reportHeaderE = new ReportHeader();
+                reportHeaderE.ProprietorName = "Test Distillery";
+                reportHeaderE.EIN = "12-3456789";
+                reportHeaderE.ReportDate = "September 2017";
+                reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
+                reportHeaderE.DSP = "DSP-WA-21086";
+
+                int aprDays = DateTime.DaysInMonth(2016, 4);
+                int mayDays = DateTime.DaysInMonth(2016, 5);
+                int juneDays = DateTime.DaysInMonth(2016, 6);
+                int julyDays = DateTime.DaysInMonth(2016, 7);
+                int augDays = DateTime.DaysInMonth(2016, 8);
+                int sepDays = DateTime.DaysInMonth(2016, 9);
+
+                DateTime aprStart = new DateTime(2016, 4, 1);
+                DateTime aprEnd = new DateTime(2016, 4, aprDays);
+                DateTime mayStart = new DateTime(2016, 5, 1);
+                DateTime mayEnd = new DateTime(2016, 5, mayDays);
+                DateTime juneStart = new DateTime(2016, 6, 1);
+                DateTime juneEnd = new DateTime(2016, 6, juneDays);
+                DateTime julyStart = new DateTime(2016, 7, 1);
+                DateTime julyEnd = new DateTime(2016, 7, julyDays);
+                DateTime augStart = new DateTime(2016, 8, 1);
+                DateTime augEnd = new DateTime(2016, 8, augDays);
+                DateTime sepStart = new DateTime(2016, 9, 1);
+                DateTime sepEnd = new DateTime(2016, 9, sepDays);
+
+                StorageReport aprStorageReport = _dl.GetStorageReportData(aprStart, aprEnd, _userId);
+                StorageReport mayStorageReport = _dl.GetStorageReportData(mayStart, mayEnd, _userId);
+                StorageReport juneStorageReport = _dl.GetStorageReportData(juneStart, juneEnd, _userId);
+                StorageReport julyStorageReport = _dl.GetStorageReportData(julyStart, julyEnd, _userId);
+                StorageReport augStorageReport = _dl.GetStorageReportData(augStart, augEnd, _userId);
+                StorageReport sepStorageReport = _dl.GetStorageReportData(sepStart, sepEnd, _userId);
+
+                #endregion
+
+                #region Assert
+
+                // April
+                Assert.AreEqual(1, aprStorageReport.ReportBody.Count); // One category
+                Assert.IsTrue(aprStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
+                Assert.AreEqual(0f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
+                Assert.AreEqual(20f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
+                Assert.AreEqual(0f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r4_ReturnedToBulkStorage).Single());
+                Assert.AreEqual(20f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r6_TotalLines1Through5).Single());
+                Assert.AreEqual(0f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r7_TaxPaid).Single());
+                Assert.AreEqual(0f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r17_TransferredToProcessingAccount).Single());
+                Assert.AreEqual(0f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r18_TransferredToProductionAccount).Single());
+                Assert.AreEqual(0f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r19_TransferredToOtherBondedPremises).Single());
+                Assert.AreEqual(0f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r20_Destroyed).Single());
+                Assert.AreEqual(0f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r22_OtherLosses).Single());
+                //Assert.AreEqual(20f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r23_OnHandEndOfMonth).Single());
+                //Assert.AreEqual(20f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
+
+                //// May
+                //Assert.AreEqual(1, mayStorageReport.ReportBody.Count); // One category
+                //Assert.IsTrue(mayStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
+                //Assert.AreEqual(20f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
+                //Assert.AreEqual(0f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
+                //Assert.AreEqual(0f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r4_ReturnedToBulkStorage).Single());
+                //Assert.AreEqual(20f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r6_TotalLines1Through5).Single());
+                //Assert.AreEqual(0f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r7_TaxPaid).Single());
+                //Assert.AreEqual(0f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r17_TransferredToProcessingAccount).Single());
+                //Assert.AreEqual(0f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r18_TransferredToProductionAccount).Single());
+                //Assert.AreEqual(0f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r19_TransferredToOtherBondedPremises).Single());
+                //Assert.AreEqual(0f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r20_Destroyed).Single());
+                //Assert.AreEqual(0f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r22_OtherLosses).Single());
+                //Assert.AreEqual(20f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r23_OnHandEndOfMonth).Single());
+                //Assert.AreEqual(20f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
+
+                // June
+                Assert.AreEqual(1, juneStorageReport.ReportBody.Count); // One category
+                Assert.IsTrue(juneStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
+                //Assert.AreEqual(20f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
+                Assert.AreEqual(0f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
+                Assert.AreEqual(0f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r4_ReturnedToBulkStorage).Single());
+                //Assert.AreEqual(20f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r6_TotalLines1Through5).Single());
+                Assert.AreEqual(0f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r7_TaxPaid).Single());
+                Assert.AreEqual(0f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r17_TransferredToProcessingAccount).Single());
+                Assert.AreEqual(0f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r18_TransferredToProductionAccount).Single());
+                Assert.AreEqual(0f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r19_TransferredToOtherBondedPremises).Single());
+                Assert.AreEqual(0f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r20_Destroyed).Single());
+                Assert.AreEqual(0f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r22_OtherLosses).Single());
+                Assert.AreEqual(20f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r23_OnHandEndOfMonth).Single());
+                Assert.AreEqual(20f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
+
+                // July
+                Assert.AreEqual(1, julyStorageReport.ReportBody.Count); // One category
+                Assert.IsTrue(julyStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
+                Assert.AreEqual(20f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
+                Assert.AreEqual(15f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
+                Assert.AreEqual(0f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r4_ReturnedToBulkStorage).Single());
+                Assert.AreEqual(35f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r6_TotalLines1Through5).Single());
+                Assert.AreEqual(0f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r7_TaxPaid).Single());
+                Assert.AreEqual(0f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r17_TransferredToProcessingAccount).Single());
+                //Assert.AreEqual(6f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r18_TransferredToProductionAccount).Single());
+                Assert.AreEqual(0f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r19_TransferredToOtherBondedPremises).Single());
+                Assert.AreEqual(0f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r20_Destroyed).Single());
+                Assert.AreEqual(0f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r22_OtherLosses).Single());
+                //Assert.AreEqual(29f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r23_OnHandEndOfMonth).Single());
+                Assert.AreEqual(35f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
+
+                // August
+                Assert.AreEqual(1, augStorageReport.ReportBody.Count); // One category
+                Assert.IsTrue(augStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
+                //Assert.AreEqual(29f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
+                Assert.AreEqual(35f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
+                Assert.AreEqual(0f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r4_ReturnedToBulkStorage).Single());
+                //Assert.AreEqual(64f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r6_TotalLines1Through5).Single());
+                Assert.AreEqual(0f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r7_TaxPaid).Single());
+                Assert.AreEqual(0f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r17_TransferredToProcessingAccount).Single());
+                //Assert.AreEqual(14f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r18_TransferredToProductionAccount).Single());
+                Assert.AreEqual(0f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r19_TransferredToOtherBondedPremises).Single());
+                Assert.AreEqual(0f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r20_Destroyed).Single());
+                Assert.AreEqual(0f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r22_OtherLosses).Single());
+                //Assert.AreEqual(50f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r23_OnHandEndOfMonth).Single());
+                //Assert.AreEqual(64f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
+
+                // September
+                Assert.AreEqual(1, sepStorageReport.ReportBody.Count); // One category
+                Assert.IsTrue(sepStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
+                //Assert.AreEqual(64f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
+                Assert.AreEqual(0f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
+                Assert.AreEqual(0f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r4_ReturnedToBulkStorage).Single());
+                //Assert.AreEqual(64f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r6_TotalLines1Through5).Single());
+                Assert.AreEqual(0f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r7_TaxPaid).Single());
+                Assert.AreEqual(0f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r17_TransferredToProcessingAccount).Single());
+                Assert.AreEqual(0f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r18_TransferredToProductionAccount).Single());
+                Assert.AreEqual(0f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r19_TransferredToOtherBondedPremises).Single());
+                Assert.AreEqual(0f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r20_Destroyed).Single());
+                Assert.AreEqual(0f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r22_OtherLosses).Single());
+                //Assert.AreEqual(64f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r23_OnHandEndOfMonth).Single());
+                //Assert.AreEqual(64f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
+
+                #endregion
+            }
+            finally
+            {
+                // Cleanup
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+
+
         // This covers a full workflow test for Brandy Under 170
         /*
          * We need to make Brandy Under 170 and test its appearance in 
