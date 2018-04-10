@@ -3629,6 +3629,7 @@ namespace WebApp.Helpers
 
                 if (pTypes != null)
                 {
+                    purchT.Gauged = pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled ? true : false;
                     purchT.PurchaseTypeID = pTypes.PurchaseTypeID;
                 }
 
@@ -7205,6 +7206,94 @@ namespace WebApp.Helpers
         }
 
         /// <summary>
+        /// Returns a collection of purchased on hand first of month.
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        private IEnumerable<OnHandFirstOfMonth> GetPurchasedOnHandFirstOfMonthQuery(DateTime startDate, DateTime endDate, int userId)
+        {
+            return from purchase in db.Purchase
+                   join distiller in db.AspNetUserToDistiller on purchase.DistillerID equals distiller.DistillerID into distiller_join
+                   from distiller in distiller_join.DefaultIfEmpty()
+                   join mDic in db.MaterialDict on purchase.MaterialDictID equals mDic.MaterialDictID into mDic_join
+                   from mDic in mDic_join.DefaultIfEmpty()
+                   join uOm in db.UnitOfMeasurement on mDic.UnitOfMeasurementID equals uOm.UnitOfMeasurementID into uOm_join
+                   from uOm in uOm_join.DefaultIfEmpty()
+                   join dest in db.Destruction on purchase.PurchaseID equals dest.RecordID into dest_join
+                   from dest in dest_join.DefaultIfEmpty()
+                   join proof in db.Proof on purchase.ProofID equals proof.ProofID into proof_join
+                   from proof in proof_join.DefaultIfEmpty()
+                   join productionContent in db.ProductionContent on purchase.PurchaseID equals productionContent.RecordID into productionContent_join
+                   from productionContent in productionContent_join.DefaultIfEmpty()
+                   join production in db.Production on productionContent.ProductionID equals production.ProductionID into production_join
+                   from production in production_join.DefaultIfEmpty()
+                   join productionToSpiritType in db.PurchaseToSpiritTypeReporting on purchase.PurchaseID equals productionToSpiritType.PurchaseID into productionToSpiritType_join
+                   from productionToSpiritType in productionToSpiritType_join.DefaultIfEmpty()
+                   join str in db.SpiritTypeReporting on productionToSpiritType.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                   from str in str_join.DefaultIfEmpty()
+                   where
+                       distiller.UserId == userId
+                       && (purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
+                       && purchase.PurchaseDate < startDate
+                       && ((purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (purchase.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
+                       && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)))
+                       && uOm.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
+                   select new OnHandFirstOfMonth()
+                   {
+                       ProductionDate = production.ProductionEndTime != null ? production.ProductionEndTime : DateTime.MinValue,
+                       ReportingCategoryName = str.ProductTypeName ?? string.Empty,
+                       SpiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
+                       Proof = (float?)proof.Value ?? 0,
+                       DestroyedProof = (float?)dest.ProofGallons ?? 0,
+                       ProductionContentProof = (float?)productionContent.ContentValue ?? 0
+                   };
+        }
+
+        /// <summary>
+        /// Returns a collection of produced on hand first of month. 
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        private IEnumerable<OnHandFirstOfMonth> GetProducedOnHandFirstOfMonthQuery(DateTime startDate, DateTime endDate, int userId)
+        {
+            return from sourceProduction in db.Production
+                   join distiller in db.AspNetUserToDistiller on sourceProduction.DistillerID equals distiller.DistillerID into distiller_join
+                   from distiller in distiller_join.DefaultIfEmpty()
+                   join dest in db.Destruction on sourceProduction.ProductionID equals dest.RecordID into dest_join
+                   from dest in dest_join.DefaultIfEmpty()
+                   join proof in db.Proof on sourceProduction.ProofID equals proof.ProofID into proof_join
+                   from proof in proof_join.DefaultIfEmpty()
+                   join productionContent in db.ProductionContent on sourceProduction.ProductionID equals productionContent.RecordID into productionContent_join
+                   from productionContent in productionContent_join.DefaultIfEmpty()
+                   join outputProduction in db.Production on productionContent.ProductionID equals outputProduction.ProductionID into outputProductionRecord_join
+                   from outputProduction in outputProductionRecord_join.DefaultIfEmpty()
+                   join productionToSpiritType in db.ProductionToSpiritTypeReporting on sourceProduction.ProductionID equals productionToSpiritType.ProductionID into productionToSpiritType_join
+                   from productionToSpiritType in productionToSpiritType_join.DefaultIfEmpty()
+                   join str in db.SpiritTypeReporting on productionToSpiritType.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
+                   from str in str_join.DefaultIfEmpty()
+                   where
+                       distiller.UserId == userId
+                       && (sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
+                       && sourceProduction.ProductionEndTime < startDate
+                       && sourceProduction.Gauged == true
+                       && ((sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (sourceProduction.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
+                       && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal)))
+                   select new OnHandFirstOfMonth()
+                   {
+                       ProductionDate = outputProduction.ProductionEndTime != null ? outputProduction.ProductionEndTime : DateTime.MinValue,
+                       ReportingCategoryName = str.ProductTypeName ?? string.Empty,
+                       SpiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
+                       Proof = (float?)proof.Value ?? 0,
+                       DestroyedProof = (float?)dest.ProofGallons ?? 0,
+                       ProductionContentProof = (float?)productionContent.ContentValue ?? 0
+                   };
+        }
+
+        /// <summary>
         /// 1. On hand first of month (Purchased)
         /// </summary>
         /// <param name="startDate"></param>
@@ -7213,77 +7302,41 @@ namespace WebApp.Helpers
         /// <param name="storageReportBody"></param>
         private void GetPurchasedOnHandFirstOfMonth(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
-            // Query distilled purchase records transferred to storage account
-            var records =
-                (from purchase in db.Purchase
-                 join distiller in db.AspNetUserToDistiller on purchase.DistillerID equals distiller.DistillerID into distiller_join
-                 from distiller in distiller_join.DefaultIfEmpty()
-                 join mDic in db.MaterialDict on purchase.MaterialDictID equals mDic.MaterialDictID into mDic_join
-                 from mDic in mDic_join.DefaultIfEmpty()
-                 join uOm in db.UnitOfMeasurement on mDic.UnitOfMeasurementID equals uOm.UnitOfMeasurementID into uOm_join
-                 from uOm in uOm_join.DefaultIfEmpty()
-                 join dest in db.Destruction on purchase.PurchaseID equals dest.RecordID into dest_join
-                 from dest in dest_join.DefaultIfEmpty()
-                 join proof in db.Proof on purchase.ProofID equals proof.ProofID into proof_join
-                 from proof in proof_join.DefaultIfEmpty()
-                 join productionContent in db.ProductionContent on purchase.PurchaseID equals productionContent.RecordID into productionContent_join
-                 from productionContent in productionContent_join.DefaultIfEmpty()
-                 join production in db.Production on productionContent.ProductionID equals production.ProductionID into production_join
-                 from production in production_join.DefaultIfEmpty()
-                 join productionToSpiritType in db.PurchaseToSpiritTypeReporting on purchase.PurchaseID equals productionToSpiritType.PurchaseID into productionToSpiritType_join
-                 from productionToSpiritType in productionToSpiritType_join.DefaultIfEmpty()
-                 join str in db.SpiritTypeReporting on productionToSpiritType.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                 from str in str_join.DefaultIfEmpty()
-                 where
-                     distiller.UserId == userId
-                     && (purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
-                     && purchase.PurchaseDate < startDate
-                     && ((purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (purchase.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
-                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)))
-                     && uOm.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
-                 select new
-                 {
-                     productionDate = (DateTime?)production.ProductionEndTime,
-                     reportingCategoryName = str.ProductTypeName ?? string.Empty,
-                     spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
-                     proof = (float?)proof.Value ?? 0,
-                     destroyedProof = (float?)dest.ProofGallons ?? 0,
-                     productionContentProof = (float?)productionContent.ContentValue ?? 0
-                 }).DefaultIfEmpty();
+            var records = GetPurchasedOnHandFirstOfMonthQuery(startDate, endDate, userId);
 
-            if (records.First() != null)
+            if (records.Any())
             {
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.SpiritTypeReportingId);
 
                     if (category == null)
                     {
-                        var total = rec.proof + rec.destroyedProof;
+                        var total = rec.Proof + rec.DestroyedProof;
 
-                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.ProductionContentProof > 0 && rec.ProductionDate >= startDate)
                         {
-                            total += rec.productionContentProof;
+                            total += rec.ProductionContentProof;
                         }
 
                         if (total > 0)
                         {
                             // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                             StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
+                            cat.SpiritTypeReportingID = rec.SpiritTypeReportingId;
+                            cat.CategoryName = rec.ReportingCategoryName;
                             cat.r1_OnHandFirstOfMonth += total;
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
-                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
+                        category.r1_OnHandFirstOfMonth += rec.Proof + rec.DestroyedProof;
 
-                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.ProductionContentProof > 0 && rec.ProductionDate >= startDate)
                         {
-                            category.r1_OnHandFirstOfMonth += rec.productionContentProof;
+                            category.r1_OnHandFirstOfMonth += rec.ProductionContentProof;
                         }
                     }
                 }
@@ -7299,73 +7352,41 @@ namespace WebApp.Helpers
         /// <param name="storageReportBody"></param>
         private void GetProducedOnHandFirstOfMonth(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
-            // Query distilled production records transferred to storage account
-            var records =
-                (from sourceProduction in db.Production
-                 join distiller in db.AspNetUserToDistiller on sourceProduction.DistillerID equals distiller.DistillerID into distiller_join
-                 from distiller in distiller_join.DefaultIfEmpty()
-                 join dest in db.Destruction on sourceProduction.ProductionID equals dest.RecordID into dest_join
-                 from dest in dest_join.DefaultIfEmpty()
-                 join proof in db.Proof on sourceProduction.ProofID equals proof.ProofID into proof_join
-                 from proof in proof_join.DefaultIfEmpty()
-                 join productionContent in db.ProductionContent on sourceProduction.ProductionID equals productionContent.RecordID into productionContent_join
-                 from productionContent in productionContent_join.DefaultIfEmpty()
-                 join outputProduction in db.Production on productionContent.ProductionID equals outputProduction.ProductionID into outputProductionRecord_join
-                 from outputProduction in outputProductionRecord_join.DefaultIfEmpty()
-                 join productionToSpiritType in db.ProductionToSpiritTypeReporting on sourceProduction.ProductionID equals productionToSpiritType.ProductionID into productionToSpiritType_join
-                 from productionToSpiritType in productionToSpiritType_join.DefaultIfEmpty()
-                 join str in db.SpiritTypeReporting on productionToSpiritType.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                 from str in str_join.DefaultIfEmpty()
-                 where
-                     distiller.UserId == userId
-                     && (sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
-                     && sourceProduction.ProductionEndTime < startDate
-                     && sourceProduction.Gauged == true
-                     && ((sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (sourceProduction.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
-                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal)))
-                 select new
-                 {
-                     productionDate = (DateTime?)outputProduction.ProductionEndTime,
-                     reportingCategoryName = str.ProductTypeName ?? string.Empty,
-                     spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
-                     proof = (float?)proof.Value ?? 0,
-                     destroyedProof = (float?)dest.ProofGallons ?? 0,
-                     productionContentProof = (float?)productionContent.ContentValue ?? 0
-                 }).DefaultIfEmpty();
+            var records = GetProducedOnHandFirstOfMonthQuery(startDate, endDate, userId);
 
-            if (records.First() != null)
+            if (records.Any())
             {
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.SpiritTypeReportingId);
 
                     if (category == null)
                     {
-                        var total = rec.proof + rec.destroyedProof;
+                        var total = rec.Proof + rec.DestroyedProof;
 
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.ProductionContentProof > 0 && rec.ProductionDate >= startDate)
                         {
-                            total += rec.productionContentProof;
+                            total += rec.ProductionContentProof;
                         }
 
                         if (total > 0)
                         {
                             // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                             StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
+                            cat.SpiritTypeReportingID = rec.SpiritTypeReportingId;
+                            cat.CategoryName = rec.ReportingCategoryName;
                             cat.r1_OnHandFirstOfMonth += total;
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
-                        category.r1_OnHandFirstOfMonth += rec.proof + rec.destroyedProof;
+                        category.r1_OnHandFirstOfMonth += rec.Proof + rec.DestroyedProof;
 
-                        if (rec.productionContentProof > 0 && rec.productionDate >= startDate && rec.productionDate <= endDate)
+                        if (rec.ProductionContentProof > 0 && rec.ProductionDate >= startDate)
                         {
-                            category.r1_OnHandFirstOfMonth += rec.productionContentProof;
+                            category.r1_OnHandFirstOfMonth += rec.ProductionContentProof;
                         }
                     }
                 }
@@ -8009,156 +8030,86 @@ namespace WebApp.Helpers
         /// <param name="storageReportBody"></param>
         private void GetStorageOnHandEndOfMonth(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
-            // On hand end of the month is the same as on hand first of the next month
-            var nextStartDate = startDate.AddMonths(1);
-            var nextEndDate = endDate.AddMonths(1);
+            var nextStart = startDate.AddMonths(1);
+            var nextEnd = new DateTime(endDate.AddMonths(1).Year, endDate.AddMonths(1).Month, DateTime.DaysInMonth(endDate.AddMonths(1).Year, endDate.AddMonths(1).Month), 23, 59, 59);
 
-            // Query fermented and distilled purchase records on hand end of the month
-            var purchaseRecords =
-                (from purchase in db.Purchase
-                 join distiller in db.AspNetUserToDistiller on purchase.DistillerID equals distiller.DistillerID into distiller_join
-                 from distiller in distiller_join.DefaultIfEmpty()
-                 join mDic in db.MaterialDict on purchase.MaterialDictID equals mDic.MaterialDictID into mDic_join
-                 from mDic in mDic_join.DefaultIfEmpty()
-                 join uOm in db.UnitOfMeasurement on mDic.UnitOfMeasurementID equals uOm.UnitOfMeasurementID into uOm_join
-                 from uOm in uOm_join.DefaultIfEmpty()
-                 join dest in db.Destruction on purchase.PurchaseID equals dest.RecordID into dest_join
-                 from dest in dest_join.DefaultIfEmpty()
-                 join proof in db.Proof on purchase.ProofID equals proof.ProofID into proof_join
-                 from proof in proof_join.DefaultIfEmpty()
-                 join productionContent in db.ProductionContent on purchase.PurchaseID equals productionContent.RecordID into productionContent_join
-                 from productionContent in productionContent_join.DefaultIfEmpty()
-                 join production in db.Production on productionContent.ProductionID equals production.ProductionID into production_join
-                 from production in production_join.DefaultIfEmpty()
-                 join productionToSpiritType in db.PurchaseToSpiritTypeReporting on purchase.PurchaseID equals productionToSpiritType.PurchaseID into productionToSpiritType_join
-                 from productionToSpiritType in productionToSpiritType_join.DefaultIfEmpty()
-                 join str in db.SpiritTypeReporting on productionToSpiritType.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                 from str in str_join.DefaultIfEmpty()
-                 where
-                     distiller.UserId == userId
-                     && (purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
-                     && purchase.PurchaseDate < nextStartDate
-                     && ((purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (purchase.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > nextStartDate && dest.EndTime < nextEndDate))
-                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)))
-                     && uOm.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
-                 select new
-                 {
-                     productionDate = (DateTime?)production.ProductionEndTime,
-                     reportingCategoryName = str.ProductTypeName ?? string.Empty,
-                     spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
-                     proof = (float?)proof.Value ?? 0,
-                     destroyedProof = (float?)dest.ProofGallons ?? 0,
-                     productionContentProof = (float?)productionContent.ContentValue ?? 0
-                 }).DefaultIfEmpty();
+            // On hand end of month is the same as on hand first of month for next month
+            var records = GetPurchasedOnHandFirstOfMonthQuery(nextStart, nextEnd, userId);
 
-            if (purchaseRecords.First() != null)
+            if (records.Any())
             {
-                foreach (var rec in purchaseRecords)
+                foreach (var rec in records)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.SpiritTypeReportingId);
 
                     if (category == null)
                     {
-                        var total = rec.proof + rec.destroyedProof;
+                        var total = rec.Proof + rec.DestroyedProof;
 
-                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= nextStartDate && rec.productionDate <= nextEndDate)
+                        if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
-                            total += rec.productionContentProof;
+                            total += rec.ProductionContentProof;
                         }
 
                         if (total > 0)
                         {
                             // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                             StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
+                            cat.SpiritTypeReportingID = rec.SpiritTypeReportingId;
+                            cat.CategoryName = rec.ReportingCategoryName;
                             cat.r23_OnHandEndOfMonth += total;
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
-                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                        category.r23_OnHandEndOfMonth += rec.Proof + rec.DestroyedProof;
 
-                        if (rec.productionDate != null && rec.productionContentProof > 0 && rec.productionDate >= nextStartDate && rec.productionDate <= nextEndDate)
+                        if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
-                            category.r23_OnHandEndOfMonth += rec.productionContentProof;
+                            category.r23_OnHandEndOfMonth += rec.ProductionContentProof;
                         }
                     }
                 }
             }
 
-            // Query distilled production records on hand end of the month
-            var producedRecords =
-                (from sourceProduction in db.Production
-                 join distiller in db.AspNetUserToDistiller on sourceProduction.DistillerID equals distiller.DistillerID into distiller_join
-                 from distiller in distiller_join.DefaultIfEmpty()
-                 join dest in db.Destruction on sourceProduction.ProductionID equals dest.RecordID into dest_join
-                 from dest in dest_join.DefaultIfEmpty()
-                 join proof in db.Proof on sourceProduction.ProofID equals proof.ProofID into proof_join
-                 from proof in proof_join.DefaultIfEmpty()
-                 join productionContent in db.ProductionContent on sourceProduction.ProductionID equals productionContent.RecordID into productionContent_join
-                 from productionContent in productionContent_join.DefaultIfEmpty()
-                 join outputProduction in db.Production on productionContent.ProductionID equals outputProduction.ProductionID into outputProductionRecord_join
-                 from outputProduction in outputProductionRecord_join.DefaultIfEmpty()
-                 join productionToSpiritType in db.ProductionToSpiritTypeReporting on sourceProduction.ProductionID equals productionToSpiritType.ProductionID into productionToSpiritType_join
-                 from productionToSpiritType in productionToSpiritType_join.DefaultIfEmpty()
-                 join str in db.SpiritTypeReporting on productionToSpiritType.SpiritTypeReportingID equals str.SpiritTypeReportingID into str_join
-                 from str in str_join.DefaultIfEmpty()
-                 where
-                     distiller.UserId == userId
-                     && (sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
-                     && sourceProduction.ProductionEndTime < nextStartDate
-                     && sourceProduction.Gauged == true
-                     && ((sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
-                        || (sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing)
-                        || (sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && (outputProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation || (outputProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Blending && !(sourceProduction.ProductionEndTime >= startDate && outputProduction.ProductionEndTime <= endDate)))))
-                        || (sourceProduction.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > nextStartDate && dest.EndTime < nextEndDate))
-                     && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal)))
-                 select new
-                 {
-                     productionDate = (DateTime?)outputProduction.ProductionEndTime,
-                     reportingCategoryName = str.ProductTypeName ?? string.Empty,
-                     spiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
-                     proof = (float?)proof.Value ?? 0,
-                     destroyedProof = (float?)dest.ProofGallons ?? 0,
-                     productionContentProof = (float?)productionContent.ContentValue ?? 0
-                 }).DefaultIfEmpty();
+            // On hand end of month is the same as on hand first of month for next month
+            records = GetProducedOnHandFirstOfMonthQuery(nextStart, nextEnd, userId);
 
-            if (producedRecords.First() != null)
+            if (records.Any())
             {
-                foreach (var rec in producedRecords)
+                foreach (var rec in records)
                 {
                     // Search for existing category with matching name
-                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.spiritTypeReportingId);
+                    var category = storageReportBody.Find(x => x.SpiritTypeReportingID == rec.SpiritTypeReportingId);
 
                     if (category == null)
                     {
-                        var total = rec.proof + rec.destroyedProof;
+                        var total = rec.Proof + rec.DestroyedProof;
 
-                        if (rec.productionContentProof > 0 && rec.productionDate >= nextStartDate && rec.productionDate <= nextEndDate)
+                        if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
-                            total += rec.productionContentProof;
+                            total += rec.ProductionContentProof;
                         }
 
                         if (total > 0)
                         {
                             // Add category to the list with given produced distilled batch ReportingCategoryName and update relevant rows
                             StorageReportCategory cat = new StorageReportCategory();
-                            cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
-                            cat.CategoryName = rec.reportingCategoryName;
+                            cat.SpiritTypeReportingID = rec.SpiritTypeReportingId;
+                            cat.CategoryName = rec.ReportingCategoryName;
                             cat.r23_OnHandEndOfMonth += total;
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
-                        category.r23_OnHandEndOfMonth += rec.proof + rec.destroyedProof;
+                        category.r23_OnHandEndOfMonth += rec.Proof + rec.DestroyedProof;
 
-                        if (rec.productionContentProof > 0 && rec.productionDate >= nextStartDate && rec.productionDate <= nextEndDate)
+                        if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
-                            category.r23_OnHandEndOfMonth += rec.productionContentProof;
+                            category.r23_OnHandEndOfMonth += rec.ProductionContentProof;
                         }
                     }
                 }

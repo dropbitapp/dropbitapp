@@ -3,10 +3,25 @@ using System.Collections.Generic;
 
 namespace WebApp.Helpers
 {
+    #region QueryResults
+    /// <summary>
+    /// Query result type for purchased on hand first of month in storage report
+    /// </summary>
+    public class OnHandFirstOfMonth
+    {
+        public DateTime ProductionDate { get; set; }
+        public string ReportingCategoryName { get; set; }
+        public int SpiritTypeReportingId { get; set; }
+        public float Proof { get; set; }
+        public float DestroyedProof { get; set; }
+        public float ProductionContentProof { get; set; }
+    }
+    #endregion
+
     #region Reporting Objects
     /* This sections contains object that are used for reporting workflows*/
 
-     public class ProductionReportingObject
+    public class ProductionReportingObject
     {
         public ReportHeader Header { get; set; }
         public List<ProdReportPart1> Part1List { get; set; }
@@ -20,7 +35,7 @@ namespace WebApp.Helpers
         public ReportHeader Header { get; set; }
         public List<StorageReportCategory> ReportBody { get; set; }
     }
-    
+
     public class ReportHeader
     {
         public string ProprietorName { get; set; }
@@ -90,14 +105,14 @@ namespace WebApp.Helpers
         public float Used4Redistil { get; set; }
         public float Losses { get; set; }
         public float OnHandEndofMonth { get; set; }
-    }   
+    }
 
     public class ProcessReportingPart2
     {
         public string FinishedProduct { get; set; } // either bottled or packaged
         public float OnHandFirstofMonth { get; set; }
         public float AmtBottledPackaged { get; set; }
-        public float Recd4Process { get; set; } 
+        public float Recd4Process { get; set; }
         public float InventoryOverage { get; set; }
         public float Transf2Prod4Redistil { get; set; } // transferred to Production for re-distillation
         public float Destroyed { get; set; }
@@ -301,7 +316,7 @@ namespace WebApp.Helpers
         public bool ExecuteResult { get; set; }
         public string ExecuteMessage { get; set; }
 
-        public ReturnObject ()
+        public ReturnObject()
         {
             this.ExecuteResult = _executeResult;
             this.ExecuteMessage = _executeMessage;
@@ -347,7 +362,7 @@ namespace WebApp.Helpers
         public System.DateTime PurchaseDate { get; set; }
         public float Quantity { get; set; } // volume
         public float VolumeByWeight { get; set; } //weight
-        public float AlcoholContent{ get; set; }
+        public float AlcoholContent { get; set; }
         public float ProofGallon { get; set; }
         public int UnitOfMeasurementId { get; set; }
         public string UnitOfMeasurementName { get; set; }
@@ -366,7 +381,7 @@ namespace WebApp.Helpers
         public bool Gauged { get; set; }
     }
 
-     /// <summary>
+    /// <summary>
     /// BlendingAdditive is the object that contains Additive information for 
     /// a given Blending record that we are either creating or viewing
     /// </summary>
@@ -467,7 +482,7 @@ namespace WebApp.Helpers
     /// Note Object is used as a blueprint object when transferred between client and backend 
     /// </summary>
     public class NoteObject
-    { 
+    {
         public int NoteId { get; set; }
         public int RecordId { get; set; }
         public int IdentifierId { get; set; }
@@ -508,7 +523,7 @@ namespace WebApp.Helpers
         public int SpiritTypeReportingID { get; set; }
         public string ProductTypeName { get; set; }
         public List<MaterialKindObject> MaterialKindObject { get; set; }
-        
+
     }
     /// <summary>
     /// FillTestObject object is used to store fill test data (proof and date) during bottling 
