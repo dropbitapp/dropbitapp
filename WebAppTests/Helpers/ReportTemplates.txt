@@ -1026,3 +1026,133 @@ actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
     }
 }
 #endregion End of Storage Report
+
+#region Processing Report
+{
+/*Processing Report values are by default null */
+ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
+actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+
+// Part 1
+{
+    var processingReportObject = actualProcessingReportObject.Part1.Find(x => x.BulkIngredients == "spirit");
+
+    if (processingReportObject == null)
+    {
+        Assert.IsNull(processingReportObject, "Part 1 of Processing Report should be Null");
+    }
+    else
+    {
+        Assert.IsNull(processingReportObject, "Part 1 of Processing Report should be Null");
+
+        Assert.AreEqual(0, processingReportObject.AmtBottledPackaged);
+        Assert.AreEqual(0, processingReportObject.Destroyed);
+        Assert.AreEqual(0, processingReportObject.Dumped4Processing);
+        Assert.AreEqual(0, processingReportObject.Gains);
+        Assert.AreEqual(0, processingReportObject.Losses);
+        Assert.AreEqual(0, processingReportObject.OnHandEndofMonth);
+        Assert.AreEqual(0, processingReportObject.OnHandFirstofMonth);
+        Assert.AreEqual(0, processingReportObject.Recd4Process);
+        Assert.AreEqual(0, processingReportObject.Transf2Prod4Redistil);
+        Assert.AreEqual(0, processingReportObject.Used4Redistil);
+        Assert.AreEqual(0, processingReportObject.WineMixedWithSpirit);
+    }
+}
+// Part 2
+{
+    var processingReportObject = actualProcessingReportObject.Part2.Find(x => x.BulkIngredients == "bottled");
+
+    if (processingReportObject == null)
+    {
+        Assert.IsNull(processingReportObject, "Part 2 of Processing Report should be Null");
+    }
+    else
+    {
+        Assert.IsNull(processingReportObject, "Part 2 of Processing Report should be Null");
+
+        Assert.AreEqual(0, processingReportObject.AmtBottledPackaged);
+        Assert.AreEqual(0, processingReportObject.Destroyed);
+        Assert.AreEqual(0, processingReportObject.Dumped4Processing);
+        Assert.AreEqual(0, processingReportObject.FinishedProduct);
+        Assert.AreEqual(0, processingReportObject.InventoryOverage);
+        Assert.AreEqual(0, processingReportObject.OnHandEndofMonth);
+        Assert.AreEqual(0, processingReportObject.OnHandFirstofMonth);
+        Assert.AreEqual(0, processingReportObject.Recd4Process);
+        Assert.AreEqual(0, processingReportObject.RecordedLosses);
+        Assert.AreEqual(0, processingReportObject.TaxWithdrawn);
+        Assert.AreEqual(0, processingReportObject.Transf2Prod4Redistil);
+    }
+}
+
+// Part 4
+{
+	var processingReportObject = actualProcessingReportObject.Part4List.Find(x => x.BulkIngredients == "bulkSpiritDumped");
+
+    if (processingReportObject == null)
+    {
+        Assert.IsNull(processingReportObject, "Part 4 Bulk Spirit Dumped of Processing Report should be Null");
+    }
+    else
+    {
+        Assert.IsNull(processingReportObject, "Part 4 Bulk Spirit Dumped of Processing Report should be Null");
+
+        Assert.AreEqual(0f, processingReportObject.AlcoholNeutral);
+        Assert.AreEqual(0f, processingReportObject.BlendedLightWhiskey);
+        Assert.AreEqual(0f, processingReportObject.BlendedOtherWhiskey);
+        Assert.AreEqual(0f, processingReportObject.BlendedStraightWhiskey);
+        Assert.AreEqual(0f, processingReportObject.BlendedWhiskeyWithLight);
+        Assert.AreEqual(0f, processingReportObject.BlendedWhiskeyWithNeutral);
+        Assert.AreEqual(0f, processingReportObject.Brandy170Under);
+        Assert.AreEqual(0f, processingReportObject.BrandyOver170);
+        Assert.AreEqual(0f, processingReportObject.Cocktail);
+        Assert.AreEqual(0f, processingReportObject.DomesticWhiskey160Under);
+        Assert.AreEqual(0f, processingReportObject.DomesticWhiskeyOver160);
+        Assert.AreEqual(0f, processingReportObject.Gin);
+        Assert.AreEqual(0f, processingReportObject.ImportedWhiskeyCanadian);
+        Assert.AreEqual(0f, processingReportObject.ImportedWhiskeyIrish);
+        Assert.AreEqual(0f, processingReportObject.ImportedWhiskeyScotch);
+        Assert.AreEqual(0f, processingReportObject.Liqueur);
+        Assert.AreEqual(0f, processingReportObject.RumDomestic);
+        Assert.AreEqual(0f, processingReportObject.RumDomestic);
+        Assert.AreEqual(0f, processingReportObject.RumOtherImported);
+        Assert.AreEqual(0f, processingReportObject.RumPuertoRican);
+        Assert.AreEqual(0f, processingReportObject.Tequila);
+        Assert.AreEqual(0f, processingReportObject.Vodka);
+    }
+
+	var processingReportObject = actualProcessingReportObject.Part4List.Find(x => x.BulkIngredients == "bottled");
+
+    if (processingReportObject == null)
+    {
+        Assert.IsNull(processingReportObject, "Part 4 Bottled of Processing Report should be Null");
+    }
+    else
+    {
+        Assert.IsNull(processingReportObject, "Part 4 Bottled of Processing Report should be Null");
+
+        Assert.AreEqual(0f, processingReportObject.AlcoholNeutral);
+        Assert.AreEqual(0f, processingReportObject.BlendedLightWhiskey);
+        Assert.AreEqual(0f, processingReportObject.BlendedOtherWhiskey);
+        Assert.AreEqual(0f, processingReportObject.BlendedStraightWhiskey);
+        Assert.AreEqual(0f, processingReportObject.BlendedWhiskeyWithLight);
+        Assert.AreEqual(0f, processingReportObject.BlendedWhiskeyWithNeutral);
+        Assert.AreEqual(0f, processingReportObject.Brandy170Under);
+        Assert.AreEqual(0f, processingReportObject.BrandyOver170);
+        Assert.AreEqual(0f, processingReportObject.Cocktail);
+        Assert.AreEqual(0f, processingReportObject.DomesticWhiskey160Under);
+        Assert.AreEqual(0f, processingReportObject.DomesticWhiskeyOver160);
+        Assert.AreEqual(0f, processingReportObject.Gin);
+        Assert.AreEqual(0f, processingReportObject.ImportedWhiskeyCanadian);
+        Assert.AreEqual(0f, processingReportObject.ImportedWhiskeyIrish);
+        Assert.AreEqual(0f, processingReportObject.ImportedWhiskeyScotch);
+        Assert.AreEqual(0f, processingReportObject.Liqueur);
+        Assert.AreEqual(0f, processingReportObject.RumDomestic);
+        Assert.AreEqual(0f, processingReportObject.RumDomestic);
+        Assert.AreEqual(0f, processingReportObject.RumOtherImported);
+        Assert.AreEqual(0f, processingReportObject.RumPuertoRican);
+        Assert.AreEqual(0f, processingReportObject.Tequila);
+        Assert.AreEqual(0f, processingReportObject.Vodka);
+    }
+}
+}
+#endregion End of Processing Report

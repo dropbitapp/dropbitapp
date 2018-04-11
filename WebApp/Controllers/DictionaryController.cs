@@ -99,15 +99,15 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.DeleteDictionaryRecord(userId, deleteObject);
-                        if (returnResult)
+                        ReturnObject returnResult = dl.DeleteDictionaryRecord(userId, deleteObject);
+                        if (returnResult.ExecuteResult)
                         {
                             string message = deleteObject.DeleteRecordType + " Record was deleted successfully";
                             return Json(message);
                         }
                         else
                         {
-                            string message = "Wasn't able to delete " + deleteObject.DeleteRecordType + " Record";
+                            string message = "Wasn't able to delete " + deleteObject.DeleteRecordType + " Record because it's associated with " + returnResult.ExecuteMessage;
                             return Json(message);
                         }
                     }

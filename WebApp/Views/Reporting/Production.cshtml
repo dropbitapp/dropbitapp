@@ -395,7 +395,7 @@
                         let curUnifinishedSpiritsEndOfQuarter = $( '#p1_17b_k_Other' ).val();
                         $( '#p1_17b_k_Other' ).val( parseFloat( curUnifinishedSpiritsEndOfQuarter ) + parseFloat( result.Part1List[i].UnfinishedSpiritsEndOfQuarter ) );
 
-                        computeColLTotals(parseFloat(result.Part1List[i]));
+                        computeColLTotals(result.Part1List[i]);
                     }
                 }
 

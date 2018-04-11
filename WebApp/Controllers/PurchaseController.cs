@@ -108,10 +108,8 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    // get the list
-                    int identifierId = (int)TypeIdentifier.RawMaterial;
-                    var rawMaterialList = dl.GetRawMaterialListForPurchase(identifierId, userId, purchaseType);
-                    //filter the list for raw materials, relevant to this workflow
+                    var rawMaterialList = dl.GetRawMaterialListForPurchase(userId, purchaseType);
+
                     return Json(rawMaterialList, JsonRequestBehavior.AllowGet);
                 }
                 else
