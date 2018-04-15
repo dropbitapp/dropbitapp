@@ -297,7 +297,7 @@ namespace WebApp.Helpers
 
     /// <summary>
     /// DeleteRecord is a generic object which defines
-    /// a dictionary item which must be deleted
+    /// a dictionary, purchase, or production item which must be deleted.
     /// </summary>
     public class DeleteRecordObject
     {

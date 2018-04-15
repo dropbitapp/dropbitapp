@@ -1832,15 +1832,70 @@ namespace WebApp.Helpers
         }
 
         /// <summary>
+        /// This method validates that Purchase object is not being used by Production object
+        /// prior to deletion. If Purchase object is used by Production object, method doesn't 
+        /// delete Purchase object and instead surfaces name of Production object to user. 
+        /// </summary>
+        /// <param name="deleteObject"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public ReturnObject DeletePurchaseRecord (int userId, DeleteRecordObject deleteObject)
+        {
+            int recordId = deleteObject.DeleteRecordID;
+            string recordType = deleteObject.DeleteRecordType;
+            int distillerId = GetDistillerId(userId);
+            ReturnObject delReturn = new ReturnObject();
+            if (recordId > 0)
+            {
+                try
+                {
+                    var res = 
+                        from rec in db.ProductionToPurchase
+                        join prod2Name in db.Production on rec.ProductionID equals prod2Name.ProductionID into prod2Name_join
+                        where rec.PurchaseID == recordId
+                        from prod2Name in prod2Name_join.DefaultIfEmpty()
+                        select new
+                        {
+                            ProductionID = (int?)prod2Name.ProductionID ?? 0,
+                            ProductionName = prod2Name.ProductionName ?? string.Empty
+                        };
+
+                    if (res.Count() == 0)
+                    {
+                        delReturn.ExecuteResult = DeletePurchaseExecute(recordId, userId);
+                    }
+                    else
+                    {
+                        foreach (var item in res)
+                        {
+                            delReturn.ExecuteMessage = item.ProductionName;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine("Failed to delete " + recordType + ": " + e);
+                    delReturn.ExecuteResult = false;
+                }
+            }
+            else
+            {
+                delReturn.ExecuteResult = false;
+                delReturn.ExecuteMessage = "Purchase Id is Null";
+            }
+            return delReturn;
+        }
+
+        /// <summary>
         /// This method removes all relevant records in the DB in all associated tables
         /// </summary>
         /// <param name="purchaseObject"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public bool DeletePurchase(PurchaseObject purchaseObject, int userId)
+        public bool DeletePurchaseExecute(int purchaseId, int userId)
         {
             bool retMthdExecResult = false;
-            if (purchaseObject.PurchaseId >= 0)
+            if (purchaseId > 0)
             {
                 try
                 {
@@ -1848,7 +1903,7 @@ namespace WebApp.Helpers
                         (from rec in db.Purchase
                          join dslrs in db.AspNetUserToDistiller on rec.DistillerID equals dslrs.DistillerID into dslrs_join
                          from dslrs in dslrs_join.DefaultIfEmpty()
-                         where rec.PurchaseID == purchaseObject.PurchaseId &&
+                         where rec.PurchaseID == purchaseId &&
                             dslrs.UserId == userId
                          select rec).FirstOrDefault();
 
@@ -4973,6 +5028,29 @@ namespace WebApp.Helpers
                         if (prodC != null)
                         {
                             db.ProductionContent.RemoveRange(prodC);
+                        }
+
+                        var prod2purch =
+                            (from rec in db.ProductionToPurchase
+                             where rec.ProductionID == prodRec.ProductionID
+                             select rec).FirstOrDefault();
+
+                        if (prod2purch != null)
+                        {
+                            db.ProductionToPurchase.Remove(prod2purch);
+                        }
+
+                        if (productionObject.ProductionType == "Fermentation")
+                        {
+                            var prod2SpiTypeRep =
+                               (from rec in db.ProductionToSpiritTypeReporting
+                                where rec.ProductionID == prodRec.ProductionID
+                                select rec).FirstOrDefault();
+
+                            if (prod2SpiTypeRep != null)
+                            {
+                                db.ProductionToSpiritTypeReporting.Remove(prod2SpiTypeRep);
+                            }
                         }
 
                         if (productionObject.ProductionType == "Distillation")

@@ -426,15 +426,15 @@
                         // synchronize with the server - send delete command
                         // call commit with parameter true if the synchronization with the server is successful
                         // and with parameter false if the synchronization failed.
-                        var purchaseObject = {
-                            PurchaseType: "Supply",
-                            PurchaseId: rowID
+                        var deleteRecordObject = {
+                            DeleteRecordID: rowID,
+                            DeleteRecordType: "Supply"
                         };
 
                         $.ajax({
                             type: "POST",
-                            url: '/Purchase/DeleteSupply',
-                            data: JSON.stringify(purchaseObject),
+                            url: '/Purchase/DeleteRecord',
+                            data: JSON.stringify(deleteRecordObject),
                             dataType: "json",
                             contentType: "application/json; charset=utf-8",
                             error: function (response) {
@@ -442,9 +442,9 @@
                             },
                             success: function (result) {
                                 //on success will need to refresh the table and also empty the form
+                                alert(result);
                                 commit(true);
                                 recordsDataAdapter.dataBind();
-                                //window.locationre = result.url;
                             }
                         });
                     }
