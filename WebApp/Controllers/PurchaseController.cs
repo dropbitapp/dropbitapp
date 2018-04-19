@@ -250,40 +250,6 @@ namespace WebApp.Controllers
             }
         }
 
-        //[HttpPost]
-        //public JsonResult DeleteFermentable(PurchaseObject purchaseObject)
-        //{
-        //    if (purchaseObject.PurchaseId >= 0)
-        //    {
-        //        if (User.Identity.IsAuthenticated)
-        //        {
-        //            var userId = User.Identity.GetUserId<int>();
-        //            if (userId > 0)
-        //            {
-        //                bool returnResult = dl.DeletePurchase(purchaseObject, userId);
-        //                if (returnResult)
-        //                {
-        //                    string message = "Fermentable record deleted successfully.";
-        //                    return Json(message);
-        //                }
-        //                else
-        //                {
-        //                    string message = "Failed to delete fermentable record!";
-        //                    return Json(message);
-        //                }
-        //            }
-        //            else
-        //                return Json("Unable to find UserId!");
-        //        }
-        //        else
-        //            return Json("Unauthenticated user!");
-        //    }
-        //    else
-        //    {
-        //        string message = "Invalid PurchaseId received from the front-end!" + purchaseObject.PurchaseId;
-        //        return Json(message);
-        //    }
-        //}
         #endregion
 
         #region Fermented
@@ -328,41 +294,6 @@ namespace WebApp.Controllers
                 return Json("Backend received empty, undefined, or null object from the client!");
             }
         }
-
-        //[HttpPost]
-        //public JsonResult DeleteFermented(PurchaseObject purchaseObject)
-        //{
-        //    if (purchaseObject.PurchaseId >= 0)
-        //    {
-        //        if (User.Identity.IsAuthenticated)
-        //        {
-        //            var userId = User.Identity.GetUserId<int>();
-        //            if (userId > 0)
-        //            {
-        //                bool returnResult = dl.DeletePurchase(purchaseObject, userId);
-        //                if (returnResult)
-        //                {
-        //                    string message = "Fermented record deleted successfully.";
-        //                    return Json(message);
-        //                }
-        //                else
-        //                {
-        //                    string message = "Failed to delete fermented record!";
-        //                    return Json(message);
-        //                }
-        //            }
-        //            else
-        //                return Json("Unable to find UserId!");
-        //        }
-        //        else
-        //            return Json("Unauthenticated user!");
-        //    }
-        //    else
-        //    {
-        //        string message = "Invalid PurchaseId received from the front-end!" + purchaseObject.PurchaseId;
-        //        return Json(message);
-        //    }
-        //}
 
         /// <summary>
         /// Get reporting spirit and kinds values for data binding in inputs
@@ -419,40 +350,6 @@ namespace WebApp.Controllers
             }
         }
 
-        //[HttpPost]
-        //public JsonResult DeleteDistilled(PurchaseObject purchaseObject)
-        //{
-        //    if (purchaseObject.PurchaseId >= 0)
-        //    {
-        //        if (User.Identity.IsAuthenticated)
-        //        {
-        //            var userId = User.Identity.GetUserId<int>();
-        //            if (userId > 0)
-        //            {
-        //                bool returnResult = dl.DeletePurchase(purchaseObject, userId);
-        //                if (returnResult)
-        //                {
-        //                    string message = "Distilled record deleted successfully.";
-        //                    return Json(message);
-        //                }
-        //                else
-        //                {
-        //                    string message = "Failed to delete distilled record!";
-        //                    return Json(message);
-        //                }
-        //            }
-        //            else
-        //                return Json("Unable to find userId!");
-        //        }
-        //        else
-        //            return Json("Unauthenticated user!");
-        //    }
-        //    else
-        //    {
-        //        string message = "Invalid PurchaseId received from the front-end!" + purchaseObject.PurchaseId;
-        //        return Json(message);
-        //    }
-        //}
         #endregion // end of Distilled controller methods
 
         #region Supplies
@@ -497,40 +394,6 @@ namespace WebApp.Controllers
             }
         }
 
-        //[HttpPost]
-        //public JsonResult DeleteSupply(PurchaseObject purchaseObject)
-        //{
-        //    if (purchaseObject.PurchaseId >= 0)
-        //    {
-        //        if (User.Identity.IsAuthenticated)
-        //        {
-        //            var userId = User.Identity.GetUserId<int>();
-        //            if (userId > 0)
-        //            {
-        //                bool returnResult = dl.DeletePurchase(purchaseObject, userId);
-        //                if (returnResult)
-        //                {
-        //                    string message = "Supply record deleted successfully.";
-        //                    return Json(message);
-        //                }
-        //                else
-        //                {
-        //                    string message = "Failed to delete supply record!";
-        //                    return Json(message);
-        //                }
-        //            }
-        //            else
-        //                return Json("Unable to find UserId!");
-        //        }
-        //        else
-        //            return Json("Unauthenticated user!");
-        //    }
-        //    else
-        //    {
-        //        string message = "Invalid PurchaseId received from the front-end!" + purchaseObject.PurchaseId;
-        //        return Json(message);
-        //    }
-        //}
         #endregion
 
         #region Additives
@@ -575,40 +438,6 @@ namespace WebApp.Controllers
             }
         }
 
-        //[HttpPost]
-        //public JsonResult DeleteAdditive(PurchaseObject purchaseObject)
-        //{
-        //    if (purchaseObject.PurchaseId >= 0)
-        //    {
-        //        if (User.Identity.IsAuthenticated)
-        //        {
-        //            var userId = User.Identity.GetUserId<int>();
-        //            if (userId > 0)
-        //            {
-        //                bool returnResult = dl.DeletePurchase(purchaseObject, userId);
-        //                if (returnResult)
-        //                {
-        //                    string message = "Additive record deleted successfully.";
-        //                    return Json(message);
-        //                }
-        //                else
-        //                {
-        //                    string message = "Failed to delete additive record!";
-        //                    return Json(message);
-        //                }
-        //            }
-        //            else
-        //                return Json("Unable to find UserId!");
-        //        }
-        //        else
-        //            return Json("Unauthenticated user!");
-        //    }
-        //    else
-        //    {
-        //        string message = "Invalid PurchaseId received from the front-end!" + purchaseObject.PurchaseId;
-        //        return Json(message);
-        //    }
-        //}
         #endregion
     }
 }

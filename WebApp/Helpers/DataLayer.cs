@@ -4988,11 +4988,61 @@ namespace WebApp.Helpers
             }
         }
 
-        public bool DeleteProduction(ProductionObject productionObject, int userId)
+        public ReturnObject DeleteProductionRecord(int userId, DeleteRecordObject deleteObject)
+        {
+            int recordId = deleteObject.DeleteRecordID;
+            string recordType = deleteObject.DeleteRecordType;
+            int distillerId = GetDistillerId(userId);
+            ReturnObject delReturn = new ReturnObject();
+            if (recordId > 0)
+            {
+                try
+                {
+                    var res =
+                        from rec in db.ProductionContent
+                        join prod2Name in db.Production on rec.ProductionID equals prod2Name.ProductionID into prod2Name_join
+                        where rec.RecordID == recordId
+                        from prod2Name in prod2Name_join.DefaultIfEmpty()
+                        select new
+                        {
+                            ProductionID = (int?)prod2Name.ProductionID ?? 0,
+                            ProductionName = prod2Name.ProductionName ?? string.Empty
+                        };
+
+                    if (res.Count() == 0)
+                    {
+                        delReturn.ExecuteResult = DeleteProductionExecute(deleteObject, userId);
+                    }
+                    else
+                    {
+                        foreach (var item in res)
+                        {
+                            delReturn.ExecuteMessage = item.ProductionName;
+                        }
+                        
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine("Failed to delete " + recordType + ": " + e);
+                    delReturn.ExecuteResult = false;
+                }
+            }
+            else
+            {
+                delReturn.ExecuteResult = false;
+                delReturn.ExecuteMessage = "Production Id is Null";
+            }
+            return delReturn;
+        }
+
+        public bool DeleteProductionExecute(DeleteRecordObject deleteObject, int userId)
         {
             bool retMthdExecResult = false;
+            int productionId = deleteObject.DeleteRecordID;
+            string productionType = deleteObject.DeleteRecordType;
 
-            if (productionObject.ProductionId >= 0)
+            if (productionId > 0)
             {
                 try
                 {
@@ -5000,7 +5050,7 @@ namespace WebApp.Helpers
                         (from rec in db.Production
                          join distillers in db.AspNetUserToDistiller on rec.DistillerID equals distillers.DistillerID into distillers_join
                          from distillers in distillers_join.DefaultIfEmpty()
-                         where rec.ProductionID == productionObject.ProductionId
+                         where rec.ProductionID == productionId
                          && distillers.UserId == userId
                          select rec).FirstOrDefault();
 
@@ -5040,7 +5090,7 @@ namespace WebApp.Helpers
                             db.ProductionToPurchase.Remove(prod2purch);
                         }
 
-                        if (productionObject.ProductionType == "Fermentation")
+                        if (productionType == "Fermentation")
                         {
                             var prod2SpiTypeRep =
                                (from rec in db.ProductionToSpiritTypeReporting
@@ -5053,7 +5103,7 @@ namespace WebApp.Helpers
                             }
                         }
 
-                        if (productionObject.ProductionType == "Distillation")
+                        if (productionType == "Distillation")
                         {
                             var p2scRec =
                                 (from rec in db.ProductionToSpiritCut
@@ -5076,7 +5126,7 @@ namespace WebApp.Helpers
                             }
                         }
 
-                        if (productionObject.ProductionType == "Blending")
+                        if (productionType == "Blending")
                         {
                             var prod2SpiTypeRep =
                                (from rec in db.ProductionToSpiritTypeReporting
@@ -5109,7 +5159,7 @@ namespace WebApp.Helpers
                             }
                         }
 
-                        if (productionObject.ProductionType == "Bottling")
+                        if (productionType == "Bottling")
                         {
                             var p2sRec =
                                 (from rec in db.ProductionToSpirit

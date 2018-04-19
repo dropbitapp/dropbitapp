@@ -268,6 +268,50 @@ namespace WebApp.Controllers
                 return Json("Back End received empty or undefined or null Object from the client");
             }
         }
+
+        /// <summary>
+        /// Generic method for deleting a record from the database.
+        /// </summary>
+        /// <param name="deleteRecordObject"></param>
+        /// <returns>JsonResult</returns>
+        [HttpPost]
+        public JsonResult DeleteRecord(DeleteRecordObject deleteObject)
+        {
+            if (deleteObject.DeleteRecordID >= 0 && deleteObject != null)
+            {
+                if (User.Identity.IsAuthenticated)
+                {
+                    int userId = User.Identity.GetUserId<int>();
+                    if (userId > 0)
+                    {
+                        ReturnObject returnResult = dl.DeleteProductionRecord(userId, deleteObject);
+                        if (returnResult.ExecuteResult)
+                        {
+                            string message = deleteObject.DeleteRecordType + " Record was deleted successfully";
+                            return Json(message);
+                        }
+                        else
+                        {
+                            string message = "Wasn't able to delete " + deleteObject.DeleteRecordType + " Record because it's associated with " + returnResult.ExecuteMessage;
+                            return Json(message);
+                        }
+                    }
+                    else
+                    {
+                        return Json("Unable to find UserId!");
+                    }
+                }
+                else
+                {
+                    return Json("Unauthenticated user!");
+                }
+            }
+            else
+            {
+                string message = "Even though DeleteRecord method was called from the client the RecordID was unacceptable " + deleteObject.DeleteRecordID;
+                return Json(message);
+            }
+        }
         #endregion
 
         #region Fermentation
@@ -277,45 +321,6 @@ namespace WebApp.Controllers
             return View();
         }
 
-        [HttpPost]
-        public JsonResult DeleteFermentation(ProductionObject productionObject)
-        {
-            if (productionObject.ProductionId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeleteProduction(productionObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Fermentation record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete fermentation record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                    {
-                        return Json("Unable to find UserId!");
-                    }
-                }
-                else
-                {
-                    return Json("Unauthenticated user!");
-                }
-            }
-            else
-            {
-                string message = "Even though DeleteFermentation method was called from the client but ProductionId was unacceptable " + productionObject.ProductionId;
-                return Json(message);
-            }
-        }
-
         #endregion
 
         #region Distillation
@@ -323,45 +328,6 @@ namespace WebApp.Controllers
         public ActionResult Distillation()
         {
             return View();
-        }
-
-        [HttpPost]
-        public JsonResult DeleteDistillation(ProductionObject productionObject)
-        {
-            if (productionObject.ProductionId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeleteProduction(productionObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Distillation record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete Distillation record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                    {
-                        return Json("Unable to find UserId!");
-                    }
-                }
-                else
-                {
-                    return Json("Unauthenticated user!");
-                }
-            }
-            else
-            {
-                string message = "Even though DeleteDistillation method was called from the client but ProductionId was unacceptable " + productionObject.ProductionId;
-                return Json(message);
-            }
         }
 
         /// <summary>
@@ -384,45 +350,6 @@ namespace WebApp.Controllers
             return View();
         }
 
-        [HttpPost]
-        public JsonResult DeleteBlending(ProductionObject productionObject)
-        {
-            if (productionObject.ProductionId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeleteProduction(productionObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Blending record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete blending record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                    {
-                        return Json("Unable to find UserId!");
-                    }
-                }
-                else
-                {
-                    return Json("Unauthenticated user!");
-                }
-            }
-            else
-            {
-                string message = "Even though DeleteBlending method was called from the client but ProductionId was unacceptable " + productionObject.ProductionId;
-                return Json(message);
-            }
-        }
-
         #endregion
 
         #region Bottling
@@ -430,45 +357,6 @@ namespace WebApp.Controllers
         public ActionResult Bottling()
         {
             return View();
-        }
-
-        [HttpPost]
-        public JsonResult DeleteBottling(ProductionObject productionObject)
-        {
-            if (productionObject.ProductionId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeleteProduction(productionObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Bottling record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete bottling record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                    {
-                        return Json("Unable to find UserId!");
-                    }
-                }
-                else
-                {
-                    return Json("Unauthenticated user!");
-                }
-            }
-            else
-            {
-                string message = "Even though DeleteBottling method was called from the client but ProductionId was unacceptable " + productionObject.ProductionId;
-                return Json(message);
-            }
         }
 
         #endregion

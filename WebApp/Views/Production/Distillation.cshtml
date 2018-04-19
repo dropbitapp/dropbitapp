@@ -860,15 +860,15 @@
                             // synchronize with the server - send delete command
                             // call commit with parameter true if the synchronization with the server is successful
                             // and with parameter false if the synchronization failed.
-                            var productionObject = {
-                                ProductionType: "Distillation",
-                                ProductionId: rowID
+                            var deleteRecordObject = {
+                                DeleteRecordID: rowID,
+                                DeleteRecordType: "Distillation"
                             };
 
                             $.ajax({
                                 type: "POST",
-                                url: '/Production/DeleteDistillation',
-                                data: JSON.stringify(productionObject),
+                                url: '/Production/DeleteRecord',
+                                data: JSON.stringify(deleteRecordObject),
                                 dataType: "json",
                                 contentType: "application/json; charset=utf-8",
                                 error: function (response) {
@@ -876,6 +876,7 @@
                                 },
                                 success: function (result) {
                                     //on success will need to refresh the table and also empty the form
+                                    alert(result);
                                     commit(true);
                                     dataAdapter.dataBind();
                                     distillationSourceBatchAdapter.dataBind();
