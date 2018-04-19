@@ -99,14 +99,12 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-
                     if (_enableNewReportingImplementation)
                     {
                         var report = dl.GetReportData(endOfReporting, userId, PersistReportType.Storage);
 
                         return Json(report, JsonRequestBehavior.AllowGet);
                     }
-
                     var storageReport = dl.GetStorageReportData(startOfReporting, endOfReporting, userId);
                     return Json(storageReport, JsonRequestBehavior.AllowGet);
                 }

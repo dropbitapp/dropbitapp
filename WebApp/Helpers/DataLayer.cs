@@ -4343,7 +4343,6 @@ namespace WebApp.Helpers
 
                 db.Production4Reporting.Add(prod4RepT);
                 db.SaveChanges();
-                retMthdExecResult = 0;
             }
             catch (Exception e)
             {
@@ -7567,7 +7566,7 @@ namespace WebApp.Helpers
                      && purchase.PurchaseDate >= startDate
                      && purchase.PurchaseDate <= endDate
                      && (productionContent == null
-                        || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal))) // 16 = PurFermentedProofGal, 18 = PurDistilledProofGal
+                        || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)))
                      && unitOfMeasurement.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
                  select new
                  {
@@ -7984,7 +7983,7 @@ namespace WebApp.Helpers
                      && (sourceProductionRecord.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || sourceProductionRecord.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
                      && outputProductionRecord.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation
                      && (sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
-                 && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal))) // ProdDistlledProofGal
+                 && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal)))
                  && sourceProductionRecord.ProductionEndTime <= endDate
                  && outputProductionRecord.ProductionEndTime >= startDate
                  && outputProductionRecord.ProductionEndTime <= endDate
@@ -8159,7 +8158,7 @@ namespace WebApp.Helpers
         private void GetStorageOnHandEndOfMonth(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             var nextStart = startDate.AddMonths(1);
-            var nextEnd = new DateTime(endDate.AddMonths(1).Year, endDate.AddMonths(1).Month, DateTime.DaysInMonth(endDate.AddMonths(1).Year, endDate.AddMonths(1).Month), 23, 59, 59);
+            var nextEnd = endDate.Date.AddMonths(1).AddHours(11).AddMinutes(59).AddSeconds(59);
 
             // On hand end of month is the same as on hand first of month for next month
             var records = GetPurchasedOnHandFirstOfMonthQuery(nextStart, nextEnd, userId);

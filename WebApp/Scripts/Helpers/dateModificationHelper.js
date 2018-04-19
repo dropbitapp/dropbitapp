@@ -4,24 +4,13 @@
         var monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         var year = reportingYear.value;
         var month = monthList.indexOf(reportingMonth.value);
-        var firstDay = this.normalizeDateToDashFormat(new Date(year, month, 1));
-        var lastDay = this.normalizeDateToDashFormat(new Date(year, month + 1, 0));
+        var firstDay = new Date( year, month, 1 );
+        var lastDay = new Date( year, month + 1, 0 );
+        // set time to the earliest possible time in the day
+        firstDay.setHours( 00, 00, 00 );
+        // set the time to the latest possible time in the day
+        lastDay.setHours( 23, 59, 59, 999 );
         return [firstDay, lastDay];
-    }
-
-    // normalizeDateToDashFormat function converts JS date object into yyyy-mm-dd format
-    this.normalizeDateToDashFormat = function (dateObj) {
-        var yearObj = dateObj.getFullYear();
-        var monthObj = dateObj.getMonth() + 1;
-        if (monthObj < 10) {
-            monthObj = 0 + '' + monthObj;
-        }
-        var dayObj = dateObj.getDate();
-        if (dayObj < 10) {
-            dayObj = 0 + '' + dayObj;
-        }
-        var normalizedDate = yearObj + '-' + monthObj + '-' + dayObj;
-        return normalizedDate;
     }
 
     // convert JSON date to javasript date
@@ -35,5 +24,10 @@
         var minDate = this.convertJSONdatetoJS(jsonDate);
         minDate.setDate(minDate.getDate() - 1);
         return minDate;
+    }
+
+    this.setMinTimeOfDay = function(dateObj) {
+        var date = new Date();
+        return date;
     }
 };

@@ -23,11 +23,14 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                     // get starting year
                     var reportingYear = $("#ReportingYear").jqxDropDownList('getSelectedItem');
                     // get starting month
-                    var reportingMonth = $("#ReportingMonth").jqxDropDownList('getSelectedItem');
+                    var reportingMonth = $( "#ReportingMonth" ).jqxDropDownList( 'getSelectedItem' );
+
                     // converting to date object and getting starting/ending date
-                    var reportingDate = dateModificationHelper.getReportingMonthAndYear(reportingYear, reportingMonth);
-                    var startDate = reportingDate[0];
-                    var endDate = reportingDate[1];
+                    var reportingDate = dateModificationHelper.getReportingMonthAndYear( reportingYear, reportingMonth );
+
+                    // convert to UTC since all of the dates in the DB are stored in UTC
+                    var startDate = genericWorkflowHelper.convertUTC( reportingDate[0], true );
+                    var endDate = genericWorkflowHelper.convertUTC( reportingDate[1], true );
 
                 $.ajax({
                         type: "GET",
@@ -36,8 +39,8 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                         dataType: "json",
                         contentType: "application/json; charset=utf-8",
                         data: {
-                            startOfReporting: startDate,
-                            endOfReporting: endDate
+                            startOfReporting: startDate.toJSON(),
+                            endOfReporting: endDate.toJSON()
                         },
                         error: function (response) {
                             alert(response.responseText)
