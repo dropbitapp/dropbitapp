@@ -8169,6 +8169,556 @@ namespace WebApp.Helpers.Tests
             }
         }
 
+        /// <summary>
+        /// This test checks that a Production Distillation record cannot be deleted when
+        /// tied to another Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Forward_Delete_Production_Distillation_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int rawMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject fermentedMaterial = new RawMaterialObject();
+                    fermentedMaterial.RawMaterialName = "Fermented_Material";
+                    fermentedMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    fermentedMaterial.UnitType = "gal";
+                    fermentedMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermented = true;
+                    fermentedMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    rawMaterialId = _dl.CreateRawMaterial(_userId, fermentedMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase Set up
+
+                // Set up Purhcase Fermented record.
+                PurchaseObject purchFermented = new PurchaseObject();
+                purchFermented.PurBatchName = "Fermented_Purchase_Test";
+                purchFermented.PurchaseType = "Fermented";
+                purchFermented.PurchaseDate = new DateTime(2018, 01, 01);
+                purchFermented.Quantity = 1000f;
+                purchFermented.VolumeByWeight = 0f;
+                purchFermented.RecordId = rawMaterialId;
+                purchFermented.Price = 350f;
+                purchFermented.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchFermented.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchFermented, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Set up Production
+
+                // Set up Production Distillation1 record
+                ProductionObject prodObjectDistillation1 = new ProductionObject
+                {
+                    AlcoholContent = 50f,
+                    BatchName = "Forward_Deletion_Distillation",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 1000f,
+                    Quantity = 1000f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 500,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _dl.CreateProduction(prodObjectDistillation1, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectDistillation1.ProductionId, Table.Production));
+
+                #endregion
+
+                #region Assertions
+
+                // Set up Production Distillation2 record which uses Production Distillation1
+                ProductionObject prodObjectDistillation2 = new ProductionObject
+                {
+                    AlcoholContent = 50f,
+                    BatchName = "Forward_Deletion_Distillation-Distillation",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 100f,
+                    Quantity = 100f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectDistillation1.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _dl.CreateProduction(prodObjectDistillation2, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectDistillation2.ProductionId, Table.Production));
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = prodObjectDistillation1.ProductionId;
+                deleteObject.DeleteRecordType = prodObjectDistillation1.ProductionType;
+
+                // Try to delete Production Distillation1 record while it's being used by Production Distillation2 record.
+                ReturnObject returnResult = _dl.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist1 = _dl.GetProductionList(_userId, prodObjectDistillation1.ProductionType);
+
+                var prodFound1 = prodlist1.Find(x => x.ProductionId == prodObjectDistillation1.ProductionId);
+
+                // Assert Production Distillation1 record is not deleted.
+                Assert.IsNotNull(prodFound1);
+                // Assert Production Distillation2 record name which uses Production Distillation1 record is correctly surfaced to user.
+                Assert.AreEqual(prodObjectDistillation2.BatchName, returnResult.ExecuteMessage);
+
+                // Delete Production Distillation2 record to attempt to delete Production Distillation1 record.
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = prodObjectDistillation2.ProductionId;
+                deleteObject2.DeleteRecordType = prodObjectDistillation2.ProductionType;
+                _dl.DeleteProductionExecute(deleteObject2, _userId);
+
+                var prodList2 = _dl.GetProductionList(_userId, prodObjectDistillation2.ProductionType);
+
+                var prodFound2 = prodList2.Find(x => x.ProductionId == prodObjectDistillation2.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound2);
+
+
+                // Set up Production Blending record which uses Production Distillation1 record.
+                ProductionObject prodObjectBlending = new ProductionObject
+                {
+                    AlcoholContent = 50f,
+                    BatchName = "Forward_Deletion_Distillation-Blending",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Blending",
+                    ProofGallon = 100f,
+                    Quantity = 100f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectDistillation1.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _dl.CreateProduction(prodObjectBlending, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectBlending.ProductionId, Table.Production));
+
+                // Try to delete Production Distillation1 record while it's being used by Production Blending record.
+                ReturnObject returnResult2 = _dl.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist3 = _dl.GetProductionList(_userId, prodObjectDistillation1.ProductionType);
+
+                var prodFound3 = prodlist3.Find(x => x.ProductionId == prodObjectDistillation1.ProductionId);
+
+                // Assert Production Distillation1 record is not deleted.
+                Assert.IsNotNull(prodFound3);
+                // Assert Production Blending record name which uses Production Distillation1 record is correctly surfaced to user.
+                Assert.AreEqual(prodObjectBlending.BatchName, returnResult2.ExecuteMessage);
+
+                // Delete Production Blending record to attempt to delete Production Distillation1 record.
+                DeleteRecordObject deleteObject3 = new DeleteRecordObject();
+                deleteObject3.DeleteRecordID = prodObjectBlending.ProductionId;
+                deleteObject3.DeleteRecordType = prodObjectBlending.ProductionType;
+                _dl.DeleteProductionExecute(deleteObject3, _userId);
+
+                var prodList4 = _dl.GetProductionList(_userId, prodObjectBlending.ProductionType);
+
+                var prodFound4 = prodList4.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound4);
+
+
+                // Set up Production Bottling record which uses Production Distillation1 record.
+                ProductionObject prodObjectBottling = new ProductionObject
+                {
+                    BatchName = "Forward_Deletion_Distillation-Bottling",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    Gauged = true,
+                    ProductionType = "Bottling",
+                    Quantity = 100f,
+                    VolumeByWeight = 0f,
+                    AlcoholContent = 50f,
+                    ProofGallon = 100f,
+                    Storage = storageList,
+                    SpiritTypeReportingID = 2,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectDistillation1.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                    BottlingInfo = new BottlingObject
+                    {
+                        CaseCapacity = 12,
+                        CaseQuantity = 9.42f,
+                        BottleCapacity = 750f,
+                        BottleQuantity = 113,
+
+                    },
+                    GainLoss = .10f,
+                    FillTestList = null,
+                };
+
+                _dl.CreateProduction(prodObjectBottling, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectBottling.ProductionId, Table.Production));
+
+                // Try to delete Production Distillation1 record while it's being used by Production Bottling record.
+                ReturnObject returnResult3 = _dl.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist5 = _dl.GetProductionList(_userId, prodObjectDistillation1.ProductionType);
+
+                var prodFound5 = prodlist5.Find(x => x.ProductionId == prodObjectDistillation1.ProductionId);
+
+                // Assert Production Distillation1 record is not deleted.
+                Assert.IsNotNull(prodFound5);
+                // Assert Production Bottling record name which uses Production Distillation1 record is correctly surfaced to user.
+                Assert.AreEqual(prodObjectBottling.BatchName, returnResult3.ExecuteMessage);
+
+                // Delete Production Bottling record to attempt to delete Production Distillation1 record.
+                DeleteRecordObject deleteObject4 = new DeleteRecordObject();
+                deleteObject4.DeleteRecordID = prodObjectBottling.ProductionId;
+                deleteObject4.DeleteRecordType = prodObjectBottling.ProductionType;
+                _dl.DeleteProductionExecute(deleteObject4, _userId);
+
+                var prodList6 = _dl.GetProductionList(_userId, prodObjectBottling.ProductionType);
+
+                var prodFound6 = prodList6.Find(x => x.ProductionId == prodObjectBottling.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound4);
+
+                // Try to delete Production Distillation1 record when its not being used by any record.
+                _dl.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist7 = _dl.GetProductionList(_userId, prodObjectDistillation1.ProductionType);
+
+                var prodFound7 = prodlist7.Find(x => x.ProductionId == prodObjectDistillation1.ProductionId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNull(prodFound7);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Production Blending record cannot be deleted when
+        /// tied to another Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Forward_Delete_Production_Blending_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int rawMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dl.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dl.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject distilledMaterial = new RawMaterialObject();
+                    distilledMaterial.RawMaterialName = "Distilled_Material";
+                    distilledMaterial.UnitType = "gal";
+                    distilledMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Distilled = true;
+                    distilledMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    rawMaterialId = _dl.CreateRawMaterial(_userId, distilledMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase Set up
+
+                // Set up Purchase Distilled record 
+                PurchaseObject purchDistilled = new PurchaseObject
+                {
+                    PurBatchName = "Forward_Deletion_Purchase_Distilled_Test",
+                    PurchaseType = "Distilled",
+                    PurchaseDate = new DateTime(2018, 01, 01),
+                    Quantity = 1000f,
+                    VolumeByWeight = 0f,
+                    RecordId = rawMaterialId,
+                    Price = 350f,
+                    VendorId = vendorId,
+                };
+               
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchDistilled.Storage = storageList;
+
+                purchaseId = _dl.CreatePurchase(purchDistilled, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Set up Production
+
+                // Set up Production Distillation record
+                ProductionObject prodObjectDistillation = new ProductionObject
+                {
+                    AlcoholContent = 50f,
+                    BatchName = "Forward_Deletion_Distillation",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 1000f,
+                    Quantity = 1000f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 500,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _dl.CreateProduction(prodObjectDistillation, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectDistillation.ProductionId, Table.Production));
+
+                // Set up Production Blending record which uses Production Distillation record.
+                ProductionObject prodObjectBlending = new ProductionObject
+                {
+                    AlcoholContent = 50f,
+                    BatchName = "Forward_Deletion_Blending",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Blending",
+                    ProofGallon = 100f,
+                    Quantity = 100f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectDistillation.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _dl.CreateProduction(prodObjectBlending, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectBlending.ProductionId, Table.Production));
+
+                // Set up Production Bottling record which uses Production Blending record.
+                ProductionObject prodObjectBottling = new ProductionObject
+                {
+                    BatchName = "Forward_Deletion_Blending-Bottling",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    Gauged = true,
+                    ProductionType = "Bottling",
+                    Quantity = 100f,
+                    VolumeByWeight = 0f,
+                    AlcoholContent = 50f,
+                    ProofGallon = 100f,
+                    Storage = storageList,
+                    SpiritTypeReportingID = 2,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectBlending.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                    BottlingInfo = new BottlingObject
+                    {
+                        CaseCapacity = 12,
+                        CaseQuantity = 9.42f,
+                        BottleCapacity = 750f,
+                        BottleQuantity = 113,
+
+                    },
+                    GainLoss = .10f,
+                    FillTestList = null,
+                };
+
+                _dl.CreateProduction(prodObjectBottling, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectBottling.ProductionId, Table.Production));
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = prodObjectBlending.ProductionId;
+                deleteObject.DeleteRecordType = prodObjectBlending.ProductionType;
+
+                // Try to delete Production Blending record while it's being used by Production Bottling record.
+                ReturnObject returnResult = _dl.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist = _dl.GetProductionList(_userId, prodObjectBlending.ProductionType);
+
+                var prodFound = prodlist.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
+
+                // Assert Production Blending record is not deleted.
+                Assert.IsNotNull(prodFound);
+                // Assert Production Bottling record name which uses Production Blending record is correctly surfaced to user.
+                Assert.AreEqual(prodObjectBottling.BatchName, returnResult.ExecuteMessage);
+
+                // Delete Production Bottling record to attempt to delete Production Blending record.
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = prodObjectBottling.ProductionId;
+                deleteObject2.DeleteRecordType = prodObjectBottling.ProductionType;
+                _dl.DeleteProductionExecute(deleteObject2, _userId);
+
+                var prodList2 = _dl.GetProductionList(_userId, prodObjectBottling.ProductionType);
+
+                var prodFound2 = prodList2.Find(x => x.ProductionId == prodObjectBottling.ProductionId);
+
+                // Assert Production Bottling record is deleted.
+                Assert.IsNull(prodFound2);
+
+                // Try to delete Production Blending record when its not being used by any record.
+                _dl.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist3 = _dl.GetProductionList(_userId, prodObjectBlending.ProductionType);
+
+                var prodFound3 = prodlist3.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNull(prodFound3);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
         [TestMethod()]
         public void DeleteProductionTest()
         {
