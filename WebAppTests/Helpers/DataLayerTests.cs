@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
+using WebApp.Workflows;
 
 namespace WebApp.Helpers.Tests
 {
@@ -27,6 +28,9 @@ namespace WebApp.Helpers.Tests
     {
         private readonly int _userId = 7; /*test account*/
         DataLayer _dl = new DataLayer();
+
+        private ProductionWorkflow _production = new ProductionWorkflow();
+
         DistilDBContext _db = new DistilDBContext();
 
         /// <summary>
@@ -155,7 +159,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // Distillation
@@ -188,7 +192,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -425,7 +429,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record
@@ -458,7 +462,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -740,7 +744,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -772,7 +776,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -815,7 +819,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Bottling Record
@@ -859,7 +863,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -1272,7 +1276,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -1315,7 +1319,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -1571,7 +1575,7 @@ namespace WebApp.Helpers.Tests
 
                 brandyProduction.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(brandyProduction, _userId);
+                productionId = _production.CreateProduction(brandyProduction, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // 3. Blend that with 10 gallons of water on 5/6/18 to produce 55 gallons of 43% ABV
@@ -1614,7 +1618,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -1826,7 +1830,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -2100,7 +2104,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int productionId = _dl.CreateProduction(production, _userId);
+                int productionId = _production.CreateProduction(production, _userId);
                 testRecords.Add(Tuple.Create(productionId, Table.Production));
 
                 // Act
@@ -2234,7 +2238,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int productionId1 = _dl.CreateProduction(blending, _userId);
+                int productionId1 = _production.CreateProduction(blending, _userId);
                 testRecords.Add(Tuple.Create(productionId1, Table.Production));
 
                 // Bottle
@@ -2269,7 +2273,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int productionId2 = _dl.CreateProduction(bottling, _userId);
+                int productionId2 = _production.CreateProduction(bottling, _userId);
                 testRecords.Add(Tuple.Create(productionId2, Table.Production));
 
                 // Act
@@ -2403,7 +2407,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int productionId = _dl.CreateProduction(production, _userId);
+                int productionId = _production.CreateProduction(production, _userId);
                 testRecords.Add(Tuple.Create(productionId, Table.Production));
 
                 // Act
@@ -2572,7 +2576,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -2614,7 +2618,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -2913,7 +2917,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -2955,7 +2959,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Bottling Record
@@ -2999,7 +3003,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
                 #endregion
 
@@ -3193,7 +3197,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -3235,7 +3239,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Bottling Record
@@ -3279,7 +3283,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -3688,7 +3692,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
                 #endregion
 
@@ -4045,7 +4049,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -4078,7 +4082,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
                 #endregion
@@ -4328,7 +4332,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -4361,7 +4365,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
@@ -4624,7 +4628,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Distillation Record and mark it as Gauged
@@ -4657,7 +4661,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -4855,7 +4859,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -5073,7 +5077,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5107,7 +5111,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5267,7 +5271,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5301,7 +5305,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5478,7 +5482,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 garbage.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5513,7 +5517,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 garbage.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5745,7 +5749,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5779,7 +5783,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -6782,7 +6786,7 @@ namespace WebApp.Helpers.Tests
                 deleteObject2.DeleteRecordType = prodObject.ProductionType;
                 _dl.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList = _dl.GetProductionList(_userId, "Distillation");
+                var prodList = _production.GetProductionList(_userId, "Distillation");
 
                 var prodFound = prodList.Find(x => x.ProductionId == prodObject.ProductionId);
 
@@ -6932,7 +6936,7 @@ namespace WebApp.Helpers.Tests
                     SpiritId = spiritId
                 };
 
-                productionId = _dl.CreateProduction(prodObject, _userId);
+                productionId = _production.CreateProduction(prodObject, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -6957,9 +6961,9 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject2 = new DeleteRecordObject();
                 deleteObject2.DeleteRecordID = productionId;
                 deleteObject2.DeleteRecordType = prodObject.ProductionType;
-                _dl.DeleteProductionExecute(deleteObject2, _userId);
+                _production.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList = _dl.GetProductionList(_userId, "Blending");
+                var prodList = _production.GetProductionList(_userId, "Blending");
 
                 var prodFound = prodList.Find(x => x.ProductionId == prodObject.ProductionId);
 
@@ -7152,7 +7156,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                productionId = _dl.CreateProduction(prodObject, _userId);
+                productionId = _production.CreateProduction(prodObject, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -7173,9 +7177,9 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject2 = new DeleteRecordObject();
                 deleteObject2.DeleteRecordID = productionId;
                 deleteObject2.DeleteRecordType = prodObject.ProductionType;
-                _dl.DeleteProductionExecute(deleteObject2, _userId);
+                _production.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList = _dl.GetProductionList(_userId, "Blending");
+                var prodList = _production.GetProductionList(_userId, "Blending");
 
                 var prodFound = prodList.Find(x => x.ProductionId == prodObject.ProductionId);
 
@@ -7314,7 +7318,7 @@ namespace WebApp.Helpers.Tests
                     },
                 };
 
-                productionId = _dl.CreateProduction(prodObjectFermentation, _userId);
+                productionId = _production.CreateProduction(prodObjectFermentation, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
@@ -7337,9 +7341,9 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject2 = new DeleteRecordObject();
                 deleteObject2.DeleteRecordID = productionId;
                 deleteObject2.DeleteRecordType = prodObjectFermentation.ProductionType;
-                _dl.DeleteProductionExecute(deleteObject2, _userId);
+                _production.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList = _dl.GetProductionList(_userId, "Fementation");
+                var prodList = _production.GetProductionList(_userId, "Fementation");
 
                 var prodFound = prodList.Find(x => x.ProductionId == prodObjectFermentation.ProductionId);
 
@@ -7478,7 +7482,7 @@ namespace WebApp.Helpers.Tests
                     },
                 };
 
-                productionId = _dl.CreateProduction(prodObjectDistillation, _userId);
+                productionId = _production.CreateProduction(prodObjectDistillation, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
@@ -7501,9 +7505,9 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject2 = new DeleteRecordObject();
                 deleteObject2.DeleteRecordID = productionId;
                 deleteObject2.DeleteRecordType = prodObjectDistillation.ProductionType;
-                _dl.DeleteProductionExecute(deleteObject2, _userId);
+                _production.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList = _dl.GetProductionList(_userId, "Distillation");
+                var prodList = _production.GetProductionList(_userId, "Distillation");
 
                 var prodFound = prodList.Find(x => x.ProductionId == prodObjectDistillation.ProductionId);
 
@@ -7642,7 +7646,7 @@ namespace WebApp.Helpers.Tests
                     },
                 };
 
-                productionId = _dl.CreateProduction(prodObjectDistillation, _userId);
+                productionId = _production.CreateProduction(prodObjectDistillation, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
@@ -7665,9 +7669,9 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject2 = new DeleteRecordObject();
                 deleteObject2.DeleteRecordID = productionId;
                 deleteObject2.DeleteRecordType = prodObjectDistillation.ProductionType;
-                _dl.DeleteProductionExecute(deleteObject2, _userId);
+                _production.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList1 = _dl.GetProductionList(_userId, "Distillation");
+                var prodList1 = _production.GetProductionList(_userId, "Distillation");
 
                 var prodFound1 = prodList1.Find(x => x.ProductionId == prodObjectDistillation.ProductionId);
 
@@ -7703,7 +7707,7 @@ namespace WebApp.Helpers.Tests
                     },
                 };
 
-                productionId = _dl.CreateProduction(prodObjectBlending, _userId);
+                productionId = _production.CreateProduction(prodObjectBlending, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // Try to delete Purchase Distilled record while it's being used by Production Blending record.
@@ -7722,9 +7726,9 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject3 = new DeleteRecordObject();
                 deleteObject3.DeleteRecordID = productionId;
                 deleteObject3.DeleteRecordType = prodObjectBlending.ProductionType;
-                _dl.DeleteProductionExecute(deleteObject3, _userId);
+                _production.DeleteProductionExecute(deleteObject3, _userId);
 
-                var prodList2 = _dl.GetProductionList(_userId, "Blending");
+                var prodList2 = _production.GetProductionList(_userId, "Blending");
 
                 var prodFound2 = prodList2.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
 
@@ -7760,7 +7764,7 @@ namespace WebApp.Helpers.Tests
                     },
                 };
 
-                productionId = _dl.CreateProduction(prodObjectBottling, _userId);
+                productionId = _production.CreateProduction(prodObjectBottling, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // Try to delete Purchase Distilled record while it's being used by Production Bottling record.
@@ -7779,9 +7783,9 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject4 = new DeleteRecordObject();
                 deleteObject4.DeleteRecordID = productionId;
                 deleteObject4.DeleteRecordType = prodObjectBottling.ProductionType;
-                _dl.DeleteProductionExecute(deleteObject4, _userId);
+                _production.DeleteProductionExecute(deleteObject4, _userId);
 
-                var prodList3 = _dl.GetProductionList(_userId, "Bottling");
+                var prodList3 = _production.GetProductionList(_userId, "Bottling");
 
                 var prodFound3 = prodList3.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
 
@@ -7920,7 +7924,7 @@ namespace WebApp.Helpers.Tests
                     },
                 };
 
-                productionId = _dl.CreateProduction(prodObjectBlending, _userId);
+                productionId = _production.CreateProduction(prodObjectBlending, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
@@ -7943,9 +7947,9 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject2 = new DeleteRecordObject();
                 deleteObject2.DeleteRecordID = productionId;
                 deleteObject2.DeleteRecordType = prodObjectBlending.ProductionType;
-                _dl.DeleteProductionExecute(deleteObject2, _userId);
+                _production.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList = _dl.GetProductionList(_userId, "Blending");
+                var prodList = _production.GetProductionList(_userId, "Blending");
 
                 var prodFound = prodList.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
 
@@ -8081,7 +8085,7 @@ namespace WebApp.Helpers.Tests
                     },
                 };
 
-                _dl.CreateProduction(prodObjectFermentation, _userId);
+                _production.CreateProduction(prodObjectFermentation, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(prodObjectFermentation.ProductionId, Table.Production));
 
                 // Set up Production Distillation record which uses Production Fermentation
@@ -8110,7 +8114,7 @@ namespace WebApp.Helpers.Tests
                     },
                 };
 
-                _dl.CreateProduction(prodObjectDistillation, _userId);
+                _production.CreateProduction(prodObjectDistillation, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(prodObjectDistillation.ProductionId, Table.Production));
 
                 #endregion
@@ -8122,9 +8126,9 @@ namespace WebApp.Helpers.Tests
                 deleteObject.DeleteRecordType = prodObjectFermentation.ProductionType;
 
                 // Try to delete Production Fementation record while it's being used by Production Distillation record.
-                ReturnObject returnResult = _dl.DeleteProductionRecord(_userId, deleteObject);
+                ReturnObject returnResult = _production.DeleteProductionRecord(_userId, deleteObject);
 
-                var prodlist1 = _dl.GetProductionList(_userId, prodObjectFermentation.ProductionType);
+                var prodlist1 = _production.GetProductionList(_userId, prodObjectFermentation.ProductionType);
 
                 var prodFound1 = prodlist1.Find(x => x.ProductionId == prodObjectFermentation.ProductionId);
 
@@ -8137,9 +8141,9 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject2 = new DeleteRecordObject();
                 deleteObject2.DeleteRecordID = prodObjectDistillation.ProductionId;
                 deleteObject2.DeleteRecordType = prodObjectDistillation.ProductionType;
-                _dl.DeleteProductionExecute(deleteObject2, _userId);
+                _production.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList2 = _dl.GetProductionList(_userId, prodObjectDistillation.ProductionType);
+                var prodList2 = _production.GetProductionList(_userId, prodObjectDistillation.ProductionType);
 
                 var prodFound2 = prodList2.Find(x => x.ProductionId == prodObjectDistillation.ProductionId);
 
@@ -8147,9 +8151,9 @@ namespace WebApp.Helpers.Tests
                 Assert.IsNull(prodFound2);
 
                 // Try to delete Production Fermentation record when its not being used by any record.
-                _dl.DeleteProductionRecord(_userId, deleteObject);
+                _production.DeleteProductionRecord(_userId, deleteObject);
 
-                var prodlist3 = _dl.GetProductionList(_userId, prodObjectFermentation.ProductionType);
+                var prodlist3 = _production.GetProductionList(_userId, prodObjectFermentation.ProductionType);
 
                 var prodFound3 = prodlist3.Find(x => x.ProductionId == prodObjectFermentation.ProductionId);
 
@@ -8813,14 +8817,14 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                productionId = _dl.CreateProduction(prodObject, _userId);
+                productionId = _production.CreateProduction(prodObject, _userId);
                 cleanupList.Add(Tuple.Create(productionId, Table.Production));
 
                 // Act
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
                 deleteObject.DeleteRecordID = productionId;
                 deleteObject.DeleteRecordType = prodObject.ProductionType;
-                _dl.DeleteProductionExecute(deleteObject, _userId);
+                _production.DeleteProductionExecute(deleteObject, _userId);
 
                 var prodQuery =
                 (from production in _db.Production
@@ -9009,7 +9013,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -9044,7 +9048,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -9089,7 +9093,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId);
+                productionId = _production.CreateProduction(prodBlend, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -9332,7 +9336,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -9364,7 +9368,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -9407,7 +9411,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Bottling Record
@@ -9451,7 +9455,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -9713,7 +9717,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Purchase Record (minimal required fields)
@@ -9771,7 +9775,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -9959,7 +9963,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -9991,7 +9995,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                int productionFinalDistillationId = _dl.CreateProduction(prodO2, _userId);
+                int productionFinalDistillationId = _production.CreateProduction(prodO2, _userId);
 
                 tupleL.Add(Tuple.Create(productionFinalDistillationId, Table.Production));
 
@@ -10035,7 +10039,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                int productionBlendingId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                int productionBlendingId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionBlendingId, Table.Production));
 
                 // create Production Bottling Record
@@ -10079,7 +10083,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                int productionBottlingId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                int productionBottlingId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionBottlingId, Table.Production));
 
                 #endregion
@@ -10352,7 +10356,7 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
                 deleteObject.DeleteRecordID = prodBottl.ProductionId;
                 deleteObject.DeleteRecordType = prodBottl.ProductionType;
-                bool bottlingDeleted = _dl.DeleteProductionExecute(deleteObject, _userId);
+                bool bottlingDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 #region Blending and Distiliing after Bottling deletion
 
@@ -10731,7 +10735,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -10763,7 +10767,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                int productionFinalDistillationId = _dl.CreateProduction(prodO2, _userId);
+                int productionFinalDistillationId = _production.CreateProduction(prodO2, _userId);
 
                 tupleL.Add(Tuple.Create(productionFinalDistillationId, Table.Production));
 
@@ -10807,7 +10811,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                int productionBlendingId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                int productionBlendingId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionBlendingId, Table.Production));
 
                 #endregion
@@ -11085,7 +11089,7 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
                 deleteObject.DeleteRecordID = prodBlend.ProductionId;
                 deleteObject.DeleteRecordType = prodBlend.ProductionType;
-                bool bottlingDeleted = _dl.DeleteProductionExecute(deleteObject, _userId);
+                bool bottlingDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 #region Blending and Distiliing after Bottling deletion
 
@@ -11555,7 +11559,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -11587,7 +11591,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                int productionFinalDistillationId = _dl.CreateProduction(prodO2, _userId);
+                int productionFinalDistillationId = _production.CreateProduction(prodO2, _userId);
 
                 tupleL.Add(Tuple.Create(productionFinalDistillationId, Table.Production));
 
@@ -11790,7 +11794,7 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
                 deleteObject.DeleteRecordID = prodO2.ProductionId;
                 deleteObject.DeleteRecordType = prodO2.ProductionType;
-                bool DistillationDeleted = _dl.DeleteProductionExecute(deleteObject, _userId);
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 #region Distilled Not Gauged after Distilled deletion
 
@@ -12078,7 +12082,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -12112,7 +12116,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -12157,7 +12161,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                int productionBlendingId = _dl.CreateProduction(prodBlend, _userId);
+                int productionBlendingId = _production.CreateProduction(prodBlend, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionBlendingId, Table.Production));
 
                 // create Production Bottling Record
@@ -12201,7 +12205,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                int productionBottlingId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                int productionBottlingId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionBottlingId, Table.Production));
 
                 #endregion
@@ -12559,7 +12563,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
@@ -13502,7 +13506,7 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
                 deleteObject.DeleteRecordID = productionId;
                 deleteObject.DeleteRecordType = prodO.ProductionType;
-                bool DistillationDeleted = _dl.DeleteProductionExecute(deleteObject, _userId);
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 var amounts =
                     (from purch in _db.Purchase
@@ -14716,7 +14720,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
@@ -14761,7 +14765,7 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
                 deleteObject.DeleteRecordID = productionId;
                 deleteObject.DeleteRecordType = prodO.ProductionType;
-                bool DistillationDeleted = _dl.DeleteProductionExecute(deleteObject, _userId);
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 var amounts =
                     (from purch in _db.Purchase
@@ -14942,7 +14946,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -14977,7 +14981,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -15020,7 +15024,7 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
                 deleteObject.DeleteRecordID = prodO.ProductionId;
                 deleteObject.DeleteRecordType = prodO.ProductionType;
-                bool DistillationDeleted = _dl.DeleteProductionExecute(deleteObject, _userId);
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 var amounts =
                     (from purch in _db.Purchase
@@ -15196,7 +15200,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -15239,7 +15243,7 @@ namespace WebApp.Helpers.Tests
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
                 deleteObject.DeleteRecordID = productionId;
                 deleteObject.DeleteRecordType = prodO.ProductionType;
-                bool DistillationDeleted = _dl.DeleteProductionExecute(deleteObject, _userId);
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 var amounts =
                     (from purch in _db.Purchase

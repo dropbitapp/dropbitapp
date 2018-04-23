@@ -313,6 +313,7 @@ namespace WebApp.Helpers
     {
         private bool _executeResult = false;
         private string _executeMessage = string.Empty;
+
         public bool ExecuteResult { get; set; }
         public string ExecuteMessage { get; set; }
 

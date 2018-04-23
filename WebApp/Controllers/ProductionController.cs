@@ -4,12 +4,15 @@ using System.Web.Mvc;
 using WebApp.Models;
 using WebApp.Helpers;
 using Microsoft.AspNet.Identity;
+using WebApp.Workflows;
 
 namespace WebApp.Controllers
 {
     public class ProductionController : Controller
     {
-        private DataLayer dl = new DataLayer();
+        private DataLayer _dl = new DataLayer();
+
+        private ProductionWorkflow _production = new ProductionWorkflow();
 
         // --- Production Methods for Fermenting and Distilling ---
 
@@ -31,7 +34,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        int returnResult = dl.CreateProduction(prodObject, userId);
+                        int returnResult = _production.CreateProduction(prodObject, userId);
                         if (returnResult > 0)
                         {
                             string message = "Production record created successfully.";
@@ -68,7 +71,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var prodList = dl.GetProductionList(userId, prodType);
+                    var prodList = _production.GetProductionList(userId, prodType);
                     return Json(prodList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -95,7 +98,7 @@ namespace WebApp.Controllers
                 if (userId > 0)
                 {
                     List<ProdObjectConcise> blendingList = new List<ProdObjectConcise>();
-                    blendingList = dl.GetBlendingList(prodType, userId);
+                    blendingList = _production.GetBlendingList(prodType, userId);
                     return Json(blendingList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -118,7 +121,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var rawMaterialList = dl.GetRawMaterialList4Fermentation(userId);
+                    var rawMaterialList = _dl.GetRawMaterialList4Fermentation(userId);
                     return Json(rawMaterialList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -141,7 +144,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var rawMaterialList = dl.GetMaterialListForProduction(productionType, userId);
+                    var rawMaterialList = _dl.GetMaterialListForProduction(productionType, userId);
                     return Json(rawMaterialList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -166,7 +169,7 @@ namespace WebApp.Controllers
                 if (userId > 0)
                 {
                     // get the list
-                    var additiveList = dl.GetAdditivesListForProduction(matType, userId);
+                    var additiveList = _dl.GetAdditivesListForProduction(matType, userId);
                     return Json(additiveList, JsonRequestBehavior.AllowGet);
                 }
                 else {
@@ -191,7 +194,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var storageList = dl.GetStorageData(userId);
+                    var storageList = _dl.GetStorageData(userId);
                     return Json(storageList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -214,7 +217,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var storageList = dl.GetSpiritTypeList(userId);
+                    var storageList = _dl.GetSpiritTypeList(userId);
                     return Json(storageList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -231,7 +234,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public JsonResult GetSpiritCutData()
         {
-            var spiritCutList = dl.GetSpiritCutData();
+            var spiritCutList = _dl.GetSpiritCutData();
             return Json(spiritCutList, JsonRequestBehavior.AllowGet);
         }
 
@@ -245,7 +248,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdateProduction(pObj, userId);
+                        bool returnResult = _production.UpdateProduction(pObj, userId);
                         if (returnResult)
                         {
                             string message = "Production record updated successfully.";
@@ -284,7 +287,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        ReturnObject returnResult = dl.DeleteProductionRecord(userId, deleteObject);
+                        ReturnObject returnResult = _production.DeleteProductionRecord(userId, deleteObject);
                         if (returnResult.ExecuteResult)
                         {
                             string message = deleteObject.DeleteRecordType + " Record was deleted successfully";
@@ -337,7 +340,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public JsonResult GetSpiritToKindListData()
         {
-            var spiritToKindList = dl.GetSpiritToKindListData();
+            var spiritToKindList = _dl.GetSpiritToKindListData();
             return Json(spiritToKindList, JsonRequestBehavior.AllowGet);
         }
 
