@@ -1839,7 +1839,7 @@ namespace WebApp.Helpers
         /// <param name="deleteObject"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public ReturnObject DeletePurchaseRecord (int userId, DeleteRecordObject deleteObject)
+        public ReturnObject DeletePurchaseRecord(int userId, DeleteRecordObject deleteObject)
         {
             int recordId = deleteObject.DeleteRecordID;
             string recordType = deleteObject.DeleteRecordType;
@@ -1849,7 +1849,7 @@ namespace WebApp.Helpers
             {
                 try
                 {
-                    var res = 
+                    var res =
                         from rec in db.ProductionToPurchase
                         join prod2Name in db.Production on rec.ProductionID equals prod2Name.ProductionID into prod2Name_join
                         where rec.PurchaseID == recordId
@@ -5018,7 +5018,7 @@ namespace WebApp.Helpers
                         {
                             delReturn.ExecuteMessage = item.ProductionName;
                         }
-                        
+
                     }
                 }
                 catch (Exception e)
@@ -7454,6 +7454,7 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.SpiritTypeReportingId;
                             cat.CategoryName = rec.ReportingCategoryName;
                             cat.r1_OnHandFirstOfMonth += total;
+                            cat.r1_OnHandFirstOfMonth = (float)Math.Round(cat.r1_OnHandFirstOfMonth, 3);
                             storageReportBody.Add(cat);
                         }
                     }
@@ -7465,6 +7466,8 @@ namespace WebApp.Helpers
                         {
                             category.r1_OnHandFirstOfMonth += rec.ProductionContentProof;
                         }
+
+                        category.r1_OnHandFirstOfMonth = (float)Math.Round(category.r1_OnHandFirstOfMonth, 3);
                     }
                 }
             }
@@ -7504,6 +7507,7 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.SpiritTypeReportingId;
                             cat.CategoryName = rec.ReportingCategoryName;
                             cat.r1_OnHandFirstOfMonth += total;
+                            cat.r1_OnHandFirstOfMonth = (float)Math.Round(cat.r1_OnHandFirstOfMonth, 3);
                             storageReportBody.Add(cat);
                         }
                     }
@@ -7515,6 +7519,8 @@ namespace WebApp.Helpers
                         {
                             category.r1_OnHandFirstOfMonth += rec.ProductionContentProof;
                         }
+
+                        category.r1_OnHandFirstOfMonth = (float)Math.Round(category.r1_OnHandFirstOfMonth, 3);
                     }
                 }
             }
@@ -7595,12 +7601,14 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                             cat.CategoryName = rec.reportingCategoryName;
                             cat.r2_DepositedInBulkStorage += total;
+                            cat.r2_DepositedInBulkStorage = (float)Math.Round(cat.r2_DepositedInBulkStorage, 3);
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
                         category.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
+                        category.r2_DepositedInBulkStorage = (float)Math.Round(category.r2_DepositedInBulkStorage, 3);
                     }
                 }
             }
@@ -7690,12 +7698,14 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                             cat.CategoryName = rec.reportingCategoryName;
                             cat.r2_DepositedInBulkStorage += total;
+                            cat.r2_DepositedInBulkStorage = (float)Math.Round(cat.r2_DepositedInBulkStorage, 3);
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
                         category.r2_DepositedInBulkStorage += rec.proof + rec.productionContentProof + rec.destroyedProof;
+                        category.r2_DepositedInBulkStorage = (float)Math.Round(category.r2_DepositedInBulkStorage, 3);
                     }
                 }
             }
@@ -7709,7 +7719,7 @@ namespace WebApp.Helpers
         {
             foreach (var storage in storageReportBody)
             {
-                storage.r6_TotalLines1Through5 = storage.r1_OnHandFirstOfMonth + storage.r2_DepositedInBulkStorage + storage.r4_ReturnedToBulkStorage;
+                storage.r6_TotalLines1Through5 = (float)Math.Round(storage.r1_OnHandFirstOfMonth + storage.r2_DepositedInBulkStorage + storage.r4_ReturnedToBulkStorage, 3);
             }
         }
 
@@ -7783,12 +7793,14 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                             cat.CategoryName = rec.reportingCategoryName;
                             cat.r17_TransferredToProcessingAccount += total;
+                            cat.r17_TransferredToProcessingAccount = (float)Math.Round(cat.r17_TransferredToProcessingAccount, 3);
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
                         category.r17_TransferredToProcessingAccount += rec.proofGal;
+                        category.r17_TransferredToProcessingAccount = (float)Math.Round(category.r17_TransferredToProcessingAccount, 3);
                     }
                 }
             }
@@ -7857,12 +7869,14 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                             cat.CategoryName = rec.reportingCategoryName;
                             cat.r17_TransferredToProcessingAccount += total;
+                            cat.r17_TransferredToProcessingAccount = (float)Math.Round(cat.r17_TransferredToProcessingAccount, 3);
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
                         category.r17_TransferredToProcessingAccount += rec.proofGal;
+                        category.r17_TransferredToProcessingAccount = (float)Math.Round(category.r17_TransferredToProcessingAccount, 3);
                     }
                 }
             }
@@ -7940,12 +7954,14 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                             cat.CategoryName = rec.reportingCategoryName;
                             cat.r18_TransferredToProductionAccount += total;
+                            cat.r18_TransferredToProductionAccount = (float)Math.Round(cat.r18_TransferredToProductionAccount, 3);
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
                         category.r18_TransferredToProductionAccount += rec.proofGal;
+                        category.r18_TransferredToProductionAccount = (float)Math.Round(category.r18_TransferredToProductionAccount, 3);
                     }
                 }
             }
@@ -8013,12 +8029,14 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                             cat.CategoryName = rec.reportingCategoryName;
                             cat.r18_TransferredToProductionAccount += total;
+                            cat.r18_TransferredToProductionAccount = (float)Math.Round(category.r18_TransferredToProductionAccount, 3);
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
                         category.r18_TransferredToProductionAccount += rec.proofGal;
+                        category.r18_TransferredToProductionAccount = (float)Math.Round(category.r18_TransferredToProductionAccount, 3);
                     }
                 }
             }
@@ -8077,12 +8095,14 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                             cat.CategoryName = rec.reportingCategoryName;
                             cat.r20_Destroyed += total;
+                            cat.r20_Destroyed = (float)Math.Round(cat.r20_Destroyed, 3);
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
                         category.r20_Destroyed += rec.proof;
+                        category.r20_Destroyed = (float)Math.Round(category.r20_Destroyed, 3);
                     }
                 }
             }
@@ -8137,12 +8157,14 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.spiritTypeReportingId;
                             cat.CategoryName = rec.reportingCategoryName;
                             cat.r20_Destroyed += total;
+                            cat.r20_Destroyed = (float)Math.Round(cat.r20_Destroyed, 3);
                             storageReportBody.Add(cat);
                         }
                     }
                     else
                     {
                         category.r20_Destroyed += rec.proof;
+                        category.r20_Destroyed = (float)Math.Round(category.r20_Destroyed, 3);
                     }
                 }
             }
@@ -8186,6 +8208,7 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.SpiritTypeReportingId;
                             cat.CategoryName = rec.ReportingCategoryName;
                             cat.r23_OnHandEndOfMonth += total;
+                            cat.r23_OnHandEndOfMonth = (float)Math.Round(cat.r23_OnHandEndOfMonth, 3);
                             storageReportBody.Add(cat);
                         }
                     }
@@ -8196,6 +8219,7 @@ namespace WebApp.Helpers
                         if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
                             category.r23_OnHandEndOfMonth += rec.ProductionContentProof;
+                            category.r23_OnHandEndOfMonth = (float)Math.Round(category.r23_OnHandEndOfMonth);
                         }
                     }
                 }
@@ -8227,6 +8251,7 @@ namespace WebApp.Helpers
                             cat.SpiritTypeReportingID = rec.SpiritTypeReportingId;
                             cat.CategoryName = rec.ReportingCategoryName;
                             cat.r23_OnHandEndOfMonth += total;
+                            cat.r23_OnHandEndOfMonth = (float)Math.Round(cat.r23_OnHandEndOfMonth, 3);
                             storageReportBody.Add(cat);
                         }
                     }
@@ -8237,6 +8262,7 @@ namespace WebApp.Helpers
                         if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
                             category.r23_OnHandEndOfMonth += rec.ProductionContentProof;
+                            category.r23_OnHandEndOfMonth = (float)Math.Round(category.r23_OnHandEndOfMonth, 3);
                         }
                     }
                 }
@@ -8251,8 +8277,8 @@ namespace WebApp.Helpers
         {
             foreach (var storage in storageReportBody)
             {
-                storage.r24_Lines7Through23 = storage.r7_TaxPaid + storage.r17_TransferredToProcessingAccount + storage.r18_TransferredToProductionAccount
-                    + +storage.r19_TransferredToOtherBondedPremises + storage.r20_Destroyed + storage.r22_OtherLosses + storage.r23_OnHandEndOfMonth;
+                storage.r24_Lines7Through23 = (float)Math.Round(storage.r7_TaxPaid + storage.r17_TransferredToProcessingAccount + storage.r18_TransferredToProductionAccount
+                    + storage.r19_TransferredToOtherBondedPremises + storage.r20_Destroyed + storage.r22_OtherLosses + storage.r23_OnHandEndOfMonth, 3);
             }
         }
 
