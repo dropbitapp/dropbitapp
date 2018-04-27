@@ -8288,7 +8288,7 @@ namespace WebApp.Helpers
         /// <param name="distillerID"></param>
         /// <param name="startDate"></param>
         /// <returns></returns>
-        private ReportHeader GetDistillerInfoForReportHeader(int distillerID, DateTime startDate)
+        public ReportHeader GetDistillerInfoForReportHeader(int distillerID, DateTime startDate)
         {
             try
             {

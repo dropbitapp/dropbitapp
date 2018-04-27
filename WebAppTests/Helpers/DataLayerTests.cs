@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
+using WebApp.Reports;
 using WebApp.Workflows;
 
 namespace WebApp.Helpers.Tests
@@ -30,6 +31,8 @@ namespace WebApp.Helpers.Tests
         DataLayer _dl = new DataLayer();
 
         private ProductionWorkflow _production = new ProductionWorkflow();
+
+        private ProductionReport _productionReport = new ProductionReport();
 
         DistilDBContext _db = new DistilDBContext();
 
@@ -911,7 +914,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 /* STORAGE REPORT */
                 StorageReport actualStorageReportObject = new StorageReport();
@@ -2416,7 +2419,7 @@ namespace WebApp.Helpers.Tests
                 StorageReport storageReport = _dl.GetStorageReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
 
                 // Generate Production Report
-                ProductionReportingObject productionReport = _dl.GetProductionReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+                ProductionReportingObject productionReport = _productionReport.GetProductionReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
 
                 // Assert
 
@@ -3336,7 +3339,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
                 #endregion
 
                 #region Storage
@@ -3744,7 +3747,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
                 #endregion
 
                 #region Storage
@@ -4134,7 +4137,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 #endregion
 
@@ -4370,7 +4373,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 // verify Production report Part 1
                 Assert.AreEqual(0, actualProdReportObject.Part1List[0].ProccessingAcct);
@@ -4669,7 +4672,7 @@ namespace WebApp.Helpers.Tests
                 #region Reports
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 // verify Production report Part 1
                 Assert.AreEqual(0, actualProdReportObject.Part1List[0].ProccessingAcct);
@@ -5130,7 +5133,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProductionReport = new ProductionReportingObject();
 
                 //get actual storage data
-                actualProductionReport = _dl.GetProductionReportData(start, end, _userId);
+                actualProductionReport = _productionReport.GetProductionReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualProductionReport.Header.DSP);
@@ -5324,7 +5327,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProductionReport = new ProductionReportingObject();
 
                 //get actual storage data
-                actualProductionReport = _dl.GetProductionReportData(start, end, _userId);
+                actualProductionReport = _productionReport.GetProductionReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualProductionReport.Header.DSP);
@@ -9142,7 +9145,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 var expectedWine = actualProdReportObject.Part1List.Find(x => x.SpiritCatName == "Wine");
 
@@ -9497,7 +9500,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 #endregion
 
@@ -9558,7 +9561,7 @@ namespace WebApp.Helpers.Tests
                 // Test October Production report
                 ProductionReportingObject actualProdReportObjectOctober = new ProductionReportingObject();
 
-                actualProdReportObjectOctober = _dl.GetProductionReportData(new DateTime(2017, 10, 01), new DateTime(2017, 10, 31), _userId);
+                actualProdReportObjectOctober = _productionReport.GetProductionReportData(new DateTime(2017, 10, 01), new DateTime(2017, 10, 31), _userId);
                 // verify Production report header
                 Assert.AreEqual(reportHeaderE.DSP, actualProdReportObjectOctober.Header.DSP);
                 Assert.AreEqual(reportHeaderE.EIN, actualProdReportObjectOctober.Header.EIN);
@@ -9786,7 +9789,7 @@ namespace WebApp.Helpers.Tests
                 var novStart = new DateTime(2017, 11, 1);
                 var novEnd = new DateTime(2017, 11, novDays);
 
-                ProductionReportingObject productionReport = _dl.GetProductionReportData(novStart, novEnd, _userId);
+                ProductionReportingObject productionReport = _productionReport.GetProductionReportData(novStart, novEnd, _userId);
 
                 #endregion
 
@@ -10124,7 +10127,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 ProcessingReportingObject actualProcessingReportO = new ProcessingReportingObject();
 
@@ -10852,7 +10855,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 ProcessingReportingObject actualProcessingReportO = new ProcessingReportingObject();
 
@@ -11147,7 +11150,7 @@ namespace WebApp.Helpers.Tests
 
                 #region Production Report After Deletion
                 // verify Production report Part 1
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 Assert.AreEqual(0, actualProdReportObject.Part1List[0].ProccessingAcct);
                 Assert.AreEqual(18, actualProdReportObject.Part1List[0].StorageAcct);
@@ -11633,7 +11636,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 ProcessingReportingObject actualProcessingReportO = new ProcessingReportingObject();
 
@@ -11843,7 +11846,7 @@ namespace WebApp.Helpers.Tests
 
                 #region Production Report After Deletion
                 // verify Production report Part 1
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 Assert.AreEqual(0, actualProdReportObject.Part1List[0].ProccessingAcct);
                 Assert.AreEqual(0, actualProdReportObject.Part1List[0].StorageAcct);
@@ -12365,7 +12368,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 var expectedWine = actualProdReportObject.Part1List.Find(x => x.SpiritCatName == "Wine");
 
@@ -12582,7 +12585,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 /* verify Production report Part 1 */
 

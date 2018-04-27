@@ -209,6 +209,7 @@
     <Compile Include="Persistence\BusinessLogicEnums\ProductionWorkflowEnums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Persistence\Repositories\ReportRepository.cs" />
+    <Compile Include="Reports\ProductionReport.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Workflows\DictionaryWorkflow.cs" />
     <Compile Include="Workflows\ProductionWorkflow.cs" />
