@@ -1151,5 +1151,16 @@ namespace WebApp.Reports
                 }
             }
         }
+
+        /// <summary>
+        /// GetDistillerID retrieves DistillerId for given UserId
+        /// </summary>
+        public int GetDistillerId(int userId)
+        {
+            int distillerId = (from rec in _db.AspNetUserToDistiller
+                               where rec.UserId == userId
+                               select rec.DistillerID).FirstOrDefault();
+            return distillerId;
+        }
     }
 }

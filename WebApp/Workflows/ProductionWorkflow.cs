@@ -24,13 +24,10 @@ namespace WebApp.Workflows
         /// <returns>int</returns> 
         public int CreateProduction(ProductionObject prodObject, int userId)
         {
-            //instantiate DataLayer to call shared methods
-            DataLayer dl = new DataLayer();
-
             //define method execution return value to be false by default
             int retMthdExecResult = 0;
 
-            var distillerId = dl.GetDistillerId(userId);
+            var distillerId = GetDistillerId(userId);
 
             prodObject.StatusName = "Active";
 
@@ -1018,16 +1015,13 @@ namespace WebApp.Workflows
 
         public ReturnObject DeleteProductionRecord(int userId, DeleteRecordObject deleteObject)
         {
-            //instantiate DataLayer to call shared method
-            DataLayer dl = new DataLayer();
-
             //intitialize return object
             ReturnObject delReturn = new ReturnObject();
 
             int recordId = deleteObject.DeleteRecordID;
             string recordType = deleteObject.DeleteRecordType;
 
-            int distillerId = dl.GetDistillerId(userId);
+            int distillerId = GetDistillerId(userId);
 
             if (recordId > 0)
             {
@@ -2202,6 +2196,17 @@ namespace WebApp.Workflows
             }
 
             return bList;
+        }
+
+        /// <summary>
+        /// GetDistillerID retrieves DistillerId for given UserId
+        /// </summary>
+        public int GetDistillerId(int userId)
+        {
+            int distillerId = (from rec in _db.AspNetUserToDistiller
+                               where rec.UserId == userId
+                               select rec.DistillerID).FirstOrDefault();
+            return distillerId;
         }
     }
 }

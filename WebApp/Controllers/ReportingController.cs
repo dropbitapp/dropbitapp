@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Web.Mvc;
 using WebApp.Helpers;
 using WebApp.Persistence.BusinessLogicEnums;
+using WebApp.Reports;
 
 namespace WebApp.Controllers
 {
     public class ReportingController : Controller
     {
         private DataLayer dl = new DataLayer();
+        private ProductionReport _productionR = new ProductionReport();
+        private ProcessingReport _processingR = new ProcessingReport();
         private bool _enableNewReportingImplementation = false;
 
         // GET: Production Operations
@@ -43,7 +46,7 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var productionReport = dl.GetProductionReportData(startOfReporting, endOfReporting, userId);
+                    var productionReport = _productionR.GetProductionReportData(startOfReporting, endOfReporting, userId);
                     return Json(productionReport, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -71,7 +74,7 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var processingReport = dl.GetProcessingReportData(startOfReporting, endOfReporting, userId);
+                    var processingReport = _processingR.GetProcessingReportData(startOfReporting, endOfReporting, userId);
                     return Json(processingReport, JsonRequestBehavior.AllowGet);
                 }
                 else
