@@ -7286,11 +7286,11 @@ namespace WebApp.Helpers
             }
         }
 
-        public StorageReport GetStorageReportData(DateTime startDate, DateTime endDate, int userId)
+        public StorageReportObject GetStorageReportData(DateTime startDate, DateTime endDate, int userId)
         {
             try
             {
-                StorageReport storageReport = new StorageReport();
+                StorageReportObject storageReport = new StorageReportObject();
                 List<StorageReportCategory> storageReportBody = new List<StorageReportCategory>();
 
                 // get distiller information for header report

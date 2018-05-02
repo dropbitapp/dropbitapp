@@ -212,9 +212,9 @@ namespace WebApp.Helpers.Tests
                 DateTime decStart = new DateTime(2016, 12, 1);
                 DateTime decEnd = new DateTime(2016, 12, decDays);
 
-                StorageReport octStorageReport = _dl.GetStorageReportData(octStart, octEnd, _userId);
-                StorageReport novStorageReport = _dl.GetStorageReportData(novStart, novEnd, _userId);
-                StorageReport decStorageReport = _dl.GetStorageReportData(decStart, decEnd, _userId);
+                StorageReportObject octStorageReport = _dl.GetStorageReportData(octStart, octEnd, _userId);
+                StorageReportObject novStorageReport = _dl.GetStorageReportData(novStart, novEnd, _userId);
+                StorageReportObject decStorageReport = _dl.GetStorageReportData(decStart, decEnd, _userId);
 
                 #endregion
 
@@ -491,12 +491,12 @@ namespace WebApp.Helpers.Tests
                 DateTime sepStart = new DateTime(2016, 9, 1);
                 DateTime sepEnd = new DateTime(2016, 9, sepDays);
 
-                StorageReport aprStorageReport = _dl.GetStorageReportData(aprStart, aprEnd, _userId);
-                StorageReport mayStorageReport = _dl.GetStorageReportData(mayStart, mayEnd, _userId);
-                StorageReport juneStorageReport = _dl.GetStorageReportData(juneStart, juneEnd, _userId);
-                StorageReport julyStorageReport = _dl.GetStorageReportData(julyStart, julyEnd, _userId);
-                StorageReport augStorageReport = _dl.GetStorageReportData(augStart, augEnd, _userId);
-                StorageReport sepStorageReport = _dl.GetStorageReportData(sepStart, sepEnd, _userId);
+                StorageReportObject aprStorageReport = _dl.GetStorageReportData(aprStart, aprEnd, _userId);
+                StorageReportObject mayStorageReport = _dl.GetStorageReportData(mayStart, mayEnd, _userId);
+                StorageReportObject juneStorageReport = _dl.GetStorageReportData(juneStart, juneEnd, _userId);
+                StorageReportObject julyStorageReport = _dl.GetStorageReportData(julyStart, julyEnd, _userId);
+                StorageReportObject augStorageReport = _dl.GetStorageReportData(augStart, augEnd, _userId);
+                StorageReportObject sepStorageReport = _dl.GetStorageReportData(sepStart, sepEnd, _userId);
 
                 #endregion
 
@@ -917,7 +917,7 @@ namespace WebApp.Helpers.Tests
                 actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 /* STORAGE REPORT */
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -1343,10 +1343,10 @@ namespace WebApp.Helpers.Tests
                 var janStart = new DateTime(2017, 1, 1);
                 var janEnd = new DateTime(2017, 1, janDays);
 
-                StorageReport octStorageReport = _dl.GetStorageReportData(octStart, octEnd, _userId);
-                StorageReport novStorageReport = _dl.GetStorageReportData(novStart, novEnd, _userId);
-                StorageReport decStorageReport = _dl.GetStorageReportData(decStart, decEnd, _userId);
-                StorageReport janStorageReport = _dl.GetStorageReportData(janStart, janEnd, _userId);
+                StorageReportObject octStorageReport = _dl.GetStorageReportData(octStart, octEnd, _userId);
+                StorageReportObject novStorageReport = _dl.GetStorageReportData(novStart, novEnd, _userId);
+                StorageReportObject decStorageReport = _dl.GetStorageReportData(decStart, decEnd, _userId);
+                StorageReportObject janStorageReport = _dl.GetStorageReportData(janStart, janEnd, _userId);
 
                 #endregion
 
@@ -2416,7 +2416,7 @@ namespace WebApp.Helpers.Tests
                 // Act
 
                 // Generate Storage Report
-                StorageReport storageReport = _dl.GetStorageReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+                StorageReportObject storageReport = _dl.GetStorageReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
 
                 // Generate Production Report
                 ProductionReportingObject productionReport = _productionReport.GetProductionReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
@@ -2642,10 +2642,10 @@ namespace WebApp.Helpers.Tests
                 var marStart = new DateTime(2017, 3, 1);
                 var marEnd = new DateTime(2017, 3, marDays);
 
-                StorageReport decStorageReport = _dl.GetStorageReportData(decStart, decEnd, _userId);
-                StorageReport janStorageReport = _dl.GetStorageReportData(janStart, janEnd, _userId);
-                StorageReport febStorageReport = _dl.GetStorageReportData(febStart, febEnd, _userId);
-                StorageReport marStorageReport = _dl.GetStorageReportData(marStart, marEnd, _userId);
+                StorageReportObject decStorageReport = _dl.GetStorageReportData(decStart, decEnd, _userId);
+                StorageReportObject janStorageReport = _dl.GetStorageReportData(janStart, janEnd, _userId);
+                StorageReportObject febStorageReport = _dl.GetStorageReportData(febStart, febEnd, _userId);
+                StorageReportObject marStorageReport = _dl.GetStorageReportData(marStart, marEnd, _userId);
 
                 #endregion
 
@@ -3344,7 +3344,7 @@ namespace WebApp.Helpers.Tests
 
                 #region Storage
                 /* STORAGE REPORT */
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "AlcoholUnder190";
@@ -3752,7 +3752,7 @@ namespace WebApp.Helpers.Tests
 
                 #region Storage
                 /* STORAGE REPORT */
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "AlcoholUnder190";
@@ -4879,7 +4879,7 @@ namespace WebApp.Helpers.Tests
 
                 #region Storage Report
 
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 //get actual storage data
                 actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
@@ -5536,7 +5536,7 @@ namespace WebApp.Helpers.Tests
                 reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
                 reportHeaderE.DSP = "DSP-WA-21086";
 
-                StorageReport expectedStorageReport = new StorageReport();
+                StorageReportObject expectedStorageReport = new StorageReportObject();
 
                 List<StorageReportCategory> reportList = new List<StorageReportCategory>();
 
@@ -5576,7 +5576,7 @@ namespace WebApp.Helpers.Tests
 
                 expectedStorageReport.ReportBody = reportList;
 
-                StorageReport actualStorageReport = new StorageReport();
+                StorageReportObject actualStorageReport = new StorageReportObject();
 
                 //get actual storage data
                 actualStorageReport = _dl.GetStorageReportData(start, end, _userId);
@@ -5802,7 +5802,7 @@ namespace WebApp.Helpers.Tests
                 reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
                 reportHeaderE.DSP = "DSP-WA-21086";
 
-                StorageReport expectedStorageReport = new StorageReport();
+                StorageReportObject expectedStorageReport = new StorageReportObject();
 
                 List<StorageReportCategory> reportList = new List<StorageReportCategory>();
 
@@ -5842,7 +5842,7 @@ namespace WebApp.Helpers.Tests
 
                 expectedStorageReport.ReportBody = reportList;
 
-                StorageReport actualStorageReport = new StorageReport();
+                StorageReportObject actualStorageReport = new StorageReportObject();
 
                 //get actual storage data
                 actualStorageReport = _dl.GetStorageReportData(start, end, _userId);
@@ -9104,7 +9104,7 @@ namespace WebApp.Helpers.Tests
                 #region Reports
 
                 // verify storage report
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
 
@@ -10312,7 +10312,7 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 #region Storage Report Before Deletion
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -11045,7 +11045,7 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 #region Storage Report Before Deletion
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -11321,7 +11321,7 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 #region Storage Report After Deletion
-                actualStorageReportObject = new StorageReport();
+                actualStorageReportObject = new StorageReportObject();
 
                 storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -11700,7 +11700,7 @@ namespace WebApp.Helpers.Tests
 
 
                 #region Storage Report Before Deletion
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -11881,7 +11881,7 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 #region Storage Report After Deletion
-                actualStorageReportObject = new StorageReport();
+                actualStorageReportObject = new StorageReportObject();
 
                 storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -12332,7 +12332,7 @@ namespace WebApp.Helpers.Tests
 
                 #region Storage Report
                 // verify storage report
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
 
@@ -13228,7 +13228,7 @@ namespace WebApp.Helpers.Tests
                 #region Storage Report
                 {
                     /* Storage report object are by default null*/
-                    StorageReport actualStorageReportObject = new StorageReport();
+                    StorageReportObject actualStorageReportObject = new StorageReportObject();
                     actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
 
                     // Whisky Under 160
@@ -14295,7 +14295,7 @@ namespace WebApp.Helpers.Tests
                 #region Storage Report
                 {
                     /* Storage report object are by default null*/
-                    StorageReport actualStorageReportObject = new StorageReport();
+                    StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                     actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
 

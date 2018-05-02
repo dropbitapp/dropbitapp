@@ -30,7 +30,7 @@ namespace WebApp.Helpers
         public List<ProdReportPart6> ProdReportPart6List { get; set; }
     }
 
-    public class StorageReport
+    public class StorageReportObject
     {
         public ReportHeader Header { get; set; }
         public List<StorageReportCategory> ReportBody { get; set; }

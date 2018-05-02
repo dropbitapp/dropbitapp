@@ -12,6 +12,7 @@ namespace WebApp.Controllers
         private DataLayer dl = new DataLayer();
         private ProductionReport _productionR = new ProductionReport();
         private ProcessingReport _processingR = new ProcessingReport();
+        private StorageReport _storageR = new StorageReport();
         private bool _enableNewReportingImplementation = false;
 
         // GET: Production Operations
@@ -108,7 +109,7 @@ namespace WebApp.Controllers
 
                         return Json(report, JsonRequestBehavior.AllowGet);
                     }
-                    var storageReport = dl.GetStorageReportData(startOfReporting, endOfReporting, userId);
+                    var storageReport = _storageR.GetStorageReportData(startOfReporting, endOfReporting, userId);
                     return Json(storageReport, JsonRequestBehavior.AllowGet);
                 }
                 else
