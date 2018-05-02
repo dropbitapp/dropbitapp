@@ -125,7 +125,7 @@ namespace WebApp.Controllers
             }
             else
             {
-                string message = "Even though DeleteRecord method was called from the client the RecordID was unacceptable " + deleteObject.DeleteRecordID;
+                string message = "ID " + deleteObject.DeleteRecordID + " of the record being deleted is not valid or Dictionary Object being deleted is null";
                 return Json(message);
             }
         }
