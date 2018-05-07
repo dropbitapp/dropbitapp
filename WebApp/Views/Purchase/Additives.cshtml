@@ -400,22 +400,23 @@
                     ready: function () {
 
                         $("#EditDialogPurBatchNameInput").jqxInput({
-                            theme: 'bootstrap', height: '26px', width: '150px'
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '150px'
                         });
 
                         $("#EditDialogPurchaseDateInput").jqxDateTimeInput({
-                            theme: 'bootstrap', height: '26px', width: '130px', formatString: 'MM/dd/yyyy HH:mm'
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '130px', formatString: 'MM/dd/yyyy HH:mm'
                         });
 
                         $("#EditDialogQuantityInput").jqxNumberInput({
-                            theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
                         });
 
                         $("#EditDialogPriceInput").jqxNumberInput({
-                            theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
                         });
 
                         $("#EditDialogVendorInput").jqxDropDownList({
+                            disabled: true,
                             source: vendorAdapter,
                             displayMember: "VendorName",
                             theme: 'bootstrap',
@@ -424,6 +425,7 @@
                         });
 
                         $("#EditDialogStorageNameInput").jqxListBox({
+                            disabled: true,
                             source: storageAdapter,
                             displayMember: "StorageName",
                             theme: 'bootstrap',
@@ -431,17 +433,19 @@
                         });
 
                         $('#EditDialogNotesInput').jqxTextArea({
-                            theme: 'bootstrap', height: '150px', width: '150px', minLength: 1
+                            disabled: true, theme: 'bootstrap', height: '150px', width: '150px', minLength: 1
                         });
 
-                        $("#EditDialogSaveRecordButton").jqxButton({
-                            theme: 'bootstrap', height: '26px', width: '150px'
-                        });
+                        //temporarily disabled
+                        //$("#EditDialogSaveRecordButton").jqxButton({
+                        //    theme: 'bootstrap', height: '26px', width: '150px'
+                        //});
+
                         $("#EditDialogDeleteRecordButton").jqxButton({
-                            theme: 'bootstrap', height: 30, width: 80
+                            theme: 'bootstrap', height: 30, width: 120
                         });
                         $("#EditDialogClearInputElementsButton").jqxButton({
-                            theme: 'bootstrap', height: '26px', width: '150px'
+                            theme: 'bootstrap', height: 30, width: 120
                         });
 
                         $("#EditDialog").jqxWindow({
@@ -757,9 +761,10 @@
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="2" align="right">
+                            <td colspan="2" align="center">
                                 <br />
-                                <button id="EditDialogSaveRecordButton">Save</button>
+                                @*temporarily disabled*@
+                                @*<button id="EditDialogSaveRecordButton">Save</button>*@
                                 <button id="EditDialogDeleteRecordButton">Delete</button>
                                 <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
                             </td>

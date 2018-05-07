@@ -911,29 +911,34 @@
                             // called when the DataTable is loaded.
                             // init jqxWindow widgets.
                             $("#EditDialogPurBatchNameInput").jqxInput({
+                                disabled: true,
                                 theme: 'bootstrap',
                                 height: '26px',
                                 width: '150px'
                             });
                             $("#EditDialogProductionEndDateInput").jqxDateTimeInput({
+                                disabled: true,
                                 theme: 'bootstrap',
                                 height: '26px',
                                 width: '150px',
                                 formatString: 'MM/dd/yyyy HH:mm'
                             });
                             $("#EditDialogProductionStartDateInput").jqxDateTimeInput({
+                                disabled: true,
                                 theme: 'bootstrap',
                                 height: '26px',
                                 width: '150px',
                                 formatString: 'MM/dd/yyyy HH:mm'
                             });
                             $("#EditDialogSpiritCutInput").jqxDropDownList({
+                                disabled: true,
                                 source: spiritCutAdapter,
                                 displayMember: "SpiritCutName",
                                 theme: 'bootstrap',
                                 selectedIndex: 0
                             });
                             $("#EditDialogQuantityInput").jqxNumberInput({
+                                disabled: true,
                                 theme: 'bootstrap',
                                 height: '26px',
                                 width: '150px',
@@ -942,6 +947,7 @@
                                 min: 0
                             });
                             $("#EditDialogVolumeByWeightInput").jqxNumberInput({
+                                disabled: true,
                                 theme: 'bootstrap',
                                 height: '26px',
                                 width: '150px',
@@ -950,6 +956,7 @@
                                 min: 0
                             });
                             $("#EditDialogAlcConInput").jqxNumberInput({
+                                disabled: true,
                                 theme: 'bootstrap',
                                 height: '26px',
                                 width: '150px',
@@ -958,6 +965,7 @@
                                 min: 0
                             });
                             $("#EditDialogProofInput").jqxNumberInput({
+                                disabled: true,
                                 theme: 'bootstrap',
                                 height: '26px',
                                 width: '150px',
@@ -966,29 +974,36 @@
                                 min: 0
                             });
                             $("#EditDialogStorageNameInput").jqxListBox({
+                                disabled: true,
                                 source: storageAdapter,
                                 displayMember: "StorageName",
                                 theme: 'bootstrap',
                                 multiple: true
                             });
                             $('#EditDialogNotesInput').jqxTextArea({
+                                disabled: true,
                                 theme: 'bootstrap',
                                 height: '150px',
                                 width: '150px',
                                 minLength: 1
                             });
-                            $("#EditDialogSaveRecordButton").jqxButton({
-                                theme: 'bootstrap',
-                                height: '26px',
-                                width: '150px'
-                            });
+
+                            //temporarily disabed
+                            //$("#EditDialogSaveRecordButton").jqxButton({
+                            //    theme: 'bootstrap',
+                            //    height: '26px',
+                            //    width: '150px'
+                            //});
+
                             $("#EditDialogDeleteRecordButton").jqxButton({
-                                theme: 'bootstrap', height: 30, width: 80
+                                theme: 'bootstrap',
+                                height: 30,
+                                width: 120
                             });
                             $("#EditDialogClearInputElementsButton").jqxButton({
                                 theme: 'bootstrap',
-                                height: '26px',
-                                width: '150px'
+                                height: 30,
+                                width: 120
                             });
                             $("#EditDialog").jqxWindow({
                                 position: 'center',
@@ -1416,9 +1431,10 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2" align="right">
+                    <td colspan="2" align="center">
                         <br />
-                        <button id="EditDialogSaveRecordButton">Save</button>
+                        @*temporarily disabled*@
+                        @*<button id="EditDialogSaveRecordButton">Save</button>*@
                         <button id="EditDialogDeleteRecordButton">Delete</button>
                         <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
                     </td>
