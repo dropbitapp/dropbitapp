@@ -211,10 +211,11 @@
     <Compile Include="Persistence\Repositories\ReportRepository.cs" />
     <Compile Include="Reports\ProcessingReport.cs" />
     <Compile Include="Reports\ProductionReport.cs" />
-	<Compile Include="Reports\StorageReport.cs" />
+    <Compile Include="Reports\StorageReport.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Workflows\DictionaryWorkflow.cs" />
     <Compile Include="Workflows\ProductionWorkflow.cs" />
+    <Compile Include="Workflows\PurchaseWorkflow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-theme.css" />

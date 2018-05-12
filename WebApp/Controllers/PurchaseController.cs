@@ -6,12 +6,15 @@ using WebApp.Helpers;
 using System.Web.Security;
 using Microsoft.AspNet.Identity;
 using System;
+using WebApp.Workflows;
 
 namespace WebApp.Controllers
 {
     public class PurchaseController : Controller
     {
         private DataLayer dl = new DataLayer();
+
+        private PurchaseWorkflow _purchase = new PurchaseWorkflow();
 
         #region Shared Methods
 
@@ -42,7 +45,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        var returnResult = dl.CreatePurchase(purchaseObject, userId);
+                        var returnResult = _purchase.CreatePurchase(purchaseObject, userId);
                         if (returnResult > 0)
                         {
                             string message = "Purchase record created successfully.";
@@ -85,7 +88,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var recsList = dl.GetPurchasesList(purchaseType, userId);
+                    var recsList = _purchase.GetPurchasesList(purchaseType, userId);
                     return Json(recsList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -108,7 +111,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var rawMaterialList = dl.GetRawMaterialListForPurchase(userId, purchaseType);
+                    var rawMaterialList = _purchase.GetRawMaterialListForPurchase(userId, purchaseType);
 
                     return Json(rawMaterialList, JsonRequestBehavior.AllowGet);
                 }
@@ -178,7 +181,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        ReturnObject returnResult = dl.DeletePurchaseRecord(userId, deleteObject);
+                        ReturnObject returnResult = _purchase.DeletePurchaseRecord(userId, deleteObject);
                         if (returnResult.ExecuteResult)
                         {
                             string message = deleteObject.DeleteRecordType + " Record was deleted successfully";
@@ -226,7 +229,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
+                        bool returnResult = _purchase.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
                             string message = "Fermentable record updated successfully.";
@@ -271,7 +274,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
+                        bool returnResult = _purchase.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
                             string message = "Fermented record updated successfully.";
@@ -326,7 +329,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
+                        bool returnResult = _purchase.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
                             string message = "Distilled record updated successfully.";
@@ -370,7 +373,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
+                        bool returnResult = _purchase.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
                             string message = "Supply record updated successfully.";
@@ -414,7 +417,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
+                        bool returnResult = _purchase.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
                             string message = "Additive record updated successfully.";

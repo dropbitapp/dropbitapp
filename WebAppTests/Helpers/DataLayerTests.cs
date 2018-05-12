@@ -31,6 +31,7 @@ namespace WebApp.Helpers.Tests
         DataLayer _dl = new DataLayer();
 
         private ProductionWorkflow _production = new ProductionWorkflow();
+        private PurchaseWorkflow _purchase = new PurchaseWorkflow();
 
         private ProductionReport _productionReport = new ProductionReport();
 
@@ -129,7 +130,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -396,7 +397,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 10;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -712,7 +713,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -1246,7 +1247,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 10;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // create 1st Production Distillation Record and don't mark it as Gauged
@@ -1545,7 +1546,7 @@ namespace WebApp.Helpers.Tests
                 pomacePurchase.SpiritTypeReportingID = 10;
                 pomacePurchase.Gauged = true;
 
-                pomacePurchaseId = _dl.CreatePurchase(pomacePurchase, _userId);
+                pomacePurchaseId = _purchase.CreatePurchase(pomacePurchase, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(pomacePurchaseId, Table.Purchase));
 
                 // 2. Distill 1000 lbs to produce 55 gallons at 50% ABV on 4/6/18
@@ -2072,7 +2073,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int purchaseId = _dl.CreatePurchase(purchase, _userId);
+                int purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 testRecords.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Create Production Blending record
@@ -2206,7 +2207,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int purchaseId = _dl.CreatePurchase(purchase, _userId);
+                int purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 testRecords.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Blend and gauge
@@ -2373,7 +2374,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int purchaseId = _dl.CreatePurchase(purchase, _userId);
+                int purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 testRecords.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Create Production Distillation record and Gauged to true
@@ -2546,7 +2547,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 9;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Redistil GNS into GIN and mark it as Gauged
@@ -2887,7 +2888,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 9;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Redistil GNS into GIN and mark it as Gauged
@@ -3166,7 +3167,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 8;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -3661,7 +3662,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 8;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -4018,7 +4019,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 8;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -4300,7 +4301,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -4596,7 +4597,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -4827,7 +4828,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -5045,7 +5046,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -5239,7 +5240,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -5450,7 +5451,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 garbage.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -5717,7 +5718,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -6087,7 +6088,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 _dl.DeletePurchaseExecute(purchaseId, _userId);
@@ -6181,7 +6182,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 _dl.DeletePurchaseExecute(purchaseId, _userId);
@@ -6275,7 +6276,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 _dl.DeletePurchaseExecute(purchaseId, _userId);
@@ -6369,7 +6370,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 _dl.DeletePurchaseExecute(purchaseId, _userId);
@@ -6463,7 +6464,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 _dl.DeletePurchaseExecute(purchaseId, _userId);
@@ -6558,7 +6559,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -6685,7 +6686,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -6734,7 +6735,7 @@ namespace WebApp.Helpers.Tests
                 purchase.Price = 2500f;
                 purchase.VendorId = vendorId;
 
-                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Production
@@ -6901,7 +6902,7 @@ namespace WebApp.Helpers.Tests
                 purchase.Price = 2500f;
                 purchase.VendorId = vendorId;
 
-                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 List<StorageObject> storageList = new List<StorageObject>();
@@ -7072,7 +7073,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -7120,7 +7121,7 @@ namespace WebApp.Helpers.Tests
                 purchase.Price = 2500f;
                 purchase.VendorId = vendorId;
 
-                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // set up blending additive list
@@ -7288,7 +7289,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchFermentable.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchFermentable, _userId);
+                purchaseId = _purchase.CreatePurchase(purchFermentable, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -7329,7 +7330,7 @@ namespace WebApp.Helpers.Tests
                 deleteObject.DeleteRecordType = "Fermentable";
 
                 // Try to delete Purchase Fermentable record while it's being used by Production Fermentation record.
-                ReturnObject returnResult = _dl.DeletePurchaseRecord(_userId, deleteObject);
+                ReturnObject returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
 
                 var purchaseList1 = _dl.GetPurchasesList(purchFermentable.PurchaseType, _userId);
 
@@ -7354,7 +7355,7 @@ namespace WebApp.Helpers.Tests
                 Assert.IsNull(prodFound);
 
                 // Try to delete Purchase Fermentable record when its not being used by any record.
-                _dl.DeletePurchaseRecord(_userId, deleteObject);
+                _purchase.DeletePurchaseRecord(_userId, deleteObject);
 
                 var purchaseList2 = _dl.GetPurchasesList(purchFermentable.PurchaseType, _userId);
 
@@ -7449,7 +7450,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchFermented.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchFermented, _userId);
+                purchaseId = _purchase.CreatePurchase(purchFermented, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -7493,7 +7494,7 @@ namespace WebApp.Helpers.Tests
                 deleteObject.DeleteRecordType = "Fermented";
 
                 // Try to delete Purchase Fermented record while it's being used by Production Distillation record.
-                ReturnObject returnResult = _dl.DeletePurchaseRecord(_userId, deleteObject);
+                ReturnObject returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
 
                 var purchaseList1 = _dl.GetPurchasesList(purchFermented.PurchaseType, _userId);
 
@@ -7518,7 +7519,7 @@ namespace WebApp.Helpers.Tests
                 Assert.IsNull(prodFound);
 
                 // Try to delete Purchase Fermented record when its not being used by any record.
-                _dl.DeletePurchaseRecord(_userId, deleteObject);
+                _purchase.DeletePurchaseRecord(_userId, deleteObject);
 
                 var purchaseList2 = _dl.GetPurchasesList(purchFermented.PurchaseType, _userId);
 
@@ -7613,7 +7614,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchDistilled.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchDistilled, _userId);
+                purchaseId = _purchase.CreatePurchase(purchDistilled, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -7657,7 +7658,7 @@ namespace WebApp.Helpers.Tests
                 deleteObject.DeleteRecordType = "Distilled";
 
                 // Try to delete Purchase Distilled record while it's being used by Production Distillation record.
-                ReturnObject returnResult = _dl.DeletePurchaseRecord(_userId, deleteObject);
+                ReturnObject returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
 
                 var purchaseList1 = _dl.GetPurchasesList(purchDistilled.PurchaseType, _userId);
 
@@ -7714,7 +7715,7 @@ namespace WebApp.Helpers.Tests
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // Try to delete Purchase Distilled record while it's being used by Production Blending record.
-                returnResult = _dl.DeletePurchaseRecord(_userId, deleteObject);
+                returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
 
                 var purchaseList2 = _dl.GetPurchasesList(purchDistilled.PurchaseType, _userId);
 
@@ -7771,7 +7772,7 @@ namespace WebApp.Helpers.Tests
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // Try to delete Purchase Distilled record while it's being used by Production Bottling record.
-                returnResult = _dl.DeletePurchaseRecord(_userId, deleteObject);
+                returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
 
                 var purchaseList3 = _dl.GetPurchasesList(purchDistilled.PurchaseType, _userId);
 
@@ -7891,7 +7892,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchAdditive.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchAdditive, _userId);
+                purchaseId = _purchase.CreatePurchase(purchAdditive, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -7935,7 +7936,7 @@ namespace WebApp.Helpers.Tests
                 deleteObject.DeleteRecordType = "Additive";
 
                 // Try to delete Purchase Additive record while it's being used by Production Blending record.
-                ReturnObject returnResult = _dl.DeletePurchaseRecord(_userId, deleteObject);
+                ReturnObject returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
 
                 var purchaseList1 = _dl.GetPurchasesList(purchAdditive.PurchaseType, _userId);
 
@@ -8055,7 +8056,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchFermentable.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchFermentable, _userId);
+                purchaseId = _purchase.CreatePurchase(purchFermentable, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -8248,7 +8249,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchFermented.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchFermented, _userId);
+                purchaseId = _purchase.CreatePurchase(purchFermented, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -8566,7 +8567,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchDistilled.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchDistilled, _userId);
+                purchaseId = _purchase.CreatePurchase(purchDistilled, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -8781,7 +8782,7 @@ namespace WebApp.Helpers.Tests
                 purchase.Price = 2500f;
                 purchase.VendorId = vendorId;
 
-                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 cleanupList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Production
@@ -8981,7 +8982,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -9304,7 +9305,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -9687,7 +9688,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 10;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // create 1st Production Distillation Record and mark it as Gauged
@@ -9745,7 +9746,7 @@ namespace WebApp.Helpers.Tests
                 purchO1.SpiritTypeReportingID = 10;
                 purchO1.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO1, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO1, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // create 1st Production Distillation Record and mark it as Gauged
@@ -9931,7 +9932,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -10703,7 +10704,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -11527,7 +11528,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -12050,7 +12051,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -12531,7 +12532,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -14688,7 +14689,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -14914,7 +14915,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -15168,7 +15169,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion

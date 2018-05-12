@@ -2,12 +2,14 @@
 using System;
 using System.Web.Mvc;
 using WebApp.Helpers;
+using WebApp.Workflows;
 
 namespace WebApp.Controllers
 {
     public class DestructionController : Controller
     {
         private DataLayer dl = new DataLayer();
+        private PurchaseWorkflow _purchase = new PurchaseWorkflow();
 
         // GET: Destruction
         public ActionResult Index()
@@ -49,7 +51,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var recsList = dl.GetPurchaseDataForDestruction(userId);
+                    var recsList = _purchase.GetPurchaseDataForDestruction(userId);
                     return Json(recsList, JsonRequestBehavior.AllowGet);
                 }
                 else
