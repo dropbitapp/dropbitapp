@@ -1,20 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using WebApp.Models;
 using WebApp.Helpers;
-using System.Web.Security;
 using Microsoft.AspNet.Identity;
-using System;
 using WebApp.Workflows;
 
 namespace WebApp.Controllers
 {
     public class PurchaseController : Controller
     {
-        private DataLayer dl = new DataLayer();
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+        private readonly PurchaseWorkflow _purchase;
 
-        private PurchaseWorkflow _purchase = new PurchaseWorkflow();
+        public PurchaseController()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+            _purchase = new PurchaseWorkflow(_db, _dl);
+        }
 
         #region Shared Methods
 
@@ -25,7 +28,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public JsonResult GetReportingSpiritTypes()
         {
-            var spiritTypeList = dl.GetReportingSpiritTypes();
+            var spiritTypeList = _dl.GetReportingSpiritTypes();
             return Json(spiritTypeList, JsonRequestBehavior.AllowGet);
         }
 
@@ -134,7 +137,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var vendorList = dl.GetVendorData(userId);
+                    var vendorList = _dl.GetVendorData(userId);
                     return Json(vendorList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -156,7 +159,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var storageList = dl.GetStorageData(userId);
+                    var storageList = _dl.GetStorageData(userId);
                     return Json(storageList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -305,7 +308,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public JsonResult GetSpiritToKindListData()
         {
-            var spiritToKindList = dl.GetSpiritToKindListData();
+            var spiritToKindList = _dl.GetSpiritToKindListData();
             return Json(spiritToKindList, JsonRequestBehavior.AllowGet);
         }
 

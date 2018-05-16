@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using WebApp.Helpers;
 using WebApp.Models;
 
@@ -9,11 +8,13 @@ namespace WebApp.Reports
 {
     public class ProcessingReport
     {
-        private DistilDBContext _db;
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
 
-        public ProcessingReport()
+        public ProcessingReport(DistilDBContext db, DataLayer dl)
         {
-            _db = new DistilDBContext();
+            _db = db;
+            _dl = dl;
         }
 
         /// <summary>
@@ -36,8 +37,8 @@ namespace WebApp.Reports
             var line26RunningSum = 0F;
 
             // get distiller information for header report
-            int distillerID = GetDistillerId(userId);
-            procRepObj.Header = GetDistillerInfoForReportHeader(distillerID, startOfReporting);
+            int distillerID = _dl.GetDistillerId(userId);
+            procRepObj.Header = _dl.GetDistillerInfoForReportHeader(distillerID, startOfReporting);
 
             // Processing Report Part 1 Section
             procRepP1.BulkIngredients = "spirit";
@@ -1034,55 +1035,6 @@ namespace WebApp.Reports
             procRepObj.Part2 = procRepP2;
             procRepObj.Part4List = procRepP4L;
             return procRepObj;
-        }
-
-        /// <summary>
-        /// GetDistillerID retrieves DistillerId for given UserId
-        /// </summary>
-        public int GetDistillerId(int userId)
-        {
-            int distillerId = (from rec in _db.AspNetUserToDistiller
-                               where rec.UserId == userId
-                               select rec.DistillerID).FirstOrDefault();
-            return distillerId;
-        }
-
-        /// <summary>
-        /// Report header
-        /// </summary>
-        /// <param name="distillerID"></param>
-        /// <param name="startDate"></param>
-        /// <returns></returns>
-        public ReportHeader GetDistillerInfoForReportHeader(int distillerID, DateTime startDate)
-        {
-            try
-            {
-                ReportHeader header = new ReportHeader();
-
-                var res =
-                    (from distT in _db.Distiller
-                     join distDT in _db.DistillerDetail on distT.DistillerID equals distDT.DistillerID
-                     where distDT.DistillerID == distillerID
-                     select new
-                     {
-                         DistillerName = distT.Name,
-                         EIN = distDT.EIN,
-                         DSP = distDT.DSP,
-                         Address = distDT.StreetAddress + " " + distDT.City + " " + distDT.State + " " + distDT.Zip
-                     }).FirstOrDefault();
-
-                header.ProprietorName = res.DistillerName;
-                header.EIN = res.EIN;
-                header.DSP = res.DSP;
-                header.PlantAddress = res.Address;
-                header.ReportDate = startDate.ToString("Y");
-
-                return header;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
         }
     }
 }

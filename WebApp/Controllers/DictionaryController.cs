@@ -1,16 +1,23 @@
 ﻿using Microsoft.AspNet.Identity;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web.Mvc;
 using WebApp.Helpers;
+using WebApp.Models;
 using WebApp.Workflows;
 
 namespace WebApp.Controllers
 {
     public class DictionaryController : Controller
     {
-        private DataLayer _dl = new DataLayer();
-        private DictionaryWorkflow _dictionary = new DictionaryWorkflow();
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+        private readonly DictionaryWorkflow _dictionary;
+
+        public DictionaryController()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+            _dictionary = new DictionaryWorkflow(_db, _dl);
+        }
 
         /// <summary>   
         /// Spirit ActionResult Method

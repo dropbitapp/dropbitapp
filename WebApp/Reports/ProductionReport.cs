@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using WebApp.Helpers;
 using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
@@ -10,7 +9,9 @@ namespace WebApp.Reports
 {
     public class ProductionReport
     {
-        private DistilDBContext _db;
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+
         // integer month representation
         private const int january = 1;
         private const int february = 2;
@@ -25,9 +26,10 @@ namespace WebApp.Reports
         private const int november = 11;
         private const int december = 12;
 
-        public ProductionReport()
+        public ProductionReport(DistilDBContext db, DataLayer dl)
         {
-            _db = new DistilDBContext();
+            _db = db;
+            _dl = dl;
         }
 
         /// <summary>
@@ -39,9 +41,6 @@ namespace WebApp.Reports
         /// <returns></returns>
         public ProductionReportingObject GetProductionReportData(DateTime start, DateTime end, int userId)
         {
-            //instantiate DataLayer to call shared methods
-            DataLayer dl = new DataLayer();
-
             ProductionReportingObject prodRepObj = new ProductionReportingObject();
             List<ProdReportPart1> part1List = new List<ProdReportPart1>();
             List<ProdReportParts2Through4> part2Thru4List = new List<ProdReportParts2Through4>();
@@ -50,9 +49,9 @@ namespace WebApp.Reports
             List<ProductionReportHelper> tempRepObjList = new List<ProductionReportHelper>();
 
             // get distiller information for header report
-            int distillerID = dl.GetDistillerId(userId);
+            int distillerID = _dl.GetDistillerId(userId);
 
-            prodRepObj.Header = dl.GetDistillerInfoForReportHeader(distillerID, start);
+            prodRepObj.Header = _dl.GetDistillerInfoForReportHeader(distillerID, start);
 
             // get initial set of records produced in a given reporting period. It is used in 
             // mutliple methods
@@ -1150,17 +1149,6 @@ namespace WebApp.Reports
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// GetDistillerID retrieves DistillerId for given UserId
-        /// </summary>
-        public int GetDistillerId(int userId)
-        {
-            int distillerId = (from rec in _db.AspNetUserToDistiller
-                               where rec.UserId == userId
-                               select rec.DistillerID).FirstOrDefault();
-            return distillerId;
         }
     }
 }

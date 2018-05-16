@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Web;
 using WebApp.Helpers;
 using WebApp.Models;
 
@@ -11,22 +9,13 @@ namespace WebApp.Workflows
 {
     public class DictionaryWorkflow
     {
-        private DistilDBContext _db;
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
 
-        public DictionaryWorkflow()
+        public DictionaryWorkflow(DistilDBContext db, DataLayer dl)
         {
-            _db = new DistilDBContext();
-        }
-
-        /// <summary>
-        /// GetDistillerID retrieves DistillerId for given UserId
-        /// </summary>
-        public int GetDistillerId(int userId)
-        {
-            int distillerId = (from rec in _db.AspNetUserToDistiller
-                               where rec.UserId == userId
-                               select rec.DistillerID).FirstOrDefault();
-            return distillerId;
+            _db = db;
+            _dl = dl;
         }
 
         /// <summary>
@@ -69,7 +58,7 @@ namespace WebApp.Workflows
         public int CreateSpirit(int userId, SpiritObject spiritObject)
         {
 
-            var distillerId = GetDistillerId(userId);
+            var distillerId = _dl.GetDistillerId(userId);
 
             //define method execution return value to be false by default
             var retMthdExecResult = 0;
@@ -113,7 +102,7 @@ namespace WebApp.Workflows
         {
             //define method execution return value to be false by default
             int retMthdExecResult = 0;
-            int distillerID = GetDistillerId(userId);
+            int distillerID = _dl.GetDistillerId(userId);
             if (vendorObject != null)
             {
                 try
@@ -158,7 +147,7 @@ namespace WebApp.Workflows
         {
             //define method execution return value to be false by default
             int retMthdExecResult = 0;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
 
             if (storageObject != null)
             {
@@ -203,7 +192,7 @@ namespace WebApp.Workflows
             //define method execution return value to be false by default
             int retMthdExecResult = 0;
             int materialDictID = 0;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
 
             if (rawMObject != null)
             {
@@ -301,7 +290,7 @@ namespace WebApp.Workflows
         {
             //define method execution return value to be false by default
             var retMthdExecResult = false;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
 
             if (spiritObject != null)
             {
@@ -345,7 +334,7 @@ namespace WebApp.Workflows
         {
             //define method execution return value to be false by default
             var retMthdExecResult = false;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
 
             if (vendorObject != null)
             {
@@ -399,7 +388,7 @@ namespace WebApp.Workflows
         {
             //define method execution return value to be false by default
             var retMthdExecResult = false;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
 
             if (storageObject != null)
             {
@@ -451,7 +440,7 @@ namespace WebApp.Workflows
             //define method execution return value to be false by default
             var retMthdExecResult = false;
             int materialDictID = 0;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
 
             if (rawMObject != null)
             {
@@ -640,7 +629,7 @@ namespace WebApp.Workflows
         public List<VendorObject> GetVendorList(int userId)
         {
             List<VendorObject> vendorList = new List<VendorObject>();
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
 
             try
             {
@@ -795,7 +784,7 @@ namespace WebApp.Workflows
         {
             int RecordID = deleteObject.DeleteRecordID;
             string RecordType = deleteObject.DeleteRecordType;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
             ReturnObject delReturn = new ReturnObject();
             if (RecordID > 0)
             {
@@ -933,7 +922,7 @@ namespace WebApp.Workflows
         private bool DeleteVendor(int userId, int vendorID)
         {
             bool retMthdExecResult = false;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
             if (vendorID > 0)
             {
                 try
@@ -978,7 +967,7 @@ namespace WebApp.Workflows
         private bool DeleteSpirit(int userId, int spiritID)
         {
             bool retMthdExecResult = false;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
             if (spiritID > 0)
             {
                 try
@@ -1010,7 +999,7 @@ namespace WebApp.Workflows
         private bool DeleteStorage(int userId, int storageID)
         {
             bool retMthdExecResult = false;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
             if (storageID >= 0)
             {
                 try
@@ -1050,7 +1039,7 @@ namespace WebApp.Workflows
         private bool DeleteRawMaterial(int userId, int rawMaterialID)
         {
             bool retMthdExecResult = false;
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
             if (rawMaterialID >= 0)
             {
                 try

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Web;
 using WebApp.Helpers;
 using WebApp.Models;
 
@@ -10,11 +9,13 @@ namespace WebApp.Workflows
 {
     public class ProductionWorkflow
     {
-        private DistilDBContext _db;
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
 
-        public ProductionWorkflow()
+        public ProductionWorkflow(DistilDBContext db, DataLayer dl)
         {
-            _db = new DistilDBContext();
+            _db = db;
+            _dl = dl;
         }
 
         /// <summary>
@@ -27,7 +28,7 @@ namespace WebApp.Workflows
             //define method execution return value to be false by default
             int retMthdExecResult = 0;
 
-            var distillerId = GetDistillerId(userId);
+            var distillerId = _dl.GetDistillerId(userId);
 
             prodObject.StatusName = "Active";
 
@@ -385,9 +386,6 @@ namespace WebApp.Workflows
         /// <param name="userId"></param>
         internal void UpdateRecordsUsedInProductionWorkflow(List<ObjInfo4Burndwn> usedMats, int productionIDBeingCreated, int userId)
         {
-            //instantiate DataLayer to call shared method
-            DataLayer dl = new DataLayer();
-
             // list of purchase ids of purchase records and ids associated with production records
             // that are used in distillation process
             List<int> purIdL = new List<int>();
@@ -588,7 +586,7 @@ namespace WebApp.Workflows
                         _db.ProductionContent.AddRange(prodContentL);
                         _db.SaveChanges();
 
-                        dl.SavePurchaseHistory(purObj, userId);
+                        _dl.SavePurchaseHistory(purObj, userId);
                     }
                     // production batch used in the distillation
                     else if (k.DistillableOrigin == "prod")
@@ -1021,7 +1019,7 @@ namespace WebApp.Workflows
             int recordId = deleteObject.DeleteRecordID;
             string recordType = deleteObject.DeleteRecordType;
 
-            int distillerId = GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
 
             if (recordId > 0)
             {
@@ -1746,80 +1744,6 @@ namespace WebApp.Workflows
         }
 
         /// <summary>
-        /// GetSpiritToKindListObject method returns an object with a list of multiple material kinds mapped to transaction spirit type.
-        /// </summary>
-        /// <param name="spiritList"></param>
-        /// <param name="kindsList"></param>
-        /// <returns></returns>
-        public List<SpiritToKindListObject> GetSpiritToKindListData()
-        {
-            List<SpiritToKindListObject> spir2KindList = new List<SpiritToKindListObject>();
-            byte[] existsArray = new byte[256];
-
-            try
-            {
-                var res =
-                    from spiType in _db.SpiritTypeReporting
-                    join spiT2Mat in _db.SpiritType2MaterialKindReporting on spiType.SpiritTypeReportingID equals spiT2Mat.SpiritTypeReportingID into spiT2Mat_join
-                    from spiT2Mat in spiT2Mat_join.DefaultIfEmpty()
-                    join matKind in _db.MaterialKindReporting on spiT2Mat.MaterialKindReportingID equals matKind.MaterialKindReportingID into matKind_join
-                    from matKind in matKind_join.DefaultIfEmpty()
-                    select new
-                    {
-                        MaterialKindReportingID = (int?)spiT2Mat.MaterialKindReportingID ?? 0,
-                        SpiritTypeReportingID = (int?)spiType.SpiritTypeReportingID ?? 0,
-                        MaterialKindName = matKind.MaterialKindName ?? string.Empty,
-                        ProductTypeName = spiType.ProductTypeName ?? string.Empty
-                    };
-
-                foreach (var i in res)
-                {
-                    if (existsArray[i.SpiritTypeReportingID] == 0)
-                    {
-                        SpiritToKindListObject spir2Kind = new SpiritToKindListObject();
-                        spir2Kind.SpiritTypeReportingID = i.SpiritTypeReportingID;
-                        spir2Kind.ProductTypeName = i.ProductTypeName;
-
-                        List<MaterialKindObject> kindList = new List<MaterialKindObject>();
-
-                        if (i.MaterialKindReportingID > 0 && i.MaterialKindName != string.Empty)
-                        {
-                            MaterialKindObject kind = new MaterialKindObject();
-                            kind.MaterialKindID = i.MaterialKindReportingID;
-                            kind.MaterialKindName = i.MaterialKindName;
-                            kind.SpiritTypeReportingID = i.SpiritTypeReportingID;
-                            kindList.Add(kind);
-                        }
-
-                        spir2Kind.MaterialKindObject = kindList;
-                        spir2KindList.Add(spir2Kind);
-                        existsArray[i.SpiritTypeReportingID] = 1;
-                    }
-                    else if (existsArray[i.SpiritTypeReportingID] == 1)
-                    {
-                        foreach (var li in spir2KindList)
-                        {
-                            if (li.SpiritTypeReportingID == i.SpiritTypeReportingID && i.MaterialKindReportingID > 0 && i.MaterialKindName != string.Empty)
-                            {
-                                MaterialKindObject kind = new MaterialKindObject();
-                                kind.MaterialKindID = i.MaterialKindReportingID;
-                                kind.MaterialKindName = i.MaterialKindName;
-                                kind.SpiritTypeReportingID = i.SpiritTypeReportingID;
-                                li.MaterialKindObject.Add(kind);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-
-            return spir2KindList;
-        }
-
-        /// <summary>
         /// Method that updates DB with updated production values from fron-end
         /// </summary>
         /// <param name="pObj"></param>
@@ -2198,15 +2122,22 @@ namespace WebApp.Workflows
             return bList;
         }
 
+
         /// <summary>
-        /// GetDistillerID retrieves DistillerId for given UserId
+        /// Retrieves all produced batches
         /// </summary>
-        public int GetDistillerId(int userId)
+        public List<ProductionObject> GetProductionDataForDestruction(int userId)
         {
-            int distillerId = (from rec in _db.AspNetUserToDistiller
-                               where rec.UserId == userId
-                               select rec.DistillerID).FirstOrDefault();
-            return distillerId;
+            List<ProductionObject> productionList = new List<ProductionObject>();
+
+            // Production types to be included in the return list
+            string[] productionType = new string[] { "Fermentation", "Distillation", "Blending", "Bottling" };
+
+            foreach (string i in productionType)
+            {
+                productionList.AddRange(GetProductionList(userId, i));
+            }
+            return productionList;
         }
     }
 }

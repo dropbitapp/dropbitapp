@@ -8,22 +8,13 @@ namespace WebApp.Reports
 {
     public class StorageReport
     {
-        private DistilDBContext _db;
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
 
-        public StorageReport()
+        public StorageReport(DistilDBContext db, DataLayer dl)
         {
-            _db = new DistilDBContext();
-        }
-
-        /// <summary>
-        /// GetDistillerID retrieves DistillerId for given UserId
-        /// </summary>
-        public int GetDistillerId(int userId)
-        {
-            int distillerId = (from rec in _db.AspNetUserToDistiller
-                               where rec.UserId == userId
-                               select rec.DistillerID).FirstOrDefault();
-            return distillerId;
+            _db = db;
+            _dl = dl;
         }
 
         public StorageReportObject GetStorageReportData(DateTime startDate, DateTime endDate, int userId)
@@ -34,9 +25,9 @@ namespace WebApp.Reports
                 List<StorageReportCategory> storageReportBody = new List<StorageReportCategory>();
 
                 // get distiller information for header report
-                int distillerID = GetDistillerId(userId);
+                int distillerID = _dl.GetDistillerId(userId);
 
-                storageReport.Header = GetDistillerInfoForReportHeader(distillerID, startDate);
+                storageReport.Header = _dl.GetDistillerInfoForReportHeader(distillerID, startDate);
 
                 GetProducedOnHandFirstOfMonth(startDate, endDate, userId, ref storageReportBody);
 
@@ -1019,44 +1010,6 @@ namespace WebApp.Reports
             {
                 storage.r24_Lines7Through23 = (float)Math.Round(storage.r7_TaxPaid + storage.r17_TransferredToProcessingAccount + storage.r18_TransferredToProductionAccount
                     + storage.r19_TransferredToOtherBondedPremises + storage.r20_Destroyed + storage.r22_OtherLosses + storage.r23_OnHandEndOfMonth, 3);
-            }
-        }
-
-        /// <summary>
-        /// Report header
-        /// </summary>
-        /// <param name="distillerID"></param>
-        /// <param name="startDate"></param>
-        /// <returns></returns>
-        public ReportHeader GetDistillerInfoForReportHeader(int distillerID, DateTime startDate)
-        {
-            try
-            {
-                ReportHeader header = new ReportHeader();
-
-                var res =
-                    (from distT in _db.Distiller
-                     join distDT in _db.DistillerDetail on distT.DistillerID equals distDT.DistillerID
-                     where distDT.DistillerID == distillerID
-                     select new
-                     {
-                         DistillerName = distT.Name,
-                         EIN = distDT.EIN,
-                         DSP = distDT.DSP,
-                         Address = distDT.StreetAddress + " " + distDT.City + " " + distDT.State + " " + distDT.Zip
-                     }).FirstOrDefault();
-
-                header.ProprietorName = res.DistillerName;
-                header.EIN = res.EIN;
-                header.DSP = res.DSP;
-                header.PlantAddress = res.Address;
-                header.ReportDate = startDate.ToString("Y");
-
-                return header;
-            }
-            catch (Exception e)
-            {
-                throw e;
             }
         }
     }

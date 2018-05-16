@@ -10,9 +10,16 @@ namespace WebApp.Controllers
 {
     public class ProductionController : Controller
     {
-        private DataLayer _dl = new DataLayer();
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+        private readonly ProductionWorkflow _production;
 
-        private ProductionWorkflow _production = new ProductionWorkflow();
+        public ProductionController()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+            _production = new ProductionWorkflow(_db, _dl);
+        }
 
         // --- Production Methods for Fermenting and Distilling ---
 

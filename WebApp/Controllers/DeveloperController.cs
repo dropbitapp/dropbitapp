@@ -1,12 +1,20 @@
 ﻿using Microsoft.AspNet.Identity;
 using System.Web.Mvc;
 using WebApp.Helpers;
+using WebApp.Models;
 
 namespace WebApp.Controllers
 {
     public class DeveloperController : Controller
     {
-        private DataLayer dl = new DataLayer();
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+
+        public DeveloperController()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+        }
 
 #if DEBUG
         public void Test()
@@ -31,7 +39,7 @@ namespace WebApp.Controllers
                 {
                     try
                     {
-                        bool returnResult = dl.RemoveRecordsFromDBForUser(userId);
+                        bool returnResult = _dl.RemoveRecordsFromDBForUser(userId);
                     }
                     catch
                     {
@@ -51,7 +59,7 @@ namespace WebApp.Controllers
                 {
                     try
                     {
-                        bool returnResult = dl.RemoveRecordsFromDBForUser(7);
+                        bool returnResult = _dl.RemoveRecordsFromDBForUser(7);
                     }
                     catch
                     {

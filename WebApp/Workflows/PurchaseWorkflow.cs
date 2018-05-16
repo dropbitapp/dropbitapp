@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using WebApp.Helpers;
 using WebApp.Models;
 using WebApp.Persistence.Repositories;
@@ -10,25 +9,24 @@ namespace WebApp.Workflows
 {
     public class PurchaseWorkflow
     {
-        private DistilDBContext db;
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
 
-        public PurchaseWorkflow()
+        public PurchaseWorkflow(DistilDBContext db, DataLayer dl)
         {
-            db = new DistilDBContext();
+            _db = db;
+            _dl = dl;
         }
 
-        internal bool UpdatePurchase(PurchaseObject purchaseObject, int userId)
+        public bool UpdatePurchase(PurchaseObject purchaseObject, int userId)
         {
-            //instantiate DataLayer to call shared method
-            DataLayer dl = new DataLayer();
-
             bool retMthdExecResult = false;
 
             try
             {
                 var purchT =
-                    (from rec in db.Purchase
-                     join dslrs in db.AspNetUserToDistiller on rec.DistillerID equals dslrs.DistillerID into dslrs_join
+                    (from rec in _db.Purchase
+                     join dslrs in _db.AspNetUserToDistiller on rec.DistillerID equals dslrs.DistillerID into dslrs_join
                      from dslrs in dslrs_join.DefaultIfEmpty()
                      where rec.PurchaseID == purchaseObject.PurchaseId &&
                      dslrs.UserId == userId
@@ -63,20 +61,20 @@ namespace WebApp.Workflows
 
                     //todo: need to be able to add update for storages and Material Type(even though, updating material type might be difficult)
 
-                    db.SaveChanges();
+                    _db.SaveChanges();
 
                     // Quantity
                     if (purchT.VolumeID > 0 && purchaseObject.Quantity != null)
                     {
                         //update quantity record
                         var qtyRec =
-                            (from rec in db.Volume
+                            (from rec in _db.Volume
                              where rec.VolumeID == purchT.VolumeID
                              select rec).FirstOrDefault();
                         if (qtyRec != null && qtyRec.Value != purchaseObject.Quantity)
                         {
                             qtyRec.Value = purchaseObject.Quantity;
-                            db.SaveChanges();
+                            _db.SaveChanges();
                         }
                     }
                     else if (purchT.VolumeID == 0 && purchaseObject.Quantity != null)
@@ -84,8 +82,8 @@ namespace WebApp.Workflows
                         //create quantity record
                         Volume newQtyRec = new Volume();
                         newQtyRec.Value = purchaseObject.Quantity;
-                        db.Volume.Add(newQtyRec);
-                        db.SaveChanges();
+                        _db.Volume.Add(newQtyRec);
+                        _db.SaveChanges();
                         purchT.VolumeID = newQtyRec.VolumeID;
                     }
 
@@ -96,14 +94,14 @@ namespace WebApp.Workflows
                         {
                             //update volume by weight record
                             var vbwRec =
-                                (from rec in db.Weight
+                                (from rec in _db.Weight
                                  where rec.WeightID == purchT.WeightID
                                  select rec).FirstOrDefault();
 
                             if (vbwRec != null && vbwRec.Value != purchaseObject.VolumeByWeight)
                             {
                                 vbwRec.Value = purchaseObject.VolumeByWeight;
-                                db.SaveChanges();
+                                _db.SaveChanges();
                             }
                         }
                         else if (purchT.WeightID == 0 && purchaseObject.VolumeByWeight != null)
@@ -111,8 +109,8 @@ namespace WebApp.Workflows
                             //create volume by weight record
                             Weight newVbwRec = new Weight();
                             newVbwRec.Value = purchaseObject.VolumeByWeight;
-                            db.Weight.Add(newVbwRec);
-                            db.SaveChanges();
+                            _db.Weight.Add(newVbwRec);
+                            _db.SaveChanges();
                             purchT.WeightID = newVbwRec.WeightID;
                         }
                     }
@@ -124,13 +122,13 @@ namespace WebApp.Workflows
                         {
                             //update alcohol content record
                             var alcRec =
-                                (from rec in db.Alcohol
+                                (from rec in _db.Alcohol
                                  where rec.AlcoholID == purchT.AlcoholID
                                  select rec).FirstOrDefault();
                             if (alcRec != null && alcRec.Value != purchaseObject.AlcoholContent)
                             {
                                 alcRec.Value = purchaseObject.AlcoholContent;
-                                db.SaveChanges();
+                                _db.SaveChanges();
                             }
                         }
                         else if (purchT.AlcoholID == 0 && purchaseObject.AlcoholContent != null)
@@ -138,8 +136,8 @@ namespace WebApp.Workflows
                             //create alcohol content record
                             Alcohol newAlcRec = new Alcohol();
                             newAlcRec.Value = purchaseObject.AlcoholContent;
-                            db.Alcohol.Add(newAlcRec);
-                            db.SaveChanges();
+                            _db.Alcohol.Add(newAlcRec);
+                            _db.SaveChanges();
                             purchT.AlcoholID = newAlcRec.AlcoholID;
                         }
 
@@ -148,13 +146,13 @@ namespace WebApp.Workflows
                         {
                             //update proof record
                             var prfRec =
-                                (from rec in db.Proof
+                                (from rec in _db.Proof
                                  where rec.ProofID == purchT.ProofID
                                  select rec).FirstOrDefault();
                             if (prfRec != null && prfRec.Value != purchaseObject.ProofGallon)
                             {
                                 prfRec.Value = purchaseObject.ProofGallon;
-                                db.SaveChanges();
+                                _db.SaveChanges();
                             }
                         }
                         else if (purchT.ProofID == 0 && purchaseObject.ProofGallon != null)
@@ -162,8 +160,8 @@ namespace WebApp.Workflows
                             //create proof record
                             Proof newPrfRec = new Proof();
                             newPrfRec.Value = purchaseObject.ProofGallon;
-                            db.Proof.Add(newPrfRec);
-                            db.SaveChanges();
+                            _db.Proof.Add(newPrfRec);
+                            _db.SaveChanges();
                             purchT.ProofID = newPrfRec.ProofID;
                         }
 
@@ -172,7 +170,7 @@ namespace WebApp.Workflows
 
                     // update storages
                     var storages =
-                        from rec in db.StorageToRecord
+                        from rec in _db.StorageToRecord
                         where rec.RecordId == purchT.PurchaseID && rec.TableIdentifier == "pur"
                         select rec;
 
@@ -181,9 +179,9 @@ namespace WebApp.Workflows
                     {
                         foreach (var i in storages)
                         {
-                            db.StorageToRecord.Remove(i);
+                            _db.StorageToRecord.Remove(i);
                         }
-                        db.SaveChanges();
+                        _db.SaveChanges();
                     }
 
                     if (purchaseObject.Storage != null)
@@ -196,8 +194,8 @@ namespace WebApp.Workflows
                             stoR.StorageID = k.StorageId;
                             stoR.RecordId = purchT.PurchaseID;
                             stoR.TableIdentifier = "pur";
-                            db.StorageToRecord.Add(stoR);
-                            db.SaveChanges();
+                            _db.StorageToRecord.Add(stoR);
+                            _db.SaveChanges();
                             storagesString += k.StorageName + "; ";
                         }
                         purchaseObject.StorageName = storagesString;
@@ -210,7 +208,7 @@ namespace WebApp.Workflows
 
                 retMthdExecResult = true;
 
-                dl.SavePurchaseHistory(purchaseObject, userId);
+                _dl.SavePurchaseHistory(purchaseObject, userId);
             }
             catch (Exception e)
             {
@@ -227,9 +225,6 @@ namespace WebApp.Workflows
         /// <returns>int</returns>
         public int CreatePurchase(PurchaseObject purchaseObject, int userId)
         {
-            //instantiate DataLayer to call shared method
-            DataLayer dl = new DataLayer();
-
             int retMthdExecResult = 0;
 
             try
@@ -241,10 +236,10 @@ namespace WebApp.Workflows
                 purchT.Note = purchaseObject.Note;
                 purchT.Price = purchaseObject.Price;
                 purchT.VendorID = purchaseObject.VendorId;
-                purchT.DistillerID = dl.GetDistillerId(userId);
+                purchT.DistillerID = _dl.GetDistillerId(userId);
 
                 var pTypes =
-                    (from rec in db.PurchaseType
+                    (from rec in _db.PurchaseType
                      where rec.Name == purchaseObject.PurchaseType
                      select rec).FirstOrDefault();
 
@@ -258,8 +253,8 @@ namespace WebApp.Workflows
                 {
                     Volume quantG = new Volume();
                     quantG.Value = purchaseObject.Quantity;
-                    db.Volume.Add(quantG);
-                    db.SaveChanges();
+                    _db.Volume.Add(quantG);
+                    _db.SaveChanges();
 
                     purchT.VolumeID = quantG.VolumeID;
                 }
@@ -272,8 +267,8 @@ namespace WebApp.Workflows
                 {
                     Weight vBW = new Weight();
                     vBW.Value = purchaseObject.VolumeByWeight;
-                    db.Weight.Add(vBW);
-                    db.SaveChanges();
+                    _db.Weight.Add(vBW);
+                    _db.SaveChanges();
 
                     purchT.WeightID = vBW.WeightID;
                 }
@@ -286,8 +281,8 @@ namespace WebApp.Workflows
                 {
                     Alcohol alc = new Alcohol();
                     alc.Value = purchaseObject.AlcoholContent;
-                    db.Alcohol.Add(alc);
-                    db.SaveChanges();
+                    _db.Alcohol.Add(alc);
+                    _db.SaveChanges();
 
                     purchT.AlcoholID = alc.AlcoholID;
                 }
@@ -300,8 +295,8 @@ namespace WebApp.Workflows
                 {
                     Proof proof = new Proof();
                     proof.Value = purchaseObject.ProofGallon;
-                    db.Proof.Add(proof);
-                    db.SaveChanges();
+                    _db.Proof.Add(proof);
+                    _db.SaveChanges();
 
                     purchT.ProofID = proof.ProofID;
                 }
@@ -311,17 +306,17 @@ namespace WebApp.Workflows
                 }
 
                 purchT.StatusID =
-                    (from rec in db.Status
+                    (from rec in _db.Status
                      where rec.Name == "Active"
                      select rec.StatusID).FirstOrDefault();
 
                 purchT.StateID =
-                    (from rec in db.State
+                    (from rec in _db.State
                      where rec.Name == purchaseObject.PurchaseType
                      select rec.StateID).FirstOrDefault();
 
-                db.Purchase.Add(purchT);
-                db.SaveChanges();
+                _db.Purchase.Add(purchT);
+                _db.SaveChanges();
 
                 // Only fermented and distilled purchase records can be reported on storage report
                 if ((pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled) && purchaseObject?.SpiritTypeReportingID != null && purchaseObject?.SpiritTypeReportingID != 0)
@@ -329,11 +324,11 @@ namespace WebApp.Workflows
                     PurchaseToSpiritTypeReporting pstr = new PurchaseToSpiritTypeReporting();
                     pstr.PurchaseID = purchT.PurchaseID;
                     pstr.SpiritTypeReportingID = purchaseObject.SpiritTypeReportingID;
-                    db.PurchaseToSpiritTypeReporting.Add(pstr);
-                    db.SaveChanges();
+                    _db.PurchaseToSpiritTypeReporting.Add(pstr);
+                    _db.SaveChanges();
 
                     // Persistent Reporting: call Update Storage Report method here
-                    ReportRepository reportRepository = new ReportRepository();
+                    ReportRepository reportRepository = new ReportRepository(_db, _dl);
                     reportRepository.UpdateReportDataDuringPurchase(purchaseObject, userId);
                 }
 
@@ -346,8 +341,8 @@ namespace WebApp.Workflows
                         storToRec.StorageID = iter.StorageId;
                         storToRec.RecordId = purchT.PurchaseID;
                         storToRec.TableIdentifier = "pur";
-                        db.StorageToRecord.Add(storToRec);
-                        db.SaveChanges();
+                        _db.StorageToRecord.Add(storToRec);
+                        _db.SaveChanges();
                     }
                 }
 
@@ -364,8 +359,8 @@ namespace WebApp.Workflows
                         purch4RepT.Alcohol = purchaseObject.AlcoholContent;
                         purch4RepT.Redistilled = false;
 
-                        db.Purchase4Reporting.Add(purch4RepT);
-                        db.SaveChanges();
+                        _db.Purchase4Reporting.Add(purch4RepT);
+                        _db.SaveChanges();
                     }
                     catch (Exception e)
                     {
@@ -378,7 +373,7 @@ namespace WebApp.Workflows
                 // now, lets' try to save to history table
                 purchaseObject.PurchaseId = purchT.PurchaseID;
                 purchaseObject.Status = "Active";
-                dl.SavePurchaseHistory(purchaseObject, userId);
+                _dl.SavePurchaseHistory(purchaseObject, userId);
             }
             catch (Exception e)
             {
@@ -400,12 +395,12 @@ namespace WebApp.Workflows
             List<RawMaterialObject> rawMaterialList = new List<RawMaterialObject>();
 
             var ress =
-            from Mats in db.MaterialDict
-            join dslrs in db.AspNetUserToDistiller on Mats.DistillerID equals dslrs.DistillerID into dslrs_join
+            from Mats in _db.MaterialDict
+            join dslrs in _db.AspNetUserToDistiller on Mats.DistillerID equals dslrs.DistillerID into dslrs_join
             from dslrs in dslrs_join.DefaultIfEmpty()
-            join MatsType in db.MaterialType on Mats.MaterialDictID equals MatsType.MaterialDictID into MatsType_join
+            join MatsType in _db.MaterialType on Mats.MaterialDictID equals MatsType.MaterialDictID into MatsType_join
             from MatsType in MatsType_join.DefaultIfEmpty()
-            join units in db.UnitOfMeasurement on Mats.UnitOfMeasurementID equals units.UnitOfMeasurementID into units_join
+            join units in _db.UnitOfMeasurement on Mats.UnitOfMeasurementID equals units.UnitOfMeasurementID into units_join
             from units in units_join.DefaultIfEmpty()
             where
                 MatsType.Name == purchaseMatType &&
@@ -447,20 +442,18 @@ namespace WebApp.Workflows
         public ReturnObject DeletePurchaseRecord(int userId, DeleteRecordObject deleteObject)
         {
             ReturnObject delReturn = new ReturnObject();
-            //instantiate DataLayer to call shared method
-            DataLayer dl = new DataLayer();
 
             int recordId = deleteObject.DeleteRecordID;
             string recordType = deleteObject.DeleteRecordType;
-            int distillerId = dl.GetDistillerId(userId);
+            int distillerId = _dl.GetDistillerId(userId);
 
             if (recordId > 0)
             {
                 try
                 {
                     var res =
-                        from rec in db.ProductionToPurchase
-                        join prod2Name in db.Production on rec.ProductionID equals prod2Name.ProductionID into prod2Name_join
+                        from rec in _db.ProductionToPurchase
+                        join prod2Name in _db.Production on rec.ProductionID equals prod2Name.ProductionID into prod2Name_join
                         where rec.PurchaseID == recordId
                         from prod2Name in prod2Name_join.DefaultIfEmpty()
                         select new
@@ -508,8 +501,8 @@ namespace WebApp.Workflows
                 try
                 {
                     var purRec =
-                        (from rec in db.Purchase
-                         join dslrs in db.AspNetUserToDistiller on rec.DistillerID equals dslrs.DistillerID into dslrs_join
+                        (from rec in _db.Purchase
+                         join dslrs in _db.AspNetUserToDistiller on rec.DistillerID equals dslrs.DistillerID into dslrs_join
                          from dslrs in dslrs_join.DefaultIfEmpty()
                          where rec.PurchaseID == purchaseId &&
                             dslrs.UserId == userId
@@ -518,70 +511,70 @@ namespace WebApp.Workflows
                     if (purRec != null)
                     {
                         var purch4Rep =
-                           (from rec in db.Purchase4Reporting
+                           (from rec in _db.Purchase4Reporting
                             where rec.PurchaseID == purRec.PurchaseID
                             select rec).FirstOrDefault();
 
                         if (purch4Rep != null)
                         {
-                            db.Purchase4Reporting.Remove(purch4Rep);
+                            _db.Purchase4Reporting.Remove(purch4Rep);
 
                         }
 
-                        db.Purchase.Remove(purRec);
+                        _db.Purchase.Remove(purRec);
 
                         var qtyRec =
-                            (from rec in db.Volume
+                            (from rec in _db.Volume
                              where rec.VolumeID == purRec.VolumeID
                              select rec).FirstOrDefault();
 
                         if (qtyRec != null)
                         {
-                            db.Volume.Remove(qtyRec);
+                            _db.Volume.Remove(qtyRec);
                         }
 
                         var vbwRec =
-                            (from rec in db.Weight
+                            (from rec in _db.Weight
                              where rec.WeightID == purRec.WeightID
                              select rec).FirstOrDefault();
 
                         if (vbwRec != null)
                         {
-                            db.Weight.Remove(vbwRec);
+                            _db.Weight.Remove(vbwRec);
                         }
 
                         var alcRec =
-                            (from rec in db.Alcohol
+                            (from rec in _db.Alcohol
                              where rec.AlcoholID == purRec.AlcoholID
                              select rec).FirstOrDefault();
 
                         if (alcRec != null)
                         {
-                            db.Alcohol.Remove(alcRec);
+                            _db.Alcohol.Remove(alcRec);
                         }
 
                         var prfRec =
-                            (from rec in db.Proof
+                            (from rec in _db.Proof
                              where rec.ProofID == purRec.ProofID
                              select rec).FirstOrDefault();
 
                         if (prfRec != null)
                         {
-                            db.Proof.Remove(prfRec);
+                            _db.Proof.Remove(prfRec);
                         }
 
                         var strRec =
-                            (from rec in db.StorageToRecord
+                            (from rec in _db.StorageToRecord
                              where rec.RecordId == purRec.PurchaseID
                              select rec).FirstOrDefault();
 
                         if (strRec != null)
                         {
-                            db.StorageToRecord.Remove(strRec);
+                            _db.StorageToRecord.Remove(strRec);
                         }
 
                         var purToSpiritTypeReporting =
-                            (from rec in db.PurchaseToSpiritTypeReporting
+                            (from rec in _db.PurchaseToSpiritTypeReporting
                              where rec.PurchaseID == purRec.PurchaseID
                              select rec);
 
@@ -589,12 +582,12 @@ namespace WebApp.Workflows
                         {
                             foreach (var i in purToSpiritTypeReporting)
                             {
-                                db.PurchaseToSpiritTypeReporting.Remove(i);
+                                _db.PurchaseToSpiritTypeReporting.Remove(i);
                             }
                         }
 
                         var prodContent =
-                            (from rec in db.ProductionContent
+                            (from rec in _db.ProductionContent
                              where rec.RecordID == purRec.PurchaseID
                              && rec.isProductionComponent == false
                              select rec);
@@ -603,13 +596,13 @@ namespace WebApp.Workflows
                         {
                             foreach (var k in prodContent)
                             {
-                                db.ProductionContent.Remove(k);
+                                _db.ProductionContent.Remove(k);
                             }
                         }
 
-                        db.Purchase.Remove(purRec);
+                        _db.Purchase.Remove(purRec);
 
-                        db.SaveChanges();
+                        _db.SaveChanges();
                     }
 
                     retMthdExecResult = true;
@@ -646,26 +639,26 @@ namespace WebApp.Workflows
             List<PurchaseObject> purchaseList = new List<PurchaseObject>();
 
             var res =
-                from purchT in db.Purchase
-                join purType in db.PurchaseType on purchT.PurchaseTypeID equals purType.PurchaseTypeID into purType_join
+                from purchT in _db.Purchase
+                join purType in _db.PurchaseType on purchT.PurchaseTypeID equals purType.PurchaseTypeID into purType_join
                 from purType in purType_join.DefaultIfEmpty()
-                join distiller in db.AspNetUserToDistiller on purchT.DistillerID equals distiller.DistillerID into distiller_join
+                join distiller in _db.AspNetUserToDistiller on purchT.DistillerID equals distiller.DistillerID into distiller_join
                 from distiller in distiller_join.DefaultIfEmpty()
-                join material in db.MaterialDict on purchT.MaterialDictID equals material.MaterialDictID into material_join
+                join material in _db.MaterialDict on purchT.MaterialDictID equals material.MaterialDictID into material_join
                 from material in material_join.DefaultIfEmpty()
-                join vendor in db.Vendor on purchT.VendorID equals vendor.VendorID into vendor_join
+                join vendor in _db.Vendor on purchT.VendorID equals vendor.VendorID into vendor_join
                 from vendor in vendor_join.DefaultIfEmpty()
-                join galQuant in db.Volume on purchT.VolumeID equals galQuant.VolumeID into galQuant_join
+                join galQuant in _db.Volume on purchT.VolumeID equals galQuant.VolumeID into galQuant_join
                 from galQuant in galQuant_join.DefaultIfEmpty()
-                join VBW in db.Weight on purchT.WeightID equals VBW.WeightID into VBW_join
+                join VBW in _db.Weight on purchT.WeightID equals VBW.WeightID into VBW_join
                 from VBW in VBW_join.DefaultIfEmpty()
-                join alc in db.Alcohol on purchT.AlcoholID equals alc.AlcoholID into alc_join
+                join alc in _db.Alcohol on purchT.AlcoholID equals alc.AlcoholID into alc_join
                 from alc in alc_join.DefaultIfEmpty()
-                join proof in db.Proof on purchT.ProofID equals proof.ProofID into proof_join
+                join proof in _db.Proof on purchT.ProofID equals proof.ProofID into proof_join
                 from proof in proof_join.DefaultIfEmpty()
-                join states in db.State on purchT.StateID equals states.StateID into states_join
+                join states in _db.State on purchT.StateID equals states.StateID into states_join
                 from states in states_join.DefaultIfEmpty()
-                join statuses in db.Status on purchT.StatusID equals statuses.StatusID into statuses_join
+                join statuses in _db.Status on purchT.StatusID equals statuses.StatusID into statuses_join
                 from statuses in statuses_join.DefaultIfEmpty()
                 where
                     distiller.UserId == userId &&
@@ -717,8 +710,8 @@ namespace WebApp.Workflows
             {
                 List<StorageObject> storageL = new List<StorageObject>();
                 var storages =
-                    from rec in db.StorageToRecord
-                    join stoName in db.Storage on rec.StorageID equals stoName.StorageID
+                    from rec in _db.StorageToRecord
+                    join stoName in _db.Storage on rec.StorageID equals stoName.StorageID
                     where rec.RecordId == i.PurchaseId && rec.TableIdentifier == "pur"
                     select new
                     {
@@ -757,70 +750,5 @@ namespace WebApp.Workflows
             }
             return purchaseList;
         }
-
-        /// <summary>
-        /// GetPurMaterialType method maps current PurchaseMaterialBooleanTypes types
-        /// </summary>
-        /// <param name="purMatBooleanTypes"></param>
-        /// <param name="purchaseMaterialTypeName"></param>
-        /// <returns></returns>
-        //private void GetPurMaterialType(ref PurchaseMaterialBooleanTypes purMatBooleanTypes, string purchaseMaterialTypeName)
-        //{
-        //    if (purchaseMaterialTypeName == "Additive")
-        //    {
-        //        purMatBooleanTypes.Additive = true;
-        //    }
-        //    if (purchaseMaterialTypeName == "Supply")
-        //    {
-        //        purMatBooleanTypes.Supply = true;
-        //    }
-        //    if (purchaseMaterialTypeName == "Distilled")
-        //    {
-        //        purMatBooleanTypes.Distilled = true;
-        //    }
-        //    if (purchaseMaterialTypeName == "Fermented")
-        //    {
-        //        purMatBooleanTypes.Fermented = true;
-        //    }
-        //    if (purchaseMaterialTypeName == "Fermentable")
-        //    {
-        //        purMatBooleanTypes.Fermentable = true;
-        //    }
-        //}
-
-        /// <summary>
-        /// IsOfPurMaterialType method returns value (true/false) for a given set of purchaseMaterialTypes and purchaseMaterialType in question.
-        /// For example I am trying to see what bool value a current purchaseMaterial type of "Fermented" has.
-        /// </summary>
-        /// <param name="purchaseMaterialTypes"></param>
-        /// <param name="purchaseMatType"></param>
-        /// <returns></returns>
-        //private bool IsOfPurMaterialType(PurchaseMaterialBooleanTypes purchaseMaterialTypes, string purchaseMatType)
-        //{
-        //    if (purchaseMatType == "Additive")
-        //    {
-        //        return purchaseMaterialTypes.Additive;
-        //    }
-        //    else if (purchaseMatType == "Supply")
-        //    {
-        //        return purchaseMaterialTypes.Supply;
-        //    }
-        //    else if (purchaseMatType == "Distilled")
-        //    {
-        //        return purchaseMaterialTypes.Distilled;
-        //    }
-        //    else if (purchaseMatType == "Fermented")
-        //    {
-        //        return purchaseMaterialTypes.Fermented;
-        //    }
-        //    else if (purchaseMatType == "Fermentable")
-        //    {
-        //        return purchaseMaterialTypes.Fermentable;
-        //    }
-        //    else
-        //    {
-        //        return false;
-        //    }
-        //}
     }
 }

@@ -1,19 +1,33 @@
 ﻿using Microsoft.AspNet.Identity;
-using System.Collections.Generic;
 using System.Web.Mvc;
 using WebApp.Helpers;
+using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
+using WebApp.Persistence.Repositories;
 using WebApp.Reports;
 
 namespace WebApp.Controllers
 {
     public class ReportingController : Controller
     {
-        private DataLayer dl = new DataLayer();
-        private ProductionReport _productionR = new ProductionReport();
-        private ProcessingReport _processingR = new ProcessingReport();
-        private StorageReport _storageR = new StorageReport();
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+        private readonly ProductionReport _productionR;
+        private readonly ProcessingReport _processingR;
+        private readonly StorageReport _storageR;
+        private readonly ReportRepository _reportRepository;
+
         private bool _enableNewReportingImplementation = false;
+
+        public ReportingController()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+            _productionR = new ProductionReport(_db, _dl);
+            _processingR = new ProcessingReport(_db, _dl);
+            _storageR = new StorageReport(_db, _dl);
+            _reportRepository = new ReportRepository(_db, _dl);
+        }
 
         // GET: Production Operations
         public ActionResult Production()
@@ -105,7 +119,7 @@ namespace WebApp.Controllers
                 {
                     if (_enableNewReportingImplementation)
                     {
-                        var report = dl.GetReportData(endOfReporting, userId, PersistReportType.Storage);
+                        var report = _reportRepository.GetReportData(endOfReporting, userId, PersistReportType.Storage);
 
                         return Json(report, JsonRequestBehavior.AllowGet);
                     }
