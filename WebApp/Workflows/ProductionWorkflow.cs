@@ -1097,6 +1097,19 @@ namespace WebApp.Workflows
                             _db.Production4Reporting.Remove(prod4Rep);
                         }
 
+                        var purch4Rep =
+                            (from rec in _db.Purchase4Reporting
+                             where rec.ProductionID == prodRec.ProductionID
+                             select rec).ToList();
+                        if (purch4Rep != null)
+                        {
+                            foreach (var item in purch4Rep)
+                            {
+                                _db.Purchase4Reporting.Remove(item);
+                            }
+
+                        }
+
                         var prodC =
                             (from rec in _db.ProductionContent
                              where rec.ProductionID == prodRec.ProductionID

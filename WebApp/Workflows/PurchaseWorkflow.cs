@@ -521,8 +521,6 @@ namespace WebApp.Workflows
 
                         }
 
-                        _db.Purchase.Remove(purRec);
-
                         var qtyRec =
                             (from rec in _db.Volume
                              where rec.VolumeID == purRec.VolumeID
