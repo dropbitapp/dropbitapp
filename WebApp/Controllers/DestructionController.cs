@@ -1,13 +1,25 @@
 ﻿using Microsoft.AspNet.Identity;
-using System;
 using System.Web.Mvc;
 using WebApp.Helpers;
+using WebApp.Models;
+using WebApp.Workflows;
 
 namespace WebApp.Controllers
 {
     public class DestructionController : Controller
     {
-        private DataLayer dl = new DataLayer();
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+        private readonly PurchaseWorkflow _purchase;
+        private readonly ProductionWorkflow _production;
+
+        public DestructionController()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+            _purchase = new PurchaseWorkflow(_db, _dl);
+            _production = new ProductionWorkflow(_db, _dl);
+        }
 
         // GET: Destruction
         public ActionResult Index()
@@ -27,7 +39,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var prodList = dl.GetProductionDataForDestruction(userId);
+                    var prodList = _production.GetProductionDataForDestruction(userId);
                     return Json(prodList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -49,7 +61,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var recsList = dl.GetPurchaseDataForDestruction(userId);
+                    var recsList = _purchase.GetPurchaseDataForDestruction(userId);
                     return Json(recsList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -71,7 +83,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var recsList = dl.GetDestroyedBatches(userId);
+                    var recsList = _dl.GetDestroyedBatches(userId);
                     return Json(recsList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -97,7 +109,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.DestroyBatch(destructionObject, userId);
+                        bool returnResult = _dl.DestroyBatch(destructionObject, userId);
                         if (returnResult)
                         {
                             string message = "Batch successfully destroyed.";

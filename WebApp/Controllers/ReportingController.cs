@@ -1,15 +1,33 @@
 ﻿using Microsoft.AspNet.Identity;
-using System.Collections.Generic;
 using System.Web.Mvc;
 using WebApp.Helpers;
+using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
+using WebApp.Persistence.Repositories;
+using WebApp.Reports;
 
 namespace WebApp.Controllers
 {
     public class ReportingController : Controller
     {
-        private DataLayer dl = new DataLayer();
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+        private readonly ProductionReport _productionR;
+        private readonly ProcessingReport _processingR;
+        private readonly StorageReport _storageR;
+        private readonly ReportRepository _reportRepository;
+
         private bool _enableNewReportingImplementation = false;
+
+        public ReportingController()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+            _productionR = new ProductionReport(_db, _dl);
+            _processingR = new ProcessingReport(_db, _dl);
+            _storageR = new StorageReport(_db, _dl);
+            _reportRepository = new ReportRepository(_db, _dl);
+        }
 
         // GET: Production Operations
         public ActionResult Production()
@@ -43,7 +61,7 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var productionReport = dl.GetProductionReportData(startOfReporting, endOfReporting, userId);
+                    var productionReport = _productionR.GetProductionReportData(startOfReporting, endOfReporting, userId);
                     return Json(productionReport, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -71,7 +89,7 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var processingReport = dl.GetProcessingReportData(startOfReporting, endOfReporting, userId);
+                    var processingReport = _processingR.GetProcessingReportData(startOfReporting, endOfReporting, userId);
                     return Json(processingReport, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -99,15 +117,13 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-
                     if (_enableNewReportingImplementation)
                     {
-                        var report = dl.GetReportData(endOfReporting, userId, PersistReportType.Storage);
+                        var report = _reportRepository.GetReportData(endOfReporting, userId, PersistReportType.Storage);
 
                         return Json(report, JsonRequestBehavior.AllowGet);
                     }
-
-                    var storageReport = dl.GetStorageReportData(startOfReporting, endOfReporting, userId);
+                    var storageReport = _storageR.GetStorageReportData(startOfReporting, endOfReporting, userId);
                     return Json(storageReport, JsonRequestBehavior.AllowGet);
                 }
                 else

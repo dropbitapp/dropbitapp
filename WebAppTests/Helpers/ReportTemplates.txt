@@ -692,8 +692,8 @@
         {
             Assert.IsNull(part6CategoryExpected, "There should be no records for Cane category");
 
-            Assert.Equals(0, part6CategoryExpected.Weight);
-            Assert.Equals(0, part6CategoryExpected.Volume);
+            Assert.AreEqual(0, part6CategoryExpected.Weight);
+            Assert.AreEqual(0, part6CategoryExpected.Volume);
         }
 
         part6CategoryExpected = actualProdReportObject.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit);
@@ -706,8 +706,8 @@
         {
             Assert.IsNull(part6CategoryExpected, "There should be no records for Fruit category");
 
-            Assert.Equals(0, part6CategoryExpected.Weight);
-            Assert.Equals(0, part6CategoryExpected.Volume);
+            Assert.AreEqual(0, part6CategoryExpected.Weight);
+            Assert.AreEqual(0, part6CategoryExpected.Volume);
         }
 
         part6CategoryExpected = actualProdReportObject.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Grain);
@@ -720,8 +720,8 @@
         {
             Assert.IsNull(part6CategoryExpected, "There should be no records for Grain category");
 
-            Assert.Equals(0, part6CategoryExpected.Weight);
-            Assert.Equals(0, part6CategoryExpected.Volume);
+            Assert.AreEqual(0, part6CategoryExpected.Weight);
+            Assert.AreEqual(0, part6CategoryExpected.Volume);
         }
 
         part6CategoryExpected = actualProdReportObject.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Other);
@@ -734,8 +734,8 @@
         {
             Assert.IsNull(part6CategoryExpected, "There should be no records for Other category");
 
-            Assert.Equals(0, part6CategoryExpected.Weight);
-            Assert.Equals(0, part6CategoryExpected.Volume);
+            Assert.AreEqual(0, part6CategoryExpected.Weight);
+            Assert.AreEqual(0, part6CategoryExpected.Volume);
         }
     }
 #endregion Production Part 6

@@ -30,7 +30,7 @@ namespace WebApp.Helpers
         public List<ProdReportPart6> ProdReportPart6List { get; set; }
     }
 
-    public class StorageReport
+    public class StorageReportObject
     {
         public ReportHeader Header { get; set; }
         public List<StorageReportCategory> ReportBody { get; set; }
@@ -297,7 +297,7 @@ namespace WebApp.Helpers
 
     /// <summary>
     /// DeleteRecord is a generic object which defines
-    /// a dictionary item which must be deleted
+    /// a dictionary, purchase, or production item which must be deleted.
     /// </summary>
     public class DeleteRecordObject
     {
@@ -313,6 +313,7 @@ namespace WebApp.Helpers
     {
         private bool _executeResult = false;
         private string _executeMessage = string.Empty;
+
         public bool ExecuteResult { get; set; }
         public string ExecuteMessage { get; set; }
 

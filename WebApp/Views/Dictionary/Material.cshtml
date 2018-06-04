@@ -474,36 +474,37 @@
                         });
 
                         $("#EditDialogRawMaterialNameInput").jqxInput({
-                            theme: 'bootstrap', height: '26px', width: '100px', minLength: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', minLength: 0
                         });
 
                         $("#EditDialogVisibilityFermentableCheckbox").jqxCheckBox({
-                            theme: 'bootstrap', height: '26px', width: '200px'
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '200px'
                         });
 
                         $("#EditDialogVisibilityFermentedCheckbox").jqxCheckBox({
-                            theme: 'bootstrap', height: '26px', width: '200px'
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '200px'
                         });
 
                         $("#EditDialogVisibilityDistilledCheckbox").jqxCheckBox({
-                            theme: 'bootstrap', height: '26px', width: '200px'
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '200px'
                         });
 
                         $("#EditDialogVisibilitySuppliesCheckbox").jqxCheckBox({
-                            theme: 'bootstrap', height: '26px', width: '200px'
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '200px'
                         });
 
                         $("#EditDialogVisibilityAdditivesCheckbox").jqxCheckBox({
-                            theme: 'bootstrap', height: '26px', width: '200px'
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '200px'
                         });
 
                         $('#EditDialogNotesInput').jqxTextArea({
-                            theme: 'bootstrap', height: '50px', width: '200px', minLength: 1
+                            disabled: true, theme: 'bootstrap', height: '50px', width: '200px', minLength: 1
                         });
 
-                        $("#EditDialogSaveRecordButton").jqxButton({
-                            theme: 'bootstrap', height: 30, width: 80
-                        });
+                        //temporarily disabled
+                        //$("#EditDialogSaveRecordButton").jqxButton({
+                        //    theme: 'bootstrap', height: 30, width: 80
+                        //});
 
                         $("#EditDialogDeleteRecordButton").jqxButton({
                             theme: 'bootstrap', height: 30, width: 80
@@ -513,7 +514,7 @@
                             theme: 'bootstrap', height: 30, width: 80
                         });
 
-                        $("#EditDialogUnitListbox").jqxListBox({ width: 80, source: unitsListAdapater, displayMember: "UnitName", valueMember: "UnitOfMeasurementId", height: 125 });
+                        $("#EditDialogUnitListbox").jqxListBox({ disabled: true, width: 80, source: unitsListAdapater, displayMember: "UnitName", valueMember: "UnitOfMeasurementId", height: 125 });
 
                         $("#EditDialog").jqxWindow({
                             position: 'center',
@@ -708,9 +709,10 @@
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="2" align="right">
+                            <td colspan="2" align="center">
                                 <br />
-                                <button id="EditDialogSaveRecordButton">Save</button>
+                                @*temporarily disabled*@
+                                @*<button id="EditDialogSaveRecordButton">Save</button>*@
                                 <button id="EditDialogDeleteRecordButton">Delete</button>
                                 <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
                             </td>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using WebApp.Helpers;
 using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
@@ -12,16 +11,25 @@ namespace WebApp.Persistence.Repositories
     public class ReportRepository
     {
         private readonly DistilDBContext _context;
+        private readonly DataLayer _dl;
 
-        // <summary>
-        /// GetDistillerID retrieves DistillerId for given UserId
-        /// </summary>
-        public int GetDistillerId(int userId)
+        public ReportRepository(DistilDBContext context, DataLayer dl)
         {
-            int distillerId = (from rec in _context.AspNetUserToDistiller
-                               where rec.UserId == userId
-                               select rec.DistillerID).FirstOrDefault();
-            return distillerId;
+            _context = context;
+            _dl = dl;
+        }
+
+        /// <summary>
+        /// Method queries for a set of reporting records from persistent report table
+        /// </summary>
+        /// <param name="startOfReporting"></param>
+        /// <param name="endOfReporting"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public ReportData GetReportData(DateTime endOfReporting, int userId, PersistReportType reportType)
+        {
+            ReportData reportData = GetPersistentStorageReportData(endOfReporting, userId);
+            return reportData;
         }
 
         private void GetDataToBeInsertedInPersistentTableFormat(RecordType recordType, int userId, PurchaseObject purchaseData = null, ProductionObject productionData = null)
@@ -59,11 +67,6 @@ namespace WebApp.Persistence.Repositories
                 }
 
             }
-        }
-
-        public ReportRepository()
-        {
-            _context = new DistilDBContext();
         }
 
         public bool UpdateReportDataDuringPurchase(PurchaseObject purchaseData, int userId)
@@ -154,7 +157,7 @@ namespace WebApp.Persistence.Repositories
                         {
                             cellValue.Date = purchDate;
                         }
-                        cellValue.DistillerID = GetDistillerId(userId);
+                        cellValue.DistillerID = _dl.GetDistillerId(userId);
 
                         _context.PersistentReport.Add(cellValue);
                     }
@@ -192,7 +195,7 @@ namespace WebApp.Persistence.Repositories
             int partId = (int)PersistReportPart.Part1;
             int endYear = endDate.Year;
             int endMonth = endDate.Month;
-            int distillerID = GetDistillerId(userId);
+            int distillerID = _dl.GetDistillerId(userId);
             ReportData reportData = new ReportData();
 
             try
@@ -209,7 +212,7 @@ namespace WebApp.Persistence.Repositories
                 if (records != null)
                 {
                     // fill header
-                    reportData.Header = GetDistillerInfoForReportHeader(distillerID, endDate);
+                    reportData.Header = _dl.GetDistillerInfoForReportHeader(distillerID, endDate);
 
                     PersistRepType reportType = new PersistRepType();
                     PersistRepPart reportPart = new PersistRepPart();
@@ -274,37 +277,5 @@ namespace WebApp.Persistence.Repositories
         }
 
     #endregion
-
-    private ReportHeader GetDistillerInfoForReportHeader(int distillerID, DateTime startDate)
-        {
-            try
-            {
-                ReportHeader header = new ReportHeader();
-
-                var res =
-                    (from distT in _context.Distiller
-                     join distDT in _context.DistillerDetail on distT.DistillerID equals distDT.DistillerID
-                     where distDT.DistillerID == distillerID
-                     select new
-                     {
-                         DistillerName = distT.Name,
-                         EIN = distDT.EIN,
-                         DSP = distDT.DSP,
-                         Address = distDT.StreetAddress + " " + distDT.City + " " + distDT.State + " " + distDT.Zip
-                     }).FirstOrDefault();
-
-                header.ProprietorName = res.DistillerName;
-                header.EIN = res.EIN;
-                header.DSP = res.DSP;
-                header.PlantAddress = res.Address;
-                header.ReportDate = startDate.ToString("Y");
-
-                return header;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
     }
 }

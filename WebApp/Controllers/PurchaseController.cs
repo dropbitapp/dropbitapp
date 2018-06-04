@@ -1,17 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using WebApp.Models;
 using WebApp.Helpers;
-using System.Web.Security;
 using Microsoft.AspNet.Identity;
-using System;
+using WebApp.Workflows;
 
 namespace WebApp.Controllers
 {
     public class PurchaseController : Controller
     {
-        private DataLayer dl = new DataLayer();
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+        private readonly PurchaseWorkflow _purchase;
+
+        public PurchaseController()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+            _purchase = new PurchaseWorkflow(_db, _dl);
+        }
 
         #region Shared Methods
 
@@ -22,7 +28,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public JsonResult GetReportingSpiritTypes()
         {
-            var spiritTypeList = dl.GetReportingSpiritTypes();
+            var spiritTypeList = _dl.GetReportingSpiritTypes();
             return Json(spiritTypeList, JsonRequestBehavior.AllowGet);
         }
 
@@ -42,7 +48,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        var returnResult = dl.CreatePurchase(purchaseObject, userId);
+                        var returnResult = _purchase.CreatePurchase(purchaseObject, userId);
                         if (returnResult > 0)
                         {
                             string message = "Purchase record created successfully.";
@@ -85,7 +91,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var recsList = dl.GetPurchasesList(purchaseType, userId);
+                    var recsList = _purchase.GetPurchasesList(purchaseType, userId);
                     return Json(recsList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -108,7 +114,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var rawMaterialList = dl.GetRawMaterialListForPurchase(userId, purchaseType);
+                    var rawMaterialList = _purchase.GetRawMaterialListForPurchase(userId, purchaseType);
 
                     return Json(rawMaterialList, JsonRequestBehavior.AllowGet);
                 }
@@ -131,7 +137,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var vendorList = dl.GetVendorData(userId);
+                    var vendorList = _dl.GetVendorData(userId);
                     return Json(vendorList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -153,7 +159,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var storageList = dl.GetStorageData(userId);
+                    var storageList = _dl.GetStorageData(userId);
                     return Json(storageList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -161,6 +167,50 @@ namespace WebApp.Controllers
             }
             else
                 return Json("Unauthenticated user!");
+        }
+
+        /// <summary>
+        /// Generic method for deleting a record from the database.
+        /// </summary>
+        /// <param name="deleteRecordObject"></param>
+        /// <returns>JsonResult</returns>
+        [HttpPost]
+        public JsonResult DeleteRecord(DeleteRecordObject deleteObject)
+        {
+            if (deleteObject.DeleteRecordID >= 0 && deleteObject != null)
+            {
+                if (User.Identity.IsAuthenticated)
+                {
+                    int userId = User.Identity.GetUserId<int>();
+                    if (userId > 0)
+                    {
+                        ReturnObject returnResult = _purchase.DeletePurchaseRecord(userId, deleteObject);
+                        if (returnResult.ExecuteResult)
+                        {
+                            string message = deleteObject.DeleteRecordType + " Record was deleted successfully";
+                            return Json(message);
+                        }
+                        else
+                        {
+                            string message = "Wasn't able to delete " + deleteObject.DeleteRecordType + " Record because it's associated with " + returnResult.ExecuteMessage;
+                            return Json(message);
+                        }
+                    }
+                    else
+                    {
+                        return Json("Unable to find UserId!");
+                    }
+                }
+                else
+                {
+                    return Json("Unauthenticated user!");
+                }
+            }
+            else
+            {
+                string message = "ID " + deleteObject.DeleteRecordID + " of the record being deleted is not valid or Purchase Object being deleted is null";
+                return Json(message);
+            }
         }
         #endregion
 
@@ -182,7 +232,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
+                        bool returnResult = _purchase.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
                             string message = "Fermentable record updated successfully.";
@@ -206,40 +256,6 @@ namespace WebApp.Controllers
             }
         }
 
-        [HttpPost]
-        public JsonResult DeleteFermentable(PurchaseObject purchaseObject)
-        {
-            if (purchaseObject.PurchaseId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeletePurchase(purchaseObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Fermentable record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete fermentable record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                        return Json("Unable to find UserId!");
-                }
-                else
-                    return Json("Unauthenticated user!");
-            }
-            else
-            {
-                string message = "Invalid PurchaseId received from the front-end!" + purchaseObject.PurchaseId;
-                return Json(message);
-            }
-        }
         #endregion
 
         #region Fermented
@@ -261,7 +277,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
+                        bool returnResult = _purchase.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
                             string message = "Fermented record updated successfully.";
@@ -285,41 +301,6 @@ namespace WebApp.Controllers
             }
         }
 
-        [HttpPost]
-        public JsonResult DeleteFermented(PurchaseObject purchaseObject)
-        {
-            if (purchaseObject.PurchaseId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeletePurchase(purchaseObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Fermented record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete fermented record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                        return Json("Unable to find UserId!");
-                }
-                else
-                    return Json("Unauthenticated user!");
-            }
-            else
-            {
-                string message = "Invalid PurchaseId received from the front-end!" + purchaseObject.PurchaseId;
-                return Json(message);
-            }
-        }
-
         /// <summary>
         /// Get reporting spirit and kinds values for data binding in inputs
         /// </summary>
@@ -327,7 +308,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public JsonResult GetSpiritToKindListData()
         {
-            var spiritToKindList = dl.GetSpiritToKindListData();
+            var spiritToKindList = _dl.GetSpiritToKindListData();
             return Json(spiritToKindList, JsonRequestBehavior.AllowGet);
         }
 
@@ -351,7 +332,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
+                        bool returnResult = _purchase.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
                             string message = "Distilled record updated successfully.";
@@ -375,40 +356,6 @@ namespace WebApp.Controllers
             }
         }
 
-        [HttpPost]
-        public JsonResult DeleteDistilled(PurchaseObject purchaseObject)
-        {
-            if (purchaseObject.PurchaseId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeletePurchase(purchaseObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Distilled record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete distilled record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                        return Json("Unable to find userId!");
-                }
-                else
-                    return Json("Unauthenticated user!");
-            }
-            else
-            {
-                string message = "Invalid PurchaseId received from the front-end!" + purchaseObject.PurchaseId;
-                return Json(message);
-            }
-        }
         #endregion // end of Distilled controller methods
 
         #region Supplies
@@ -429,7 +376,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
+                        bool returnResult = _purchase.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
                             string message = "Supply record updated successfully.";
@@ -453,40 +400,6 @@ namespace WebApp.Controllers
             }
         }
 
-        [HttpPost]
-        public JsonResult DeleteSupply(PurchaseObject purchaseObject)
-        {
-            if (purchaseObject.PurchaseId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeletePurchase(purchaseObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Supply record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete supply record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                        return Json("Unable to find UserId!");
-                }
-                else
-                    return Json("Unauthenticated user!");
-            }
-            else
-            {
-                string message = "Invalid PurchaseId received from the front-end!" + purchaseObject.PurchaseId;
-                return Json(message);
-            }
-        }
         #endregion
 
         #region Additives
@@ -507,7 +420,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdatePurchase(purchaseObject, userId);
+                        bool returnResult = _purchase.UpdatePurchase(purchaseObject, userId);
                         if (returnResult)
                         {
                             string message = "Additive record updated successfully.";
@@ -531,40 +444,6 @@ namespace WebApp.Controllers
             }
         }
 
-        [HttpPost]
-        public JsonResult DeleteAdditive(PurchaseObject purchaseObject)
-        {
-            if (purchaseObject.PurchaseId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeletePurchase(purchaseObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Additive record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete additive record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                        return Json("Unable to find UserId!");
-                }
-                else
-                    return Json("Unauthenticated user!");
-            }
-            else
-            {
-                string message = "Invalid PurchaseId received from the front-end!" + purchaseObject.PurchaseId;
-                return Json(message);
-            }
-        }
         #endregion
     }
 }

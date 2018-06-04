@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
+using WebApp.Reports;
+using WebApp.Workflows;
 
 namespace WebApp.Helpers.Tests
 {
@@ -25,9 +27,29 @@ namespace WebApp.Helpers.Tests
     [TestClass()]
     public class DataLayerTests
     {
-        private readonly int _userId = 7; /*test account*/
-        DataLayer _dl = new DataLayer();
-        DistilDBContext _db = new DistilDBContext();
+        // Test Account 
+        private readonly int _userId = 7;
+
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+        private readonly DictionaryWorkflow _dictionary;
+        private readonly PurchaseWorkflow _purchase;
+        private readonly ProductionWorkflow _production;
+        private readonly ProductionReport _productionReport;
+        private readonly ProcessingReport _processingReport;
+        private readonly StorageReport _storageReport;
+
+        public DataLayerTests()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+            _dictionary = new DictionaryWorkflow(_db, _dl);
+            _purchase = new PurchaseWorkflow(_db, _dl);
+            _production = new ProductionWorkflow(_db, _dl);
+            _productionReport = new ProductionReport(_db, _dl);
+            _processingReport = new ProcessingReport(_db, _dl);
+            _storageReport = new StorageReport(_db, _dl);
+        }
 
         /// <summary>
         /// Table enum contains dictionary tables identifiers for easy mapping during
@@ -70,14 +92,14 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // vendor
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "TheVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // storage
@@ -85,7 +107,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "TheStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // grapes
@@ -99,7 +121,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -122,7 +144,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -155,7 +177,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // Distillation
@@ -188,7 +210,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -205,9 +227,9 @@ namespace WebApp.Helpers.Tests
                 DateTime decStart = new DateTime(2016, 12, 1);
                 DateTime decEnd = new DateTime(2016, 12, decDays);
 
-                StorageReport octStorageReport = _dl.GetStorageReportData(octStart, octEnd, _userId);
-                StorageReport novStorageReport = _dl.GetStorageReportData(novStart, novEnd, _userId);
-                StorageReport decStorageReport = _dl.GetStorageReportData(decStart, decEnd, _userId);
+                StorageReportObject octStorageReport = _storageReport.GetStorageReportData(octStart, octEnd, _userId);
+                StorageReportObject novStorageReport = _storageReport.GetStorageReportData(novStart, novEnd, _userId);
+                StorageReportObject decStorageReport = _storageReport.GetStorageReportData(decStart, decEnd, _userId);
 
                 #endregion
 
@@ -316,14 +338,14 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "SpecialDistill";
                 spirit.ProcessingReportTypeID = 20;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -331,7 +353,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
 
@@ -347,7 +369,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -361,7 +383,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -389,7 +411,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 10;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -425,7 +447,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record
@@ -458,7 +480,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -484,12 +506,12 @@ namespace WebApp.Helpers.Tests
                 DateTime sepStart = new DateTime(2016, 9, 1);
                 DateTime sepEnd = new DateTime(2016, 9, sepDays);
 
-                StorageReport aprStorageReport = _dl.GetStorageReportData(aprStart, aprEnd, _userId);
-                StorageReport mayStorageReport = _dl.GetStorageReportData(mayStart, mayEnd, _userId);
-                StorageReport juneStorageReport = _dl.GetStorageReportData(juneStart, juneEnd, _userId);
-                StorageReport julyStorageReport = _dl.GetStorageReportData(julyStart, julyEnd, _userId);
-                StorageReport augStorageReport = _dl.GetStorageReportData(augStart, augEnd, _userId);
-                StorageReport sepStorageReport = _dl.GetStorageReportData(sepStart, sepEnd, _userId);
+                StorageReportObject aprStorageReport = _storageReport.GetStorageReportData(aprStart, aprEnd, _userId);
+                StorageReportObject mayStorageReport = _storageReport.GetStorageReportData(mayStart, mayEnd, _userId);
+                StorageReportObject juneStorageReport = _storageReport.GetStorageReportData(juneStart, juneEnd, _userId);
+                StorageReportObject julyStorageReport = _storageReport.GetStorageReportData(julyStart, julyEnd, _userId);
+                StorageReportObject augStorageReport = _storageReport.GetStorageReportData(augStart, augEnd, _userId);
+                StorageReportObject sepStorageReport = _storageReport.GetStorageReportData(sepStart, sepEnd, _userId);
 
                 #endregion
 
@@ -632,14 +654,14 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -647,7 +669,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
 
@@ -663,7 +685,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -677,7 +699,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -705,7 +727,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -740,7 +762,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -772,7 +794,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -815,7 +837,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Bottling Record
@@ -859,7 +881,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -907,10 +929,10 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 /* STORAGE REPORT */
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -927,7 +949,7 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r6_TotalLines1Through5 = 18f;
                 storageReportBody.r7_TaxPaid = 0f;
 
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                 /* PROCESING REPORT */
                 ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
@@ -988,7 +1010,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Tequila = 0f;
                 processingReportP4.Vodka = 0f;
 
-                actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+                actualProcessingReportObject = _processingReport.GetProcessingReportData(start, end, _userId);
                 #endregion
 
                 // Assert
@@ -1169,14 +1191,14 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -1184,7 +1206,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -1199,7 +1221,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -1213,7 +1235,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -1239,7 +1261,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 10;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // create 1st Production Distillation Record and don't mark it as Gauged
@@ -1272,7 +1294,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -1315,7 +1337,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -1336,10 +1358,10 @@ namespace WebApp.Helpers.Tests
                 var janStart = new DateTime(2017, 1, 1);
                 var janEnd = new DateTime(2017, 1, janDays);
 
-                StorageReport octStorageReport = _dl.GetStorageReportData(octStart, octEnd, _userId);
-                StorageReport novStorageReport = _dl.GetStorageReportData(novStart, novEnd, _userId);
-                StorageReport decStorageReport = _dl.GetStorageReportData(decStart, decEnd, _userId);
-                StorageReport janStorageReport = _dl.GetStorageReportData(janStart, janEnd, _userId);
+                StorageReportObject octStorageReport = _storageReport.GetStorageReportData(octStart, octEnd, _userId);
+                StorageReportObject novStorageReport = _storageReport.GetStorageReportData(novStart, novEnd, _userId);
+                StorageReportObject decStorageReport = _storageReport.GetStorageReportData(decStart, decEnd, _userId);
+                StorageReportObject janStorageReport = _storageReport.GetStorageReportData(janStart, janEnd, _userId);
 
                 #endregion
 
@@ -1471,20 +1493,20 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "Vendor#1";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 StorageObject storage = new StorageObject();
                 storage.StorageName = "Storage#1";
                 storage.SerialNumber = "1A2B3C4D";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // Fermented Pomace
@@ -1498,7 +1520,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     fermentedPomace.PurchaseMaterialTypes = materialBoolTypes;
 
-                    rawMaterialPomaceId = _dl.CreateRawMaterial(_userId, fermentedPomace);
+                    rawMaterialPomaceId = _dictionary.CreateRawMaterial(_userId, fermentedPomace);
                     tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialPomaceId, Table.MaterialDict));
                 }
 
@@ -1512,7 +1534,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     water.PurchaseMaterialTypes = materialBoolTypes;
 
-                    rawMaterialWaterId = _dl.CreateRawMaterial(_userId, water);
+                    rawMaterialWaterId = _dictionary.CreateRawMaterial(_userId, water);
                     tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialWaterId, Table.MaterialDict));
                 }
 
@@ -1538,7 +1560,7 @@ namespace WebApp.Helpers.Tests
                 pomacePurchase.SpiritTypeReportingID = 10;
                 pomacePurchase.Gauged = true;
 
-                pomacePurchaseId = _dl.CreatePurchase(pomacePurchase, _userId);
+                pomacePurchaseId = _purchase.CreatePurchase(pomacePurchase, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(pomacePurchaseId, Table.Purchase));
 
                 // 2. Distill 1000 lbs to produce 55 gallons at 50% ABV on 4/6/18
@@ -1571,7 +1593,7 @@ namespace WebApp.Helpers.Tests
 
                 brandyProduction.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(brandyProduction, _userId);
+                productionId = _production.CreateProduction(brandyProduction, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // 3. Blend that with 10 gallons of water on 5/6/18 to produce 55 gallons of 43% ABV
@@ -1614,7 +1636,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -1638,10 +1660,10 @@ namespace WebApp.Helpers.Tests
                 var juneStart = new DateTime(2018, 6, 1);
                 var juneEnd = new DateTime(2018, 6, juneDays);
 
-                var marProcessingReport = _dl.GetProcessingReportData(marStart, marEnd, _userId);
-                var aprProcessingReport = _dl.GetProcessingReportData(aprStart, aprEnd, _userId);
-                var mayProcessingReport = _dl.GetProcessingReportData(mayStart, mayEnd, _userId);
-                var juneProcessingReport = _dl.GetProcessingReportData(juneStart, juneEnd, _userId);
+                var marProcessingReport = _processingReport.GetProcessingReportData(marStart, marEnd, _userId);
+                var aprProcessingReport = _processingReport.GetProcessingReportData(aprStart, aprEnd, _userId);
+                var mayProcessingReport = _processingReport.GetProcessingReportData(mayStart, mayEnd, _userId);
+                var juneProcessingReport = _processingReport.GetProcessingReportData(juneStart, juneEnd, _userId);
 
                 #endregion
 
@@ -1826,17 +1848,17 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
 
                 #region Act Step 2
 
-                var marAfterBottlingProcessingReport = _dl.GetProcessingReportData(marStart, marEnd, _userId);
-                var aprAfterBottlingProcessingReport = _dl.GetProcessingReportData(aprStart, aprEnd, _userId);
-                var mayAfterBottlingProcessingReport = _dl.GetProcessingReportData(mayStart, mayEnd, _userId);
-                var juneAfterBottlingProcessingReport = _dl.GetProcessingReportData(juneStart, juneEnd, _userId);
+                var marAfterBottlingProcessingReport = _processingReport.GetProcessingReportData(marStart, marEnd, _userId);
+                var aprAfterBottlingProcessingReport = _processingReport.GetProcessingReportData(aprStart, aprEnd, _userId);
+                var mayAfterBottlingProcessingReport = _processingReport.GetProcessingReportData(mayStart, mayEnd, _userId);
+                var juneAfterBottlingProcessingReport = _processingReport.GetProcessingReportData(juneStart, juneEnd, _userId);
 
                 #endregion
 
@@ -2012,7 +2034,7 @@ namespace WebApp.Helpers.Tests
                     ProcessingReportTypeID = 19
                 };
 
-                int spiritId = _dl.CreateSpirit(_userId, spirit);
+                int spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 testRecords.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // Create Raw Material dictionary item
@@ -2024,7 +2046,7 @@ namespace WebApp.Helpers.Tests
                     UnitType = "gal"
                 };
 
-                int rawMaterialId = _dl.CreateRawMaterial(_userId, rawMaterial);
+                int rawMaterialId = _dictionary.CreateRawMaterial(_userId, rawMaterial);
                 testRecords.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
 
                 // Create Vendor dictionary item
@@ -2033,7 +2055,7 @@ namespace WebApp.Helpers.Tests
                     VendorName = "TestVendor-4tUTav"
                 };
 
-                int vendorId = _dl.CreateVendor(_userId, vendor);
+                int vendorId = _dictionary.CreateVendor(_userId, vendor);
                 testRecords.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // Create Storage dictionary item
@@ -2042,7 +2064,7 @@ namespace WebApp.Helpers.Tests
                     StorageName = "TestStorage-4tUTav"
                 };
 
-                int storageId = _dl.CreateStorage(_userId, storage);
+                int storageId = _dictionary.CreateStorage(_userId, storage);
                 testRecords.Add(Tuple.Create(storageId, Table.Storage));
 
                 // Create Distilled Purchase record
@@ -2065,7 +2087,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int purchaseId = _dl.CreatePurchase(purchase, _userId);
+                int purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 testRecords.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Create Production Blending record
@@ -2100,13 +2122,13 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int productionId = _dl.CreateProduction(production, _userId);
+                int productionId = _production.CreateProduction(production, _userId);
                 testRecords.Add(Tuple.Create(productionId, Table.Production));
 
                 // Act
 
                 // Generate Processing Report
-                ProcessingReportingObject report = _dl.GetProcessingReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+                ProcessingReportingObject report = _processingReport.GetProcessingReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
 
                 // Assert
                 var actual = report.Part4List.Find(x => x.ProcessingReportTypeName == "VODKA" && x.ProcessingSpirits == "bulkSpiritDumped").Vodka;
@@ -2146,7 +2168,7 @@ namespace WebApp.Helpers.Tests
                     ProcessingReportTypeID = 18 // GIN
                 };
 
-                int spiritId = _dl.CreateSpirit(_userId, spirit);
+                int spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 testRecords.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // Create Raw Material dictionary item
@@ -2159,7 +2181,7 @@ namespace WebApp.Helpers.Tests
                     MaterialCategoryID = 1 // grain
                 };
 
-                int rawMaterialId = _dl.CreateRawMaterial(_userId, rawMaterial);
+                int rawMaterialId = _dictionary.CreateRawMaterial(_userId, rawMaterial);
                 testRecords.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
 
                 // Create Vendor dictionary item
@@ -2168,7 +2190,7 @@ namespace WebApp.Helpers.Tests
                     VendorName = "BigGrainsDistillery"
                 };
 
-                int vendorId = _dl.CreateVendor(_userId, vendor);
+                int vendorId = _dictionary.CreateVendor(_userId, vendor);
                 testRecords.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // Create Storage dictionary item
@@ -2177,7 +2199,7 @@ namespace WebApp.Helpers.Tests
                     StorageName = "ThaTank"
                 };
 
-                int storageId = _dl.CreateStorage(_userId, storage);
+                int storageId = _dictionary.CreateStorage(_userId, storage);
                 testRecords.Add(Tuple.Create(storageId, Table.Storage));
 
                 // Distilled purchase
@@ -2199,7 +2221,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int purchaseId = _dl.CreatePurchase(purchase, _userId);
+                int purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 testRecords.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Blend and gauge
@@ -2234,7 +2256,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int productionId1 = _dl.CreateProduction(blending, _userId);
+                int productionId1 = _production.CreateProduction(blending, _userId);
                 testRecords.Add(Tuple.Create(productionId1, Table.Production));
 
                 // Bottle
@@ -2269,13 +2291,13 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int productionId2 = _dl.CreateProduction(bottling, _userId);
+                int productionId2 = _production.CreateProduction(bottling, _userId);
                 testRecords.Add(Tuple.Create(productionId2, Table.Production));
 
                 // Act
 
                 // Generate Processing Report
-                ProcessingReportingObject report = _dl.GetProcessingReportData(new DateTime(2017, 11, 1), new DateTime(2017, 11, 30), _userId);
+                ProcessingReportingObject report = _processingReport.GetProcessingReportData(new DateTime(2017, 11, 1), new DateTime(2017, 11, 30), _userId);
 
                 // Assert
                 Assert.IsNotNull(report);
@@ -2315,7 +2337,7 @@ namespace WebApp.Helpers.Tests
                     ProcessingReportTypeID = 12 // BRANDY DISTILLED AT 170 AND UNDER
                 };
 
-                int spiritId = _dl.CreateSpirit(_userId, spirit);
+                int spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 testRecords.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // Create Raw Material dictionary item
@@ -2328,7 +2350,7 @@ namespace WebApp.Helpers.Tests
                     UnitType = "lb"
                 };
 
-                int rawMaterialId = _dl.CreateRawMaterial(_userId, rawMaterial);
+                int rawMaterialId = _dictionary.CreateRawMaterial(_userId, rawMaterial);
                 testRecords.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
 
                 // Create Vendor dictionary item
@@ -2337,7 +2359,7 @@ namespace WebApp.Helpers.Tests
                     VendorName = "BigGrapesWinery"
                 };
 
-                int vendorId = _dl.CreateVendor(_userId, vendor);
+                int vendorId = _dictionary.CreateVendor(_userId, vendor);
                 testRecords.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // Create Storage dictionary item
@@ -2346,7 +2368,7 @@ namespace WebApp.Helpers.Tests
                     StorageName = "TheTank"
                 };
 
-                int storageId = _dl.CreateStorage(_userId, storage);
+                int storageId = _dictionary.CreateStorage(_userId, storage);
                 testRecords.Add(Tuple.Create(storageId, Table.Storage));
 
                 // Create Fermented Purchase record
@@ -2366,7 +2388,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int purchaseId = _dl.CreatePurchase(purchase, _userId);
+                int purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 testRecords.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Create Production Distillation record and Gauged to true
@@ -2403,16 +2425,16 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                int productionId = _dl.CreateProduction(production, _userId);
+                int productionId = _production.CreateProduction(production, _userId);
                 testRecords.Add(Tuple.Create(productionId, Table.Production));
 
                 // Act
 
                 // Generate Storage Report
-                StorageReport storageReport = _dl.GetStorageReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+                StorageReportObject storageReport = _storageReport.GetStorageReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
 
                 // Generate Production Report
-                ProductionReportingObject productionReport = _dl.GetProductionReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+                ProductionReportingObject productionReport = _productionReport.GetProductionReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
 
                 // Assert
 
@@ -2430,7 +2452,6 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(100F, productionReport.Part2Through4List.First().ProofGallons);
                 Assert.AreEqual(1, productionReport.ProdReportPart6List.Count);
                 Assert.AreEqual("FermentedPomace", productionReport.ProdReportPart6List.First().KindOfMaterial);
-                // Test fails because of this assertion. Weight is 0. Debug.
                 Assert.AreEqual(1000F, productionReport.ProdReportPart6List.First().Weight);
             }
             finally
@@ -2470,13 +2491,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "GIN";
                 spirit.ProcessingReportTypeID = 18;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -2484,7 +2505,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -2498,7 +2519,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Distilled = true;
                     gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    gnsMaterialId = _dl.CreateRawMaterial(_userId, gnsMaterial);
+                    gnsMaterialId = _dictionary.CreateRawMaterial(_userId, gnsMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
                 }
 
@@ -2512,7 +2533,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -2539,7 +2560,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 9;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Redistil GNS into GIN and mark it as Gauged
@@ -2572,7 +2593,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -2614,7 +2635,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -2635,10 +2656,10 @@ namespace WebApp.Helpers.Tests
                 var marStart = new DateTime(2017, 3, 1);
                 var marEnd = new DateTime(2017, 3, marDays);
 
-                StorageReport decStorageReport = _dl.GetStorageReportData(decStart, decEnd, _userId);
-                StorageReport janStorageReport = _dl.GetStorageReportData(janStart, janEnd, _userId);
-                StorageReport febStorageReport = _dl.GetStorageReportData(febStart, febEnd, _userId);
-                StorageReport marStorageReport = _dl.GetStorageReportData(marStart, marEnd, _userId);
+                StorageReportObject decStorageReport = _storageReport.GetStorageReportData(decStart, decEnd, _userId);
+                StorageReportObject janStorageReport = _storageReport.GetStorageReportData(janStart, janEnd, _userId);
+                StorageReportObject febStorageReport = _storageReport.GetStorageReportData(febStart, febEnd, _userId);
+                StorageReportObject marStorageReport = _storageReport.GetStorageReportData(marStart, marEnd, _userId);
 
                 #endregion
 
@@ -2811,13 +2832,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "GIN";
                 spirit.ProcessingReportTypeID = 18;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -2825,7 +2846,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -2839,7 +2860,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Distilled = true;
                     gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    gnsMaterialId = _dl.CreateRawMaterial(_userId, gnsMaterial);
+                    gnsMaterialId = _dictionary.CreateRawMaterial(_userId, gnsMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
                 }
 
@@ -2853,7 +2874,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -2880,7 +2901,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 9;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Redistil GNS into GIN and mark it as Gauged
@@ -2913,7 +2934,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -2955,7 +2976,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Bottling Record
@@ -2999,7 +3020,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
                 #endregion
 
@@ -3017,7 +3038,7 @@ namespace WebApp.Helpers.Tests
 
                 ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
 
-                actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+                actualProcessingReportObject = _processingReport.GetProcessingReportData(start, end, _userId);
 
                 Assert.AreEqual(reportHeaderE.DSP, actualProcessingReportObject.Header.DSP);
                 Assert.AreEqual(reportHeaderE.EIN, actualProcessingReportObject.Header.EIN);
@@ -3088,13 +3109,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "GIN";
                 spirit.ProcessingReportTypeID = 18;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -3102,7 +3123,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -3116,7 +3137,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Distilled = true;
                     gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    gnsMaterialId = _dl.CreateRawMaterial(_userId, gnsMaterial);
+                    gnsMaterialId = _dictionary.CreateRawMaterial(_userId, gnsMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
                 }
 
@@ -3130,7 +3151,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -3159,7 +3180,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 8;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -3193,7 +3214,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -3235,7 +3256,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Bottling Record
@@ -3279,7 +3300,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -3332,12 +3353,12 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
                 #endregion
 
                 #region Storage
                 /* STORAGE REPORT */
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "AlcoholUnder190";
@@ -3354,7 +3375,7 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r6_TotalLines1Through5 = 180f;
                 storageReportBody.r7_TaxPaid = 0f;
 
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
                 #endregion
 
                 #region Processing
@@ -3417,7 +3438,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Tequila = 0f;
                 processingReportP4.Vodka = 0f;
 
-                actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+                actualProcessingReportObject = _processingReport.GetProcessingReportData(start, end, _userId);
                 #endregion // end of processing region
 
                 #endregion
@@ -3583,13 +3604,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "GIN";
                 spirit.ProcessingReportTypeID = 18;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -3597,7 +3618,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -3611,7 +3632,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Distilled = true;
                     gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    gnsMaterialId = _dl.CreateRawMaterial(_userId, gnsMaterial);
+                    gnsMaterialId = _dictionary.CreateRawMaterial(_userId, gnsMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
                 }
 
@@ -3625,7 +3646,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -3654,7 +3675,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 8;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -3688,7 +3709,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
                 #endregion
 
@@ -3740,12 +3761,12 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
                 #endregion
 
                 #region Storage
                 /* STORAGE REPORT */
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "AlcoholUnder190";
@@ -3762,7 +3783,7 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r6_TotalLines1Through5 = 160f;
                 storageReportBody.r7_TaxPaid = 0f;
 
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
                 #endregion
 
                 #region Processing
@@ -3797,7 +3818,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP2.TaxWithdrawn = 0f;
                 processingReportP2.Transf2Prod4Redistil = 0f;
 
-                actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+                actualProcessingReportObject = _processingReport.GetProcessingReportData(start, end, _userId);
                 #endregion // end of processing region
 
                 #endregion
@@ -3940,13 +3961,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "GIN";
                 spirit.ProcessingReportTypeID = 18;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -3954,7 +3975,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -3968,7 +3989,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Distilled = true;
                     gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    gnsMaterialId = _dl.CreateRawMaterial(_userId, gnsMaterial);
+                    gnsMaterialId = _dictionary.CreateRawMaterial(_userId, gnsMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
                 }
 
@@ -3982,7 +4003,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -4011,7 +4032,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 8;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -4045,7 +4066,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -4078,7 +4099,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
                 #endregion
@@ -4130,7 +4151,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 #endregion
 
@@ -4220,13 +4241,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -4234,7 +4255,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
 
@@ -4250,7 +4271,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -4264,7 +4285,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -4293,7 +4314,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -4328,7 +4349,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -4361,12 +4382,12 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 // verify Production report Part 1
                 Assert.AreEqual(0, actualProdReportObject.Part1List[0].ProccessingAcct);
@@ -4521,13 +4542,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -4535,7 +4556,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
 
@@ -4551,7 +4572,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
 
@@ -4565,7 +4586,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -4589,7 +4610,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -4624,7 +4645,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Distillation Record and mark it as Gauged
@@ -4657,7 +4678,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -4665,7 +4686,7 @@ namespace WebApp.Helpers.Tests
                 #region Reports
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 // verify Production report Part 1
                 Assert.AreEqual(0, actualProdReportObject.Part1List[0].ProccessingAcct);
@@ -4759,7 +4780,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -4767,7 +4788,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -4782,7 +4803,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
 
@@ -4796,7 +4817,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -4820,7 +4841,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -4855,7 +4876,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -4872,10 +4893,10 @@ namespace WebApp.Helpers.Tests
 
                 #region Storage Report
 
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 //get actual storage data
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualStorageReportObject.Header.DSP);
@@ -4990,7 +5011,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -4998,7 +5019,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -5013,7 +5034,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -5038,7 +5059,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -5073,7 +5094,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5107,7 +5128,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5126,7 +5147,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProductionReport = new ProductionReportingObject();
 
                 //get actual storage data
-                actualProductionReport = _dl.GetProductionReportData(start, end, _userId);
+                actualProductionReport = _productionReport.GetProductionReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualProductionReport.Header.DSP);
@@ -5184,7 +5205,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -5192,7 +5213,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -5207,7 +5228,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -5232,7 +5253,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -5267,7 +5288,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5301,7 +5322,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5320,7 +5341,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProductionReport = new ProductionReportingObject();
 
                 //get actual storage data
-                actualProductionReport = _dl.GetProductionReportData(start, end, _userId);
+                actualProductionReport = _productionReport.GetProductionReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualProductionReport.Header.DSP);
@@ -5395,7 +5416,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 garbage.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -5403,7 +5424,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 garbage.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -5418,7 +5439,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     garbage.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -5443,7 +5464,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 garbage.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -5478,7 +5499,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 garbage.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5513,7 +5534,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 garbage.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5529,7 +5550,7 @@ namespace WebApp.Helpers.Tests
                 reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
                 reportHeaderE.DSP = "DSP-WA-21086";
 
-                StorageReport expectedStorageReport = new StorageReport();
+                StorageReportObject expectedStorageReport = new StorageReportObject();
 
                 List<StorageReportCategory> reportList = new List<StorageReportCategory>();
 
@@ -5569,10 +5590,10 @@ namespace WebApp.Helpers.Tests
 
                 expectedStorageReport.ReportBody = reportList;
 
-                StorageReport actualStorageReport = new StorageReport();
+                StorageReportObject actualStorageReport = new StorageReportObject();
 
                 //get actual storage data
-                actualStorageReport = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReport = _storageReport.GetStorageReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualStorageReport.Header.DSP);
@@ -5662,7 +5683,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -5670,7 +5691,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -5685,7 +5706,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -5710,7 +5731,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -5745,7 +5766,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5779,7 +5800,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -5795,7 +5816,7 @@ namespace WebApp.Helpers.Tests
                 reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
                 reportHeaderE.DSP = "DSP-WA-21086";
 
-                StorageReport expectedStorageReport = new StorageReport();
+                StorageReportObject expectedStorageReport = new StorageReportObject();
 
                 List<StorageReportCategory> reportList = new List<StorageReportCategory>();
 
@@ -5835,10 +5856,10 @@ namespace WebApp.Helpers.Tests
 
                 expectedStorageReport.ReportBody = reportList;
 
-                StorageReport actualStorageReport = new StorageReport();
+                StorageReportObject actualStorageReport = new StorageReportObject();
 
                 //get actual storage data
-                actualStorageReport = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReport = _storageReport.GetStorageReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualStorageReport.Header.DSP);
@@ -5906,7 +5927,7 @@ namespace WebApp.Helpers.Tests
             spirit.ProcessingReportTypeID = 1;
 
             //Act
-            int result = _dl.CreateSpirit(_userId, spirit);
+            int result =_dictionary.CreateSpirit(_userId, spirit);
 
             // Assert
             Assert.AreNotEqual(0, result);
@@ -5924,7 +5945,7 @@ namespace WebApp.Helpers.Tests
             vendor.Note = Guid.NewGuid().ToString();
 
             //Act
-            int result = _dl.CreateVendor(_userId, vendor);
+            int result = _dictionary.CreateVendor(_userId, vendor);
 
             // Assert
             Assert.AreNotEqual(0, result);
@@ -5947,7 +5968,7 @@ namespace WebApp.Helpers.Tests
             wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
             //Act
-            int result = _dl.CreateRawMaterial(_userId, wineMaterial);
+            int result = _dictionary.CreateRawMaterial(_userId, wineMaterial);
 
             // Assert
             Assert.AreNotEqual(0, result);
@@ -5969,7 +5990,7 @@ namespace WebApp.Helpers.Tests
             waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
             //Act
-            int result = _dl.CreateRawMaterial(_userId, waterMaterial);
+            int result = _dictionary.CreateRawMaterial(_userId, waterMaterial);
 
             // Assert
             Assert.AreNotEqual(0, result);
@@ -5991,8 +6012,8 @@ namespace WebApp.Helpers.Tests
             distilledMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
             // Act
-            int result = _dl.CreateRawMaterial(_userId, distilledMaterial);
-            var materialList = _dl.GetRawMaterialListDict(_userId);
+            int result = _dictionary.CreateRawMaterial(_userId, distilledMaterial);
+            var materialList = _dictionary.GetRawMaterialListDict(_userId);
             var dbResult = materialList.Single(m => m.RawMaterialId == result);
             // Assert
             Assert.AreNotEqual(0, result);
@@ -6032,7 +6053,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -6040,7 +6061,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -6055,7 +6076,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -6080,12 +6101,12 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
-                _dl.DeletePurchase(purchO, _userId);
+                _purchase.DeletePurchaseExecute(purchaseId, _userId);
 
-                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+                var purchaseList = _purchase.GetPurchasesList(purchO.PurchaseType, _userId);
 
                 var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
 
@@ -6127,7 +6148,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -6135,7 +6156,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -6149,7 +6170,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
@@ -6174,12 +6195,12 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
-                _dl.DeletePurchase(purchO, _userId);
+                _purchase.DeletePurchaseExecute(purchaseId, _userId);
 
-                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+                var purchaseList = _purchase.GetPurchasesList(purchO.PurchaseType, _userId);
 
                 var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
 
@@ -6221,7 +6242,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -6229,23 +6250,21 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
-                {
-                    RawMaterialObject gnsMaterial = new RawMaterialObject();
-                    gnsMaterial.RawMaterialName = "GNS";
-                    gnsMaterial.UnitType = "gal";
-                    gnsMaterial.UnitTypeId = 1;
-                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
-                    materialBoolTypes.Distilled = true;
-                    gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
+                RawMaterialObject gnsMaterial = new RawMaterialObject();
+                gnsMaterial.RawMaterialName = "GNS";
+                gnsMaterial.UnitType = "gal";
+                gnsMaterial.UnitTypeId = 1;
+                PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                materialBoolTypes.Distilled = true;
+                gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    distilledMaterialId = _dl.CreateRawMaterial(_userId, gnsMaterial);
+                distilledMaterialId = _dictionary.CreateRawMaterial(_userId, gnsMaterial);
 
-                    tablesForCleanupTupleList.Add(Tuple.Create(distilledMaterialId, Table.MaterialDict));
-                }
+                tablesForCleanupTupleList.Add(Tuple.Create(distilledMaterialId, Table.MaterialDict));
 
                 #endregion
 
@@ -6268,12 +6287,12 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
-                _dl.DeletePurchase(purchO, _userId);
+                _purchase.DeletePurchaseExecute(purchaseId, _userId);
 
-                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+                var purchaseList = _purchase.GetPurchasesList(purchO.PurchaseType, _userId);
 
                 var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
 
@@ -6315,7 +6334,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -6323,23 +6342,21 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
-                {
-                    RawMaterialObject additiveMaterial = new RawMaterialObject();
-                    additiveMaterial.RawMaterialName = "Honey";
-                    additiveMaterial.UnitType = "lb";
-                    additiveMaterial.UnitTypeId = 2;
-                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
-                    materialBoolTypes.Additive = true;
-                    additiveMaterial.PurchaseMaterialTypes = materialBoolTypes;
+                RawMaterialObject additiveMaterial = new RawMaterialObject();
+                additiveMaterial.RawMaterialName = "Honey";
+                additiveMaterial.UnitType = "lb";
+                additiveMaterial.UnitTypeId = 2;
+                PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                materialBoolTypes.Additive = true;
+                additiveMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    additiveMaterialId = _dl.CreateRawMaterial(_userId, additiveMaterial);
+                additiveMaterialId = _dictionary.CreateRawMaterial(_userId, additiveMaterial);
 
-                    tablesForCleanupTupleList.Add(Tuple.Create(additiveMaterialId, Table.MaterialDict));
-                }
+                tablesForCleanupTupleList.Add(Tuple.Create(additiveMaterialId, Table.MaterialDict));
 
                 #endregion
 
@@ -6362,12 +6379,12 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
-                _dl.DeletePurchase(purchO, _userId);
+                _purchase.DeletePurchaseExecute(purchaseId, _userId);
 
-                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+                var purchaseList = _purchase.GetPurchasesList(purchO.PurchaseType, _userId);
 
                 var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
 
@@ -6409,7 +6426,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -6417,7 +6434,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -6430,7 +6447,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Supply = true;
                     additiveMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    supplyMaterialId = _dl.CreateRawMaterial(_userId, additiveMaterial);
+                    supplyMaterialId = _dictionary.CreateRawMaterial(_userId, additiveMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(supplyMaterialId, Table.MaterialDict));
                 }
@@ -6456,12 +6473,12 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
-                _dl.DeletePurchase(purchO, _userId);
+                _purchase.DeletePurchaseExecute(purchaseId, _userId);
 
-                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+                var purchaseList = _purchase.GetPurchasesList(purchO.PurchaseType, _userId);
 
                 var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
 
@@ -6484,7 +6501,7 @@ namespace WebApp.Helpers.Tests
         /// tied to a Purchase record
         /// </summary>
         [TestMethod()]
-        public void Delete_Dictionary_Vendor_Test()
+        public void Forward_Delete_Dictionary_Vendor_Test()
         {
             // Arrange
             int vendorId = 0;
@@ -6503,7 +6520,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -6511,7 +6528,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -6526,7 +6543,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -6551,7 +6568,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -6563,7 +6580,7 @@ namespace WebApp.Helpers.Tests
                 deleteObject.DeleteRecordType = "Vendor";
 
                 // Attempt to delete vendor even though it's being used by purchase record
-                ReturnObject returnResult = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+                ReturnObject returnResult = _dictionary.DeleteDictionaryRecord(_userId, deleteObject);
 
                 var vendorList = _dl.GetVendorData(_userId);
 
@@ -6574,9 +6591,9 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(returnResult.ExecuteMessage, purchO.PurBatchName);
 
                 // Delete purchase record to ensure Vendor can be deleted when not used by other record.
-                _dl.DeletePurchase(purchO, _userId);
+                _purchase.DeletePurchaseExecute(purchaseId, _userId);
 
-                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+                var purchaseList = _purchase.GetPurchasesList(purchO.PurchaseType, _userId);
 
                 var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
 
@@ -6584,7 +6601,7 @@ namespace WebApp.Helpers.Tests
                 Assert.IsNull(purchaseFound);
 
                 // Attempt to delete Vendor record now that it's no longer used by purchase record
-                _dl.DeleteDictionaryRecord(_userId, deleteObject);
+                _dictionary.DeleteDictionaryRecord(_userId, deleteObject);
 
                 var vendorList2 = _dl.GetVendorData(_userId);
 
@@ -6610,7 +6627,7 @@ namespace WebApp.Helpers.Tests
         /// tied to a Purchase or Production record.
         /// </summary>
         [TestMethod()]
-        public void Delete_Dictionary_Storage_Test()
+        public void Forward_Delete_Dictionary_Storage_Test()
         {
             // Arrange
             int vendorId = 0;
@@ -6630,7 +6647,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -6638,7 +6655,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -6653,7 +6670,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -6678,7 +6695,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -6690,7 +6707,7 @@ namespace WebApp.Helpers.Tests
                 deleteObject.DeleteRecordType = "Storage";
 
                 // Attempt to delete storage even though it's being used by Purchase record
-                ReturnObject returnResult1 = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+                ReturnObject returnResult1 = _dictionary.DeleteDictionaryRecord(_userId, deleteObject);
 
                 var storList1 = _dl.GetStorageData(_userId);
 
@@ -6701,9 +6718,9 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(returnResult1.ExecuteMessage, purchO.PurBatchName);
 
                 // Delete Purchase record to ensure Storage can be deleted when not used by other record.
-                _dl.DeletePurchase(purchO, _userId);
+                _purchase.DeletePurchaseExecute(purchaseId, _userId);
 
-                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+                var purchaseList = _purchase.GetPurchasesList(purchO.PurchaseType, _userId);
 
                 var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
 
@@ -6727,7 +6744,7 @@ namespace WebApp.Helpers.Tests
                 purchase.Price = 2500f;
                 purchase.VendorId = vendorId;
 
-                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Production
@@ -6759,7 +6776,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                productionId = _dl.CreateProduction(prodObject, _userId);
+                productionId = _production.CreateProduction(prodObject, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -6767,7 +6784,7 @@ namespace WebApp.Helpers.Tests
                 #region Assertions: Production
 
                 // Attempt to delete storage even though it's being used by Production record
-                ReturnObject returnResult2 = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+                ReturnObject returnResult2 = _dictionary.DeleteDictionaryRecord(_userId, deleteObject);
 
                 var storList2 = _dl.GetStorageData(_userId);
 
@@ -6777,9 +6794,12 @@ namespace WebApp.Helpers.Tests
                 // Assert Production record name used by Storage is correctly surfaced to user.
                 Assert.AreEqual(returnResult2.ExecuteMessage, prodObject.BatchName);
                 // Delete Production record to ensure Storage can be deleted when not used by other record.
-                _dl.DeleteProduction(prodObject, _userId);
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = productionId;
+                deleteObject2.DeleteRecordType = prodObject.ProductionType;
+                _production.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList = _dl.GetProductionList(_userId, "Distillation");
+                var prodList = _production.GetProductionList(_userId, "Distillation");
 
                 var prodFound = prodList.Find(x => x.ProductionId == prodObject.ProductionId);
 
@@ -6791,7 +6811,7 @@ namespace WebApp.Helpers.Tests
                 #region Assertions: Storage
 
                 // Attempt to delete Storage record now that it's no longer used by any other record
-                _dl.DeleteDictionaryRecord(_userId, deleteObject);
+                _dictionary.DeleteDictionaryRecord(_userId, deleteObject);
 
                 var storList3 = _dl.GetStorageData(_userId);
 
@@ -6817,7 +6837,7 @@ namespace WebApp.Helpers.Tests
         /// tied to a Production record.
         /// </summary>
         [TestMethod()]
-        public void Delete_Dictionary_Spirit_Test()
+        public void Forward_Delete_Dictionary_Spirit_Test()
         {
             // Arrange
             int spiritId = 0;
@@ -6838,7 +6858,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -6846,7 +6866,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Spirit Object
@@ -6854,7 +6874,7 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "testSpirit";
                 spirit.ProcessingReportTypeID = 19;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // setup Material Object
@@ -6869,7 +6889,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -6891,7 +6911,7 @@ namespace WebApp.Helpers.Tests
                 purchase.Price = 2500f;
                 purchase.VendorId = vendorId;
 
-                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 List<StorageObject> storageList = new List<StorageObject>();
@@ -6929,7 +6949,7 @@ namespace WebApp.Helpers.Tests
                     SpiritId = spiritId
                 };
 
-                productionId = _dl.CreateProduction(prodObject, _userId);
+                productionId = _production.CreateProduction(prodObject, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -6941,7 +6961,7 @@ namespace WebApp.Helpers.Tests
                 deleteObject.DeleteRecordType = "Spirit";
 
                 // Attempt to delete Spirit even though it's being used by Production record
-                ReturnObject returnResult = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+                ReturnObject returnResult = _dictionary.DeleteDictionaryRecord(_userId, deleteObject);
 
                 var spiritList1 = _dl.GetSpiritTypeList(_userId);
 
@@ -6951,9 +6971,12 @@ namespace WebApp.Helpers.Tests
                 // Assert Production record name used by Spirit is correctly surfaced to user.
                 Assert.AreEqual(returnResult.ExecuteMessage, prodObject.BatchName);
                 // Delete Production record to ensure Spirit can be deleted when not used by other record.
-                _dl.DeleteProduction(prodObject, _userId);
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = productionId;
+                deleteObject2.DeleteRecordType = prodObject.ProductionType;
+                _production.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList = _dl.GetProductionList(_userId, "Blending");
+                var prodList = _production.GetProductionList(_userId, "Blending");
 
                 var prodFound = prodList.Find(x => x.ProductionId == prodObject.ProductionId);
 
@@ -6965,7 +6988,7 @@ namespace WebApp.Helpers.Tests
                 #region Assertions
 
                 // Attempt to delete Spirit record now that it's no longer used by purchase record
-                _dl.DeleteDictionaryRecord(_userId, deleteObject);
+                _dictionary.DeleteDictionaryRecord(_userId, deleteObject);
 
                 var spiritList2 = _dl.GetSpiritTypeList(_userId);
 
@@ -6987,11 +7010,11 @@ namespace WebApp.Helpers.Tests
         }
 
         /// <summary>
-        /// This test checks that a Vendor record cannot be deleted when
+        /// This test checks that a Raw Material record cannot be deleted when
         /// tied to a Purchase record
         /// </summary>
         [TestMethod()]
-        public void Delete_Dictionary_RawMaterial_Test()
+        public void Forward_Delete_Dictionary_RawMaterial_Test()
         {
             // Arrange
             int vendorId = 0;
@@ -7011,7 +7034,7 @@ namespace WebApp.Helpers.Tests
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -7019,7 +7042,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -7034,7 +7057,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    rawMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    rawMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
                 }
@@ -7059,7 +7082,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -7071,9 +7094,9 @@ namespace WebApp.Helpers.Tests
                 deleteObject.DeleteRecordType = "RawMaterial";
 
                 // Attempt to delete Raw Material even though it's being used by Purchase record
-                ReturnObject returnResult1 = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+                ReturnObject returnResult1 = _dictionary.DeleteDictionaryRecord(_userId, deleteObject);
 
-                var rawMaterialList1 = _dl.GetRawMaterialListDict(_userId);
+                var rawMaterialList1 = _dictionary.GetRawMaterialListDict(_userId);
 
                 var rawMaterialFound1 = rawMaterialList1.Find(x => x.RawMaterialId == rawMaterialId);
                 // Assert Raw Material can't be deleted when used by Purchase record.
@@ -7082,9 +7105,9 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(returnResult1.ExecuteMessage, purchO.PurBatchName);
 
                 // Delete Purchase record to ensure Raw Material can be deleted when not used by other record.
-                _dl.DeletePurchase(purchO, _userId);
+                _purchase.DeletePurchaseExecute(purchaseId, _userId);
 
-                var purchaseList = _dl.GetPurchasesList(purchO.PurchaseType, _userId);
+                var purchaseList = _purchase.GetPurchasesList(purchO.PurchaseType, _userId);
 
                 var purchaseFound = purchaseList.Find(x => x.PurchaseId == purchaseId);
 
@@ -7107,7 +7130,7 @@ namespace WebApp.Helpers.Tests
                 purchase.Price = 2500f;
                 purchase.VendorId = vendorId;
 
-                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // set up blending additive list
@@ -7137,7 +7160,7 @@ namespace WebApp.Helpers.Tests
                         new ObjInfo4Burndwn
                         {
                             ID = purchaseId,
-                            BurningDownMethod = "volume",
+                            BurningDownMethod = "weight",
                             DistillableOrigin = "pur",
                             NewVal = 100,
                             OldVal = 0,
@@ -7146,7 +7169,7 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                productionId = _dl.CreateProduction(prodObject, _userId);
+                productionId = _production.CreateProduction(prodObject, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -7154,9 +7177,9 @@ namespace WebApp.Helpers.Tests
                 #region: Assertions: Production
 
                 // Attempt to delete Raw Material even though it's being used by Production record
-                ReturnObject returnResult2 = _dl.DeleteDictionaryRecord(_userId, deleteObject);
+                ReturnObject returnResult2 = _dictionary.DeleteDictionaryRecord(_userId, deleteObject);
 
-                var rawMaterialList2 = _dl.GetRawMaterialListDict(_userId);
+                var rawMaterialList2 = _dictionary.GetRawMaterialListDict(_userId);
 
                 var rawMaterialFound2 = rawMaterialList2.Find(x => x.RawMaterialId == rawMaterialId);
                 // Assert Raw Material can't be deleted when used by Production record.
@@ -7164,9 +7187,12 @@ namespace WebApp.Helpers.Tests
                 // Assert Production record name which uses Raw Material is correctly surfaced to user.
                 Assert.AreEqual(returnResult2.ExecuteMessage, prodObject.BatchName);
                 // Delete Production record to ensure Raw Material can be deleted when not used by other record.
-                _dl.DeleteProduction(prodObject, _userId);
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = productionId;
+                deleteObject2.DeleteRecordType = prodObject.ProductionType;
+                _production.DeleteProductionExecute(deleteObject2, _userId);
 
-                var prodList = _dl.GetProductionList(_userId, "Blending");
+                var prodList = _production.GetProductionList(_userId, "Blending");
 
                 var prodFound = prodList.Find(x => x.ProductionId == prodObject.ProductionId);
 
@@ -7178,13 +7204,1524 @@ namespace WebApp.Helpers.Tests
                 #region Assertion
 
                 // Attempt to delete Raw Material record now that it's no longer used by other records
-                _dl.DeleteDictionaryRecord(_userId, deleteObject);
+                _dictionary.DeleteDictionaryRecord(_userId, deleteObject);
 
-                var rawMaterialList3 = _dl.GetRawMaterialListDict(_userId);
+                var rawMaterialList3 = _dictionary.GetRawMaterialListDict(_userId);
 
                 var rawMaterialFound3 = rawMaterialList3.Find(x => x.RawMaterialId == rawMaterialId);
                 // Assert Vendor can be deleted when not used by purchase record.
                 Assert.IsNull(rawMaterialFound3);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Purchase Fermentable record cannot be deleted when
+        /// tied to a Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Forward_Delete_Purchase_Fermentable_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int grapeMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dictionary.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject fermentableMaterial = new RawMaterialObject();
+                    fermentableMaterial.RawMaterialName = "Fermentable_Material";
+                    fermentableMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    fermentableMaterial.UnitType = "lb";
+                    fermentableMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermentable = true;
+                    fermentableMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, fermentableMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase Set up
+
+                // Set up Purhcase Fementable record.
+                PurchaseObject purchFermentable = new PurchaseObject();
+                purchFermentable.PurBatchName = "Forward_Deletion_Purchase_Fermentable_Test";
+                purchFermentable.PurchaseType = "Fermentable";
+                purchFermentable.PurchaseDate = new DateTime(2018, 01, 01);
+                purchFermentable.Quantity = 0f;
+                purchFermentable.VolumeByWeight = 2000f;
+                purchFermentable.RecordId = grapeMaterialId;
+                purchFermentable.Price = 350f;
+                purchFermentable.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchFermentable.Storage = storageList;
+
+                purchaseId = _purchase.CreatePurchase(purchFermentable, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Assertions
+
+                // Set up Production Fermenation record which uses Purchase Fermentable record.
+                ProductionObject prodObjectFermentation = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "TEST",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Fermentation",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "weight",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                productionId = _production.CreateProduction(prodObjectFermentation, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = purchaseId;
+                deleteObject.DeleteRecordType = "Fermentable";
+
+                // Try to delete Purchase Fermentable record while it's being used by Production Fermentation record.
+                ReturnObject returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
+
+                var purchaseList1 = _purchase.GetPurchasesList(purchFermentable.PurchaseType, _userId);
+
+                var purchaseFound1 = purchaseList1.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNotNull(purchaseFound1);
+                // Assert Production record name which uses Purchase record is correctly surfaced to user.
+                Assert.AreEqual(returnResult.ExecuteMessage, prodObjectFermentation.BatchName);
+
+                // Delete Production record to attempt to delete Purchase record.
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = productionId;
+                deleteObject2.DeleteRecordType = prodObjectFermentation.ProductionType;
+                _production.DeleteProductionExecute(deleteObject2, _userId);
+
+                var prodList = _production.GetProductionList(_userId, "Fementation");
+
+                var prodFound = prodList.Find(x => x.ProductionId == prodObjectFermentation.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound);
+
+                // Try to delete Purchase Fermentable record when its not being used by any record.
+                _purchase.DeletePurchaseRecord(_userId, deleteObject);
+
+                var purchaseList2 = _purchase.GetPurchasesList(purchFermentable.PurchaseType, _userId);
+
+                var purchaseFound2 = purchaseList2.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNull(purchaseFound2);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Purchase Fermented record cannot be deleted when
+        /// tied to a Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Forward_Delete_Purchase_Fermented_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int rawMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dictionary.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject fermentedMaterial = new RawMaterialObject();
+                    fermentedMaterial.RawMaterialName = "Fermented_Material";
+                    fermentedMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    fermentedMaterial.UnitType = "lb";
+                    fermentedMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermented = true;
+                    fermentedMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    rawMaterialId = _dictionary.CreateRawMaterial(_userId, fermentedMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase Set up
+
+                // Set up Purchase Fermented record.
+                PurchaseObject purchFermented = new PurchaseObject();
+                purchFermented.PurBatchName = "Forward_Deletion_Purchase_Fermented_Test";
+                purchFermented.PurchaseType = "Fermented";
+                purchFermented.PurchaseDate = new DateTime(2018, 01, 01);
+                purchFermented.Quantity = 1000f;
+                purchFermented.VolumeByWeight = 0f;
+                purchFermented.RecordId = rawMaterialId;
+                purchFermented.Price = 350f;
+                purchFermented.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchFermented.Storage = storageList;
+
+                purchaseId = _purchase.CreatePurchase(purchFermented, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Assertions
+
+                // Set up Production Distillation record which uses Purchase Fermented record.
+                ProductionObject prodObjectDistillation = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "TEST",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritCutId = 9,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                productionId = _production.CreateProduction(prodObjectDistillation, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = purchaseId;
+                deleteObject.DeleteRecordType = "Fermented";
+
+                // Try to delete Purchase Fermented record while it's being used by Production Distillation record.
+                ReturnObject returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
+
+                var purchaseList1 = _purchase.GetPurchasesList(purchFermented.PurchaseType, _userId);
+
+                var purchaseFound1 = purchaseList1.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNotNull(purchaseFound1);
+                // Assert Production record name which uses Purchase record is correctly surfaced to user.
+                Assert.AreEqual(returnResult.ExecuteMessage, prodObjectDistillation.BatchName);
+
+                // Delete Production record to attempt to delete Purchase record.
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = productionId;
+                deleteObject2.DeleteRecordType = prodObjectDistillation.ProductionType;
+                _production.DeleteProductionExecute(deleteObject2, _userId);
+
+                var prodList = _production.GetProductionList(_userId, "Distillation");
+
+                var prodFound = prodList.Find(x => x.ProductionId == prodObjectDistillation.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound);
+
+                // Try to delete Purchase Fermented record when its not being used by any record.
+                _purchase.DeletePurchaseRecord(_userId, deleteObject);
+
+                var purchaseList2 = _purchase.GetPurchasesList(purchFermented.PurchaseType, _userId);
+
+                var purchaseFound2 = purchaseList2.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is deleted.
+                Assert.IsNull(purchaseFound2);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Purchase DistilLed record cannot be deleted when
+        /// tied to a Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Forward_Delete_Purchase_Distilled_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int rawMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dictionary.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject distilledMaterial = new RawMaterialObject();
+                    distilledMaterial.RawMaterialName = "Distilled_Material";
+                    distilledMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    distilledMaterial.UnitType = "gal";
+                    distilledMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Distilled = true;
+                    distilledMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    rawMaterialId = _dictionary.CreateRawMaterial(_userId, distilledMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase Set up
+
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchDistilled = new PurchaseObject();
+                purchDistilled.PurBatchName = "Forward_Deletion_Purchase_Distilled_Test";
+                purchDistilled.PurchaseType = "Distilled";
+                purchDistilled.PurchaseDate = new DateTime(2018, 01, 01);
+                purchDistilled.Quantity = 1000f;
+                purchDistilled.VolumeByWeight = 0f;
+                purchDistilled.RecordId = rawMaterialId;
+                purchDistilled.Price = 350f;
+                purchDistilled.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchDistilled.Storage = storageList;
+
+                purchaseId = _purchase.CreatePurchase(purchDistilled, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Assertions
+
+                // Set up Production Distillation record which uses Purchase Distilled record.
+                ProductionObject prodObjectDistillation = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "TEST",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritCutId = 9,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                productionId = _production.CreateProduction(prodObjectDistillation, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = purchaseId;
+                deleteObject.DeleteRecordType = "Distilled";
+
+                // Try to delete Purchase Distilled record while it's being used by Production Distillation record.
+                ReturnObject returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
+
+                var purchaseList1 = _purchase.GetPurchasesList(purchDistilled.PurchaseType, _userId);
+
+                var purchaseFound1 = purchaseList1.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNotNull(purchaseFound1);
+                // Assert Production record name which uses Purchase record is correctly surfaced to user.
+                Assert.AreEqual(returnResult.ExecuteMessage, prodObjectDistillation.BatchName);
+
+                // Delete Production record to attempt to delete Purchase record.
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = productionId;
+                deleteObject2.DeleteRecordType = prodObjectDistillation.ProductionType;
+                _production.DeleteProductionExecute(deleteObject2, _userId);
+
+                var prodList1 = _production.GetProductionList(_userId, "Distillation");
+
+                var prodFound1 = prodList1.Find(x => x.ProductionId == prodObjectDistillation.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound1);
+
+                // Set up Production Blending record which uses Purchase Distilled record.
+                ProductionObject prodObjectBlending = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "TEST",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Blending",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritCutId = 9,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                productionId = _production.CreateProduction(prodObjectBlending, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                // Try to delete Purchase Distilled record while it's being used by Production Blending record.
+                returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
+
+                var purchaseList2 = _purchase.GetPurchasesList(purchDistilled.PurchaseType, _userId);
+
+                var purchaseFound2 = purchaseList2.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNotNull(purchaseFound2);
+                // Assert Production record name which uses Purchase record is correctly surfaced to user.
+                Assert.AreEqual(returnResult.ExecuteMessage, prodObjectBlending.BatchName);
+
+                // Delete Production record to attempt to delete Purchase record.
+                DeleteRecordObject deleteObject3 = new DeleteRecordObject();
+                deleteObject3.DeleteRecordID = productionId;
+                deleteObject3.DeleteRecordType = prodObjectBlending.ProductionType;
+                _production.DeleteProductionExecute(deleteObject3, _userId);
+
+                var prodList2 = _production.GetProductionList(_userId, "Blending");
+
+                var prodFound2 = prodList2.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound2);
+
+                // Set up Production Bottling record which uses Purchase Distilled record.
+                ProductionObject prodObjectBottling = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "TEST",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Bottling",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritCutId = 9,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                productionId = _production.CreateProduction(prodObjectBottling, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                // Try to delete Purchase Distilled record while it's being used by Production Bottling record.
+                returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
+
+                var purchaseList3 = _purchase.GetPurchasesList(purchDistilled.PurchaseType, _userId);
+
+                var purchaseFound3 = purchaseList3.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNotNull(purchaseFound3);
+                // Assert Production record name which uses Purchase record is correctly surfaced to user.
+                Assert.AreEqual(returnResult.ExecuteMessage, prodObjectBottling.BatchName);
+
+                // Delete Production record to attempt to delete Purchase record.
+                DeleteRecordObject deleteObject4 = new DeleteRecordObject();
+                deleteObject4.DeleteRecordID = productionId;
+                deleteObject4.DeleteRecordType = prodObjectBottling.ProductionType;
+                _production.DeleteProductionExecute(deleteObject4, _userId);
+
+                var prodList3 = _production.GetProductionList(_userId, "Bottling");
+
+                var prodFound3 = prodList3.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound3);
+
+                // Try to delete Purchase Fermented record when its not being used by any record.
+                _purchase.DeletePurchaseExecute(purchaseId, _userId);
+
+                var purchaseList4 = _purchase.GetPurchasesList(purchDistilled.PurchaseType, _userId);
+
+                var purchaseFound4 = purchaseList4.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is deleted.
+                Assert.IsNull(purchaseFound4);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Purchase Additive record cannot be deleted when
+        /// tied to a Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Forward_Delete_Purchase_Additive_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int rawMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dictionary.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Raw Material Object: Additive
+                {
+                    RawMaterialObject additiveMaterial = new RawMaterialObject();
+                    additiveMaterial.RawMaterialName = "Additive_Material";
+                    additiveMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    additiveMaterial.UnitType = "gal";
+                    additiveMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Additive = true;
+                    additiveMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    rawMaterialId = _dictionary.CreateRawMaterial(_userId, additiveMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase Set up
+
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchAdditive = new PurchaseObject();
+                purchAdditive.PurBatchName = "Forward_Deletion_Purchase_Additive_Test";
+                purchAdditive.PurchaseType = "Additive";
+                purchAdditive.PurchaseDate = new DateTime(2018, 01, 01);
+                purchAdditive.Quantity = 1000f;
+                purchAdditive.VolumeByWeight = 0f;
+                purchAdditive.RecordId = rawMaterialId;
+                purchAdditive.Price = 350f;
+                purchAdditive.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchAdditive.Storage = storageList;
+
+                purchaseId = _purchase.CreatePurchase(purchAdditive, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Assertions
+
+                // Set up Production Blending record which uses Purchase Additve record.
+                ProductionObject prodObjectBlending = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "TEST",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Blending",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritCutId = 9,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                productionId = _production.CreateProduction(prodObjectBlending, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = purchaseId;
+                deleteObject.DeleteRecordType = "Additive";
+
+                // Try to delete Purchase Additive record while it's being used by Production Blending record.
+                ReturnObject returnResult = _purchase.DeletePurchaseRecord(_userId, deleteObject);
+
+                var purchaseList1 = _purchase.GetPurchasesList(purchAdditive.PurchaseType, _userId);
+
+                var purchaseFound1 = purchaseList1.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNotNull(purchaseFound1);
+                // Assert Production record name which uses Purchase record is correctly surfaced to user.
+                Assert.AreEqual(returnResult.ExecuteMessage, prodObjectBlending.BatchName);
+
+                // Delete Production record to attempt to delete Purchase record.
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = productionId;
+                deleteObject2.DeleteRecordType = prodObjectBlending.ProductionType;
+                _production.DeleteProductionExecute(deleteObject2, _userId);
+
+                var prodList = _production.GetProductionList(_userId, "Blending");
+
+                var prodFound = prodList.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound);
+
+
+                // Try to delete Purchase Additive record when its not being used by any record.
+                _purchase.DeletePurchaseExecute(purchaseId, _userId);
+
+                var purchaseList2 = _purchase.GetPurchasesList(purchAdditive.PurchaseType, _userId);
+
+                var purchaseFound2 = purchaseList2.Find(x => x.PurchaseId == purchaseId);
+
+                // Assert Purchase record is deleted.
+                Assert.IsNull(purchaseFound2);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Production Fermentation record cannot be deleted when
+        /// tied to another Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Forward_Delete_Production_Fermentation_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int grapeMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dictionary.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject fermentableMaterial = new RawMaterialObject();
+                    fermentableMaterial.RawMaterialName = "Fermentable_Material";
+                    fermentableMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    fermentableMaterial.UnitType = "lb";
+                    fermentableMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermentable = true;
+                    fermentableMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, fermentableMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase Set up
+
+                // Set up Purhcase Fementable record.
+                PurchaseObject purchFermentable = new PurchaseObject();
+                purchFermentable.PurBatchName = "Fementable_Purchase_Test";
+                purchFermentable.PurchaseType = "Fermentable";
+                purchFermentable.PurchaseDate = new DateTime(2018, 01, 01);
+                purchFermentable.Quantity = 0f;
+                purchFermentable.VolumeByWeight = 2000f;
+                purchFermentable.RecordId = grapeMaterialId;
+                purchFermentable.Price = 350f;
+                purchFermentable.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchFermentable.Storage = storageList;
+
+                purchaseId = _purchase.CreatePurchase(purchFermentable, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Set up Production
+
+                // Set up Production Fermenation record
+                ProductionObject prodObjectFermentation = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "Forward_Deletion_Fermenatation_Test_01",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Fermentation",
+                    ProofGallon = 78f,
+                    Quantity = 100f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "weight",
+                            DistillableOrigin = "pur",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _production.CreateProduction(prodObjectFermentation, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectFermentation.ProductionId, Table.Production));
+
+                // Set up Production Distillation record which uses Production Fermentation
+                ProductionObject prodObjectDistillation = new ProductionObject
+                {
+                    AlcoholContent = 39f,
+                    BatchName = "Forward_Deletion_Fermenatation_Test_02",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 78f,
+                    Quantity = 50f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectFermentation.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _production.CreateProduction(prodObjectDistillation, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectDistillation.ProductionId, Table.Production));
+
+                #endregion
+
+                #region Assertions
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = prodObjectFermentation.ProductionId;
+                deleteObject.DeleteRecordType = prodObjectFermentation.ProductionType;
+
+                // Try to delete Production Fementation record while it's being used by Production Distillation record.
+                ReturnObject returnResult = _production.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist1 = _production.GetProductionList(_userId, prodObjectFermentation.ProductionType);
+
+                var prodFound1 = prodlist1.Find(x => x.ProductionId == prodObjectFermentation.ProductionId);
+
+                // Assert Production Fermentation record is not deleted.
+                Assert.IsNotNull(prodFound1);
+                // Assert Production Distillation record name which uses Production Fermentation record is correctly surfaced to user.
+                Assert.AreEqual(prodObjectDistillation.BatchName, returnResult.ExecuteMessage);
+
+                // Delete Production Distillation record to attempt to delete Production Fermentation record.
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = prodObjectDistillation.ProductionId;
+                deleteObject2.DeleteRecordType = prodObjectDistillation.ProductionType;
+                _production.DeleteProductionExecute(deleteObject2, _userId);
+
+                var prodList2 = _production.GetProductionList(_userId, prodObjectDistillation.ProductionType);
+
+                var prodFound2 = prodList2.Find(x => x.ProductionId == prodObjectDistillation.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound2);
+
+                // Try to delete Production Fermentation record when its not being used by any record.
+                _production.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist3 = _production.GetProductionList(_userId, prodObjectFermentation.ProductionType);
+
+                var prodFound3 = prodlist3.Find(x => x.ProductionId == prodObjectFermentation.ProductionId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNull(prodFound3);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Production Distillation record cannot be deleted when
+        /// tied to another Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Forward_Delete_Production_Distillation_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int rawMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dictionary.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject fermentedMaterial = new RawMaterialObject();
+                    fermentedMaterial.RawMaterialName = "Fermented_Material";
+                    fermentedMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    fermentedMaterial.UnitType = "gal";
+                    fermentedMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermented = true;
+                    fermentedMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    rawMaterialId = _dictionary.CreateRawMaterial(_userId, fermentedMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase Set up
+
+                // Set up Purhcase Fermented record.
+                PurchaseObject purchFermented = new PurchaseObject();
+                purchFermented.PurBatchName = "Fermented_Purchase_Test";
+                purchFermented.PurchaseType = "Fermented";
+                purchFermented.PurchaseDate = new DateTime(2018, 01, 01);
+                purchFermented.Quantity = 1000f;
+                purchFermented.VolumeByWeight = 0f;
+                purchFermented.RecordId = rawMaterialId;
+                purchFermented.Price = 350f;
+                purchFermented.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchFermented.Storage = storageList;
+
+                purchaseId = _purchase.CreatePurchase(purchFermented, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Set up Production
+
+                // Set up Production Distillation1 record
+                ProductionObject prodObjectDistillation1 = new ProductionObject
+                {
+                    AlcoholContent = 50f,
+                    BatchName = "Forward_Deletion_Distillation",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 1000f,
+                    Quantity = 1000f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 500,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _production.CreateProduction(prodObjectDistillation1, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectDistillation1.ProductionId, Table.Production));
+
+                #endregion
+
+                #region Assertions
+
+                // Set up Production Distillation2 record which uses Production Distillation1
+                ProductionObject prodObjectDistillation2 = new ProductionObject
+                {
+                    AlcoholContent = 50f,
+                    BatchName = "Forward_Deletion_Distillation-Distillation",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 100f,
+                    Quantity = 100f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectDistillation1.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _production.CreateProduction(prodObjectDistillation2, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectDistillation2.ProductionId, Table.Production));
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = prodObjectDistillation1.ProductionId;
+                deleteObject.DeleteRecordType = prodObjectDistillation1.ProductionType;
+
+                // Try to delete Production Distillation1 record while it's being used by Production Distillation2 record.
+                ReturnObject returnResult = _production.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist1 = _production.GetProductionList(_userId, prodObjectDistillation1.ProductionType);
+
+                var prodFound1 = prodlist1.Find(x => x.ProductionId == prodObjectDistillation1.ProductionId);
+
+                // Assert Production Distillation1 record is not deleted.
+                Assert.IsNotNull(prodFound1);
+                // Assert Production Distillation2 record name which uses Production Distillation1 record is correctly surfaced to user.
+                Assert.AreEqual(prodObjectDistillation2.BatchName, returnResult.ExecuteMessage);
+
+                // Delete Production Distillation2 record to attempt to delete Production Distillation1 record.
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = prodObjectDistillation2.ProductionId;
+                deleteObject2.DeleteRecordType = prodObjectDistillation2.ProductionType;
+                _production.DeleteProductionExecute(deleteObject2, _userId);
+
+                var prodList2 = _production.GetProductionList(_userId, prodObjectDistillation2.ProductionType);
+
+                var prodFound2 = prodList2.Find(x => x.ProductionId == prodObjectDistillation2.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound2);
+
+
+                // Set up Production Blending record which uses Production Distillation1 record.
+                ProductionObject prodObjectBlending = new ProductionObject
+                {
+                    AlcoholContent = 50f,
+                    BatchName = "Forward_Deletion_Distillation-Blending",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Blending",
+                    ProofGallon = 100f,
+                    Quantity = 100f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectDistillation1.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _production.CreateProduction(prodObjectBlending, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectBlending.ProductionId, Table.Production));
+
+                // Try to delete Production Distillation1 record while it's being used by Production Blending record.
+                ReturnObject returnResult2 = _production.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist3 = _production.GetProductionList(_userId, prodObjectDistillation1.ProductionType);
+
+                var prodFound3 = prodlist3.Find(x => x.ProductionId == prodObjectDistillation1.ProductionId);
+
+                // Assert Production Distillation1 record is not deleted.
+                Assert.IsNotNull(prodFound3);
+                // Assert Production Blending record name which uses Production Distillation1 record is correctly surfaced to user.
+                Assert.AreEqual(prodObjectBlending.BatchName, returnResult2.ExecuteMessage);
+
+                // Delete Production Blending record to attempt to delete Production Distillation1 record.
+                DeleteRecordObject deleteObject3 = new DeleteRecordObject();
+                deleteObject3.DeleteRecordID = prodObjectBlending.ProductionId;
+                deleteObject3.DeleteRecordType = prodObjectBlending.ProductionType;
+                _production.DeleteProductionExecute(deleteObject3, _userId);
+
+                var prodList4 = _production.GetProductionList(_userId, prodObjectBlending.ProductionType);
+
+                var prodFound4 = prodList4.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound4);
+
+
+                // Set up Production Bottling record which uses Production Distillation1 record.
+                ProductionObject prodObjectBottling = new ProductionObject
+                {
+                    BatchName = "Forward_Deletion_Distillation-Bottling",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    Gauged = true,
+                    ProductionType = "Bottling",
+                    Quantity = 100f,
+                    VolumeByWeight = 0f,
+                    AlcoholContent = 50f,
+                    ProofGallon = 100f,
+                    Storage = storageList,
+                    SpiritTypeReportingID = 2,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectDistillation1.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                    BottlingInfo = new BottlingObject
+                    {
+                        CaseCapacity = 12,
+                        CaseQuantity = 9.42f,
+                        BottleCapacity = 750f,
+                        BottleQuantity = 113,
+
+                    },
+                    GainLoss = .10f,
+                    FillTestList = null,
+                };
+
+                _production.CreateProduction(prodObjectBottling, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectBottling.ProductionId, Table.Production));
+
+                // Try to delete Production Distillation1 record while it's being used by Production Bottling record.
+                ReturnObject returnResult3 = _production.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist5 = _production.GetProductionList(_userId, prodObjectDistillation1.ProductionType);
+
+                var prodFound5 = prodlist5.Find(x => x.ProductionId == prodObjectDistillation1.ProductionId);
+
+                // Assert Production Distillation1 record is not deleted.
+                Assert.IsNotNull(prodFound5);
+                // Assert Production Bottling record name which uses Production Distillation1 record is correctly surfaced to user.
+                Assert.AreEqual(prodObjectBottling.BatchName, returnResult3.ExecuteMessage);
+
+                // Delete Production Bottling record to attempt to delete Production Distillation1 record.
+                DeleteRecordObject deleteObject4 = new DeleteRecordObject();
+                deleteObject4.DeleteRecordID = prodObjectBottling.ProductionId;
+                deleteObject4.DeleteRecordType = prodObjectBottling.ProductionType;
+                _production.DeleteProductionExecute(deleteObject4, _userId);
+
+                var prodList6 = _production.GetProductionList(_userId, prodObjectBottling.ProductionType);
+
+                var prodFound6 = prodList6.Find(x => x.ProductionId == prodObjectBottling.ProductionId);
+
+                // Assert Production record is deleted.
+                Assert.IsNull(prodFound4);
+
+                // Try to delete Production Distillation1 record when its not being used by any record.
+                _production.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist7 = _production.GetProductionList(_userId, prodObjectDistillation1.ProductionType);
+
+                var prodFound7 = prodlist7.Find(x => x.ProductionId == prodObjectDistillation1.ProductionId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNull(prodFound7);
+
+                #endregion
+
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This test checks that a Production Blending record cannot be deleted when
+        /// tied to another Production record.
+        /// </summary>
+        [TestMethod()]
+        public void Forward_Delete_Production_Blending_Test()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int rawMaterialId = 0;
+            int purchaseId = 0;
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dictionary.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                {
+                    RawMaterialObject distilledMaterial = new RawMaterialObject();
+                    distilledMaterial.RawMaterialName = "Distilled_Material";
+                    distilledMaterial.UnitType = "gal";
+                    distilledMaterial.UnitTypeId = 1;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Distilled = true;
+                    distilledMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    rawMaterialId = _dictionary.CreateRawMaterial(_userId, distilledMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase Set up
+
+                // Set up Purchase Distilled record 
+                PurchaseObject purchDistilled = new PurchaseObject
+                {
+                    PurBatchName = "Forward_Deletion_Purchase_Distilled_Test",
+                    PurchaseType = "Distilled",
+                    PurchaseDate = new DateTime(2018, 01, 01),
+                    Quantity = 1000f,
+                    VolumeByWeight = 0f,
+                    RecordId = rawMaterialId,
+                    Price = 350f,
+                    VendorId = vendorId,
+                };
+               
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchDistilled.Storage = storageList;
+
+                purchaseId = _purchase.CreatePurchase(purchDistilled, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Set up Production
+
+                // Set up Production Distillation record
+                ProductionObject prodObjectDistillation = new ProductionObject
+                {
+                    AlcoholContent = 50f,
+                    BatchName = "Forward_Deletion_Distillation",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Distillation",
+                    ProofGallon = 1000f,
+                    Quantity = 1000f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "pur",
+                            NewVal = 500,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _production.CreateProduction(prodObjectDistillation, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectDistillation.ProductionId, Table.Production));
+
+                // Set up Production Blending record which uses Production Distillation record.
+                ProductionObject prodObjectBlending = new ProductionObject
+                {
+                    AlcoholContent = 50f,
+                    BatchName = "Forward_Deletion_Blending",
+                    Gauged = true,
+                    MaterialKindReportingID = 92,
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionType = "Blending",
+                    ProofGallon = 100f,
+                    Quantity = 100f,
+                    SpiritTypeReportingID = 2,
+                    Storage = storageList,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectDistillation.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                };
+
+                _production.CreateProduction(prodObjectBlending, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectBlending.ProductionId, Table.Production));
+
+                // Set up Production Bottling record which uses Production Blending record.
+                ProductionObject prodObjectBottling = new ProductionObject
+                {
+                    BatchName = "Forward_Deletion_Blending-Bottling",
+                    ProductionDate = new DateTime(2018, 1, 1),
+                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionEnd = new DateTime(2018, 1, 1),
+                    Gauged = true,
+                    ProductionType = "Bottling",
+                    Quantity = 100f,
+                    VolumeByWeight = 0f,
+                    AlcoholContent = 50f,
+                    ProofGallon = 100f,
+                    Storage = storageList,
+                    SpiritTypeReportingID = 2,
+                    UsedMats = new List<ObjInfo4Burndwn> {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = prodObjectBlending.ProductionId,
+                            BurningDownMethod = "volume",
+                            DistillableOrigin = "prod",
+                            NewVal = 100,
+                            OldVal = 0,
+                            Proof = 0
+                        }
+                    },
+                    BottlingInfo = new BottlingObject
+                    {
+                        CaseCapacity = 12,
+                        CaseQuantity = 9.42f,
+                        BottleCapacity = 750f,
+                        BottleQuantity = 113,
+
+                    },
+                    GainLoss = .10f,
+                    FillTestList = null,
+                };
+
+                _production.CreateProduction(prodObjectBottling, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(prodObjectBottling.ProductionId, Table.Production));
+
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = prodObjectBlending.ProductionId;
+                deleteObject.DeleteRecordType = prodObjectBlending.ProductionType;
+
+                // Try to delete Production Blending record while it's being used by Production Bottling record.
+                ReturnObject returnResult = _production.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist = _production.GetProductionList(_userId, prodObjectBlending.ProductionType);
+
+                var prodFound = prodlist.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
+
+                // Assert Production Blending record is not deleted.
+                Assert.IsNotNull(prodFound);
+                // Assert Production Bottling record name which uses Production Blending record is correctly surfaced to user.
+                Assert.AreEqual(prodObjectBottling.BatchName, returnResult.ExecuteMessage);
+
+                // Delete Production Bottling record to attempt to delete Production Blending record.
+                DeleteRecordObject deleteObject2 = new DeleteRecordObject();
+                deleteObject2.DeleteRecordID = prodObjectBottling.ProductionId;
+                deleteObject2.DeleteRecordType = prodObjectBottling.ProductionType;
+                _production.DeleteProductionExecute(deleteObject2, _userId);
+
+                var prodList2 = _production.GetProductionList(_userId, prodObjectBottling.ProductionType);
+
+                var prodFound2 = prodList2.Find(x => x.ProductionId == prodObjectBottling.ProductionId);
+
+                // Assert Production Bottling record is deleted.
+                Assert.IsNull(prodFound2);
+
+                // Try to delete Production Blending record when its not being used by any record.
+                _production.DeleteProductionRecord(_userId, deleteObject);
+
+                var prodlist3 = _production.GetProductionList(_userId, prodObjectBlending.ProductionType);
+
+                var prodFound3 = prodlist3.Find(x => x.ProductionId == prodObjectBlending.ProductionId);
+
+                // Assert Purchase record is not deleted.
+                Assert.IsNull(prodFound3);
 
                 #endregion
 
@@ -7218,14 +8755,14 @@ namespace WebApp.Helpers.Tests
                     SerialNumber = "2H29NNS"
                 };
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 cleanupList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // Vendor
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "DeleteProductionTest_Vendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 cleanupList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // Raw material
@@ -7238,7 +8775,7 @@ namespace WebApp.Helpers.Tests
                 materialBoolTypes.Fermented = true;
                 material.PurchaseMaterialTypes = materialBoolTypes;
 
-                materialId = _dl.CreateRawMaterial(_userId, material);
+                materialId = _dictionary.CreateRawMaterial(_userId, material);
                 cleanupList.Add(Tuple.Create(materialId, Table.MaterialDict));
 
                 // Purchase
@@ -7254,7 +8791,7 @@ namespace WebApp.Helpers.Tests
                 purchase.Price = 2500f;
                 purchase.VendorId = vendorId;
 
-                purchaseId = _dl.CreatePurchase(purchase, _userId);
+                purchaseId = _purchase.CreatePurchase(purchase, _userId);
                 cleanupList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // Production
@@ -7293,17 +8830,14 @@ namespace WebApp.Helpers.Tests
                     }
                 };
 
-                productionId = _dl.CreateProduction(prodObject, _userId);
+                productionId = _production.CreateProduction(prodObject, _userId);
                 cleanupList.Add(Tuple.Create(productionId, Table.Production));
 
-                ProductionObject deleteObject = new ProductionObject
-                {
-                    ProductionType = "Distillation",
-                    ProductionId = productionId
-                };
-
                 // Act
-                _dl.DeleteProduction(deleteObject, _userId);
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = productionId;
+                deleteObject.DeleteRecordType = prodObject.ProductionType;
+                _production.DeleteProductionExecute(deleteObject, _userId);
 
                 var prodQuery =
                 (from production in _db.Production
@@ -7334,7 +8868,7 @@ namespace WebApp.Helpers.Tests
             storage.Note = "TestNote";
 
             // Act
-            int result = _dl.CreateStorage(_userId, storage);
+            int result = _dictionary.CreateStorage(_userId, storage);
 
             // Assert
             Assert.AreNotEqual(0, result);
@@ -7348,7 +8882,7 @@ namespace WebApp.Helpers.Tests
         public void GetStorageListTest()
         {
             // Act
-            List<StorageObject> result = _dl.GetStorageList(1);
+            List<StorageObject> result = _dictionary.GetStorageList(1);
 
             // Assert
             Assert.IsNotNull(result, "GetStorageListTest result returned is null");
@@ -7390,13 +8924,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -7404,7 +8938,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -7419,7 +8953,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -7433,7 +8967,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -7457,7 +8991,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -7492,7 +9026,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -7527,7 +9061,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -7572,7 +9106,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId);
+                productionId = _production.CreateProduction(prodBlend, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -7580,9 +9114,9 @@ namespace WebApp.Helpers.Tests
                 #region Reports
 
                 // verify storage report
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                 // check grape brandy object
                 var actualStoGrapeBrandy = actualStorageReportObject.ReportBody.Find(x => x.CategoryName == "BrandyUnder170");
@@ -7621,7 +9155,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 var expectedWine = actualProdReportObject.Part1List.Find(x => x.SpiritCatName == "Wine");
 
@@ -7708,13 +9242,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -7722,7 +9256,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tupleL.Add(Tuple.Create(storageId, Table.Storage));
 
 
@@ -7738,7 +9272,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tupleL.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -7752,7 +9286,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -7780,7 +9314,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -7815,7 +9349,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -7847,7 +9381,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                productionId = _dl.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodO2, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Blending Record
@@ -7890,7 +9424,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                productionId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Production Bottling Record
@@ -7934,7 +9468,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                productionId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -7976,7 +9510,7 @@ namespace WebApp.Helpers.Tests
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 #endregion
 
@@ -8037,7 +9571,7 @@ namespace WebApp.Helpers.Tests
                 // Test October Production report
                 ProductionReportingObject actualProdReportObjectOctober = new ProductionReportingObject();
 
-                actualProdReportObjectOctober = _dl.GetProductionReportData(new DateTime(2017, 10, 01), new DateTime(2017, 10, 31), _userId);
+                actualProdReportObjectOctober = _productionReport.GetProductionReportData(new DateTime(2017, 10, 01), new DateTime(2017, 10, 31), _userId);
                 // verify Production report header
                 Assert.AreEqual(reportHeaderE.DSP, actualProdReportObjectOctober.Header.DSP);
                 Assert.AreEqual(reportHeaderE.EIN, actualProdReportObjectOctober.Header.EIN);
@@ -8093,14 +9627,14 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -8108,7 +9642,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -8123,7 +9657,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -8137,7 +9671,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -8163,7 +9697,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 10;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // create 1st Production Distillation Record and mark it as Gauged
@@ -8196,7 +9730,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 // create Purchase Record (minimal required fields)
@@ -8221,7 +9755,7 @@ namespace WebApp.Helpers.Tests
                 purchO1.SpiritTypeReportingID = 10;
                 purchO1.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO1, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO1, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 // create 1st Production Distillation Record and mark it as Gauged
@@ -8254,7 +9788,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
                 #endregion
@@ -8265,7 +9799,7 @@ namespace WebApp.Helpers.Tests
                 var novStart = new DateTime(2017, 11, 1);
                 var novEnd = new DateTime(2017, 11, novDays);
 
-                ProductionReportingObject productionReport = _dl.GetProductionReportData(novStart, novEnd, _userId);
+                ProductionReportingObject productionReport = _productionReport.GetProductionReportData(novStart, novEnd, _userId);
 
                 #endregion
 
@@ -8335,13 +9869,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -8349,7 +9883,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tupleL.Add(Tuple.Create(storageId, Table.Storage));
 
 
@@ -8365,7 +9899,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tupleL.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -8379,7 +9913,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -8407,7 +9941,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -8442,7 +9976,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -8474,7 +10008,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                int productionFinalDistillationId = _dl.CreateProduction(prodO2, _userId);
+                int productionFinalDistillationId = _production.CreateProduction(prodO2, _userId);
 
                 tupleL.Add(Tuple.Create(productionFinalDistillationId, Table.Production));
 
@@ -8518,7 +10052,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                int productionBlendingId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                int productionBlendingId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionBlendingId, Table.Production));
 
                 // create Production Bottling Record
@@ -8562,7 +10096,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                int productionBottlingId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                int productionBottlingId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionBottlingId, Table.Production));
 
                 #endregion
@@ -8603,7 +10137,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 ProcessingReportingObject actualProcessingReportO = new ProcessingReportingObject();
 
@@ -8725,7 +10259,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Tequila = 0f;
                 processingReportP4.Vodka = 0f;
 
-                actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+                actualProcessingReportObject = _processingReport.GetProcessingReportData(start, end, _userId);
 
                 Assert.AreEqual(reportHeaderE.DSP, actualProcessingReportObject.Header.DSP);
                 Assert.AreEqual(reportHeaderE.EIN, actualProcessingReportObject.Header.EIN);
@@ -8788,7 +10322,7 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 #region Storage Report Before Deletion
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -8805,7 +10339,7 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r6_TotalLines1Through5 = 18f;
                 storageReportBody.r7_TaxPaid = 0f;
 
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualStorageReportObject.Header.DSP);
@@ -8832,7 +10366,10 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 // let's verify the values in production report after we deleted bottling
-                bool bottlingDeleted = _dl.DeleteProduction(prodBottl, _userId);
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = prodBottl.ProductionId;
+                deleteObject.DeleteRecordType = prodBottl.ProductionType;
+                bool bottlingDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 #region Blending and Distiliing after Bottling deletion
 
@@ -8987,7 +10524,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Tequila = 0f;
                 processingReportP4.Vodka = 0f;
 
-                actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+                actualProcessingReportObject = _processingReport.GetProcessingReportData(start, end, _userId);
 
                 Assert.AreEqual(processingReportP1.AmtBottledPackaged, actualProcessingReportObject.Part1.AmtBottledPackaged);
                 Assert.AreEqual(processingReportP1.BulkIngredients, actualProcessingReportObject.Part1.BulkIngredients);
@@ -9104,13 +10641,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -9118,7 +10655,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tupleL.Add(Tuple.Create(storageId, Table.Storage));
 
 
@@ -9134,7 +10671,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tupleL.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -9148,7 +10685,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -9176,7 +10713,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -9211,7 +10748,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -9243,7 +10780,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                int productionFinalDistillationId = _dl.CreateProduction(prodO2, _userId);
+                int productionFinalDistillationId = _production.CreateProduction(prodO2, _userId);
 
                 tupleL.Add(Tuple.Create(productionFinalDistillationId, Table.Production));
 
@@ -9287,7 +10824,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                int productionBlendingId = _dl.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                int productionBlendingId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tupleL.Add(Tuple.Create(productionBlendingId, Table.Production));
 
                 #endregion
@@ -9328,7 +10865,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 ProcessingReportingObject actualProcessingReportO = new ProcessingReportingObject();
 
@@ -9449,7 +10986,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Tequila = 0f;
                 processingReportP4.Vodka = 0f;
 
-                actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+                actualProcessingReportObject = _processingReport.GetProcessingReportData(start, end, _userId);
 
                 Assert.AreEqual(reportHeaderE.DSP, actualProcessingReportObject.Header.DSP);
                 Assert.AreEqual(reportHeaderE.EIN, actualProcessingReportObject.Header.EIN);
@@ -9518,7 +11055,7 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 #region Storage Report Before Deletion
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -9535,7 +11072,7 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r6_TotalLines1Through5 = 18f;
                 storageReportBody.r7_TaxPaid = 0f;
 
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualStorageReportObject.Header.DSP);
@@ -9562,7 +11099,10 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 // let's verify the values in production report after we deleted bottling
-                bool bottlingDeleted = _dl.DeleteProduction(prodBlend, _userId);
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = prodBlend.ProductionId;
+                deleteObject.DeleteRecordType = prodBlend.ProductionType;
+                bool bottlingDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 #region Blending and Distiliing after Bottling deletion
 
@@ -9620,7 +11160,7 @@ namespace WebApp.Helpers.Tests
 
                 #region Production Report After Deletion
                 // verify Production report Part 1
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 Assert.AreEqual(0, actualProdReportObject.Part1List[0].ProccessingAcct);
                 Assert.AreEqual(18, actualProdReportObject.Part1List[0].StorageAcct);
@@ -9718,7 +11258,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Tequila = 0f;
                 processingReportP4.Vodka = 0f;
 
-                actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+                actualProcessingReportObject = _processingReport.GetProcessingReportData(start, end, _userId);
 
                 Assert.AreEqual(processingReportP1.AmtBottledPackaged, actualProcessingReportObject.Part1.AmtBottledPackaged);
                 Assert.AreEqual(processingReportP1.BulkIngredients, actualProcessingReportObject.Part1.BulkIngredients);
@@ -9791,7 +11331,7 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 #region Storage Report After Deletion
-                actualStorageReportObject = new StorageReport();
+                actualStorageReportObject = new StorageReportObject();
 
                 storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -9808,7 +11348,7 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r6_TotalLines1Through5 = 18f;
                 storageReportBody.r7_TaxPaid = 0f;
 
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualStorageReportObject.Header.DSP);
@@ -9925,13 +11465,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -9939,7 +11479,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tupleL.Add(Tuple.Create(storageId, Table.Storage));
 
 
@@ -9955,7 +11495,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tupleL.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -9969,7 +11509,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -9997,7 +11537,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -10032,7 +11572,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
                 // create 2nd Production Distillation Record and mark it as Gauged
@@ -10064,7 +11604,7 @@ namespace WebApp.Helpers.Tests
                 usedMats4Gauge.Add(uMat4Gauged);
                 prodO2.UsedMats = usedMats4Gauge;
 
-                int productionFinalDistillationId = _dl.CreateProduction(prodO2, _userId);
+                int productionFinalDistillationId = _production.CreateProduction(prodO2, _userId);
 
                 tupleL.Add(Tuple.Create(productionFinalDistillationId, Table.Production));
 
@@ -10106,7 +11646,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 ProcessingReportingObject actualProcessingReportO = new ProcessingReportingObject();
 
@@ -10170,7 +11710,7 @@ namespace WebApp.Helpers.Tests
 
 
                 #region Storage Report Before Deletion
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
                 StorageReportCategory storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -10187,7 +11727,7 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r6_TotalLines1Through5 = 18f;
                 storageReportBody.r7_TaxPaid = 0f;
 
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualStorageReportObject.Header.DSP);
@@ -10264,7 +11804,10 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 // let's verify the values in production report after we deleted bottling
-                bool DistillationDeleted = _dl.DeleteProduction(prodO2, _userId);
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = prodO2.ProductionId;
+                deleteObject.DeleteRecordType = prodO2.ProductionType;
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 #region Distilled Not Gauged after Distilled deletion
 
@@ -10313,7 +11856,7 @@ namespace WebApp.Helpers.Tests
 
                 #region Production Report After Deletion
                 // verify Production report Part 1
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 Assert.AreEqual(0, actualProdReportObject.Part1List[0].ProccessingAcct);
                 Assert.AreEqual(0, actualProdReportObject.Part1List[0].StorageAcct);
@@ -10348,7 +11891,7 @@ namespace WebApp.Helpers.Tests
                 #endregion
 
                 #region Storage Report After Deletion
-                actualStorageReportObject = new StorageReport();
+                actualStorageReportObject = new StorageReportObject();
 
                 storageReportBody = new StorageReportCategory();
                 storageReportBody.CategoryName = "Wine";
@@ -10365,7 +11908,7 @@ namespace WebApp.Helpers.Tests
                 storageReportBody.r6_TotalLines1Through5 = 18f;
                 storageReportBody.r7_TaxPaid = 0f;
 
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                 // verify Storage report Header
                 Assert.AreEqual(reportHeaderE.DSP, actualStorageReportObject.Header.DSP);
@@ -10450,13 +11993,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -10464,7 +12007,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -10479,7 +12022,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -10493,7 +12036,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -10517,7 +12060,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -10552,7 +12095,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -10586,7 +12129,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -10631,7 +12174,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBlend.BlendingAdditives = blendAdditives;
 
-                int productionBlendingId = _dl.CreateProduction(prodBlend, _userId);
+                int productionBlendingId = _production.CreateProduction(prodBlend, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(productionBlendingId, Table.Production));
 
                 // create Production Bottling Record
@@ -10675,7 +12218,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.FillTestList = null;
 
-                int productionBottlingId = _dl.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
+                int productionBottlingId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
                 tablesForCleanupTupleList.Add(Tuple.Create(productionBottlingId, Table.Production));
 
                 #endregion
@@ -10741,7 +12284,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP4.Tequila = 0f;
                 processingReportP4.Vodka = 0f;
 
-                actualProcessingReportObject = _dl.GetProcessingReportData(start, end, _userId);
+                actualProcessingReportObject = _processingReport.GetProcessingReportData(start, end, _userId);
 
                 Assert.AreEqual(processingReportP1.AmtBottledPackaged, actualProcessingReportObject.Part1.AmtBottledPackaged);
                 Assert.AreEqual(processingReportP1.BulkIngredients, actualProcessingReportObject.Part1.BulkIngredients);
@@ -10799,9 +12342,9 @@ namespace WebApp.Helpers.Tests
 
                 #region Storage Report
                 // verify storage report
-                StorageReport actualStorageReportObject = new StorageReport();
+                StorageReportObject actualStorageReportObject = new StorageReportObject();
 
-                actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                 // check grape brandy object
                 var actualStoGrapeBrandy = actualStorageReportObject.ReportBody.Find(x => x.CategoryName == "BrandyUnder170");
@@ -10835,7 +12378,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 var expectedWine = actualProdReportObject.Part1List.Find(x => x.SpiritCatName == "Wine");
 
@@ -10927,13 +12470,13 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -10941,7 +12484,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tupleL.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -10956,7 +12499,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tupleL.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -10970,7 +12513,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -10998,7 +12541,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -11033,7 +12576,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
@@ -11052,7 +12595,7 @@ namespace WebApp.Helpers.Tests
 
                 ProductionReportingObject actualProdReportObject = new ProductionReportingObject();
 
-                actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                 /* verify Production report Part 1 */
 
@@ -11654,10 +13197,8 @@ namespace WebApp.Helpers.Tests
                     }
                     else
                     {
-                        Assert.IsNull(part6CategoryExpected, "There should be no records for Fruit category");
-
-                        Assert.Equals(0, part6CategoryExpected.Weight);
-                        Assert.Equals(0, part6CategoryExpected.Volume);
+                        Assert.AreEqual(0, part6CategoryExpected.Weight);
+                        Assert.AreEqual(0, part6CategoryExpected.Volume);
                     }
 
                     part6CategoryExpected = actualProdReportObject.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Grain);
@@ -11695,8 +13236,8 @@ namespace WebApp.Helpers.Tests
                 #region Storage Report
                 {
                     /* Storage report object are by default null*/
-                    StorageReport actualStorageReportObject = new StorageReport();
-                    actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                    StorageReportObject actualStorageReportObject = new StorageReportObject();
+                    actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                     // Whisky Under 160
                     var storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.WhiskyUnder160);
@@ -11973,7 +13514,10 @@ namespace WebApp.Helpers.Tests
                 #endregion End of Storage Report
 
                 // let's verify the values in production report after we deleted gauged distillation
-                bool DistillationDeleted = _dl.DeleteProduction(prodO, _userId);
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = productionId;
+                deleteObject.DeleteRecordType = prodO.ProductionType;
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 var amounts =
                     (from purch in _db.Purchase
@@ -12012,7 +13556,7 @@ namespace WebApp.Helpers.Tests
                 {
                     actualProdReportObject = new ProductionReportingObject();
 
-                    actualProdReportObject = _dl.GetProductionReportData(start, end, _userId);
+                    actualProdReportObject = _productionReport.GetProductionReportData(start, end, _userId);
 
                     /* Production Report 
                      Update expected values accordingly to the expected result if needed
@@ -12759,9 +14303,9 @@ namespace WebApp.Helpers.Tests
                 #region Storage Report
                 {
                     /* Storage report object are by default null*/
-                    StorageReport actualStorageReportObject = new StorageReport();
+                    StorageReportObject actualStorageReportObject = new StorageReportObject();
 
-                    actualStorageReportObject = _dl.GetStorageReportData(start, end, _userId);
+                    actualStorageReportObject = _storageReport.GetStorageReportData(start, end, _userId);
 
                     // Whisky Under 160
                     var storageSpiritObject = actualStorageReportObject.ReportBody.Find(x => x.SpiritTypeReportingID == (int)ReportSpiritTypes.WhiskyUnder160);
@@ -13080,14 +14624,14 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tupleL.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "testVendor";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tupleL.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -13095,7 +14639,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tupleL.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -13110,7 +14654,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermented = true;
                     wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    wineMaterialId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                     tupleL.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
                 }
 
@@ -13124,7 +14668,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
                 #endregion
@@ -13152,7 +14696,7 @@ namespace WebApp.Helpers.Tests
                 purchO.SpiritTypeReportingID = 11;
                 purchO.Gauged = true;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tupleL.Add(Tuple.Create(purchaseId, Table.Purchase));
                 #endregion
 
@@ -13187,7 +14731,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
@@ -13229,7 +14773,10 @@ namespace WebApp.Helpers.Tests
                 }
 
                 // let's verify the values in production report after we deleted Ungauged distillation
-                bool DistillationDeleted = _dl.DeleteProduction(prodO, _userId);
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = productionId;
+                deleteObject.DeleteRecordType = prodO.ProductionType;
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 var amounts =
                     (from purch in _db.Purchase
@@ -13307,14 +14854,14 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -13322,7 +14869,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -13337,7 +14884,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -13351,7 +14898,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -13375,7 +14922,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -13410,7 +14957,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -13445,7 +14992,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO1.UsedMats = usedMats1;
 
-                productionId = _dl.CreateProduction(prodO1, _userId);
+                productionId = _production.CreateProduction(prodO1, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -13485,7 +15032,10 @@ namespace WebApp.Helpers.Tests
                 }
 
                 // let's verify the values in production report after we deleted Ungauged distillation
-                bool DistillationDeleted = _dl.DeleteProduction(prodO, _userId);
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = prodO.ProductionId;
+                deleteObject.DeleteRecordType = prodO.ProductionType;
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 var amounts =
                     (from purch in _db.Purchase
@@ -13558,14 +15108,14 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Brandy Under 170";
                 spirit.ProcessingReportTypeID = 12;
 
-                spiritId = _dl.CreateSpirit(_userId, spirit);
+                spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // setup Vendor object
                 VendorObject vendor = new VendorObject();
                 vendor.VendorName = "VendorTest";
 
-                vendorId = _dl.CreateVendor(_userId, vendor);
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
                 tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
                 // setup Storage Object
@@ -13573,7 +15123,7 @@ namespace WebApp.Helpers.Tests
                 storage.StorageName = "testStorage";
                 storage.SerialNumber = "2H29NNS";
 
-                storageId = _dl.CreateStorage(_userId, storage);
+                storageId = _dictionary.CreateStorage(_userId, storage);
                 tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
@@ -13588,7 +15138,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Fermentable = true;
                     grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    grapeMaterialId = _dl.CreateRawMaterial(_userId, grapeMaterial);
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
 
                     tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
                 }
@@ -13602,7 +15152,7 @@ namespace WebApp.Helpers.Tests
                     materialBoolTypes.Additive = true;
                     waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                    waterMaterialId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                     tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
                 }
 
@@ -13626,7 +15176,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                purchaseId = _dl.CreatePurchase(purchO, _userId);
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
                 #endregion
@@ -13661,7 +15211,7 @@ namespace WebApp.Helpers.Tests
 
                 prodO.UsedMats = usedMats;
 
-                productionId = _dl.CreateProduction(prodO, _userId);
+                productionId = _production.CreateProduction(prodO, _userId);
 
                 tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
 
@@ -13701,7 +15251,10 @@ namespace WebApp.Helpers.Tests
                 }
 
                 // let's verify the values Purchase records are reinstated after we deleted Fermented record
-                bool DistillationDeleted = _dl.DeleteProduction(prodO, _userId);
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = productionId;
+                deleteObject.DeleteRecordType = prodO.ProductionType;
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
 
                 var amounts =
                     (from purch in _db.Purchase
@@ -13740,6 +15293,483 @@ namespace WebApp.Helpers.Tests
                 foreach (var i in tablesForCleanupTupleList)
                 {
                     TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Repro steps from the bug:
+        /// 1. Purchase 4000 lbs of Red Grapes on 2/3/2018
+        /// 2. Make 500 gallons of 12% ABV from those grapes on 2/10/2018
+        /// 3. Distill 250 gallons of those grapes into brandy on 3/10/2018
+        /// 4. Check Production report it should show 2000 pounds 
+        /// 5. Distil another 125 gallons with remaining 125 out of 250 gallons
+        /// Production report should show 3000 pounds of grapes
+        /// </summary>
+        [TestMethod]
+        public void Make_Multiple_Distil_Batches_Out_Of_Single_Batch_Of_Grapes_Check_Production_Report()
+        {
+            // Arrange
+            int vendorId = 0;
+            int storageId = 0;
+            int grapeMaterialId = 0;
+            int purchaseId = 0;
+            int productionId = 0;
+
+            // reporting time range
+            DateTime startMarch = new DateTime(2018, 03, 01);
+            DateTime endMarch = new DateTime(2018, 03, 31);
+            DateTime startApril = new DateTime(2018, 04, 01);
+            DateTime endApril = new DateTime(2018, 04, 30);
+
+            List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            try
+            {
+                //  dictionary setup
+                #region Dictionary
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dictionary.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // setup Material Object
+                // grapes
+                {
+                    RawMaterialObject grapeMaterial = new RawMaterialObject();
+                    grapeMaterial.RawMaterialName = "Grapes";
+                    grapeMaterial.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit;
+                    grapeMaterial.UnitType = "lb";
+                    grapeMaterial.UnitTypeId = 2;
+                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
+                    materialBoolTypes.Fermentable = true;
+                    grapeMaterial.PurchaseMaterialTypes = materialBoolTypes;
+
+                    grapeMaterialId = _dictionary.CreateRawMaterial(_userId, grapeMaterial);
+
+                    tablesForCleanupTupleList.Add(Tuple.Create(grapeMaterialId, Table.MaterialDict));
+                }
+
+                #endregion
+
+                #region Purchase
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Riesling Grapes ";
+                purchO.PurchaseType = "Fermentable";
+                purchO.PurchaseDate = new DateTime(2018, 03, 03);
+                purchO.Quantity = 0f;
+                purchO.VolumeByWeight = 4000f;
+                purchO.RecordId = grapeMaterialId;
+                purchO.Price = 350f;
+                purchO.VendorId = vendorId;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                #endregion
+
+                #region Production
+                // create Fermented record
+                ProductionObject prodO = new ProductionObject();
+                prodO.BatchName = "Riesling Wine";
+                prodO.ProductionDate = new DateTime(2018, 03, 15);
+                prodO.ProductionStart = new DateTime(2018, 03, 15);
+                prodO.ProductionEnd = new DateTime(2018, 03, 15);
+                prodO.Gauged = true;
+                prodO.ProductionType = "Fermentation";
+                prodO.ProductionTypeId = 1;
+                prodO.Quantity = 500f; // 500 gallons of wine
+                prodO.VolumeByWeight = 0f;
+                prodO.AlcoholContent = 12f; // %
+                prodO.ProofGallon = 120f; // pfg
+                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO.SpiritTypeReportingID = 11; // Wine
+                prodO.MaterialKindReportingID = 0;
+
+                List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
+                uMat.ID = purchaseId;
+                uMat.OldVal = 0f;
+                uMat.NewVal = purchO.VolumeByWeight;
+                uMat.DistillableOrigin = "pur";
+                uMat.BurningDownMethod = "weight";
+
+                usedMats.Add(uMat);
+
+                prodO.UsedMats = usedMats;
+
+                productionId = _production.CreateProduction(prodO, _userId);
+                var wineProdId = productionId;
+
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                // create 1st Production Distillation Record and mark it as Gauged
+                ProductionObject prodO1 = new ProductionObject();
+                prodO1.BatchName = "Brandy";
+                prodO1.ProductionDate = new DateTime(2018, 03, 20);
+                prodO1.ProductionStart = new DateTime(2018, 03, 20);
+                prodO1.ProductionEnd = new DateTime(2018, 03, 20);
+                prodO1.SpiritCutId = 11; // mixed
+                prodO1.Gauged = true;
+                prodO1.ProductionType = "Distillation";
+                prodO1.ProductionTypeId = 2;
+                prodO1.Quantity = 25f; // 25 gallons
+                prodO1.VolumeByWeight = 0f;
+                prodO1.AlcoholContent = 55f;
+                prodO1.ProofGallon = 27.5f;
+                prodO1.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO1.SpiritTypeReportingID = 3; // Brandy 170-
+                prodO1.MaterialKindReportingID = 94; // grape brandy
+
+                List<ObjInfo4Burndwn> usedMats1 = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat1 = new ObjInfo4Burndwn();
+                uMat1.ID = wineProdId;
+                uMat1.OldVal = 250; // remaining value
+                uMat1.NewVal = 250;
+                uMat1.Proof = 60;
+                uMat1.DistillableOrigin = "prod";
+                uMat1.BurningDownMethod = "volume";
+
+                usedMats1.Add(uMat1);
+
+                prodO1.UsedMats = usedMats1;
+
+                productionId = _production.CreateProduction(prodO1, _userId);
+
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                // Report Header
+                ReportHeader reportHeaderE = new ReportHeader();
+                reportHeaderE.ProprietorName = "Test Distillery";
+                reportHeaderE.EIN = "12-3456789";
+                reportHeaderE.ReportDate = "March 2018";
+                reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
+                reportHeaderE.DSP = "DSP-WA-21086";
+
+                ProductionReportingObject actualProductionReport = new ProductionReportingObject();
+
+                //get actual production data after first production creation
+                actualProductionReport = _productionReport.GetProductionReportData(startMarch, endMarch, _userId);
+
+                // verify Storage report Header
+                Assert.AreEqual(reportHeaderE.DSP, actualProductionReport.Header.DSP);
+                Assert.AreEqual(reportHeaderE.EIN, actualProductionReport.Header.EIN);
+                Assert.AreEqual(reportHeaderE.PlantAddress, actualProductionReport.Header.PlantAddress);
+                Assert.AreEqual(reportHeaderE.ProprietorName, actualProductionReport.Header.ProprietorName);
+                Assert.AreEqual(reportHeaderE.ReportDate, actualProductionReport.Header.ReportDate);
+
+                // verify Production Report Part 6
+                // we should display half of the used materials since only half of the wine was used in this production
+                var part6CategoryExpected = actualProductionReport.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit);
+
+                if (part6CategoryExpected == null)
+                {
+                    Assert.IsNotNull(part6CategoryExpected, "There should be no records for Fruit category");
+                }
+                else
+                {
+                    Assert.AreEqual(2000, part6CategoryExpected.Weight);
+                    Assert.AreEqual(0, part6CategoryExpected.Volume);
+                }
+
+                // create 2nd Production Distillation Record and mark it as Gauged. Use 1/4 of the original amount of wine
+                ProductionObject prodO2 = new ProductionObject();
+                prodO2.BatchName = "Brandy";
+                prodO2.ProductionDate = new DateTime(2018, 03, 21);
+                prodO2.ProductionStart = new DateTime(2018, 03, 21);
+                prodO2.ProductionEnd = new DateTime(2018, 03, 21);
+                prodO2.SpiritCutId = 11; // mixed
+                prodO2.Gauged = true;
+                prodO2.ProductionType = "Distillation";
+                prodO2.ProductionTypeId = 2;
+                prodO2.Quantity = 12f;
+                prodO2.VolumeByWeight = 0f;
+                prodO2.AlcoholContent = 55f;
+                prodO2.ProofGallon = 13.2f;
+                prodO2.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO2.SpiritTypeReportingID = 3; // Brandy 170-
+                prodO2.MaterialKindReportingID = 94; // grape brandy
+
+                List<ObjInfo4Burndwn> usedMats2 = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat2 = new ObjInfo4Burndwn();
+                uMat2.ID = wineProdId;
+                uMat2.OldVal = 125; // remaining value
+                uMat2.NewVal = 125;
+                uMat2.Proof = 30;
+                uMat2.DistillableOrigin = "prod";
+                uMat2.BurningDownMethod = "volume";
+
+                usedMats2.Add(uMat2);
+
+                prodO2.UsedMats = usedMats2;
+
+                productionId = _production.CreateProduction(prodO2, _userId);
+
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                actualProductionReport = _productionReport.GetProductionReportData(startMarch, endMarch, _userId);
+
+                // verify Production Report Part 6
+                // we should display 2/3 of the used material.
+                part6CategoryExpected = actualProductionReport.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit);
+
+                if (part6CategoryExpected == null)
+                {
+                    Assert.IsNotNull(part6CategoryExpected, "There should be no records for Fruit category");
+                }
+                else
+                {
+                    Assert.AreEqual(3000, part6CategoryExpected.Weight);
+                    Assert.AreEqual(0, part6CategoryExpected.Volume);
+                }
+
+                // create 3rd Production Distillation Record and mark it as Gauged. Use 1/4 of the original amount of wine
+                ProductionObject prodO3 = new ProductionObject();
+                prodO3.BatchName = "Brandy";
+                prodO3.ProductionDate = new DateTime(2018, 04, 05);
+                prodO3.ProductionStart = new DateTime(2018, 04, 05);
+                prodO3.ProductionEnd = new DateTime(2018, 04, 05);
+                prodO3.SpiritCutId = 11; // mixed
+                prodO3.Gauged = true;
+                prodO3.ProductionType = "Distillation";
+                prodO3.ProductionTypeId = 2;
+                prodO3.Quantity = 12f;
+                prodO3.VolumeByWeight = 0f;
+                prodO3.AlcoholContent = 55f;
+                prodO3.ProofGallon = 13.2f;
+                prodO3.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO3.SpiritTypeReportingID = 3; // Brandy 170-
+                prodO3.MaterialKindReportingID = 94; // grape brandy
+
+                List<ObjInfo4Burndwn> usedMats3 = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat3 = new ObjInfo4Burndwn();
+                uMat3.ID = wineProdId;
+                uMat3.OldVal = 0; // remaining value
+                uMat3.NewVal = 125;
+                uMat3.Proof = 30;
+                uMat3.DistillableOrigin = "prod";
+                uMat3.BurningDownMethod = "volume";
+
+                usedMats3.Add(uMat3);
+
+                prodO3.UsedMats = usedMats3;
+
+                productionId = _production.CreateProduction(prodO3, _userId);
+
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+
+                actualProductionReport = _productionReport.GetProductionReportData(startApril, endApril, _userId);
+
+                // verify Production Report Part 6
+                // we should display only the remainder of the used materials.
+                part6CategoryExpected = actualProductionReport.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit);
+
+                if (part6CategoryExpected == null)
+                {
+                    Assert.IsNotNull(part6CategoryExpected, "There should be records for Fruit category");
+                }
+                else
+                {
+                    Assert.AreEqual(1000, part6CategoryExpected.Weight);
+                    Assert.AreEqual(0, part6CategoryExpected.Volume);
+                }
+
+                #endregion
+            }
+            finally
+            {
+                // Cleanup created records
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Testcase:
+        /// Purchase Pomace batch 1
+        /// Purchase Pomace batch 2
+        /// Distill and Gauge
+        /// Check Production report
+        /// </summary>
+        [TestMethod()]
+        public void BuyMultiplPomaceBatches_And_Distill()
+        {
+            // A tuple to log database test records for later clean-up
+            List<Tuple<int, Table>> testRecords = new List<Tuple<int, Table>>();
+
+            try
+            {
+                // Arrange
+
+                // Create Spirit dictionary item
+                SpiritObject spirit = new SpiritObject
+                {
+                    SpiritName = "PomaceBrandy",
+                    ProcessingReportTypeID = 12 // BRANDY DISTILLED AT 170 AND UNDER
+                };
+
+                int spiritId = _dictionary.CreateSpirit(_userId, spirit);
+                testRecords.Add(Tuple.Create(spiritId, Table.Spirit));
+
+                // Create Raw Material dictionary item
+                RawMaterialObject rawMaterial = new RawMaterialObject
+                {
+                    RawMaterialName = "FermentedPomace",
+                    PurchaseMaterialTypes = new PurchaseMaterialBooleanTypes { Fermented = true },
+                    UnitTypeId = 2,
+                    MaterialCategoryID = 2,
+                    UnitType = "lb"
+                };
+
+                int rawMaterialId = _dictionary.CreateRawMaterial(_userId, rawMaterial);
+                testRecords.Add(Tuple.Create(rawMaterialId, Table.MaterialDict));
+
+                // Create Vendor dictionary item
+                VendorObject vendor = new VendorObject
+                {
+                    VendorName = "BigGrapesWinery"
+                };
+
+                int vendorId = _dictionary.CreateVendor(_userId, vendor);
+                testRecords.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // Create Storage dictionary item
+                StorageObject storage = new StorageObject
+                {
+                    StorageName = "TheTank"
+                };
+
+                int storageId = _dictionary.CreateStorage(_userId, storage);
+                testRecords.Add(Tuple.Create(storageId, Table.Storage));
+
+                // Create Fermented Purchase record 1
+                PurchaseObject purchase = new PurchaseObject
+                {
+                    PurBatchName = "FermentedPomaceFromBigGrapesWinery",
+                    PurchaseType = "Fermented",
+                    PurchaseDate = new DateTime(2017, 1, 1),
+                    VolumeByWeight = 1000f,
+                    RecordId = rawMaterialId,
+                    Price = 2000f,
+                    VendorId = vendorId,
+                    Gauged = true,
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject { StorageId = storageId }
+                    }
+                };
+
+                int purchaseId = _purchase.CreatePurchase(purchase, _userId);
+                testRecords.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                // Create Fermented Purchase record 2
+                PurchaseObject purchase2 = new PurchaseObject
+                {
+                    PurBatchName = "FermentedPomaceFromBigGrapesWinery2",
+                    PurchaseType = "Fermented",
+                    PurchaseDate = new DateTime(2017, 1, 1),
+                    VolumeByWeight = 1000f,
+                    RecordId = rawMaterialId,
+                    Price = 2000f,
+                    VendorId = vendorId,
+                    Gauged = true,
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject { StorageId = storageId }
+                    }
+                };
+
+                int purchaseId2 = _purchase.CreatePurchase(purchase2, _userId);
+                testRecords.Add(Tuple.Create(purchaseId2, Table.Purchase));
+
+                // Create Production Distillation record and Gauged to true
+                ProductionObject production = new ProductionObject
+                {
+                    BatchName = "PomaceDistillation",
+                    ProductionDate = new DateTime(2017, 1, 1),
+                    ProductionStart = new DateTime(2017, 1, 1),
+                    ProductionEnd = new DateTime(2017, 1, 1),
+                    Gauged = true,
+                    ProductionType = "Distillation",
+                    Quantity = 100f,
+                    AlcoholContent = 50f,
+                    ProofGallon = 100f,
+                    SpiritTypeReportingID = 3, // Brandy Under 170
+                    ProductionTypeId = 2,
+                    SpiritId = spiritId,
+                    SpiritCutId = 11, // mixed
+                    MaterialKindReportingID = 95, // All Other Brandy
+                    Storage = new List<StorageObject>
+                    {
+                        new StorageObject { StorageId = storageId }
+                    },
+                    UsedMats = new List<ObjInfo4Burndwn>
+                    {
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId,
+                            OldVal = 0f,
+                            NewVal = purchase.VolumeByWeight,
+                            DistillableOrigin = "pur",
+                            BurningDownMethod = "weight"
+                        },
+                        new ObjInfo4Burndwn
+                        {
+                            ID = purchaseId2,
+                            OldVal = 0f,
+                            NewVal = purchase2.VolumeByWeight,
+                            DistillableOrigin = "pur",
+                            BurningDownMethod = "weight"
+                        }
+                    }
+                };
+
+                int productionId = _production.CreateProduction(production, _userId);
+                testRecords.Add(Tuple.Create(productionId, Table.Production));
+
+                // Act
+                ProductionReportingObject actualProductionReport = _productionReport.GetProductionReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+
+                // verify Production Report Part 6
+                // we should display only the remainder of the used materials.
+                var part6CategoryExpected = actualProductionReport.ProdReportPart6List.Find(x => x.ProdReportMaterialCategoryID == (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit);
+
+                if (part6CategoryExpected == null)
+                {
+                    Assert.IsNotNull(part6CategoryExpected, "There should be records for Fruit category");
+                }
+                else
+                {
+                    Assert.AreEqual(2000, part6CategoryExpected.Weight);
+                    Assert.AreEqual(0, part6CategoryExpected.Volume);
+                }
+            }
+            finally
+            {
+                // Perform table cleanup
+                foreach (var rec in testRecords)
+                {
+                    TestRecordCleanup(rec.Item1, rec.Item2);
                 }
             }
         }
@@ -14280,7 +16310,7 @@ namespace WebApp.Helpers.Tests
             spirit.SpiritName = "Brandy Under 170";
             spirit.ProcessingReportTypeID = 12;
 
-            spiritId = _dl.CreateSpirit(_userId, spirit);
+            spiritId =_dictionary.CreateSpirit(_userId, spirit);
             tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
 
 
@@ -14288,7 +16318,7 @@ namespace WebApp.Helpers.Tests
             VendorObject vendor = new VendorObject();
             vendor.VendorName = "testVendor";
 
-            vendorId = _dl.CreateVendor(_userId, vendor);
+            vendorId = _dictionary.CreateVendor(_userId, vendor);
             tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
 
             // setup Storage Object
@@ -14296,7 +16326,7 @@ namespace WebApp.Helpers.Tests
             storage.StorageName = "testStorage";
             storage.SerialNumber = "2H29NNS";
 
-            storageId = _dl.CreateStorage(_userId, storage);
+            storageId = _dictionary.CreateStorage(_userId, storage);
             tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
 
 
@@ -14312,7 +16342,7 @@ namespace WebApp.Helpers.Tests
                 materialBoolTypes.Fermented = true;
                 wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                materialDictId = _dl.CreateRawMaterial(_userId, wineMaterial);
+                materialDictId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
                 tablesForCleanupTupleList.Add(Tuple.Create(materialDictId, Table.MaterialDict));
             }
 
@@ -14326,7 +16356,7 @@ namespace WebApp.Helpers.Tests
                 materialBoolTypes.Additive = true;
                 waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
 
-                materialDictId = _dl.CreateRawMaterial(_userId, waterMaterial);
+                materialDictId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
                 tablesForCleanupTupleList.Add(Tuple.Create(materialDictId, Table.MaterialDict));
             }
 

@@ -1,16 +1,25 @@
 ﻿using Microsoft.AspNet.Identity;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web.Mvc;
 using WebApp.Helpers;
+using WebApp.Models;
+using WebApp.Workflows;
 
 namespace WebApp.Controllers
 {
     public class DictionaryController : Controller
     {
-        private DataLayer dl = new DataLayer();
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+        private readonly DictionaryWorkflow _dictionary;
 
-        /// <summary>
+        public DictionaryController()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+            _dictionary = new DictionaryWorkflow(_db, _dl);
+        }
+
+        /// <summary>   
         /// Spirit ActionResult Method
         /// </summary>
         /// <returns></returns>
@@ -74,7 +83,7 @@ namespace WebApp.Controllers
         {
             if(User.Identity.IsAuthenticated)
             {
-                var unitList = dl.GetUnitList();
+                var unitList = _dictionary.GetUnitList();
                 return Json(unitList, JsonRequestBehavior.AllowGet);
             }
             else
@@ -99,7 +108,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        ReturnObject returnResult = dl.DeleteDictionaryRecord(userId, deleteObject);
+                        ReturnObject returnResult = _dictionary.DeleteDictionaryRecord(userId, deleteObject);
                         if (returnResult.ExecuteResult)
                         {
                             string message = deleteObject.DeleteRecordType + " Record was deleted successfully";
@@ -123,7 +132,7 @@ namespace WebApp.Controllers
             }
             else
             {
-                string message = "Even though DeleteRecord method was called from the client the RecordID was unacceptable " + deleteObject.DeleteRecordID;
+                string message = "ID " + deleteObject.DeleteRecordID + " of the record being deleted is not valid or Dictionary Object being deleted is null";
                 return Json(message);
             }
         }
@@ -145,7 +154,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        int returnResult = dl.CreateSpirit(userId, spiritObject);
+                        int returnResult = _dictionary.CreateSpirit(userId, spiritObject);
                         if (returnResult > 0)
                         {
                             string message = "Spirit dictionary record created successfully.";
@@ -188,7 +197,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdateSpirit(userId, spiritObject);
+                        bool returnResult = _dictionary.UpdateSpirit(userId, spiritObject);
                         if (returnResult)
                         {
                             string message = "Spirit dictionary record updated successfully.";
@@ -228,7 +237,7 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var spiritList = dl.GetSpiritList(userId);
+                    var spiritList = _dictionary.GetSpiritList(userId);
                     if(spiritList != null)
                     {
                         return Json(spiritList, JsonRequestBehavior.AllowGet);
@@ -261,7 +270,7 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var types = dl.GetProcessingReportTypes();
+                    var types = _dl.GetProcessingReportTypes();
                     if (types != null)
                     {
                         return Json(types, JsonRequestBehavior.AllowGet);
@@ -301,7 +310,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        int returnResult = dl.CreateVendor(userId, vendorObject);
+                        int returnResult = _dictionary.CreateVendor(userId, vendorObject);
                         if (returnResult > 0)
                         {
                             string message = "Vendor dictionary record created successfully.";
@@ -344,7 +353,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdateVendor(userId, vendorObject);
+                        bool returnResult = _dictionary.UpdateVendor(userId, vendorObject);
                         if (returnResult)
                         {
                             string message = "Vendor dictionary record updated successfully.";
@@ -384,7 +393,7 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var vendorList = dl.GetVendorList(userId);
+                    var vendorList = _dictionary.GetVendorList(userId);
 
                     if (vendorList != null)
                     {
@@ -424,7 +433,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        int returnResult = dl.CreateStorage(userId, storageObject);
+                        int returnResult = _dictionary.CreateStorage(userId, storageObject);
                         if (returnResult > 0)
                         {
                             string message = "Storage dictionary record created successfully.";
@@ -467,7 +476,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdateStorage(userId, storageObject);
+                        bool returnResult = _dictionary.UpdateStorage(userId, storageObject);
                         if (returnResult)
                         {
                             string message = "Storage dictionary record updated successfully.";
@@ -507,7 +516,7 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var storageList = dl.GetStorageList(userId);
+                    var storageList = _dictionary.GetStorageList(userId);
 
                     if (storageList != null)
                     {
@@ -547,7 +556,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        int returnResult = dl.CreateRawMaterial(userId, rawMObject);
+                        int returnResult = _dictionary.CreateRawMaterial(userId, rawMObject);
                         if (returnResult > 0)
                         {
                             string message = "Raw Material dictionary record created successfully.";
@@ -590,7 +599,7 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdateRawMaterial(userId, rawMaterialObject);
+                        bool returnResult = _dictionary.UpdateRawMaterial(userId, rawMaterialObject);
                         if (returnResult)
                         {
                             string message = "Raw Material dictionary record updated successfully.";
@@ -630,7 +639,7 @@ namespace WebApp.Controllers
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var rawMaterialList = dl.GetRawMaterialListDict(userId);
+                    var rawMaterialList = _dictionary.GetRawMaterialListDict(userId);
 
                     if (rawMaterialList != null)
                     {
@@ -661,7 +670,7 @@ namespace WebApp.Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
-                var materialCategoryList = dl.GetMaterialCategoryList();
+                var materialCategoryList = _dl.GetMaterialCategoryList();
 
                 if(materialCategoryList != null)
                 {

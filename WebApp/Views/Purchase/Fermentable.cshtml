@@ -366,15 +366,15 @@
                         // synchronize with the server - send delete command
                         // call commit with parameter true if the synchronization with the server is successful
                         // and with parameter false if the synchronization failed.
-                        var purchaseObject = {
-                            PurchaseType: "Fermentable",
-                            PurchaseId: rowID
+                        var deleteRecordObject = {
+                            DeleteRecordID: rowID,
+                            DeleteRecordType: "Fermentable"
                         };
 
                         $.ajax({
                             type: "POST",
-                            url: '/Purchase/DeleteFermentable',
-                            data: JSON.stringify(purchaseObject),
+                            url: '/Purchase/DeleteRecord',
+                            data: JSON.stringify(deleteRecordObject),
                             dataType: "json",
                             contentType: "application/json; charset=utf-8",
                             error: function (response) {
@@ -382,9 +382,9 @@
                             },
                             success: function (result) {
                                 //on success will need to refresh the table and also empty the form
+                                alert(result);
                                 commit(true);
                                 recordsDataAdapter.dataBind();
-                                //window.locationre = result.url;
                             }
                         });
                     }
@@ -411,26 +411,27 @@
                     ready: function () {
 
                         $("#EditDialogPurBatchNameInput").jqxInput({
-                            theme: 'bootstrap', height: '26px', width: '150px'
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '150px'
                         });
 
                         $("#EditDialogPurchaseDateInput").jqxDateTimeInput({
-                            theme: 'bootstrap', height: '26px', width: '150px', formatString: "MM/dd/yyyy HH:mm"
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '150px', formatString: "MM/dd/yyyy HH:mm"
                         });
 
                         $("#EditDialogQuantityInput").jqxNumberInput({
-                            theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
                         });
 
                         $("#EditDialogVolumeByWeightInput").jqxNumberInput({
-                            theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
                         });
 
                         $("#EditDialogPriceInput").jqxNumberInput({
-                            theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '150px', inputMode: 'simple', textAlign: 'center', min: 0
                         });
 
                         $("#EditDialogVendorInput").jqxDropDownList({
+                            disabled: true,
                             source: vendorAdapter,
                             displayMember: "VendorName",
                             theme: 'bootstrap',
@@ -439,6 +440,7 @@
                         });
 
                         $("#EditDialogStorageNameInput").jqxListBox({
+                            disabled: true,
                             source: storageAdapter,
                             displayMember: "StorageName",
                             theme: 'bootstrap',
@@ -446,19 +448,20 @@
                         });
 
                         $('#EditDialogNotesInput').jqxTextArea({
-                            theme: 'bootstrap', height: '150px', width: '150px', minLength: 1
+                            disabled: true, theme: 'bootstrap', height: '150px', width: '150px', minLength: 1
                         });
 
-                        $("#EditDialogSaveRecordButton").jqxButton({
-                            theme: 'bootstrap', height: '26px', width: '150px'
-                        });
+                        //temporarily disabled
+                        //$("#EditDialogSaveRecordButton").jqxButton({
+                        //    theme: 'bootstrap', height: '26px', width: '150px'
+                        //});
 
                         $("#EditDialogDeleteRecordButton").jqxButton({
-                            theme: 'bootstrap', height: 30, width: 80
+                            theme: 'bootstrap', height: 30, width: 120
                         });
 
                         $("#EditDialogClearInputElementsButton").jqxButton({
-                            theme: 'bootstrap', height: '26px', width: '150px'
+                            theme: 'bootstrap', height: 30, width: 120
                         });
 
                         $("#EditDialog").jqxWindow({
@@ -802,9 +805,10 @@
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="2" align="right">
+                            <td colspan="2" align="center">
                                 <br />
-                                <button id="EditDialogSaveRecordButton">Save</button>
+                                @*temporarily disabled*@
+                                @*<button id="EditDialogSaveRecordButton">Save</button>*@
                                 <button id="EditDialogDeleteRecordButton">Delete</button>
                                 <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
                             </td>

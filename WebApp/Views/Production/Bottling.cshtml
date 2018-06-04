@@ -181,9 +181,13 @@
 
                     usedMat.DistillableOrigin = blendingDataAdapter.records[curRawMatIndex].DistillableOrigin;
 
-                    if ( ( usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight" ) || usedMat.BurningDownMethod == "volume" )
-                    {
-                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.OldVal, blendingDataAdapter.records[curRawMatIndex].AlcoholContent );
+                    if ((usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight") || usedMat.BurningDownMethod == "volume") {
+                        var alc = blendingDataAdapter.records[curRawMatIndex].AlcoholContent;
+                        if (alc <= 0 && usedMat.BurningDownMethod == "volume") {
+                            var name = blendingDataAdapter.records[curRawMatIndex].BatchName;
+                            window.alert("Selected record, " + name + ", doesn't include alcohol content. Update the Alcohol value of the selected record and try again.");
+                        }
+                        usedMat.Proof = distillCompInstance.calculateProof(usedMat.OldVal, blendingDataAdapter.records[curRawMatIndex].AlcoholContent);
                     }
 
                     usedMatsList.push( usedMat );
@@ -968,15 +972,15 @@
                         // synchronize with the server - send delete command
                         // call commit with parameter true if the synchronization with the server is successful
                         // and with parameter false if the synchronization failed.
-                        var productionObject = {
-                            ProductionType: "Bottling",
-                            ProductionId: rowID
+                        var deleteRecordObject = {
+                            DeleteRecordID: rowID,
+                            DeleteRecordType: "Bottling"
                         };
 
                         $.ajax({
                             type: "POST",
-                            url: '/Production/DeleteBottling',
-                            data: JSON.stringify(productionObject),
+                            url: '/Production/DeleteRecord',
+                            data: JSON.stringify(deleteRecordObject),
                             dataType: "json",
                             contentType: "application/json; charset=utf-8",
                             error: function (response) {
@@ -984,6 +988,7 @@
                             },
                             success: function (result) {
                                 //on success will need to refresh the table and also empty the form
+                                alert(result);
                                 commit(true);
                                 bottlingRecordsDataAdapter.dataBind();
                                 blendingDataAdapter.dataBind();
@@ -1019,71 +1024,72 @@
                     ready: function () {
 
                         $("#EditDialogBatchNameInput").jqxInput({
-                            theme: 'bootstrap', height: '26px', width: '100px', minLength: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', minLength: 0
                         });
 
                         $("#EditDialogStartDate").jqxDateTimeInput({
-                            theme: 'bootstrap', formatString: "MM/dd/yyyy HH:mm", width: 180, height: 30
+                            disabled: true, theme: 'bootstrap', formatString: "MM/dd/yyyy HH:mm", width: 180, height: 30
                         });
 
                         $("#EditDialogEndDate").jqxDateTimeInput({
-                            theme: 'bootstrap', formatString: "MM/dd/yyyy HH:mm", width: 180, height: 30
+                            disabled: true, theme: 'bootstrap', formatString: "MM/dd/yyyy HH:mm", width: 180, height: 30
                         });
 
                         $("#EditDialogCaseCapacityInput").jqxNumberInput({
-                            theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 3, min: 0, disabled: false, decimalDigits: 0, min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 3, min: 0, decimalDigits: 0, min: 0
                         });
 
                         $("#EditDialogCaseQuantityInput").jqxNumberInput({
-                            theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
                         });
 
                         $("#EditDialogBottleQuantityInput").jqxNumberInput({
-                            theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
                         });
 
                         $("#EditDialogBottleCapacityInput").jqxNumberInput({
-                            theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
                         });
 
                         $("#EditDialogBottleQuantityInput").jqxNumberInput({
-                            theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 4, min: 0, decimalDigits: 0, min: 0
                         });
 
                         $("#EditDialogQuantityInput").jqxNumberInput({
-                            theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
                         });
 
                         $("#EditDialogAlcoholInput").jqxNumberInput({
-                            theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', symbol: '%', min: 0
+                            disabled: true, theme: 'bootstrap',height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', symbol: '%', min: 0
                         });
 
                         $('#EditDialogProofInput').jqxNumberInput({
-                            theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
                         } );
 
                         $( '#EditDialogTaxedProof' ).jqxNumberInput( {
-                            theme: 'bootstrap', disabled: false, height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
                         } );
 
                         $( "#EditDialogTaxWithdrawalDate" ).jqxDateTimeInput( {
-                            theme: 'bootstrap', formatString: "MM/dd/yyyy", width: 180, height: 30
+                            disabled: true, theme: 'bootstrap', formatString: "MM/dd/yyyy", width: 180, height: 30
                         } );
 
                         $('#EditDialogNotesInput').jqxTextArea({
-                            theme: 'bootstrap', height: '50px', width: '200px', minLength: 1
+                            disabled: true, theme: 'bootstrap', height: '50px', width: '200px', minLength: 1
                         });
 
-                        $("#EditDialogSaveRecordButton").jqxButton({
-                            theme: 'bootstrap', height: 30, width: 80
-                        });
+                        //temporarily disabled
+                        //$("#EditDialogSaveRecordButton").jqxButton({
+                        //    theme: 'bootstrap', height: 30, width: 80
+                        //});
 
                         $("#EditDialogDeleteRecordButton").jqxButton({
-                            theme: 'bootstrap', height: 30, width: 80
+                            theme: 'bootstrap', height: 30, width: 120
                         });
 
                         $("#EditDialogClearInputElementsButton").jqxButton({
-                            theme: 'bootstrap', height: 30, width: 80
+                            theme: 'bootstrap', height: 30, width: 120
                         });
 
                         $("#EditDialog").jqxWindow({
@@ -1499,9 +1505,10 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2" align="right">
+                    <td colspan="2" align="center">
                         <br />
-                        <button id="EditDialogSaveRecordButton">Save</button>
+                        @*temporarily disabled*@
+                        @*<button id="EditDialogSaveRecordButton">Save</button>*@
                         <button id="EditDialogDeleteRecordButton">Delete</button>
                         <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
                     </td>

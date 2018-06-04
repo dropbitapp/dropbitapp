@@ -4,12 +4,22 @@ using System.Web.Mvc;
 using WebApp.Models;
 using WebApp.Helpers;
 using Microsoft.AspNet.Identity;
+using WebApp.Workflows;
 
 namespace WebApp.Controllers
 {
     public class ProductionController : Controller
     {
-        private DataLayer dl = new DataLayer();
+        private readonly DistilDBContext _db;
+        private readonly DataLayer _dl;
+        private readonly ProductionWorkflow _production;
+
+        public ProductionController()
+        {
+            _db = new DistilDBContext();
+            _dl = new DataLayer(_db);
+            _production = new ProductionWorkflow(_db, _dl);
+        }
 
         // --- Production Methods for Fermenting and Distilling ---
 
@@ -31,7 +41,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        int returnResult = dl.CreateProduction(prodObject, userId);
+                        int returnResult = _production.CreateProduction(prodObject, userId);
                         if (returnResult > 0)
                         {
                             string message = "Production record created successfully.";
@@ -68,7 +78,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var prodList = dl.GetProductionList(userId, prodType);
+                    var prodList = _production.GetProductionList(userId, prodType);
                     return Json(prodList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -95,7 +105,7 @@ namespace WebApp.Controllers
                 if (userId > 0)
                 {
                     List<ProdObjectConcise> blendingList = new List<ProdObjectConcise>();
-                    blendingList = dl.GetBlendingList(prodType, userId);
+                    blendingList = _production.GetBlendingList(prodType, userId);
                     return Json(blendingList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -118,7 +128,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var rawMaterialList = dl.GetRawMaterialList4Fermentation(userId);
+                    var rawMaterialList = _dl.GetRawMaterialList4Fermentation(userId);
                     return Json(rawMaterialList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -141,7 +151,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var rawMaterialList = dl.GetMaterialListForProduction(productionType, userId);
+                    var rawMaterialList = _dl.GetMaterialListForProduction(productionType, userId);
                     return Json(rawMaterialList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -166,7 +176,7 @@ namespace WebApp.Controllers
                 if (userId > 0)
                 {
                     // get the list
-                    var additiveList = dl.GetAdditivesListForProduction(matType, userId);
+                    var additiveList = _dl.GetAdditivesListForProduction(matType, userId);
                     return Json(additiveList, JsonRequestBehavior.AllowGet);
                 }
                 else {
@@ -191,7 +201,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var storageList = dl.GetStorageData(userId);
+                    var storageList = _dl.GetStorageData(userId);
                     return Json(storageList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -214,7 +224,7 @@ namespace WebApp.Controllers
                 var userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
-                    var storageList = dl.GetSpiritTypeList(userId);
+                    var storageList = _dl.GetSpiritTypeList(userId);
                     return Json(storageList, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -231,7 +241,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public JsonResult GetSpiritCutData()
         {
-            var spiritCutList = dl.GetSpiritCutData();
+            var spiritCutList = _dl.GetSpiritCutData();
             return Json(spiritCutList, JsonRequestBehavior.AllowGet);
         }
 
@@ -245,7 +255,7 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.UpdateProduction(pObj, userId);
+                        bool returnResult = _production.UpdateProduction(pObj, userId);
                         if (returnResult)
                         {
                             string message = "Production record updated successfully.";
@@ -268,34 +278,31 @@ namespace WebApp.Controllers
                 return Json("Back End received empty or undefined or null Object from the client");
             }
         }
-        #endregion
 
-        #region Fermentation
-        // GET: Fermentation
-        public ActionResult Fermentation()
-        {
-            return View();
-        }
-
+        /// <summary>
+        /// Generic method for deleting a record from the database.
+        /// </summary>
+        /// <param name="deleteRecordObject"></param>
+        /// <returns>JsonResult</returns>
         [HttpPost]
-        public JsonResult DeleteFermentation(ProductionObject productionObject)
+        public JsonResult DeleteRecord(DeleteRecordObject deleteObject)
         {
-            if (productionObject.ProductionId >= 0)
+            if (deleteObject.DeleteRecordID >= 0 && deleteObject != null)
             {
                 if (User.Identity.IsAuthenticated)
                 {
-                    var userId = User.Identity.GetUserId<int>();
+                    int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
-                        bool returnResult = dl.DeleteProduction(productionObject, userId);
-                        if (returnResult)
+                        ReturnObject returnResult = _production.DeleteProductionRecord(userId, deleteObject);
+                        if (returnResult.ExecuteResult)
                         {
-                            string message = "Fermentation record deleted successfully.";
+                            string message = deleteObject.DeleteRecordType + " Record was deleted successfully";
                             return Json(message);
                         }
                         else
                         {
-                            string message = "Failed to delete fermentation record!";
+                            string message = "Wasn't able to delete " + deleteObject.DeleteRecordType + " Record because it's associated with " + returnResult.ExecuteMessage;
                             return Json(message);
                         }
                     }
@@ -311,9 +318,17 @@ namespace WebApp.Controllers
             }
             else
             {
-                string message = "Even though DeleteFermentation method was called from the client but ProductionId was unacceptable " + productionObject.ProductionId;
+                string message = "ID " + deleteObject.DeleteRecordID + " of the record being deleted is not valid or Production Object being deleted is null";
                 return Json(message);
             }
+        }
+        #endregion
+
+        #region Fermentation
+        // GET: Fermentation
+        public ActionResult Fermentation()
+        {
+            return View();
         }
 
         #endregion
@@ -325,45 +340,6 @@ namespace WebApp.Controllers
             return View();
         }
 
-        [HttpPost]
-        public JsonResult DeleteDistillation(ProductionObject productionObject)
-        {
-            if (productionObject.ProductionId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeleteProduction(productionObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Distillation record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete Distillation record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                    {
-                        return Json("Unable to find UserId!");
-                    }
-                }
-                else
-                {
-                    return Json("Unauthenticated user!");
-                }
-            }
-            else
-            {
-                string message = "Even though DeleteDistillation method was called from the client but ProductionId was unacceptable " + productionObject.ProductionId;
-                return Json(message);
-            }
-        }
-
         /// <summary>
         /// Get reporting spirit and kinds values for data binding in inputs
         /// </summary>
@@ -371,7 +347,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public JsonResult GetSpiritToKindListData()
         {
-            var spiritToKindList = dl.GetSpiritToKindListData();
+            var spiritToKindList = _dl.GetSpiritToKindListData();
             return Json(spiritToKindList, JsonRequestBehavior.AllowGet);
         }
 
@@ -384,45 +360,6 @@ namespace WebApp.Controllers
             return View();
         }
 
-        [HttpPost]
-        public JsonResult DeleteBlending(ProductionObject productionObject)
-        {
-            if (productionObject.ProductionId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeleteProduction(productionObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Blending record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete blending record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                    {
-                        return Json("Unable to find UserId!");
-                    }
-                }
-                else
-                {
-                    return Json("Unauthenticated user!");
-                }
-            }
-            else
-            {
-                string message = "Even though DeleteBlending method was called from the client but ProductionId was unacceptable " + productionObject.ProductionId;
-                return Json(message);
-            }
-        }
-
         #endregion
 
         #region Bottling
@@ -430,45 +367,6 @@ namespace WebApp.Controllers
         public ActionResult Bottling()
         {
             return View();
-        }
-
-        [HttpPost]
-        public JsonResult DeleteBottling(ProductionObject productionObject)
-        {
-            if (productionObject.ProductionId >= 0)
-            {
-                if (User.Identity.IsAuthenticated)
-                {
-                    var userId = User.Identity.GetUserId<int>();
-                    if (userId > 0)
-                    {
-                        bool returnResult = dl.DeleteProduction(productionObject, userId);
-                        if (returnResult)
-                        {
-                            string message = "Bottling record deleted successfully.";
-                            return Json(message);
-                        }
-                        else
-                        {
-                            string message = "Failed to delete bottling record!";
-                            return Json(message);
-                        }
-                    }
-                    else
-                    {
-                        return Json("Unable to find UserId!");
-                    }
-                }
-                else
-                {
-                    return Json("Unauthenticated user!");
-                }
-            }
-            else
-            {
-                string message = "Even though DeleteBottling method was called from the client but ProductionId was unacceptable " + productionObject.ProductionId;
-                return Json(message);
-            }
         }
 
         #endregion
