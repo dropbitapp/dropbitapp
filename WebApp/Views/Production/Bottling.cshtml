@@ -181,9 +181,13 @@
 
                     usedMat.DistillableOrigin = blendingDataAdapter.records[curRawMatIndex].DistillableOrigin;
 
-                    if ( ( usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight" ) || usedMat.BurningDownMethod == "volume" )
-                    {
-                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.OldVal, blendingDataAdapter.records[curRawMatIndex].AlcoholContent );
+                    if ((usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight") || usedMat.BurningDownMethod == "volume") {
+                        var alc = blendingDataAdapter.records[curRawMatIndex].AlcoholContent;
+                        if (alc <= 0 && usedMat.BurningDownMethod == "volume") {
+                            var name = blendingDataAdapter.records[curRawMatIndex].BatchName;
+                            window.alert("Selected record, " + name + ", doesn't include alcohol content. Update the Alcohol value of the selected record and try again.");
+                        }
+                        usedMat.Proof = distillCompInstance.calculateProof(usedMat.OldVal, blendingDataAdapter.records[curRawMatIndex].AlcoholContent);
                     }
 
                     usedMatsList.push( usedMat );

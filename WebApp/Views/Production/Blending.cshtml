@@ -174,8 +174,13 @@
                     }
                     usedMat.DistillableOrigin = distilsAdapter.records[curRawMatIndex].DistillableOrigin;
 
-                    if ( ( usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight" ) || usedMat.BurningDownMethod == "volume" ) {
-                        usedMat.Proof = distillCompInstance.calculateProof( usedMat.OldVal, distilsAdapter.records[curRawMatIndex].AlcoholContent );
+                    if ((usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight") || usedMat.BurningDownMethod == "volume") {
+                        var alc = distilsAdapter.records[curRawMatIndex].AlcoholContent;
+                        if (alc <= 0 && usedMat.BurningDownMethod == "volume") {
+                            var name = distilsAdapter.records[curRawMatIndex].BatchName;
+                            window.alert("Selected record, " + name + ", doesn't include alcohol content. Update the Alcohol value of the selected record and try again.");
+                        }
+                        usedMat.Proof = distillCompInstance.calculateProof(usedMat.OldVal, distilsAdapter.records[curRawMatIndex].AlcoholContent);
                     }
 
                     usedMatsList.push(usedMat);
@@ -994,6 +999,7 @@
                 var source = {
                     datatype: "json",
                     dataFields: [
+                        { name: 'AlcoholContent' },
                         { name: 'BatchName' },
                         { name: 'RecordId' },
                         { name: 'ProductionId' },

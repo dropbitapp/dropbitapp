@@ -160,6 +160,11 @@
 
                     if ( ( usedMat.OldVal == 0 && usedMat.BurningDownMethod == "weight" ) || usedMat.BurningDownMethod == "volume" )
                     {
+                        var alc = distillationSourceBatchAdapter.records[curRawMatIndex].AlcoholContent;
+                        if (alc <= 0 && usedMat.BurningDownMethod == "volume") {
+                            var name = distillationSourceBatchAdapter.records[curRawMatIndex].BatchName;
+                            window.alert("Selected record, " + name + ", doesn't include alcohol content. Update the Alcohol value of the selected record and try again.");
+                        }
                         usedMat.Proof = distillCompInstance.calculateProof( usedMat.OldVal, distillationSourceBatchAdapter.records[curRawMatIndex].AlcoholContent );
                     }
 

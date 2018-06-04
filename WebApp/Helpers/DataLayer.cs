@@ -423,6 +423,8 @@ namespace WebApp.Helpers
                   from distillers in distillers_join.DefaultIfEmpty()
                   join quant in _db.Volume on purch.VolumeID equals quant.VolumeID into quant_join
                   from quant in quant_join.DefaultIfEmpty()
+                  join alc in _db.Alcohol on purch.AlcoholID equals alc.AlcoholID into alc_join
+                  from alc in alc_join.DefaultIfEmpty()
                   join vbw in _db.Weight on purch.WeightID equals vbw.WeightID into vbw_join
                   from vbw in vbw_join.DefaultIfEmpty()
                   where
@@ -432,6 +434,7 @@ namespace WebApp.Helpers
                    distillers.UserId == userId
                   select new
                   {
+                      AlcoholContent = ((System.Single?)alc.Value ?? (System.Single?)0),
                       PurchaseID = ((System.Int32?)purch.PurchaseID ?? (System.Int32?)0),
                       PurchaseBatchName = purch.PurchaseName ?? string.Empty,
                       PurchaseDate = purch.PurchaseDate,
@@ -455,6 +458,7 @@ namespace WebApp.Helpers
                         prodO.BurningDownMethod = i.BurningDownMethod;
                         prodO.Quantity = (float)i.Quantity;
                         prodO.VolumeByWeight = (float)i.VolumeByWeight;
+                        prodO.AlcoholContent = (float)i.AlcoholContent;
                         list.Add(prodO);
                         combinedId++;
                     }
@@ -466,6 +470,8 @@ namespace WebApp.Helpers
                     from distillers in distillers_join.DefaultIfEmpty()
                     join quant in _db.Volume on prod.VolumeID equals quant.VolumeID into quant_join
                     from quant in quant_join.DefaultIfEmpty()
+                    join alc in _db.Alcohol on prod.AlcoholID equals alc.AlcoholID into alc_join
+                    from alc in alc_join.DefaultIfEmpty()
                     join vbw in _db.Weight on prod.WeightID equals vbw.WeightID into vbw_join
                     from vbw in vbw_join.DefaultIfEmpty()
                     where
@@ -475,6 +481,7 @@ namespace WebApp.Helpers
                       distillers.UserId == userId
                     select new
                     {
+                        AlcoholContent = ((System.Single?)alc.Value ?? (System.Single?)0),
                         ProductionID = ((System.Int32?)prod.ProductionID ?? (System.Int32?)0),
                         ProductionName = prod.ProductionName ?? string.Empty,
                         ProductonEndDate = prod.ProductionEndTime,
@@ -498,6 +505,7 @@ namespace WebApp.Helpers
                         prodO.BurningDownMethod = i.BurningDownMethod;
                         prodO.Quantity = (float)i.Quantity;
                         prodO.VolumeByWeight = (float)i.VolumeByWeight;
+                        prodO.AlcoholContent = (float)i.AlcoholContent;
                         list.Add(prodO);
                         combinedId++;
                     }
