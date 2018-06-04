@@ -931,19 +931,111 @@ namespace WebApp.Reports
         /// <param name="tempRepObjList"></param>
         private void ProductionReportPart6Data(ref List<ProdReportPart6> prodReportPart6List, ref List<ProductionReportHelper> tempRepObjList)
         {
-            List<ProductionPart6DataForParsingInProductionReportWorklfow> productionContentList = new List<ProductionPart6DataForParsingInProductionReportWorklfow>();
+            List<ProductionPart6DataForParsing> productionContentList = new List<ProductionPart6DataForParsing>();
+            float updatedRawMaterialAmmt = 0f;
 
-            int[] contentFieldId = new int[23]; // making it the same size as ContentField table
-
-            contentFieldId[0] = (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume;
-            contentFieldId[1] = (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight;
-            contentFieldId[2] = (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight;
-
-            foreach (var i in tempRepObjList)
+            #region new implementation
+            foreach (var i in tempRepObjList) // iterate through the set of all active production records for this month and get Part 6 information
             {
-                GetValueFromProductionContentRecursively(contentFieldId, ref productionContentList, i.ProductionID);
-            }
+                try
+                {
+                    var prodFromPurchaseSet = (from prodCont in _db.ProductionContent
+                                               join prod2Purch in _db.ProductionToPurchase on prodCont.RecordID equals prod2Purch.PurchaseID into prod2Purch_join
+                                               from prod2Purch in prod2Purch_join.DefaultIfEmpty()
+                                               where prod2Purch.ProductionID == i.ProductionID
+                                               && prodCont.isProductionComponent == false
+                                               select prodCont).ToList();
 
+                    if (prodFromPurchaseSet != null && prodFromPurchaseSet.Count() > 0)
+                    {
+                        foreach (var prodFromPurchase in prodFromPurchaseSet) // iterate throught the list of all Purchase records that were used in producing this month's distills
+                        {
+                            var productions = (from prodCont in _db.ProductionContent
+                                               where prodCont.RecordID == prodFromPurchase.ProductionID
+                                               && prodCont.ProductionID == i.ProductionID
+                                               select prodCont)
+                                               .ToList();
+
+                            if (productions != null && productions.Count() > 0)
+                            {
+                                foreach (var prod in productions)
+                                {
+                                    if (prod.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedVolume ||
+                                        prod.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedWeight)
+                                    {
+                                        var originalFermentedAmount = (from prodForReporting in _db.Production4Reporting
+                                                                       where prodForReporting.ProductionID == prod.RecordID
+                                                                       select new
+                                                                       {
+                                                                           originalFermentedAmmt = prodForReporting.Volume > 0 ? prodForReporting.Volume : prodForReporting.Weight,
+                                                                       }).FirstOrDefault();
+
+                                        ProductionPart6DataForParsing prt6TempData = new ProductionPart6DataForParsing();
+                                        prt6TempData.OriginalRawMaterialAmount = prodFromPurchase.ContentValue;
+                                        prt6TempData.ContentFieldId = prodFromPurchase.ContentFieldID;
+                                        prt6TempData.FermentedAmountWentIntoCurrentProduction = prod.ContentValue;
+                                        prt6TempData.OriginalFermentedAmount = originalFermentedAmount != null ? originalFermentedAmount.originalFermentedAmmt : 0;
+                                        prt6TempData.ReportingPeriodProductionId = i.ProductionID;
+                                        prt6TempData.NeedsMappingFromFermentedToPurchase = true;
+                                        prt6TempData.PurchaseId = prodFromPurchase.RecordID;
+
+                                        productionContentList.Add(prt6TempData);
+                                    }
+                                }
+                            }
+                            else // this is the case with Pomace where we distill fermented product like Pomace directly without fermenting it first
+                            {
+                                var productionInList = productionContentList.Where(x => x.ReportingPeriodProductionId == i.ProductionID).FirstOrDefault();
+
+                                if (productionInList != null && productionInList.PurchaseId != prodFromPurchase.RecordID)
+                                {
+                                    if (prodFromPurchase.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedVolume ||
+                                        prodFromPurchase.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight)
+                                    {
+                                        var originalFermentedAmount = (from purchForReporting in _db.Purchase4Reporting
+                                                                       where purchForReporting.PurchaseID == prodFromPurchase.RecordID
+                                                                       select new
+                                                                       {
+                                                                           originalFermentedAmmt = purchForReporting.Volume > 0 ? purchForReporting.Volume : purchForReporting.Weight
+                                                                       }).FirstOrDefault();
+
+                                        productionInList.FermentedAmountWentIntoCurrentProduction = +prodFromPurchase.ContentValue;
+                                    }
+                                }
+                                else if (productionInList == null && i.ProductionID == prodFromPurchase.ProductionID) // to avoid double counting we need to ensure that productionID from this month matches productionID that came from Production2Purchase table
+                                {
+                                    if (prodFromPurchase.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedVolume ||
+                                        prodFromPurchase.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight)
+                                    {
+                                        var originalFermentedAmount = (from purchForReporting in _db.Purchase4Reporting
+                                                                       where purchForReporting.PurchaseID == prodFromPurchase.RecordID
+                                                                       select new
+                                                                       {
+                                                                           originalFermentedAmmt = purchForReporting.Volume > 0 ? purchForReporting.Volume : purchForReporting.Weight
+                                                                       }).FirstOrDefault();
+
+                                        ProductionPart6DataForParsing prt6TempData = new ProductionPart6DataForParsing();
+                                        prt6TempData.OriginalRawMaterialAmount = originalFermentedAmount != null ? originalFermentedAmount.originalFermentedAmmt : 0;
+                                        prt6TempData.ContentFieldId = prodFromPurchase.ContentFieldID;
+                                        prt6TempData.FermentedAmountWentIntoCurrentProduction = prodFromPurchase.ContentValue;
+                                        prt6TempData.OriginalFermentedAmount = prodFromPurchase.ContentValue;
+                                        prt6TempData.ReportingPeriodProductionId = i.ProductionID;
+                                        prt6TempData.NeedsMappingFromFermentedToPurchase = false;
+                                        prt6TempData.PurchaseId = prodFromPurchase.RecordID;
+
+                                        productionContentList.Add(prt6TempData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }
+            #endregion
             foreach (var k in productionContentList)
             {
                 try
@@ -972,65 +1064,19 @@ namespace WebApp.Reports
                         ProductionReportMaterialCategoryID = (int?)prodRepMatCat.ProductionReportMaterialCategoryID ?? (int?)0
                     };
 
-                    var productionTypeOfProductionIdAssociatedWithPurchase =
-                    (from prod in _db.Production
-                     where prod.ProductionID == k.ProductionIdAssociatedWithPurchase
-                     select new
-                     {
-                         productionType = prod.ProductionTypeID
-                     }).FirstOrDefault();
-
-                    float updatedRawMaterialAmmt = 0f;
-
-                    if (productionTypeOfProductionIdAssociatedWithPurchase != null)
+                    if (k.NeedsMappingFromFermentedToPurchase == false)
                     {
-                        if (productionTypeOfProductionIdAssociatedWithPurchase.productionType == (int)ProductinWorkflowType.Distillation)
-                        {
-                            updatedRawMaterialAmmt = k.ContentValue;
-                        }
-                        else
-                        {
-                            var originalRawMaterialAmount =
-                            (from purchaseForReporting in _db.Purchase4Reporting
-                             where
-                             purchaseForReporting.PurchaseID == k.PurchaseId
-                             && purchaseForReporting.ProductionID == k.ProductionIdAssociatedWithPurchase
-                             select new
-                             {
-                                 originalRawMaterialAmmt = purchaseForReporting.Weight > 0 ? purchaseForReporting.Weight : purchaseForReporting.Volume
-                             }).FirstOrDefault();
-
-                            var originalFermentedAmount =
-                            (from prodForReporting in _db.Production4Reporting
-                             where
-                             prodForReporting.ProductionID == k.ProductionIdAssociatedWithPurchase
-                             select new
-                             {
-                                 originalFermentedAmmt = prodForReporting.Weight > 0 ? prodForReporting.Weight : prodForReporting.Volume,
-                             }).FirstOrDefault();
-
-                            var fermentedAmountWentToProduction =
-                            (from prodContent in _db.ProductionContent
-                             where
-                             prodContent.RecordID == k.ProductionIdAssociatedWithPurchase
-                             && (new int[] { (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedVolume, (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedWeight }).Contains(prodContent.ContentFieldID)
-                             select new
-                             {
-                                 fermentedInProductionAmmt = prodContent.ContentValue
-                             }).FirstOrDefault();
-
-                            if (originalRawMaterialAmount != null && originalFermentedAmount != null && fermentedAmountWentToProduction != null)
-                            {
-                                updatedRawMaterialAmmt = (originalRawMaterialAmount.originalRawMaterialAmmt / originalFermentedAmount.originalFermentedAmmt) * fermentedAmountWentToProduction.fermentedInProductionAmmt;
-                            }
-                        }
+                        updatedRawMaterialAmmt = k.FermentedAmountWentIntoCurrentProduction;
+                    }
+                    else
+                    {
+                        updatedRawMaterialAmmt = (k.OriginalRawMaterialAmount / k.OriginalFermentedAmount) * k.FermentedAmountWentIntoCurrentProduction; // the idea here is to try to infere the amount of raw material used in wine production which in turn was used in a given distillation production.
                     }
 
                     if (part6Materials != null)
                     {
                         foreach (var t in part6Materials)
                         {
-
                             var mater = prodReportPart6List.Find(x => x.KindOfMaterial == (string)t.MaterialName);
 
                             // case where Material doesn't exist
@@ -1102,51 +1148,6 @@ namespace WebApp.Reports
                 catch (Exception e)
                 {
                     throw e;
-                }
-            }
-        }
-
-        /// <summary>
-        /// GetValueFromProductionContentRecursively retrives records
-        /// associated with given production record in ProductionContent
-        /// table recursively.
-        /// </summary>
-        /// <param name="contentFieldId"></param>
-        /// <param name="productionContentList"></param>
-        /// <param name="productionId"></param>
-        private void GetValueFromProductionContentRecursively(int[] contentFieldId, ref List<ProductionPart6DataForParsingInProductionReportWorklfow> productionContentList, int productionId)
-        {
-            var records =
-                (from prodContent in _db.ProductionContent
-                 where prodContent.ProductionID == productionId
-                 select prodContent).ToList();
-
-            if (records != null)
-            {
-                foreach (var record in records)
-                {
-                    ProductionPart6DataForParsingInProductionReportWorklfow part6ObjectForParsing = new ProductionPart6DataForParsingInProductionReportWorklfow();
-
-                    if (contentFieldId[0] == record.ContentFieldID || contentFieldId[1] == record.ContentFieldID || contentFieldId[2] == record.ContentFieldID)
-                    {
-                        var exists = productionContentList.Where(x => x.ProductionIdAssociatedWithPurchase == record.ProductionID).Where(x => x.PurchaseId == record.RecordID).Where(x => x.ContentFieldId == record.ContentFieldID);
-
-                        if (exists.Count() == 0)
-                        {
-                            part6ObjectForParsing.ContentFieldId = record.ContentFieldID;
-                            part6ObjectForParsing.ContentValue = record.ContentValue;
-                            part6ObjectForParsing.ReportingPeriodProductionId = productionId;
-                            part6ObjectForParsing.ProductionIdAssociatedWithPurchase = record.ProductionID;
-                            part6ObjectForParsing.PurchaseId = record.RecordID;
-
-                            productionContentList.Add(part6ObjectForParsing);
-                        }
-                    }
-
-                    if (record.isProductionComponent)
-                    {
-                        GetValueFromProductionContentRecursively(contentFieldId, ref productionContentList, record.RecordID);
-                    }
                 }
             }
         }

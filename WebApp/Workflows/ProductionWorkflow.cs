@@ -820,6 +820,7 @@ namespace WebApp.Workflows
                             _db.SaveChanges();
                         }
                     }
+                    purIdL.Clear();
                 }
             }
             catch
