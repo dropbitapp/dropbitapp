@@ -32,44 +32,52 @@ namespace Public.Controllers
                 return BadRequest();
             }
 
-            const string secret = "***REMOVED***";
+            var envVars = Environment.GetEnvironmentVariables();
+
             WebClient client = new WebClient();
-            var reply = client.DownloadString(string.Format("https://www.google.com/recaptcha/api/siteverify?secret={0}&response={1}", secret, contact.Response));
-            var captchaResponse = JsonConvert.DeserializeObject<RecaptchaResponse>(reply);
-
-            if (!captchaResponse.Success)
+            try
             {
-                return BadRequest();
+                var reply = client.DownloadString(string.Format("https://www.google.com/recaptcha/api/siteverify?secret={0}&response={1}", envVars["GOOGLE_API_KEY_"].ToString(), contact.Response));
+                var captchaResponse = JsonConvert.DeserializeObject<RecaptchaResponse>(reply);
+
+                if (!captchaResponse.Success)
+                {
+                    return BadRequest();
+                }
+
+
+                // Parse the connection string and return a reference to the storage account.
+                var connectionString = envVars["STORAGE_CONNECTION_STRING_"].ToString();
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(envVars["STORAGE_CONNECTION_STRING_"].ToString());
+
+                // Create the table client.
+                CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+
+                // Retrieve a reference to the table.
+                CloudTable table = tableClient.GetTableReference("contacts");
+
+                // Create the table if it doesn't exist.
+                table.CreateIfNotExists();
+
+                // Create a new customer entity
+                ContactEntity contactEntity = new ContactEntity(contact.Name, contact.Email);
+                contactEntity.Organization = contact.Organization;
+
+                if (contactEntity == null)
+                {
+                    return BadRequest();
+                }
+
+                // Create the TableOperation object that inserts the contact entity. If the entity already exists we simply replace it the old entity with this new one.
+                TableOperation insertOperation = TableOperation.InsertOrReplace(contactEntity);
+
+                // Execute the insert operation.
+                table.Execute(insertOperation);
             }
-
-            // Parse the connection string and return a reference to the storage account.
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                CloudConfigurationManager.GetSetting("StorageConnectionString"));
-
-            // Create the table client.
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
-            // Retrieve a reference to the table.
-            CloudTable table = tableClient.GetTableReference("contacts");
-
-            // Create the table if it doesn't exist.
-            table.CreateIfNotExists();
-
-            // Create a new customer entity
-            ContactEntity contactEntity = new ContactEntity(contact.Name, contact.Email);
-            contactEntity.Organization = contact.Organization;
-
-            if (contactEntity == null)
+            catch (Exception e)
             {
-                return BadRequest();
+                throw e;
             }
-
-            // Create the TableOperation object that inserts the contact entity.
-            TableOperation insertOperation = TableOperation.Insert(contactEntity);
-
-            // Execute the insert operation.
-            await table.ExecuteAsync(insertOperation);
-
             return Ok();
         }
     }
