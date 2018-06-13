@@ -1068,21 +1068,20 @@
                         } );
 
                         $( '#EditDialogTaxedProof' ).jqxNumberInput( {
-                            disabled: true, theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
+                            disabled: false, theme: 'bootstrap', height: '26px', width: '100px', inputMode: 'simple', textAlign: 'center', digits: 5, symbolPosition: 'right', min: 0
                         } );
 
                         $( "#EditDialogTaxWithdrawalDate" ).jqxDateTimeInput( {
-                            disabled: true, theme: 'bootstrap', formatString: "MM/dd/yyyy", width: 180, height: 30
+                            disabled: false, theme: 'bootstrap', formatString: "MM/dd/yyyy", width: 180, height: 30
                         } );
 
                         $('#EditDialogNotesInput').jqxTextArea({
                             disabled: true, theme: 'bootstrap', height: '50px', width: '200px', minLength: 1
                         });
 
-                        //temporarily disabled
-                        //$("#EditDialogSaveRecordButton").jqxButton({
-                        //    theme: 'bootstrap', height: 30, width: 80
-                        //});
+                        $("#EditDialogSaveRecordButton").jqxButton({
+                            theme: 'bootstrap', height: 30, width: 80
+                        });
 
                         $("#EditDialogDeleteRecordButton").jqxButton({
                             theme: 'bootstrap', height: 30, width: 120
@@ -1507,8 +1506,7 @@
                 <tr>
                     <td colspan="2" align="center">
                         <br />
-                        @*temporarily disabled*@
-                        @*<button id="EditDialogSaveRecordButton">Save</button>*@
+                        <button id="EditDialogSaveRecordButton">Save</button>
                         <button id="EditDialogDeleteRecordButton">Delete</button>
                         <button style="margin-left: 5px;" id="EditDialogClearInputElementsButton">Cancel</button>
                     </td>
