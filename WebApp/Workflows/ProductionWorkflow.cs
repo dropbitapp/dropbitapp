@@ -1352,7 +1352,7 @@ namespace WebApp.Workflows
 
                                     if (vol != null)
                                     {
-                                        vol.Value = i.value;
+                                        vol.Value = vol.Value + i.value;
                                     }
 
                                     if (prod4Reporting != null)
@@ -1376,7 +1376,7 @@ namespace WebApp.Workflows
 
                                     if (weight != null)
                                     {
-                                        weight.Value = i.value;
+                                        weight.Value = weight.Value + i.value;
                                     }
 
                                     if (prod4Reporting != null)
@@ -1400,7 +1400,7 @@ namespace WebApp.Workflows
 
                                     if (alc != null)
                                     {
-                                        alc.Value = i.value;
+                                        alc.Value = alc.Value + i.value;
                                     }
 
                                     if (prod4Reporting != null)
@@ -1424,7 +1424,7 @@ namespace WebApp.Workflows
 
                                     if (prf != null)
                                     {
-                                        prf.Value = i.value;
+                                        prf.Value = prf.Value + i.value;
                                     }
 
                                     if (prod4Reporting != null)
@@ -1476,7 +1476,7 @@ namespace WebApp.Workflows
 
                                     if (vol != null)
                                     {
-                                        vol.Value = i.value;
+                                        vol.Value = vol.Value + i.value;
                                     }
 
                                     if (purch4Reporting != null)
@@ -1500,7 +1500,7 @@ namespace WebApp.Workflows
 
                                     if (weight != null)
                                     {
-                                        weight.Value = i.value;
+                                        weight.Value = weight.Value + i.value;
                                     }
 
                                     if (purch4Reporting != null)
@@ -1524,7 +1524,7 @@ namespace WebApp.Workflows
 
                                     if (alc != null)
                                     {
-                                        alc.Value = i.value;
+                                        alc.Value = alc.Value + i.value;
                                     }
 
                                     if (purch4Reporting != null)
@@ -1548,7 +1548,7 @@ namespace WebApp.Workflows
 
                                     if (prf != null)
                                     {
-                                        prf.Value = i.value;
+                                        prf.Value = prf.Value + i.value;
                                     }
 
                                     if (purch4Reporting != null)

@@ -14594,35 +14594,35 @@ namespace WebApp.Helpers.Tests
         }
 
         /// <summary>
-        /// Buy Grapes in March, 2018
-        /// Ferment Wine in March, 2018
-        /// Disitl DO NOT Gauge in March, 2018
-        /// Delete UnGauged Distil
-        /// Check actual distilled record was deleted the record has been restored
+        /// Buy 960 PFG of GNS on 06/01/2018
+        /// Batch 1 : Distil 50 PFG Gin by partially burning down 100 gal of GNS on 06/02/2018
+        /// Batch 2 : Distil 50 PFG Gin by partially burning down 100 gal of GNS on 06/03/2018
+        /// Delete Batch 2
+        /// Check Purchase record. Number of PFG should be reinstated back to 900PFG
         /// </summary>
         [TestMethod]
-        public void Delete_UnGauged_Distil_From_Purchased_Wine()
+        public void Delete_UnGauged_GIN_From_Purchased_GNS()
         {
             // Arrange
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tupleL = new List<Tuple<int, Table>>();
             int spiritId = 0;
             int vendorId = 0;
             int storageId = 0;
-            int wineMaterialId = 0;
-            int waterMaterialId = 0;
             int purchaseId = 0;
             int productionId = 0;
+            int gnsMaterialId = 0;
+            int waterMaterialId = 0;
 
-            DateTime start = new DateTime(2018, 03, 01);
-            DateTime end = new DateTime(2018, 03, 31);
+            DateTime start = new DateTime(2018, 06, 01);
+            DateTime end = new DateTime(2018, 06, 30);
 
             try
             {
                 #region Dictionary
                 //  dictionary setup
                 SpiritObject spirit = new SpiritObject();
-                spirit.SpiritName = "Brandy Under 170";
-                spirit.ProcessingReportTypeID = 12;
+                spirit.SpiritName = "Gin";
+                spirit.ProcessingReportTypeID = 18;
 
                 spiritId =_dictionary.CreateSpirit(_userId, spirit);
                 tupleL.Add(Tuple.Create(spiritId, Table.Spirit));
@@ -14643,48 +14643,45 @@ namespace WebApp.Helpers.Tests
                 tupleL.Add(Tuple.Create(storageId, Table.Storage));
 
                 // setup Material Object
-                // wine
+                // GNS
+                RawMaterialObject gnsMaterial = new RawMaterialObject
                 {
-                    RawMaterialObject wineMaterial = new RawMaterialObject();
-                    wineMaterial.RawMaterialName = "Wine For Brandy";
-                    wineMaterial.MaterialCategoryID = 2;
-                    wineMaterial.UnitType = "gal";
-                    wineMaterial.UnitTypeId = 1;
-                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
-                    materialBoolTypes.Fermented = true;
-                    wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
+                    RawMaterialName = "GNS",
+                    PurchaseMaterialTypes = new PurchaseMaterialBooleanTypes { Distilled = true },
+                    UnitTypeId = 2, // lb
+                    UnitType = "lb",
+                    MaterialCategoryID = 1
+                };
 
-                    wineMaterialId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
-                    tupleL.Add(Tuple.Create(wineMaterialId, Table.MaterialDict));
-                }
+                gnsMaterialId = _dictionary.CreateRawMaterial(_userId, gnsMaterial);
+                tupleL.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
 
                 // water
+                RawMaterialObject waterMaterial = new RawMaterialObject
                 {
-                    RawMaterialObject waterMaterial = new RawMaterialObject();
-                    waterMaterial.RawMaterialName = "Water";
-                    waterMaterial.UnitType = "gal";
-                    waterMaterial.UnitTypeId = 1;
-                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
-                    materialBoolTypes.Additive = true;
-                    waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
+                    RawMaterialName = "Water",
+                    UnitType = "gal",
+                    UnitTypeId = 1,
+                    PurchaseMaterialTypes = new PurchaseMaterialBooleanTypes { Additive = true }
+                };
 
-                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
-                    tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
-                }
+                waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
+                tupleL.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
+
                 #endregion
 
                 #region Purchase
                 // create Purchase Record (minimal required fields)
                 PurchaseObject purchO = new PurchaseObject();
-                purchO.PurBatchName = "Feremented Purchase";
-                purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2018, 03, 1);
-                purchO.Quantity = 100f; // 100 gallons
+                purchO.PurBatchName = "GNS";
+                purchO.PurchaseType = "Distilled";
+                purchO.PurchaseDate = new DateTime(2018, 06, 1);
+                purchO.Quantity = 500f;
                 purchO.VolumeByWeight = 0f;
-                purchO.AlcoholContent = 9f;
-                purchO.ProofGallon = 18f;
-                purchO.RecordId = wineMaterialId;
-                purchO.Price = 350f;
+                purchO.AlcoholContent = 96f;
+                purchO.ProofGallon = 960f;
+                purchO.RecordId = gnsMaterialId;
+                purchO.Price = 3500f;
                 purchO.VendorId = vendorId;
 
                 List<StorageObject> stoL = new List<StorageObject>();
@@ -14704,16 +14701,16 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and don't mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
-                prodO.ProductionDate = new DateTime(2018, 03, 3);
-                prodO.ProductionStart = new DateTime(2018, 03, 3);
-                prodO.ProductionEnd = new DateTime(2018, 03, 3);
+                prodO.ProductionDate = new DateTime(2018, 6, 2);
+                prodO.ProductionStart = new DateTime(2018, 6, 2);
+                prodO.ProductionEnd = new DateTime(2018, 6, 2);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = false;
                 prodO.ProductionType = "Distillation";
-                prodO.Quantity = 50f; //50 gallons of alcohol
+                prodO.Quantity = 100f;
                 prodO.VolumeByWeight = 0f;
-                prodO.AlcoholContent = 80f;
-                prodO.ProofGallon = 80f; // 80pfg
+                prodO.AlcoholContent = 96f;
+                prodO.ProofGallon = 96f; // 80pfg
                 prodO.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
                 prodO.SpiritTypeReportingID = 3; // brandy under 170
                 prodO.MaterialKindReportingID = 94; // grape brandy
@@ -14722,10 +14719,11 @@ namespace WebApp.Helpers.Tests
                 List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
                 ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
                 uMat.ID = purchaseId;
-                uMat.OldVal = 0f;
-                uMat.NewVal = purchO.Quantity;
+                uMat.OldVal = 4000f;
+                uMat.NewVal = 100;
                 uMat.DistillableOrigin = "pur";
                 uMat.BurningDownMethod = "volume";
+                uMat.Proof = 768f;
 
                 usedMats.Add(uMat);
 
@@ -14735,42 +14733,42 @@ namespace WebApp.Helpers.Tests
 
                 tupleL.Add(Tuple.Create(productionId, Table.Production));
 
+                // create 2nd Production Distillation Record and don't mark it as Gauged
+                ProductionObject prodO1 = new ProductionObject();
+                prodO1.BatchName = "test1stDistillRun";
+                prodO1.ProductionDate = new DateTime(2018, 6, 3);
+                prodO1.ProductionStart = new DateTime(2018, 6, 3);
+                prodO1.ProductionEnd = new DateTime(2018, 6, 3);
+                prodO1.SpiritCutId = 11; // mixed
+                prodO1.Gauged = false;
+                prodO1.ProductionType = "Distillation";
+                prodO1.Quantity = 50f; //50 gallons of alcohol
+                prodO1.VolumeByWeight = 0f;
+                prodO1.AlcoholContent = 96f;
+                prodO1.ProofGallon = 96f; // 80pfg
+                prodO1.Storage = stoL; // we are using the same storage id as we use for Purchase to keep things simple
+                prodO1.SpiritTypeReportingID = 3; // brandy under 170
+                prodO1.MaterialKindReportingID = 94; // grape brandy
+                prodO1.ProductionTypeId = 2;
+
+                List<ObjInfo4Burndwn> usedMats1 = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat1 = new ObjInfo4Burndwn();
+                uMat1.ID = purchaseId;
+                uMat1.OldVal = 300f;
+                uMat1.NewVal = 100f;
+                uMat1.DistillableOrigin = "pur";
+                uMat1.BurningDownMethod = "volume";
+                uMat1.Proof = 576;
+
+                usedMats1.Add(uMat1);
+
+                prodO1.UsedMats = usedMats1;
+
+                productionId = _production.CreateProduction(prodO1, _userId);
+
+                tupleL.Add(Tuple.Create(productionId, Table.Production));
+
                 #endregion
-
-                // Assert
-
-                // validate that the burndowns have happened
-                var purchaseAfterBurndown =
-                    (from purchBefore in _db.Purchase
-                     where purchBefore.PurchaseID == purchaseId
-                     join volume in _db.Volume on purchBefore.VolumeID equals volume.VolumeID into volume_join
-                     from volume in volume_join.DefaultIfEmpty()
-                     join weight in _db.Weight on purchBefore.WeightID equals weight.WeightID into weight_join
-                     from weight in weight_join.DefaultIfEmpty()
-                     join alcohol in _db.Alcohol on purchBefore.AlcoholID equals alcohol.AlcoholID into alcohol_join
-                     from alcohol in alcohol_join.DefaultIfEmpty()
-                     join proof in _db.Proof on purchBefore.ProofID equals proof.ProofID into proof_join
-                     from proof in proof_join.DefaultIfEmpty()
-                     select new
-                     {
-                         volume = (float?)volume.Value ?? (float?)0,
-                         weight = (float?)weight.Value ?? (float?)0,
-                         alcohol = (float?)alcohol.Value ?? (float?)0,
-                         proof = (float?)proof.Value ?? (float?)0
-                     }
-                    ).FirstOrDefault();
-
-                if (purchaseAfterBurndown != null)
-                {
-                    Assert.AreEqual(0f, purchaseAfterBurndown.volume);
-                    Assert.AreEqual(0f, purchaseAfterBurndown.weight);
-                    Assert.AreEqual(9f, purchaseAfterBurndown.alcohol);
-                    Assert.AreEqual(0f, purchaseAfterBurndown.proof);
-                }
-                else
-                {
-                    Assert.Inconclusive("purchaseAfterBurndown query yielded no results so could not perform this part of the test");
-                }
 
                 // let's verify the values in production report after we deleted Ungauged distillation
                 DeleteRecordObject deleteObject = new DeleteRecordObject();
@@ -14799,10 +14797,10 @@ namespace WebApp.Helpers.Tests
 
                 if (amounts != null)
                 {
-                    Assert.AreEqual(purchO.Quantity, amounts.volume);
+                    Assert.AreEqual(400, amounts.volume);
                     Assert.AreEqual(purchO.VolumeByWeight, amounts.weight);
                     Assert.AreEqual(purchO.AlcoholContent, amounts.alcohol);
-                    Assert.AreEqual(purchO.ProofGallon, amounts.proof);
+                    Assert.AreEqual(768, amounts.proof);
                 }
                 else
                 {
