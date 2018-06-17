@@ -1,0 +1,1 @@
+insert into SpiritTypeReporting values('Total', 'Total');

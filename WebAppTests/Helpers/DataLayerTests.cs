@@ -236,10 +236,10 @@ namespace WebApp.Helpers.Tests
                 #region Assert
 
                 // October
-                Assert.AreEqual(0, octStorageReport.ReportBody.Count); // Empty
+                Assert.AreEqual(1, octStorageReport.ReportBody.Count); // Only totals are calculated
 
                 // November
-                Assert.AreEqual(2, novStorageReport.ReportBody.Count);
+                Assert.AreEqual(3, novStorageReport.ReportBody.Count);
                 Assert.IsTrue(novStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
                 Assert.IsTrue(novStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 3)); // Category is Brandy170Under
 
@@ -270,7 +270,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(45.39f, novStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 3).Select(x => x.r24_Lines7Through23).Single());
 
                 // June
-                Assert.AreEqual(2, decStorageReport.ReportBody.Count); // One category
+                Assert.AreEqual(3, decStorageReport.ReportBody.Count); // Totals plus two categories
                 Assert.IsTrue(decStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
                 Assert.IsTrue(decStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 3)); // Category is Other
 
@@ -518,7 +518,7 @@ namespace WebApp.Helpers.Tests
                 #region Assert
 
                 // April
-                Assert.AreEqual(1, aprStorageReport.ReportBody.Count); // One category
+                Assert.AreEqual(2, aprStorageReport.ReportBody.Count); // Totals plus one category
                 Assert.IsTrue(aprStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
                 Assert.AreEqual(0f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
                 Assert.AreEqual(20f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
@@ -534,7 +534,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(20f, aprStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
 
                 // May
-                Assert.AreEqual(1, mayStorageReport.ReportBody.Count); // One category
+                Assert.AreEqual(2, mayStorageReport.ReportBody.Count); // Totals plus one category
                 Assert.IsTrue(mayStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
                 Assert.AreEqual(20f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
                 Assert.AreEqual(0f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
@@ -550,7 +550,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(20f, mayStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
 
                 // June
-                Assert.AreEqual(1, juneStorageReport.ReportBody.Count); // One category
+                Assert.AreEqual(2, juneStorageReport.ReportBody.Count); // Totals plus one category
                 Assert.IsTrue(juneStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
                 Assert.AreEqual(20f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
                 Assert.AreEqual(0f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
@@ -566,7 +566,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(20f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
 
                 // July
-                Assert.AreEqual(1, julyStorageReport.ReportBody.Count); // One category
+                Assert.AreEqual(2, julyStorageReport.ReportBody.Count); // Totals plus one category
                 Assert.IsTrue(julyStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
                 Assert.AreEqual(20f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
                 Assert.AreEqual(15f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
@@ -582,7 +582,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(35f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
 
                 // August
-                Assert.AreEqual(1, augStorageReport.ReportBody.Count); // One category
+                Assert.AreEqual(2, augStorageReport.ReportBody.Count); // Totals plus one category
                 Assert.IsTrue(augStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
                 Assert.AreEqual(29f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
                 Assert.AreEqual(35f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
@@ -598,7 +598,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(64f, augStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r24_Lines7Through23).Single());
 
                 // September
-                Assert.AreEqual(1, sepStorageReport.ReportBody.Count); // One category
+                Assert.AreEqual(2, sepStorageReport.ReportBody.Count); // Totals plus one category
                 Assert.IsTrue(sepStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10)); // Category is Other
                 Assert.AreEqual(50f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r1_OnHandFirstOfMonth).Single());
                 Assert.AreEqual(0f, sepStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 10).Select(x => x.r2_DepositedInBulkStorage).Single());
@@ -1369,13 +1369,13 @@ namespace WebApp.Helpers.Tests
 
                 // October 2016
 
-                // No data records are generated
-                Assert.IsFalse(octStorageReport.ReportBody.Any());
+                // Only totals are calculated
+                Assert.AreEqual(1, octStorageReport.ReportBody.Count);
 
                 // November 2016 Storage Report
 
-                // Only "Brandy Distilled at 170 and under" AND "Other" records are generated
-                Assert.AreEqual(2, novStorageReport.ReportBody.Count);
+                // Only totals, "Brandy Distilled at 170, and under" AND "Other" records are generated
+                Assert.AreEqual(3, novStorageReport.ReportBody.Count);
                 Assert.IsTrue(novStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 3));
                 Assert.IsTrue(novStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 10));
                 Assert.IsFalse(novStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 1));
@@ -1418,8 +1418,8 @@ namespace WebApp.Helpers.Tests
 
                 // December 2016 Storage Report
 
-                // Only "Brandy Distilled at 170 and under" records generated
-                Assert.AreEqual(1, decStorageReport.ReportBody.Count);
+                // Only totals and "Brandy Distilled at 170 and under" records generated
+                Assert.AreEqual(2, decStorageReport.ReportBody.Count);
                 Assert.IsTrue(decStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 3));
 
                 Assert.IsFalse(decStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 1));
@@ -1449,8 +1449,8 @@ namespace WebApp.Helpers.Tests
 
                 // January 2017
 
-                // No data records are generated
-                Assert.IsFalse(janStorageReport.ReportBody.Any());
+                // No data records are generated other than totals
+                Assert.AreEqual(1, janStorageReport.ReportBody.Count);
 
                 #endregion
             }
@@ -2438,8 +2438,8 @@ namespace WebApp.Helpers.Tests
 
                 // Assert
 
-                // storage report should contain only one category named "BrandyUnder170"
-                Assert.AreEqual(1, storageReport.ReportBody.Count);
+                // storage report should contain only category named "BrandyUnder170" and totals
+                Assert.AreEqual(2, storageReport.ReportBody.Count);
                 Assert.AreEqual("BrandyUnder170", storageReport.ReportBody.First().CategoryName);
                 Assert.AreEqual(100F, storageReport.ReportBody.First().r2_DepositedInBulkStorage);
 
@@ -2667,13 +2667,13 @@ namespace WebApp.Helpers.Tests
 
                 // December 2016
 
-                // No data records are generated
-                Assert.IsFalse(decStorageReport.ReportBody.Any());
+                // Only totals are calculated
+                Assert.AreEqual(1, decStorageReport.ReportBody.Count);
 
                 // January 2017 Storage Report
 
-                // Only "GIN" AND "190 AND OVER" records are generated
-                Assert.AreEqual(2, janStorageReport.ReportBody.Count);
+                // Only totals, "GIN", AND "190 AND OVER" records are generated
+                Assert.AreEqual(3, janStorageReport.ReportBody.Count);
                 Assert.IsTrue(janStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 6));
                 Assert.IsTrue(janStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 9));
 
@@ -2717,8 +2717,8 @@ namespace WebApp.Helpers.Tests
 
                 // February 2017 Storage Report
 
-                // Only "GIN" AND "190 AND OVER" records are generated
-                Assert.AreEqual(2, febStorageReport.ReportBody.Count);
+                // Only totals, "GIN", AND "190 AND OVER" records are generated
+                Assert.AreEqual(3, febStorageReport.ReportBody.Count);
                 Assert.IsTrue(febStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 6));
                 Assert.IsTrue(febStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 9));
 
@@ -2762,8 +2762,8 @@ namespace WebApp.Helpers.Tests
 
                 // March 2017 Storage Report
 
-                // Only "190 AND OVER" records generated
-                Assert.AreEqual(1, marStorageReport.ReportBody.Count);
+                // Only totals and  "190 AND OVER" records generated
+                Assert.AreEqual(2, marStorageReport.ReportBody.Count);
                 Assert.IsTrue(marStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 9));
 
                 Assert.IsFalse(marStorageReport.ReportBody.Exists(x => x.SpiritTypeReportingID == 1));
@@ -5602,7 +5602,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(reportHeaderE.ProprietorName, actualStorageReport.Header.ProprietorName);
                 Assert.AreEqual(reportHeaderE.ReportDate, actualStorageReport.Header.ReportDate);
 
-                Assert.AreEqual(2, actualStorageReport.ReportBody.Count); // make sure number of spirit entries (columns) in the report is two
+                Assert.AreEqual(3, actualStorageReport.ReportBody.Count); // Totals plus 2 spirit types
 
                 var wineColumn = actualStorageReport.ReportBody.Find(x => x.CategoryName == "Wine"); // wine should be there
                 var brandyUnder170Column = actualStorageReport.ReportBody.Find(x => x.CategoryName == "BrandyUnder170"); // brandy should be there
@@ -5868,7 +5868,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(reportHeaderE.ProprietorName, actualStorageReport.Header.ProprietorName);
                 Assert.AreEqual(reportHeaderE.ReportDate, actualStorageReport.Header.ReportDate);
 
-                Assert.AreEqual(2, actualStorageReport.ReportBody.Count); // make sure number of spirit entries (columns) in the report is two
+                Assert.AreEqual(3, actualStorageReport.ReportBody.Count); // Totals plus 2 spirit types
 
                 var wineColumn = actualStorageReport.ReportBody.Find(x => x.CategoryName == "Wine"); // wine should be there
                 var brandyUnder170Column = actualStorageReport.ReportBody.Find(x => x.CategoryName == "BrandyUnder170"); // brandy should be there
