@@ -934,7 +934,6 @@ namespace WebApp.Reports
             List<ProductionPart6DataForParsing> productionContentList = new List<ProductionPart6DataForParsing>();
             float updatedRawMaterialAmmt = 0f;
 
-            #region new implementation
             foreach (var i in tempRepObjList) // iterate through the set of all active production records for this month and get Part 6 information
             {
                 try
@@ -942,9 +941,26 @@ namespace WebApp.Reports
                     var prodFromPurchaseSet = (from prodCont in _db.ProductionContent
                                                join prod2Purch in _db.ProductionToPurchase on prodCont.RecordID equals prod2Purch.PurchaseID into prod2Purch_join
                                                from prod2Purch in prod2Purch_join.DefaultIfEmpty()
+                                               join purch in _db.Purchase on prod2Purch.PurchaseID equals purch.PurchaseID into purch_join
+                                               from purch in purch_join.DefaultIfEmpty()
+                                               join matDict2MatCat in _db.MaterialDict2MaterialCategory on purch.MaterialDictID equals matDict2MatCat.MaterialDictID into matDict2MatCat_join
+                                               from matDict2MatCat in matDict2MatCat_join.DefaultIfEmpty()
+                                               join prodRepMatCat in _db.ProductionReportMaterialCategory on matDict2MatCat.ProductionReportMaterialCategoryID equals prodRepMatCat.ProductionReportMaterialCategoryID into prodRepMatCat_join
+                                               from prodRepMatCat in prodRepMatCat_join.DefaultIfEmpty()
+                                               join matDict in _db.MaterialDict on purch.MaterialDictID equals matDict.MaterialDictID into matDict_join
+                                               from matDict in matDict_join.DefaultIfEmpty()
                                                where prod2Purch.ProductionID == i.ProductionID
                                                && prodCont.isProductionComponent == false
-                                               select prodCont).ToList();
+                                               select  new
+                                               {
+                                                   ProductionID = prodCont.ProductionID,
+                                                   ContentValue = prodCont.ContentValue,
+                                                   ContentFieldID = prodCont.ContentFieldID,
+                                                   RecordID = prodCont.RecordID,
+                                                   PurchaseID = prod2Purch.PurchaseID,
+                                                   ProductionReportMaterialCategoryId = (int?)prodRepMatCat.ProductionReportMaterialCategoryID ?? (int?)0,
+                                                   MaterialCategoryName = matDict.Name
+                                               }).ToList();
 
                     if (prodFromPurchaseSet != null && prodFromPurchaseSet.Count() > 0)
                     {
@@ -978,6 +994,8 @@ namespace WebApp.Reports
                                         prt6TempData.ReportingPeriodProductionId = i.ProductionID;
                                         prt6TempData.NeedsMappingFromFermentedToPurchase = true;
                                         prt6TempData.PurchaseId = prodFromPurchase.RecordID;
+                                        prt6TempData.ProductionReportMaterialCategoryId = (int)prodFromPurchase.ProductionReportMaterialCategoryId;
+                                        prt6TempData.MaterialCategoryName = prodFromPurchase.MaterialCategoryName;
 
                                         productionContentList.Add(prt6TempData);
                                     }
@@ -999,7 +1017,7 @@ namespace WebApp.Reports
                                                                            originalFermentedAmmt = purchForReporting.Volume > 0 ? purchForReporting.Volume : purchForReporting.Weight
                                                                        }).FirstOrDefault();
 
-                                        productionInList.FermentedAmountWentIntoCurrentProduction = +prodFromPurchase.ContentValue;
+                                        productionInList.FermentedAmountWentIntoCurrentProduction += prodFromPurchase.ContentValue;
                                     }
                                 }
                                 else if (productionInList == null && i.ProductionID == prodFromPurchase.ProductionID) // to avoid double counting we need to ensure that productionID from this month matches productionID that came from Production2Purchase table
@@ -1022,6 +1040,8 @@ namespace WebApp.Reports
                                         prt6TempData.ReportingPeriodProductionId = i.ProductionID;
                                         prt6TempData.NeedsMappingFromFermentedToPurchase = false;
                                         prt6TempData.PurchaseId = prodFromPurchase.RecordID;
+                                        prt6TempData.ProductionReportMaterialCategoryId = (int)prodFromPurchase.ProductionReportMaterialCategoryId;
+                                        prt6TempData.MaterialCategoryName = prodFromPurchase.MaterialCategoryName;
 
                                         productionContentList.Add(prt6TempData);
                                     }
@@ -1035,35 +1055,11 @@ namespace WebApp.Reports
                     throw e;
                 }
             }
-            #endregion
+
             foreach (var k in productionContentList)
             {
                 try
                 {
-                    var part6Materials =
-                    from prod in _db.Production
-                    join prod2Purch in _db.ProductionToPurchase on prod.ProductionID equals prod2Purch.ProductionID into prod2Purch_join
-                    from prod2Purch in prod2Purch_join.DefaultIfEmpty()
-                    join purch in _db.Purchase on prod2Purch.PurchaseID equals purch.PurchaseID into purch_join
-                    from purch in purch_join.DefaultIfEmpty()
-                    join matDict in _db.MaterialDict on purch.MaterialDictID equals matDict.MaterialDictID into matDict_join
-                    from matDict in matDict_join.DefaultIfEmpty()
-                    join prod2SpiritType in _db.ProductionToSpiritTypeReporting on prod.ProductionID equals prod2SpiritType.ProductionID into prod2SpiritType_join
-                    from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
-                    join matKindRep in _db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
-                    from matKindRep in matKindRep_join.DefaultIfEmpty()
-                    join prodRepMatCat2MatKind in _db.ProdRepMatCat2MaterialKind on matKindRep.MaterialKindReportingID equals prodRepMatCat2MatKind.MaterialKindReportingID into prodRepMatCat2MatKind_join
-                    from prodRepMatCat2MatKind in prodRepMatCat2MatKind_join.DefaultIfEmpty()
-                    join prodRepMatCat in _db.ProductionReportMaterialCategory on prodRepMatCat2MatKind.ProductionReportMaterialCategoryID equals prodRepMatCat.ProductionReportMaterialCategoryID into prodRepMatCat_join
-                    from prodRepMatCat in prodRepMatCat_join.DefaultIfEmpty()
-                    where
-                    prod.ProductionID == k.ReportingPeriodProductionId
-                    select new
-                    {
-                        MaterialName = matDict.Name,
-                        ProductionReportMaterialCategoryID = (int?)prodRepMatCat.ProductionReportMaterialCategoryID ?? (int?)0
-                    };
-
                     if (k.NeedsMappingFromFermentedToPurchase == false)
                     {
                         updatedRawMaterialAmmt = k.FermentedAmountWentIntoCurrentProduction;
@@ -1072,76 +1068,36 @@ namespace WebApp.Reports
                     {
                         updatedRawMaterialAmmt = (k.OriginalRawMaterialAmount / k.OriginalFermentedAmount) * k.FermentedAmountWentIntoCurrentProduction; // the idea here is to try to infere the amount of raw material used in wine production which in turn was used in a given distillation production.
                     }
+                    var mater = prodReportPart6List.Find(x => x.KindOfMaterial == (string)k.MaterialCategoryName);
 
-                    if (part6Materials != null)
+                    // case where Material doesn't exist
+                    if (mater == null)
                     {
-                        foreach (var t in part6Materials)
+                        ProdReportPart6 prt6 = new ProdReportPart6();
+                        prt6.ProductionID = k.ReportingPeriodProductionId;
+                        prt6.KindOfMaterial = (string)k.MaterialCategoryName;
+                        prt6.ProdReportMaterialCategoryID = (int)k.ProductionReportMaterialCategoryId;
+
+                        if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume)
                         {
-                            var mater = prodReportPart6List.Find(x => x.KindOfMaterial == (string)t.MaterialName);
-
-                            // case where Material doesn't exist
-                            if (mater == null)
-                            {
-                                ProdReportPart6 prt6 = new ProdReportPart6();
-                                prt6.ProductionID = k.ReportingPeriodProductionId;
-                                prt6.KindOfMaterial = (string)t.MaterialName;
-                                prt6.ProdReportMaterialCategoryID = (int)t.ProductionReportMaterialCategoryID;
-
-                                if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume)
-                                {
-                                    prt6.Volume = updatedRawMaterialAmmt;
-                                }
-                                else if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight || k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight)
-                                {
-                                    prt6.Weight = updatedRawMaterialAmmt;
-                                }
-
-                                prodReportPart6List.Add(prt6);
-                            }
-                            else // case where Material already exists
-                            {
-                                if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume)
-                                {
-                                    mater.Volume += updatedRawMaterialAmmt;
-                                }
-                                else if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight || k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight)
-                                {
-                                    mater.Weight += updatedRawMaterialAmmt;
-                                }
-                            }
+                            prt6.Volume = updatedRawMaterialAmmt;
                         }
-                    }
-
-                    //we need this here to fill up ProdReportMaterialCategoryID
-                    foreach (var mat in prodReportPart6List)
-                    {
-                        if (mat.ProdReportMaterialCategoryID == 0)
+                        else if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight || k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight)
                         {
-                            var l =
-                            (from prodContent in _db.ProductionContent
-                             join prod2SpiritType in _db.ProductionToSpiritTypeReporting on prodContent.ProductionID equals prod2SpiritType.ProductionID into prod2SpiritType_join
-                             from prod2SpiritType in prod2SpiritType_join.DefaultIfEmpty()
-                             join matKindRep in _db.MaterialKindReporting on prod2SpiritType.MaterialKindReportingID equals matKindRep.MaterialKindReportingID into matKindRep_join
-                             from matKindRep in matKindRep_join.DefaultIfEmpty()
-                             join prodRepMatCat2MatKind in _db.ProdRepMatCat2MaterialKind on matKindRep.MaterialKindReportingID equals prodRepMatCat2MatKind.MaterialKindReportingID into prodRepMatCat2MatKind_join
-                             from prodRepMatCat2MatKind in prodRepMatCat2MatKind_join.DefaultIfEmpty()
-                             join prodRepMatCat in _db.ProductionReportMaterialCategory on prodRepMatCat2MatKind.ProductionReportMaterialCategoryID equals prodRepMatCat.ProductionReportMaterialCategoryID into prodRepMatCat_join
-                             from prodRepMatCat in prodRepMatCat_join.DefaultIfEmpty()
-                             where
-                             prodContent.isProductionComponent == true &&
-                             prodContent.RecordID == mat.ProductionID
-                             select new
-                             {
-                                 ProductionReportMaterialCategoryID = (int?)prodRepMatCat.ProductionReportMaterialCategoryID
-                             }).FirstOrDefault();
+                            prt6.Weight = updatedRawMaterialAmmt;
+                        }
 
-                            if (l != null)
-                            {
-                                if (l.ProductionReportMaterialCategoryID != null)
-                                {
-                                    mat.ProdReportMaterialCategoryID = (int)l.ProductionReportMaterialCategoryID;
-                                }
-                            }
+                        prodReportPart6List.Add(prt6);
+                    }
+                    else // case where Material already exists
+                    {
+                        if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume)
+                        {
+                            mater.Volume += updatedRawMaterialAmmt;
+                        }
+                        else if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight || k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight)
+                        {
+                            mater.Weight += updatedRawMaterialAmmt;
                         }
                     }
                 }

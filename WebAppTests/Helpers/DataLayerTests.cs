@@ -15760,6 +15760,7 @@ namespace WebApp.Helpers.Tests
                 {
                     Assert.AreEqual(2000, part6CategoryExpected.Weight);
                     Assert.AreEqual(0, part6CategoryExpected.Volume);
+                    Assert.AreEqual(2, part6CategoryExpected.ProdReportMaterialCategoryID);
                 }
             }
             finally
