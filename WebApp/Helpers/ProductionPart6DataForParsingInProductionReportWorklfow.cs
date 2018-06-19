@@ -11,5 +11,7 @@
         public int PurchaseId { get; set; }
         public int ProductionIdAssociatedWithPurchase { get; set; }
         public bool NeedsMappingFromFermentedToPurchase { get; set; } // we need to set this flag to false when we are dealing with Pomace. Pomace is being distilled directly without going into fermenation first
+        public int ProductionReportMaterialCategoryId { get; set; } // we need this on this object to assign ProductionReportMaterialCategoryId at the time we figure out relevant purchase records and not later as it is done now.
+        public string MaterialCategoryName { get; set; } // we need this on this object to assign MatericalCategory Name at the time we figure out relevant purchase records and not later as it is done now.
     }
 }

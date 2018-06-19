@@ -53,11 +53,77 @@ namespace WebApp.Reports
 
                 ComputeLine24ForStorageReport(ref storageReportBody);
 
+                CalculateRowTotals(ref storageReportBody);
+
                 storageReport.ReportBody = storageReportBody;
 
                 return storageReport;
             }
             catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        private void CalculateRowTotals(ref List<StorageReportCategory> storageReportBody)
+        {
+            string categoryName = "Total";
+
+            try
+            {
+                // Get total column in the SpiritTypeReporting table
+                var spiritTypeCategory = (from type in _db.SpiritTypeReporting
+                                          where type.ProductTypeName == categoryName
+                                          select new
+                                          {
+                                              type.SpiritTypeReportingID,
+                                              type.ProductTypeName
+                                          }).FirstOrDefault();
+                if (spiritTypeCategory != null)
+                {
+                    // Declare an instance of StorageReportCategory to save total values for each row
+                    StorageReportCategory cat = new StorageReportCategory
+                    {
+                        CategoryName = spiritTypeCategory.ProductTypeName,
+                        SpiritTypeReportingID = spiritTypeCategory.SpiritTypeReportingID
+                    };
+
+                    // Sum up values for each row and save to total category
+                    foreach (var i in storageReportBody)
+                    {
+                        cat.r1_OnHandFirstOfMonth += i.r1_OnHandFirstOfMonth;
+                        cat.r2_DepositedInBulkStorage += i.r2_DepositedInBulkStorage;
+                        cat.r4_ReturnedToBulkStorage += i.r4_ReturnedToBulkStorage;
+                        cat.r6_TotalLines1Through5 += i.r6_TotalLines1Through5;
+                        cat.r7_TaxPaid += i.r7_TaxPaid;
+                        cat.r17_TransferredToProcessingAccount += i.r17_TransferredToProcessingAccount;
+                        cat.r18_TransferredToProductionAccount += i.r18_TransferredToProductionAccount;
+                        cat.r19_TransferredToOtherBondedPremises += i.r19_TransferredToOtherBondedPremises;
+                        cat.r20_Destroyed += i.r20_Destroyed;
+                        cat.r22_OtherLosses += i.r22_OtherLosses;
+                        cat.r23_OnHandEndOfMonth += i.r23_OnHandEndOfMonth;
+                        cat.r24_Lines7Through23 += i.r24_Lines7Through23;
+                    }
+
+                    // Round totals
+                    cat.r1_OnHandFirstOfMonth = (float)Math.Round(cat.r1_OnHandFirstOfMonth, 3);
+                    cat.r2_DepositedInBulkStorage = (float)Math.Round(cat.r2_DepositedInBulkStorage, 3);
+                    cat.r4_ReturnedToBulkStorage = (float)Math.Round(cat.r4_ReturnedToBulkStorage, 3);
+                    cat.r6_TotalLines1Through5 = (float)Math.Round(cat.r6_TotalLines1Through5, 3);
+                    cat.r7_TaxPaid = (float)Math.Round(cat.r7_TaxPaid, 3);
+                    cat.r17_TransferredToProcessingAccount = (float)Math.Round(cat.r17_TransferredToProcessingAccount, 3);
+                    cat.r18_TransferredToProductionAccount = (float)Math.Round(cat.r18_TransferredToProductionAccount, 3);
+                    cat.r19_TransferredToOtherBondedPremises = (float)Math.Round(cat.r19_TransferredToOtherBondedPremises, 3);
+                    cat.r20_Destroyed = (float)Math.Round(cat.r20_Destroyed, 3);
+                    cat.r22_OtherLosses = (float)Math.Round(cat.r22_OtherLosses, 3);
+                    cat.r23_OnHandEndOfMonth = (float)Math.Round(cat.r23_OnHandEndOfMonth, 3);
+                    cat.r24_Lines7Through23 = (float)Math.Round(cat.r24_Lines7Through23, 3);
+
+                    // Add total category to existing report body
+                    storageReportBody.Add(cat);
+                }
+            }
+            catch(Exception e)
             {
                 throw e;
             }
@@ -104,6 +170,7 @@ namespace WebApp.Reports
                        ReportingCategoryName = str.ProductTypeName ?? string.Empty,
                        SpiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                        Proof = (float?)proof.Value ?? 0,
+                       PurchaseId = (int?)productionContent.RecordID ?? 0,
                        DestroyedProof = (float?)dest.ProofGallons ?? 0,
                        ProductionContentProof = (float?)productionContent.ContentValue ?? 0
                    };
@@ -309,6 +376,7 @@ namespace WebApp.Reports
                  {
                      reportingCategoryName = spiritTypeReporting.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)spiritTypeReporting.SpiritTypeReportingID ?? 0,
+                     purchaseId = (int?)productionContent.RecordID ?? 0,
                      purchaseProof = (float?)proof.Value ?? 0,
                      productionProof = (float?)productionContent.ContentValue ?? 0,
                      destroyedProof = (float?)destruction.ProofGallons ?? 0
@@ -316,6 +384,9 @@ namespace WebApp.Reports
 
             if (records.First() != null)
             {
+                // store pruchase ids
+                List<int> purchIdSet = new List<int>();
+
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
@@ -324,6 +395,7 @@ namespace WebApp.Reports
                     if (category == null)
                     {
                         var total = rec.purchaseProof + rec.productionProof + rec.destroyedProof;
+                        purchIdSet.Add(rec.purchaseId);
 
                         if (total > 0)
                         {
@@ -338,7 +410,16 @@ namespace WebApp.Reports
                     }
                     else
                     {
-                        category.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
+                        // check to ensure proof for that purchase id was not already added to total.
+                        if(purchIdSet.Contains(rec.purchaseId))
+                        {
+                            category.r2_DepositedInBulkStorage += rec.productionProof + rec.destroyedProof;
+                        }
+                        else
+                        {
+                            category.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
+                            purchIdSet.Add(rec.purchaseId);
+                        }
                         category.r2_DepositedInBulkStorage = (float)Math.Round(category.r2_DepositedInBulkStorage, 3);
                     }
                 }
@@ -918,6 +999,9 @@ namespace WebApp.Reports
 
             if (records.Any())
             {
+                // store purchase ids
+                List<int> purchIdSet = new List<int>();
+
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
@@ -926,6 +1010,7 @@ namespace WebApp.Reports
                     if (category == null)
                     {
                         var total = rec.Proof + rec.DestroyedProof;
+                        purchIdSet.Add(rec.PurchaseId);
 
                         if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
@@ -945,13 +1030,21 @@ namespace WebApp.Reports
                     }
                     else
                     {
-                        category.r23_OnHandEndOfMonth += rec.Proof + rec.DestroyedProof;
+                        if (purchIdSet.Contains(rec.PurchaseId))
+                        {
+                            category.r23_OnHandEndOfMonth += rec.DestroyedProof;
+                        }
+                        else
+                        {
+                            category.r23_OnHandEndOfMonth += rec.Proof + rec.DestroyedProof;
+                            purchIdSet.Add(rec.PurchaseId);
+                        }
 
                         if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
                             category.r23_OnHandEndOfMonth += rec.ProductionContentProof;
-                            category.r23_OnHandEndOfMonth = (float)Math.Round(category.r23_OnHandEndOfMonth);
                         }
+                        category.r23_OnHandEndOfMonth = (float)Math.Round(category.r23_OnHandEndOfMonth, 3);
                     }
                 }
             }

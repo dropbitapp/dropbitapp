@@ -20,6 +20,7 @@
 /Public/bin/
 /Public/obj/
 /Public/Properties/PublishProfiles/
+/Public/Web.config
 /packages
 /WebApp/connections.config
 /WebAppTests/connections.config

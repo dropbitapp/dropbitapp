@@ -317,32 +317,22 @@
                             result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
                         $('#24l_Wine').text(row24TotalLocal);
                     }
-
-                    // let's compute totals for column M
-                    row1Total += result.ReportBody[i].r1_OnHandFirstOfMonth
-                    row2Total += result.ReportBody[i].r2_DepositedInBulkStorage;
-                    row4Total += result.ReportBody[i].r4_ReturnedToBulkStorage;
-                    row6Total += result.ReportBody[i].r1_OnHandFirstOfMonth + result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                    row17Total += result.ReportBody[i].r17_TransferredToProcessingAccount;
-                    row18Total += result.ReportBody[i].r18_TransferredToProductionAccount;
-                    row19Total + result.ReportBody[i].r19_TransferredToOtherBondedPremises;
-                    row23Total += result.ReportBody[i].r23_OnHandEndOfMonth;
-                    row24Total += result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
+                    // Total
+                    if (result.ReportBody[i].CategoryName == 'Total') {
+                        $('#1m_Total').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
+                        $('#2m_Total').text(result.ReportBody[i].r2_DepositedInBulkStorage);
+                        $('#4m_Total').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
+                        $('#6m_Total').text(result.ReportBody[i].r6_TotalLines1Through5);
+                        $('#7m_Total').text(result.ReportBody[i].r7_TaxPaid);
+                        $('#17m_Total').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
+                        $('#18m_Total').text(result.ReportBody[i].r18_TransferredToProductionAccount);
+                        $('#19m_Total').text(result.ReportBody[i].r19_TransferredToOtherBondedPremises);
+                        $('#20m_Total').text(result.ReportBody[i].r20_Destroyed);
+                        $('#22m_Total').text(result.ReportBody[i].r22_OtherLosses);
+                        $('#23m_Total').text(result.ReportBody[i].r23_OnHandEndOfMonth);
+                        $('#24m_Total').text(result.ReportBody[i].r24_Lines7Through23);
+                    }
                 }
-
-                // fill-in computed totals for column M
-                $( '#1m_Total' ).text( row1Total );
-                $( '#2m_Total' ).text( row2Total );
-                $( '#4m_Total' ).text( row4Total );
-                $( '#6m_Total' ).text( row6Total );
-                $( '#17m_Total' ).text( row17Total );
-                $( '#18m_Total' ).text( row18Total );
-                $( '#19m_Total' ).text( row19Total );
-                $( '#23m_Total' ).text( row23Total );
-                $( '#24m_Total' ).text( row24Total );
             }
 
             // parse JSON datetime "/Date(1492412400000)/" format into a regular javasript format
