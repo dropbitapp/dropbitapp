@@ -15,6 +15,7 @@ namespace WebApp.Helpers
         public float Proof { get; set; }
         public float DestroyedProof { get; set; }
         public float ProductionContentProof { get; set; }
+        public int PurchaseId { get; set; }
     }
     #endregion
 

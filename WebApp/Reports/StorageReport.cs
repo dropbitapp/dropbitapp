@@ -170,6 +170,7 @@ namespace WebApp.Reports
                        ReportingCategoryName = str.ProductTypeName ?? string.Empty,
                        SpiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                        Proof = (float?)proof.Value ?? 0,
+                       PurchaseId = (int?)productionContent.RecordID ?? 0,
                        DestroyedProof = (float?)dest.ProofGallons ?? 0,
                        ProductionContentProof = (float?)productionContent.ContentValue ?? 0
                    };
@@ -375,6 +376,7 @@ namespace WebApp.Reports
                  {
                      reportingCategoryName = spiritTypeReporting.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)spiritTypeReporting.SpiritTypeReportingID ?? 0,
+                     purchaseId = (int?)productionContent.RecordID ?? 0,
                      purchaseProof = (float?)proof.Value ?? 0,
                      productionProof = (float?)productionContent.ContentValue ?? 0,
                      destroyedProof = (float?)destruction.ProofGallons ?? 0
@@ -382,6 +384,9 @@ namespace WebApp.Reports
 
             if (records.First() != null)
             {
+                // store pruchase ids
+                List<int> purchIdSet = new List<int>();
+
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
@@ -390,6 +395,7 @@ namespace WebApp.Reports
                     if (category == null)
                     {
                         var total = rec.purchaseProof + rec.productionProof + rec.destroyedProof;
+                        purchIdSet.Add(rec.purchaseId);
 
                         if (total > 0)
                         {
@@ -404,7 +410,16 @@ namespace WebApp.Reports
                     }
                     else
                     {
-                        category.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
+                        // check to ensure proof for that purchase id was not already added to total.
+                        if(purchIdSet.Contains(rec.purchaseId))
+                        {
+                            category.r2_DepositedInBulkStorage += rec.productionProof + rec.destroyedProof;
+                        }
+                        else
+                        {
+                            category.r2_DepositedInBulkStorage += rec.purchaseProof + rec.productionProof + rec.destroyedProof;
+                            purchIdSet.Add(rec.purchaseId);
+                        }
                         category.r2_DepositedInBulkStorage = (float)Math.Round(category.r2_DepositedInBulkStorage, 3);
                     }
                 }
@@ -984,6 +999,9 @@ namespace WebApp.Reports
 
             if (records.Any())
             {
+                // store purchase ids
+                List<int> purchIdSet = new List<int>();
+
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
@@ -992,6 +1010,7 @@ namespace WebApp.Reports
                     if (category == null)
                     {
                         var total = rec.Proof + rec.DestroyedProof;
+                        purchIdSet.Add(rec.PurchaseId);
 
                         if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
@@ -1011,13 +1030,21 @@ namespace WebApp.Reports
                     }
                     else
                     {
-                        category.r23_OnHandEndOfMonth += rec.Proof + rec.DestroyedProof;
+                        if (purchIdSet.Contains(rec.PurchaseId))
+                        {
+                            category.r23_OnHandEndOfMonth += rec.DestroyedProof;
+                        }
+                        else
+                        {
+                            category.r23_OnHandEndOfMonth += rec.Proof + rec.DestroyedProof;
+                            purchIdSet.Add(rec.PurchaseId);
+                        }
 
                         if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
                             category.r23_OnHandEndOfMonth += rec.ProductionContentProof;
-                            category.r23_OnHandEndOfMonth = (float)Math.Round(category.r23_OnHandEndOfMonth);
                         }
+                        category.r23_OnHandEndOfMonth = (float)Math.Round(category.r23_OnHandEndOfMonth, 3);
                     }
                 }
             }
