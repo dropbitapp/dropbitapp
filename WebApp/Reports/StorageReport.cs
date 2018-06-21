@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApp.Helpers;
 using WebApp.Models;
+using WebApp.Persistence.BusinessLogicEnums;
 
 namespace WebApp.Reports
 {
@@ -67,13 +68,11 @@ namespace WebApp.Reports
 
         private void CalculateRowTotals(ref List<StorageReportCategory> storageReportBody)
         {
-            string categoryName = "Total";
-
             try
             {
                 // Get total column in the SpiritTypeReporting table
                 var spiritTypeCategory = (from type in _db.SpiritTypeReporting
-                                          where type.ProductTypeName == categoryName
+                                          where type.SpiritTypeReportingID == (int)ReportSpiritTypes.Total
                                           select new
                                           {
                                               type.SpiritTypeReportingID,

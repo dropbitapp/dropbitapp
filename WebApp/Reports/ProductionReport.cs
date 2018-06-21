@@ -81,7 +81,67 @@ namespace WebApp.Reports
             prodRepObj.part5List = part5;
             prodRepObj.ProdReportPart6List = prodReportPart6List;
 
+            CalcuateTotals(ref prodRepObj);
+
             return prodRepObj;
+        }
+
+        /// <summary>
+        /// Computes totals for each row in Production report
+        /// TODO: 
+        /// Technical debt: 
+        /// 1. Factor out CalculateTotals methods from Production and Storage Reports. This can be fixed during another stage of OOP implementation on Reporting workflows
+        /// 2. We need to add ennums for SpiritTypeCategory as there is only 9 entries there so we can avoid quering the db every time we Calculate Totals
+        /// </summary>
+        /// <param name="prodRepObj"></param>
+        private void CalcuateTotals(ref ProductionReportingObject prodRepObj)
+        {
+            if (prodRepObj.Part1List.Count > 0)
+            {
+                try
+                {
+                    // Get total column in the SpiritTypeReporting table
+                    var spiritTypeCategory = (from type in _db.SpiritTypeReporting
+                                              where type.SpiritTypeReportingID == (int)ReportSpiritTypes.Total
+                                              select new
+                                              {
+                                                  type.SpiritTypeReportingID,
+                                                  type.ProductTypeName
+                                              }).FirstOrDefault();
+
+                    if (spiritTypeCategory != null)
+                    {
+                        ProdReportPart1 part1 = new ProdReportPart1();
+
+                        foreach (var i in prodRepObj.Part1List)
+                        {
+                            part1.SpiritTypeReportingID = spiritTypeCategory.SpiritTypeReportingID;
+                            part1.SpiritCatName = spiritTypeCategory.ProductTypeName;
+                            part1.ProccessingAcct += i.ProccessingAcct;
+                            part1.ProducedTotal += i.ProducedTotal;
+                            part1.Recd4RedistilaltionL15 += i.Recd4RedistilaltionL15;
+                            part1.Recd4RedistilL17 += i.Recd4RedistilL17;
+                            part1.StorageAcct += i.StorageAcct;
+                            part1.UnfinishedSpiritsEndOfQuarterL17 += i.UnfinishedSpiritsEndOfQuarterL17;
+                        }
+
+                        // Round totals
+                        part1.ProccessingAcct = (float)Math.Round(part1.ProccessingAcct, 3);
+                        part1.ProducedTotal = (float)Math.Round(part1.ProducedTotal, 3);
+                        part1.Recd4RedistilaltionL15 = (float)Math.Round(part1.Recd4RedistilaltionL15, 3);
+                        part1.Recd4RedistilL17 = (float)Math.Round(part1.Recd4RedistilL17, 3);
+                        part1.StorageAcct = (float)Math.Round(part1.StorageAcct, 3);
+                        part1.UnfinishedSpiritsEndOfQuarterL17 = (float)Math.Round(part1.UnfinishedSpiritsEndOfQuarterL17, 3);
+
+                        // Add total category to existing report body
+                        prodRepObj.Part1List.Add(part1);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }
         }
 
         /// <summary>
@@ -285,7 +345,7 @@ namespace WebApp.Reports
             {
                 foreach (var i in blended)
                 {
-                    blendedProof += (float)i.proof;
+                    blendedProof += (float)Math.Round((float)i.proof, 3);
                 }
             }
             else
@@ -303,7 +363,7 @@ namespace WebApp.Reports
 
             if (distilled != null)
             {
-                distilledProof = (float)distilled.Proof;
+                distilledProof = (float)Math.Round((float)distilled.Proof, 3);
             }
             else
             {
@@ -317,18 +377,18 @@ namespace WebApp.Reports
                 ProdReportPart1 part1Obj = new ProdReportPart1();
                 part1Obj.SpiritCatName = record.SpiritTypeReportName;
                 part1Obj.SpiritTypeReportingID = (int)record.SpiritTypeReportingID;
-                part1Obj.ProccessingAcct = blendedProof;
-                float storageProof = (distilledProof - blendedProof) >= 0 ? (distilledProof - blendedProof) : 0;
-                part1Obj.StorageAcct = storageProof;
-                part1Obj.ProducedTotal = blendedProof + storageProof;
+                part1Obj.ProccessingAcct = (float)Math.Round(blendedProof, 3);
+                float storageProof = (float)Math.Round((distilledProof - blendedProof) >= 0 ? (distilledProof - blendedProof) : 0, 3);
+                part1Obj.StorageAcct = (float)Math.Round(storageProof, 3);
+                part1Obj.ProducedTotal = (float)Math.Round((blendedProof + storageProof), 3);
 
                 part1List.Add(part1Obj);
             }
             else
             {
-                float storageProof = (distilledProof - blendedProof) >= 0 ? (distilledProof - blendedProof) : 0;
-                spiritType.StorageAcct += storageProof;
-                spiritType.ProducedTotal += blendedProof + storageProof;
+                float storageProof = (float)Math.Round((distilledProof - blendedProof) >= 0 ? (distilledProof - blendedProof) : 0, 3);
+                spiritType.StorageAcct += (float)Math.Round(storageProof, 3);
+                spiritType.ProducedTotal += (float)Math.Round((blendedProof + storageProof), 3);
             }
         }
 
@@ -420,10 +480,10 @@ namespace WebApp.Reports
                     tempRepObj.SpiritTypeReportName = l.SpiritTypeName;
                     tempRepObj.Redistilled = (bool)l.Redistilled;
                     tempRepObj.MaterialKindReportingName = l.MaterialKindName;
-                    tempRepObj.Weight = (float)l.Weight;
-                    tempRepObj.Volume = (float)l.Volume;
-                    tempRepObj.Alcohol = (float)l.Alcohol;
-                    tempRepObj.Proof = (float)l.Proof;
+                    tempRepObj.Weight = (float)Math.Round((float)l.Weight, 3);
+                    tempRepObj.Volume = (float)Math.Round((float)l.Volume, 3);
+                    tempRepObj.Alcohol = (float)Math.Round((float)l.Alcohol, 3);
+                    tempRepObj.Proof = (float)Math.Round((float)l.Proof, 3);
                     tempRepObj.SpiritTypeReportingID = (int)l.SpiritTypeReportingID;
                     tempRepObj.MaterialKindReportingID = (int)l.MaterialKindReportingID;
                     tempRepObj.Gauged = l.Gauged;
@@ -518,7 +578,6 @@ namespace WebApp.Reports
                                 else
                                 {
                                     // if there are no records in ProductionComponent with value isProductionComponent == 1 then we know that this material was made out of purchased material
-
                                 }
                             }
                             catch (Exception e)
@@ -687,7 +746,7 @@ namespace WebApp.Reports
                             pCI.ProductionContentId = (int)current.ProductionContentID;
                             pCI.RecordId = (int)current.RecordID;
                             pCI.IsProductionComponent = (bool)current.isProductionComponent;
-                            pCI.Proof = (float)current.Proof;
+                            pCI.Proof = (float)Math.Round((float)current.Proof, 3);
 
                             prodContentIteratorList.Add(pCI);
                         }
@@ -699,7 +758,7 @@ namespace WebApp.Reports
                             pCI.ProductionContentId = (int)current.ProductionContentID;
                             pCI.RecordId = (int)current.RecordID;
                             pCI.IsProductionComponent = (bool)current.isProductionComponent;
-                            pCI.Proof = (float)current.Proof;
+                            pCI.Proof = (float)Math.Round((float)current.Proof, 3);
 
                             prodContentIteratorList.Add(pCI);
                         }
@@ -755,19 +814,19 @@ namespace WebApp.Reports
                         var spRec = part1List.Find(x => x.SpiritTypeReportingID == (int)productionSpiritType.SpiritTypeReportingID);
                         if (spRec != null)
                         {
-                            spRec.Recd4RedistilaltionL15 += proof;
+                            spRec.Recd4RedistilaltionL15 += (float)Math.Round(proof, 3);
 
                             var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == productionSpiritType.SpiritShortName);
 
                             if (prod5Rec != null)
                             {
-                                prod5Rec.Proof += proof;
+                                prod5Rec.Proof += (float)Math.Round(proof, 3);
                             }
                             else
                             {
                                 ProdReportPart5 prod5Inst = new ProdReportPart5();
                                 prod5Inst.KindofSpirits = productionSpiritType.SpiritShortName;
-                                prod5Inst.Proof = proof;
+                                prod5Inst.Proof = (float)Math.Round(proof, 3);
 
                                 prodRPart5L.Add(prod5Inst);
                             }
@@ -775,7 +834,7 @@ namespace WebApp.Reports
                         else
                         {
                             ProdReportPart1 part1Obj = new ProdReportPart1();
-                            part1Obj.Recd4RedistilaltionL15 = proof;
+                            part1Obj.Recd4RedistilaltionL15 = (float)Math.Round(proof, 3);
                             part1Obj.SpiritTypeReportingID = (int)productionSpiritType.SpiritTypeReportingID;
                             part1Obj.SpiritCatName = productionSpiritType.SpiritShortName;
 
@@ -783,7 +842,7 @@ namespace WebApp.Reports
 
                             ProdReportPart5 prod5Inst = new ProdReportPart5();
                             prod5Inst.KindofSpirits = part1Obj.SpiritCatName;
-                            prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
+                            prod5Inst.Proof = (float)Math.Round(part1Obj.Recd4RedistilaltionL15, 3);
 
                             prodRPart5L.Add(prod5Inst);
                         }
@@ -830,19 +889,19 @@ namespace WebApp.Reports
                         var spRec = part1List.Find(x => x.SpiritTypeReportingID == (int)purchaseSpiritType.SpiritTypeReportingID);
                         if (spRec != null)
                         {
-                            spRec.Recd4RedistilaltionL15 += proof;
+                            spRec.Recd4RedistilaltionL15 += (float)Math.Round(proof, 3);
 
                             var prod5Rec = prodRPart5L.Find(x => x.KindofSpirits == purchaseSpiritType.SpiritShortName);
 
                             if (prod5Rec != null)
                             {
-                                prod5Rec.Proof += proof;
+                                prod5Rec.Proof += (float)Math.Round(proof, 3);
                             }
                             else
                             {
                                 ProdReportPart5 prod5Inst = new ProdReportPart5();
                                 prod5Inst.KindofSpirits = purchaseSpiritType.SpiritShortName;
-                                prod5Inst.Proof = proof;
+                                prod5Inst.Proof = (float)Math.Round(proof, 3);
 
                                 prodRPart5L.Add(prod5Inst);
                             }
@@ -850,7 +909,7 @@ namespace WebApp.Reports
                         else
                         {
                             ProdReportPart1 part1Obj = new ProdReportPart1();
-                            part1Obj.Recd4RedistilaltionL15 = proof;
+                            part1Obj.Recd4RedistilaltionL15 = (float)Math.Round(proof, 3);
                             part1Obj.SpiritTypeReportingID = (int)purchaseSpiritType.SpiritTypeReportingID;
                             part1Obj.SpiritCatName = (string)purchaseSpiritType.SpiritShortName;
 
@@ -858,7 +917,7 @@ namespace WebApp.Reports
 
                             ProdReportPart5 prod5Inst = new ProdReportPart5();
                             prod5Inst.KindofSpirits = part1Obj.SpiritCatName;
-                            prod5Inst.Proof = part1Obj.Recd4RedistilaltionL15;
+                            prod5Inst.Proof = (float)Math.Round(part1Obj.Recd4RedistilaltionL15, 3);
 
                             prodRPart5L.Add(prod5Inst);
                         }
@@ -901,7 +960,7 @@ namespace WebApp.Reports
                                  Proof = (float?)prodForRep.Proof ?? (float?)0
                              }).FirstOrDefault();
 
-                        prodRP2T4.ProofGallons = (float)part4.Proof;
+                        prodRP2T4.ProofGallons = (float)Math.Round((float)part4.Proof, 3);
 
                         prodRP2T4.SpiritTypeReportingID = (int)rec.SpiritTypeReportingID;
 
@@ -917,7 +976,7 @@ namespace WebApp.Reports
                                  Proof = (float?)prodForRep.Proof ?? (float?)0
                              }).FirstOrDefault();
 
-                        materialKind.ProofGallons += (float)part4.Proof;
+                        materialKind.ProofGallons += (float)Math.Round((float)part4.Proof, 3);
                     }
                 }
             }
@@ -987,10 +1046,10 @@ namespace WebApp.Reports
                                                                        }).FirstOrDefault();
 
                                         ProductionPart6DataForParsing prt6TempData = new ProductionPart6DataForParsing();
-                                        prt6TempData.OriginalRawMaterialAmount = prodFromPurchase.ContentValue;
+                                        prt6TempData.OriginalRawMaterialAmount = (float)Math.Round(prodFromPurchase.ContentValue, 3);
                                         prt6TempData.ContentFieldId = prodFromPurchase.ContentFieldID;
-                                        prt6TempData.FermentedAmountWentIntoCurrentProduction = prod.ContentValue;
-                                        prt6TempData.OriginalFermentedAmount = originalFermentedAmount != null ? originalFermentedAmount.originalFermentedAmmt : 0;
+                                        prt6TempData.FermentedAmountWentIntoCurrentProduction = (float)Math.Round(prod.ContentValue, 3);
+                                        prt6TempData.OriginalFermentedAmount = (float)Math.Round(originalFermentedAmount != null ? originalFermentedAmount.originalFermentedAmmt : 0, 3);
                                         prt6TempData.ReportingPeriodProductionId = i.ProductionID;
                                         prt6TempData.NeedsMappingFromFermentedToPurchase = true;
                                         prt6TempData.PurchaseId = prodFromPurchase.RecordID;
@@ -1017,7 +1076,7 @@ namespace WebApp.Reports
                                                                            originalFermentedAmmt = purchForReporting.Volume > 0 ? purchForReporting.Volume : purchForReporting.Weight
                                                                        }).FirstOrDefault();
 
-                                        productionInList.FermentedAmountWentIntoCurrentProduction += prodFromPurchase.ContentValue;
+                                        productionInList.FermentedAmountWentIntoCurrentProduction += (float)Math.Round(prodFromPurchase.ContentValue, 3);
                                     }
                                 }
                                 else if (productionInList == null && i.ProductionID == prodFromPurchase.ProductionID) // to avoid double counting we need to ensure that productionID from this month matches productionID that came from Production2Purchase table
@@ -1033,10 +1092,10 @@ namespace WebApp.Reports
                                                                        }).FirstOrDefault();
 
                                         ProductionPart6DataForParsing prt6TempData = new ProductionPart6DataForParsing();
-                                        prt6TempData.OriginalRawMaterialAmount = originalFermentedAmount != null ? originalFermentedAmount.originalFermentedAmmt : 0;
+                                        prt6TempData.OriginalRawMaterialAmount = (float)Math.Round(originalFermentedAmount != null ? originalFermentedAmount.originalFermentedAmmt : 0, 3);
                                         prt6TempData.ContentFieldId = prodFromPurchase.ContentFieldID;
-                                        prt6TempData.FermentedAmountWentIntoCurrentProduction = prodFromPurchase.ContentValue;
-                                        prt6TempData.OriginalFermentedAmount = prodFromPurchase.ContentValue;
+                                        prt6TempData.FermentedAmountWentIntoCurrentProduction = (float)Math.Round(prodFromPurchase.ContentValue, 3);
+                                        prt6TempData.OriginalFermentedAmount = (float)Math.Round(prodFromPurchase.ContentValue, 3);
                                         prt6TempData.ReportingPeriodProductionId = i.ProductionID;
                                         prt6TempData.NeedsMappingFromFermentedToPurchase = false;
                                         prt6TempData.PurchaseId = prodFromPurchase.RecordID;
@@ -1062,7 +1121,7 @@ namespace WebApp.Reports
                 {
                     if (k.NeedsMappingFromFermentedToPurchase == false)
                     {
-                        updatedRawMaterialAmmt = k.FermentedAmountWentIntoCurrentProduction;
+                        updatedRawMaterialAmmt = (float)Math.Round(k.FermentedAmountWentIntoCurrentProduction, 3);
                     }
                     else
                     {
@@ -1080,11 +1139,11 @@ namespace WebApp.Reports
 
                         if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume)
                         {
-                            prt6.Volume = updatedRawMaterialAmmt;
+                            prt6.Volume = (float)Math.Round(updatedRawMaterialAmmt, 3);
                         }
                         else if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight || k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight)
                         {
-                            prt6.Weight = updatedRawMaterialAmmt;
+                            prt6.Weight = (float)Math.Round(updatedRawMaterialAmmt, 3);
                         }
 
                         prodReportPart6List.Add(prt6);
@@ -1093,11 +1152,11 @@ namespace WebApp.Reports
                     {
                         if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableVolume)
                         {
-                            mater.Volume += updatedRawMaterialAmmt;
+                            mater.Volume += (float)Math.Round(updatedRawMaterialAmmt, 3);
                         }
                         else if (k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentableWeight || k.ContentFieldId == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedWeight)
                         {
-                            mater.Weight += updatedRawMaterialAmmt;
+                            mater.Weight += (float)Math.Round(updatedRawMaterialAmmt, 3);
                         }
                     }
                 }
