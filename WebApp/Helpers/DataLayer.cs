@@ -88,7 +88,7 @@ namespace WebApp.Helpers
                     from spiT2Mat in spiT2Mat_join.DefaultIfEmpty()
                     join matKind in _db.MaterialKindReporting on spiT2Mat.MaterialKindReportingID equals matKind.MaterialKindReportingID into matKind_join
                     from matKind in matKind_join.DefaultIfEmpty()
-                    where spiType.SpiritTypeReportingID == (int)ReportSpiritTypes.Total
+                    where spiType.SpiritTypeReportingID != (int)ReportSpiritTypes.Total
                     select new
                     {
                         MaterialKindReportingID = (int?)spiT2Mat.MaterialKindReportingID ?? 0,
@@ -779,7 +779,7 @@ namespace WebApp.Helpers
             {
                 var str =
                     from st in _db.SpiritTypeReporting
-                    where st.SpiritTypeReportingID == (int)ReportSpiritTypes.Total
+                    where st.SpiritTypeReportingID != (int)ReportSpiritTypes.Total
                     select st;
 
                 if (str.Any())
