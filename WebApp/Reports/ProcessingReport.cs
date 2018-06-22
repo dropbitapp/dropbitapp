@@ -177,6 +177,9 @@ namespace WebApp.Reports
 
             line26RunningSum += procRepP1.Losses;
 
+            // Round to three decimals
+            line26RunningSum = (float)Math.Round(line26RunningSum, 3);
+
             if ((line8RunningSum - line26RunningSum) < 0)
             {
                 throw new InvalidOperationException();

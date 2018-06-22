@@ -523,6 +523,15 @@
                         autoBind: true,
                         loadComplete: function (records) {
                             reportingSpiritKindAdapter = records;
+                        },
+                        beforeLoadComplete: function (records) {
+                            let filteredRecords = [];
+                            for (let i = 0; i < records.length; i++) {
+                                if (records[i].SpiritTypeReportingID === 10 || records[i].SpiritTypeReportingID === 11) {
+                                    filteredRecords.push(records[i]);
+                                }
+                            }
+                            return filteredRecords;
                         }
                     });
             }

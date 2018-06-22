@@ -149,34 +149,6 @@
                 $( '[id*=p6_][id*=c_]' ).val( 0 );
             }
 
-            function computeColLTotals(reportObject)
-            {
-                // Column (L) - update processing totals across all Spirit Types
-                processingAcct = isNaN( parseFloat( $( '#p1_9l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_9l_Total' ).val() );
-                processingAcct += parseFloat( reportObject.ProccessingAcct );
-                $( '#p1_9l_Total' ).val( processingAcct );
-
-                // Column (L) - update storages totals across all Spirit Types
-                storageAcct = isNaN( parseFloat( $( '#p1_11l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_11l_Total' ).val() );
-                storageAcct += parseFloat( reportObject.StorageAcct );
-                $( '#p1_11l_Total' ).val( storageAcct );
-
-                // Column (L) - update line 14 totals across all Spirit Types
-                producedTotals = isNaN( parseFloat( $( '#p1_14l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_14l_Total' ).val() );
-                producedTotals += parseFloat( reportObject.StorageAcct + reportObject.ProccessingAcct );
-                $( '#p1_14l_Total' ).val( producedTotals );
-
-                // Column (L) - update Received for Redistillation for across all Spirit Types - Line 15
-                redistilledTotal = isNaN( parseFloat( $( '#p1_15l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_15l_Total' ).val() );
-                redistilledTotal += parseFloat( reportObject.Recd4RedistilaltionL15 );
-                $( '#p1_15l_Total' ).val( redistilledTotal );
-
-                // Column (L) - update Unfinished spirits across all Spirit Types
-                unfinishedTotal = isNaN( parseFloat( $( '#p1_17b_l_Total' ).val() ) ) ? 0 : parseFloat( $( '#p1_17b_l_Total' ).val() );
-                unfinishedTotal += parseFloat( reportObject.UnfinishedSpiritsEndOfQuarter );
-                $( '#p1_17b_l_Total' ).val( unfinishedTotal );
-            }
-
             // populate the form
             function bindReportData( result ) {
                 // Report header section
@@ -215,8 +187,6 @@
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_b_WhiskyUnder160' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
-
-                        computeColLTotals( result.Part1List[i] );
                     }
                     else if ( result.Part1List[i].SpiritCatName === 'WhiskyOver160' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -233,8 +203,6 @@
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_c_WhiskyOver160' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
-
-                        computeColLTotals( result.Part1List[i] );
                     }
                     else if ( result.Part1List[i].SpiritCatName === 'BrandyUnder170' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -251,8 +219,6 @@
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_d_BrandyUnder170' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
-
-                        computeColLTotals( result.Part1List[i] );
                     }
                     else if ( result.Part1List[i].SpiritCatName === 'BrandyOver170' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -269,8 +235,6 @@
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_e_BrandyOver170' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
-
-                        computeColLTotals( result.Part1List[i] );
                     }
                     else if ( result.Part1List[i].SpiritCatName === 'Rum' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -290,8 +254,6 @@
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_f_Rum' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
-
-                        computeColLTotals( result.Part1List[i] );
                     }
                     else if ( result.Part1List[i].SpiritCatName === 'Gin' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -311,8 +273,6 @@
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_g_Gin' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
-
-                        computeColLTotals( result.Part1List[i] );
                     }
                     else if ( result.Part1List[i].SpiritCatName === 'Vodka' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -332,8 +292,6 @@
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_h_Vodka' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
-
-                        computeColLTotals( result.Part1List[i] );
                     }
                     else if ( result.Part1List[i].SpiritCatName === 'AlcoholUnder190' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -353,8 +311,6 @@
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_j_AlcoholAndSpiritsUnder190' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
-
-                        computeColLTotals( result.Part1List[i] );
                     }
                     else if ( result.Part1List[i].SpiritCatName === 'AlcoholOver190' ) {
                         // Line: 9 - update processing for a single SpiritType
@@ -374,10 +330,8 @@
 
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         $( '#p1_17b_i_AlcoholAndSpiritsOver190' ).val( result.Part1List[i].UnfinishedSpiritsEndOfQuarter );
-
-                        computeColLTotals( result.Part1List[i] );
                     }
-                    else {
+                    else if (result.Part1List[i].SpiritCatName === 'Other') {
                         // Line: 9 - update processing for a single SpiritType
                         let curProcess = $( '#p1_9k_Other' ).val();
                         $( '#p1_9k_Other' ).val( parseFloat( curProcess ) + parseFloat( result.Part1List[i].ProccessingAcct ) );
@@ -397,8 +351,28 @@
                         // Line: 17(b) - update Unfinished Spirits for a single SpiritType
                         let curUnifinishedSpiritsEndOfQuarter = $( '#p1_17b_k_Other' ).val();
                         $( '#p1_17b_k_Other' ).val( parseFloat( curUnifinishedSpiritsEndOfQuarter ) + parseFloat( result.Part1List[i].UnfinishedSpiritsEndOfQuarter ) );
+                    }
+                    else if (result.Part1List[i].SpiritCatName === 'Total') {
+                        let curProcess = $('#p1_9l_Total').val();
+                        $( '#p1_9l_Total' ).val(parseFloat(curProcess) + parseFloat(result.Part1List[i].ProccessingAcct));
 
-                        computeColLTotals(result.Part1List[i]);
+                        let curSto = $('#p1_11l_Total').val();
+                        $('#p1_11l_Total').val(parseFloat(curSto) + parseFloat(result.Part1List[i].StorageAcct));
+
+                        let curL14Other = $('#p1_14l_Total').val();
+                        $( '#p1_14l_Total' ).val(parseFloat(curL14Other) + parseFloat(result.Part1List[i].StorageAcct) + parseFloat(result.Part1List[i].ProccessingAcct));
+
+
+                        let curRecd4RedistilaltionL15 = $('#p1_15l_Total').val();
+                        $('#p1_15l_Total').val(parseFloat(curRecd4RedistilaltionL15) + parseFloat(result.Part1List[i].Recd4RedistilaltionL15));
+
+                        let curUnifinishedSpiritsEndOfQuarter = $('#p1_17b_l_Total').val();
+                        $('#p1_17b_l_Total').val(parseFloat(curUnifinishedSpiritsEndOfQuarter) + parseFloat(result.Part1List[i].UnfinishedSpiritsEndOfQuarter));
+                    }
+                    else {
+                        //todo uncomment out when bug 1843
+                        //alert('Unsupported value in result.Part1List[i].SpiritCatName');
+                        //console.log('value in result.Part1List[i].SpiritCatName' + result.Part1List[i].SpiritCatName);
                     }
                 }
 

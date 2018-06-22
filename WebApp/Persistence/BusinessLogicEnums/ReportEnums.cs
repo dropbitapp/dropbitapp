@@ -125,7 +125,8 @@ namespace WebApp.Persistence.BusinessLogicEnums
         AlcoholUnder190 = 8,
         AlcoholOver190 = 9,
         Other = 10,
-        Wine = 11
+        Wine = 11,
+        Total = 12
     }
     /// <summary>
     /// This enum represents values that are used in Production report part 2 through 4
