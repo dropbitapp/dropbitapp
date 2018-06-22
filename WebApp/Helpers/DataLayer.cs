@@ -770,6 +770,8 @@ namespace WebApp.Helpers
             return spiritCutList;
         }
 
+        // todo: technical debt: this method can be part of the base class from which workflows can inherit and override it's behavior.
+        // the reason is this method is used in both Purchase and Production workflows
         public List<SpiritToKindListObject> GetReportingSpiritTypes()
         {
             List<SpiritToKindListObject> stList = new List<SpiritToKindListObject>();
