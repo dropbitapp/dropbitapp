@@ -383,7 +383,7 @@ namespace WebApp.Reports
 
             if (records.First() != null)
             {
-                // store pruchase ids
+                // store purchase ids
                 List<int> purchIdSet = new List<int>();
 
                 foreach (var rec in records)
