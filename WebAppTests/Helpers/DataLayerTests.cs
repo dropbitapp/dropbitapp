@@ -1264,7 +1264,7 @@ namespace WebApp.Helpers.Tests
                 purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
-                // create 1st Production Distillation Record and don't mark it as Gauged
+                // create 1st Production Distillation Record and mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
                 prodO.ProductionDate = new DateTime(2017, 11, 3);
@@ -3959,9 +3959,9 @@ namespace WebApp.Helpers.Tests
                 // 190 AND OVER
                 Assert.AreEqual(0f, janStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r1_OnHandFirstOfMonth).Single());
                 // Commenting out for now as there is another bug open for this issue. 
-                //Assert.AreEqual(1000f, janStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r2_DepositedInBulkStorage).Single());
+                Assert.AreEqual(1000f, janStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r2_DepositedInBulkStorage).Single());
                 Assert.AreEqual(0f, janStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r4_ReturnedToBulkStorage).Single());
-                //Assert.AreEqual(1000f, janStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r6_TotalLines1Through5).Single());
+                Assert.AreEqual(1000f, janStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r6_TotalLines1Through5).Single());
                 Assert.AreEqual(0f, janStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r7_TaxPaid).Single());
                 Assert.AreEqual(0f, janStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r17_TransferredToProcessingAccount).Single());
                 Assert.AreEqual(100f, janStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r18_TransferredToProductionAccount).Single());
@@ -3992,6 +3992,14 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(0f, janProductionReport.Part1List.Where(x => x.SpiritTypeReportingID == 6).Select(x => x.Recd4RedistilaltionL15).Single());
                 Assert.AreEqual(0f, janProductionReport.Part1List.Where(x => x.SpiritTypeReportingID == 6).Select(x => x.Recd4RedistilL17).Single());
                 Assert.AreEqual(0f, janProductionReport.Part1List.Where(x => x.SpiritTypeReportingID == 6).Select(x => x.UnfinishedSpiritsEndOfQuarterL17).Single());
+
+                // Production Part 1: GNS 190 And Over
+                Assert.AreEqual(0f, janProductionReport.Part1List.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.ProccessingAcct).Single());
+                Assert.AreEqual(1000f, janProductionReport.Part1List.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.StorageAcct).Single());
+                Assert.AreEqual(1000f, janProductionReport.Part1List.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.ProducedTotal).Single());
+                Assert.AreEqual(100f, janProductionReport.Part1List.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.Recd4RedistilaltionL15).Single());
+                Assert.AreEqual(0f, janProductionReport.Part1List.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.Recd4RedistilL17).Single());
+                Assert.AreEqual(0f, janProductionReport.Part1List.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.UnfinishedSpiritsEndOfQuarterL17).Single());
 
                 // Redistil GNS into GIN a second time and mark it as Gauged
                 ProductionObject prodSecondDistill = new ProductionObject();
@@ -10155,6 +10163,8 @@ namespace WebApp.Helpers.Tests
                     Assert.AreEqual(25f, actualStoGrapeBrandy.r23_OnHandEndOfMonth);
                     Assert.AreEqual(0f, actualStoGrapeBrandy.r1_OnHandFirstOfMonth);
                     Assert.AreEqual(25f, actualStoGrapeBrandy.r24_Lines7Through23);
+                    Assert.AreEqual(0f, actualStoGrapeBrandy.r18_TransferredToProductionAccount);
+                    Assert.AreEqual(0f, actualStoGrapeBrandy.r17_TransferredToProcessingAccount);
                 }
 
                 // check Wine object

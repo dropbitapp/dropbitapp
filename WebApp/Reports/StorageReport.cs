@@ -469,6 +469,8 @@ namespace WebApp.Reports
                      reportingCategoryName = spiritTypeReporting.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)spiritTypeReporting.SpiritTypeReportingID ?? 0,
                      productionId = (int?)production.ProductionID ?? 0,
+                     productionOutputStateId = (int?)productionOutput.StateID ?? 0,
+                     productionOutputProductionDate = (DateTime?)productionOutput.ProductionEndTime,
                      proof = (float?)proof.Value ?? 0,
                      productionContentProof = (float?)productionContent.ContentValue ?? 0,
                      destroyedProof = (float?)destruction.ProofGallons ?? 0
@@ -491,17 +493,32 @@ namespace WebApp.Reports
 
                         if (rec.productionStatusId == (int)Persistence.BusinessLogicEnums.Status.Active || rec.productionStatusId == (int)Persistence.BusinessLogicEnums.Status.Processed)
                         {
-                            total += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                            total += rec.proof + rec.destroyedProof;
+
+                            if (rec.productionOutputStateId != (int)Persistence.BusinessLogicEnums.State.Blended || rec.productionOutputProductionDate >= endDate)
+                            {
+                                total += rec.productionContentProof;
+                            }
                         }
                         else if (rec.productionStatusId == (int)Persistence.BusinessLogicEnums.Status.Processing)
                         {
                             if (rec.proof != 0f && rec.productionStateId != (int)Persistence.BusinessLogicEnums.State.Fermented)
                             {
                                 total += rec.proof + rec.destroyedProof;
+
+                                if (rec.productionOutputStateId != (int)Persistence.BusinessLogicEnums.State.Blended || rec.productionOutputProductionDate >= endDate)
+                                {
+                                    total += rec.productionContentProof;
+                                }
                             }
                             else
                             {
-                                total += rec.proof + rec.destroyedProof + rec.productionContentProof;
+                                total += rec.proof + rec.destroyedProof;
+
+                                if (rec.productionOutputStateId != (int)Persistence.BusinessLogicEnums.State.Blended || rec.productionOutputProductionDate >= endDate)
+                                {
+                                    total += rec.productionContentProof;
+                                }
                             }
                         }
 
