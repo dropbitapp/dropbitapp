@@ -88,30 +88,22 @@
                         $('#1b_WhiskyUnder160').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2b_WhiskyUnder160').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4b_WhiskyUnder160').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6b_WhiskyUnder160').text(row6TotalLocal);
+                        $('#6b_WhiskyUnder160').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7b_WhiskyUnder160').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17b_WhiskyUnder160').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
                         $('#18b_WhiskyUnder160').text(result.ReportBody[i].r18_TransferredToProductionAccount);
                         $('#19b_WhiskyUnder160').text(result.ReportBody[i].r19_TransferredToOtherBondedPremises);
                         $('#20b_WhiskyUnder160').text(result.ReportBody[i].r20_Destroyed);
                         $('#22b_WhiskyUnder160').text(result.ReportBody[i].r22_OtherLosses);
-                        $( '#23b_WhiskyUnder160' ).text( row23Total );
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24b_WhiskyUnder160').text(row24TotalLocal);
+                        $('#23b_WhiskyUnder160').text(result.ReportBody[i].r23_OnHandEndOfMonth);
+                        $('#24b_WhiskyUnder160').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Whisky Over 160
                     if (result.ReportBody[i].CategoryName == 'WhiskyOver160') {
                         $('#1c_WhiskyOver160').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2c_WhiskyOver160').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4c_WhiskyOver160').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6c_WhiskyOver160').text(row6TotalLocal);
+                        $('#6c_WhiskyOver160').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7b_WhiskyUnder160').text(result.ReportBody[i].r7_TaxPaid);
                         $('#7c_WhiskyOver160').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17c_WhiskyOver160').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
@@ -119,21 +111,15 @@
                         $('#19c_WhiskyOver160').text(result.ReportBody[i].r19_TransferredToOtherBondedPremises);
                         $('#20c_WhiskyOver160').text(result.ReportBody[i].r20_Destroyed);
                         $('#22c_WhiskyOver160').text(result.ReportBody[i].r22_OtherLosses);
-                        $('#23c_WhiskyOver160' ).text( result.ReportBody[i].r23_OnHandEndOfMonth );
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24c_WhiskyOver160').text(row24TotalLocal);
+                        $('#23c_WhiskyOver160' ).text(result.ReportBody[i].r23_OnHandEndOfMonth );
+                        $('#24c_WhiskyOver160').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Brandy Under 170
                     if (result.ReportBody[i].CategoryName == 'BrandyUnder170') {
                         $('#1d_BrandyUnder170').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2d_BrandyUnder170').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4d_BrandyUnder170').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6d_BrandyUnder170').text(row6TotalLocal);
+                        $('#6d_BrandyUnder170').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7b_WhiskyUnder160').text(result.ReportBody[i].r7_TaxPaid);
                         $('#7d_BrandyUnder170').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17d_BrandyUnder170').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
@@ -142,20 +128,14 @@
                         $('#20d_BrandyUnder170').text(result.ReportBody[i].r20_Destroyed);
                         $('#22d_BrandyUnder170').text(result.ReportBody[i].r22_OtherLosses);
                         $('#23d_BrandyUnder170').text(result.ReportBody[i].r23_OnHandEndOfMonth);
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24d_BrandyUnder170').text(row24TotalLocal);
+                        $('#24d_BrandyUnder170').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Brandy Over 170
                     if (result.ReportBody[i].CategoryName == 'BrandyOver170') {
                         $('#1e_BrandyOver170').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2e_BrandyOver170').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4e_BrandyOver170').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6e_BrandyOver170').text(row6TotalLocal);
+                        $('#6e_BrandyOver170').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7b_WhiskyUnder160').text(result.ReportBody[i].r7_TaxPaid);
                         $('#7e_BrandyOver170').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17e_BrandyOver170').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
@@ -164,20 +144,14 @@
                         $('#20e_BrandyOver170').text(result.ReportBody[i].r20_Destroyed);
                         $('#22e_BrandyOver170').text(result.ReportBody[i].r22_OtherLosses);
                         $('#23e_BrandyOver170').text(result.ReportBody[i].r23_OnHandEndOfMonth);
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24e_BrandyOver170').text(row24TotalLocal);
+                        $('#24e_BrandyOver170').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Rum
                     if (result.ReportBody[i].CategoryName == 'Rum') {
                         $('#1f_Rum').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2f_Rum').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4f_Rum').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6f_Rum').text(row6TotalLocal);
+                        $('#6f_Rum').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7f_Rum').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17f_Rum').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
                         $('#18f_Rum').text(result.ReportBody[i].r18_TransferredToProductionAccount);
@@ -185,20 +159,14 @@
                         $('#20f_Rum').text(result.ReportBody[i].r20_Destroyed);
                         $('#22f_Rum').text(result.ReportBody[i].r22_OtherLosses);
                         $('#23f_Rum').text(result.ReportBody[i].r23_OnHandEndOfMonth);
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24f_Rum').text(row24TotalLocal);
+                        $('#24f_Rum').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Gin
                     if (result.ReportBody[i].CategoryName == 'Gin') {
                         $('#1g_Gin').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2g_Gin').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4g_Gin').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6g_Gin').text(row6TotalLocal);
+                        $('#6g_Gin').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7g_Gin').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17g_Gin').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
                         $('#18g_Gin').text(result.ReportBody[i].r18_TransferredToProductionAccount);
@@ -206,20 +174,14 @@
                         $('#20g_Gin').text(result.ReportBody[i].r20_Destroyed);
                         $('#22g_Gin').text(result.ReportBody[i].r22_OtherLosses);
                         $('#23g_Gin').text(result.ReportBody[i].r23_OnHandEndOfMonth);
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24g_Gin').text(row24TotalLocal);
+                        $('#24g_Gin').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Vodka
                     if (result.ReportBody[i].CategoryName == 'Vodka') {
                         $('#1h_Vodka').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2h_Vodka').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4h_Vodka').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6h_Vodka').text(row6TotalLocal);
+                        $('#6h_Vodka').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7h_Vodka').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17h_Vodka').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
                         $('#18h_Vodka').text(result.ReportBody[i].r18_TransferredToProductionAccount);
@@ -227,20 +189,14 @@
                         $('#20h_Vodka').text(result.ReportBody[i].r20_Destroyed);
                         $('#22h_Vodka').text(result.ReportBody[i].r22_OtherLosses);
                         $('#23h_Vodka').text(result.ReportBody[i].r23_OnHandEndOfMonth);
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24h_Vodka').text(row24TotalLocal);
+                        $('#24h_Vodka').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Alcohol and Spirits under 190
                     if (result.ReportBody[i].CategoryName == 'AlcoholUnder190') {
                         $('#1i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6i_AlcoholAndSpiritsUnder190').text(row6TotalLocal);
+                        $('#6i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
                         $('#18i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r18_TransferredToProductionAccount);
@@ -248,20 +204,14 @@
                         $('#20i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r20_Destroyed);
                         $('#22i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r22_OtherLosses);
                         $('#23i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r23_OnHandEndOfMonth);
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24i_AlcoholAndSpiritsUnder190').text(row24TotalLocal);
+                        $('#24i_AlcoholAndSpiritsUnder190').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Alcohol and spirits over 190
                     if (result.ReportBody[i].CategoryName == 'AlcoholOver190') {
                         $('#1j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6j_AlcoholAndSpiritsOver190').text(row6TotalLocal);
+                        $('#6j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
                         $('#18j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r18_TransferredToProductionAccount);
@@ -269,20 +219,14 @@
                         $('#20j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r20_Destroyed);
                         $('#22j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r22_OtherLosses);
                         $('#23j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r23_OnHandEndOfMonth);
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24j_AlcoholAndSpiritsOver190').text(row24TotalLocal);
+                        $('#24j_AlcoholAndSpiritsOver190').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Other
                     if (result.ReportBody[i].CategoryName == 'Other') {
                         $('#1k_Other').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2k_Other').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4k_Other').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6k_Other').text(row6TotalLocal);
+                        $('#6k_Other').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7k_Other').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17k_Other').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
                         $('#18k_Other').text(result.ReportBody[i].r18_TransferredToProductionAccount);
@@ -290,20 +234,14 @@
                         $('#20k_Other').text(result.ReportBody[i].r20_Destroyed);
                         $('#22k_Other').text(result.ReportBody[i].r22_OtherLosses);
                         $('#23k_Other').text(result.ReportBody[i].r23_OnHandEndOfMonth);
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24k_Other').text(row24TotalLocal);
+                        $('#24k_Other').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Wine
                     if (result.ReportBody[i].CategoryName == 'Wine') {
                         $('#1l_Wine').text(result.ReportBody[i].r1_OnHandFirstOfMonth);
                         $('#2l_Wine').text(result.ReportBody[i].r2_DepositedInBulkStorage);
                         $('#4l_Wine').text(result.ReportBody[i].r4_ReturnedToBulkStorage);
-                        var row6TotalLocal = result.ReportBody[i].r1_OnHandFirstOfMonth +
-                            result.ReportBody[i].r2_DepositedInBulkStorage + result.ReportBody[i].r4_ReturnedToBulkStorage;
-                        $('#6l_Wine').text(row6TotalLocal);
+                        $('#6l_Wine').text(result.ReportBody[i].r6_TotalLines1Through5);
                         $('#7l_Wine').text(result.ReportBody[i].r7_TaxPaid);
                         $('#17l_Wine').text(result.ReportBody[i].r17_TransferredToProcessingAccount);
                         $('#18l_Wine').text(result.ReportBody[i].r18_TransferredToProductionAccount);
@@ -311,11 +249,7 @@
                         $('#20l_Wine').text(result.ReportBody[i].r20_Destroyed);
                         $('#22l_Wine').text(result.ReportBody[i].r22_OtherLosses);
                         $('#23l_Wine').text(result.ReportBody[i].r23_OnHandEndOfMonth);
-                        var row24TotalLocal = result.ReportBody[i].r7_TaxPaid + result.ReportBody[i].r7_TaxPaid +
-                            result.ReportBody[i].r17_TransferredToProcessingAccount + result.ReportBody[i].r18_TransferredToProductionAccount +
-                            result.ReportBody[i].r19_TransferredToOtherBondedPremises + result.ReportBody[i].r20_Destroyed +
-                            result.ReportBody[i].r22_OtherLosses + result.ReportBody[i].r23_OnHandEndOfMonth;
-                        $('#24l_Wine').text(row24TotalLocal);
+                        $('#24l_Wine').text(result.ReportBody[i].r24_Lines7Through23);
                     }
                     // Total
                     if (result.ReportBody[i].CategoryName == 'Total') {

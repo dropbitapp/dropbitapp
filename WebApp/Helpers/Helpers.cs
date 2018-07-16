@@ -12,6 +12,7 @@ namespace WebApp.Helpers
         public DateTime ProductionDate { get; set; }
         public string ReportingCategoryName { get; set; }
         public int SpiritTypeReportingId { get; set; }
+        public int ProductionId { get; set; }
         public float Proof { get; set; }
         public float DestroyedProof { get; set; }
         public float ProductionContentProof { get; set; }

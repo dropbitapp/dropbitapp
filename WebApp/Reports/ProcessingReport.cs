@@ -1028,16 +1028,77 @@ namespace WebApp.Reports
                         procRepP4L.Add(part4Obj);
                     }
                 }
+                procRepObj.Part1 = procRepP1;
+                procRepObj.Part2 = procRepP2;
+                procRepObj.Part4List = procRepP4L;
+                Round(ref procRepObj);
+                return procRepObj;
             }
             catch (Exception e)
             {
                 throw;
             }
+        }
 
-            procRepObj.Part1 = procRepP1;
-            procRepObj.Part2 = procRepP2;
-            procRepObj.Part4List = procRepP4L;
-            return procRepObj;
+        private void Round(ref ProcessingReportingObject report)
+        {
+            try
+            {
+                // Sum up values for part of the processing report
+                report.Part1.OnHandEndofMonth = (float)Math.Round(report.Part1.OnHandEndofMonth, 3);
+                report.Part1.Recd4Process = (float)Math.Round(report.Part1.Recd4Process, 3);
+                report.Part1.WineMixedWithSpirit = (float)Math.Round(report.Part1.WineMixedWithSpirit, 3);
+                report.Part1.Dumped4Processing = (float)Math.Round(report.Part1.Dumped4Processing, 3);
+                report.Part1.Gains = (float)Math.Round(report.Part1.Gains, 3);
+                report.Part1.AmtBottledPackaged = (float)Math.Round(report.Part1.AmtBottledPackaged, 3);
+                report.Part1.Transf2Prod4Redistil = (float)Math.Round(report.Part1.Transf2Prod4Redistil, 3);
+                report.Part1.Destroyed = (float)Math.Round(report.Part1.Destroyed, 3);
+                report.Part1.Used4Redistil = (float)Math.Round(report.Part1.Used4Redistil, 3);
+                report.Part1.Losses = (float)Math.Round(report.Part1.Losses, 3);
+                report.Part1.OnHandEndofMonth = (float)Math.Round(report.Part1.OnHandEndofMonth, 3);
+
+                report.Part2.OnHandFirstofMonth = (float)Math.Round(report.Part2.OnHandFirstofMonth, 3);
+                report.Part2.AmtBottledPackaged = (float)Math.Round(report.Part2.AmtBottledPackaged, 3);
+                report.Part2.Recd4Process = (float)Math.Round(report.Part2.Recd4Process, 3);
+                report.Part2.InventoryOverage = (float)Math.Round(report.Part2.InventoryOverage, 3);
+                report.Part2.Transf2Prod4Redistil = (float)Math.Round(report.Part2.Transf2Prod4Redistil, 3);
+                report.Part2.Destroyed = (float)Math.Round(report.Part2.Destroyed, 3);
+                report.Part2.Dumped4Processing = (float)Math.Round(report.Part2.Dumped4Processing, 3);
+                report.Part2.RecordedLosses = (float)Math.Round(report.Part2.RecordedLosses, 3);
+                report.Part2.InventoryShortage = (float)Math.Round(report.Part2.InventoryShortage, 3);
+                report.Part2.OnHandEndofMonth = (float)Math.Round(report.Part2.OnHandEndofMonth, 3);
+                report.Part2.TaxWithdrawn = (float)Math.Round(report.Part2.TaxWithdrawn, 3);
+
+                foreach(var i in report.Part4List)
+                {
+                    i.AlcoholNeutral = (float)Math.Round(i.AlcoholNeutral, 3);
+                    i.BlendedStraightWhiskey = (float)Math.Round(i.BlendedStraightWhiskey, 3);
+                    i.BlendedWhiskeyWithNeutral = (float)Math.Round(i.BlendedWhiskeyWithNeutral, 3);
+                    i.BlendedWhiskeyWithLight = (float)Math.Round(i.BlendedWhiskeyWithLight, 3);
+                    i.BlendedLightWhiskey = (float)Math.Round(i.BlendedLightWhiskey, 3);
+                    i.BlendedOtherWhiskey = (float)Math.Round(i.BlendedOtherWhiskey, 3);
+                    i.ImportedWhiskeyScotch = (float)Math.Round(i.ImportedWhiskeyScotch, 3);
+                    i.ImportedWhiskeyCanadian = (float)Math.Round(i.ImportedWhiskeyCanadian, 3);
+                    i.ImportedWhiskeyIrish = (float)Math.Round(i.ImportedWhiskeyIrish, 3);
+                    i.DomesticWhiskey160Under = (float)Math.Round(i.DomesticWhiskey160Under, 3);
+                    i.DomesticWhiskeyOver160 = (float)Math.Round(i.DomesticWhiskeyOver160, 3);
+                    i.Brandy170Under = (float)Math.Round(i.Brandy170Under, 3);
+                    i.BrandyOver170 = (float)Math.Round(i.BrandyOver170, 3);
+                    i.RumPuertoRican = (float)Math.Round(i.RumPuertoRican, 3);
+                    i.RumVirginIslands = (float)Math.Round(i.RumVirginIslands, 3);
+                    i.RumDomestic = (float)Math.Round(i.RumDomestic, 3);
+                    i.RumOtherImported = (float)Math.Round(i.RumOtherImported, 3);
+                    i.Gin = (float)Math.Round(i.Gin, 3);
+                    i.Vodka = (float)Math.Round(i.Vodka, 3);
+                    i.Liqueur = (float)Math.Round(i.Liqueur, 3);
+                    i.Cocktail = (float)Math.Round(i.Cocktail, 3);
+                    i.Tequila = (float)Math.Round(i.Tequila, 3);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
     }
 }
