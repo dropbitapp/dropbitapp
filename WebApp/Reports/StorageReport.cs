@@ -169,7 +169,7 @@ namespace WebApp.Reports
                        ReportingCategoryName = str.ProductTypeName ?? string.Empty,
                        SpiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                        Proof = (float?)proof.Value ?? 0,
-                       PurchaseId = (int?)productionContent.RecordID ?? 0,
+                       PurchaseId = (int?)purchase.PurchaseID ?? 0,
                        DestroyedProof = (float?)dest.ProofGallons ?? 0,
                        ProductionContentProof = (float?)productionContent.ContentValue ?? 0
                    };
@@ -376,7 +376,7 @@ namespace WebApp.Reports
                  {
                      reportingCategoryName = spiritTypeReporting.ProductTypeName ?? string.Empty,
                      spiritTypeReportingId = (int?)spiritTypeReporting.SpiritTypeReportingID ?? 0,
-                     purchaseId = (int?)productionContent.RecordID ?? 0,
+                     purchaseId = (int?)purchase.PurchaseID ?? 0,
                      purchaseProof = (float?)proof.Value ?? 0,
                      productionProof = (float?)productionContent.ContentValue ?? 0,
                      destroyedProof = (float?)destruction.ProofGallons ?? 0
