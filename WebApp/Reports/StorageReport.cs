@@ -137,7 +137,7 @@ namespace WebApp.Reports
         /// <returns></returns>
         private IEnumerable<OnHandFirstOfMonth> GetPurchasedOnHandFirstOfMonthQuery(DateTime startDate, DateTime endDate, int userId)
         {
-            return from purchase in _db.Purchase
+            return (from purchase in _db.Purchase
                    join distiller in _db.AspNetUserToDistiller on purchase.DistillerID equals distiller.DistillerID into distiller_join
                    from distiller in distiller_join.DefaultIfEmpty()
                    join mDic in _db.MaterialDict on purchase.MaterialDictID equals mDic.MaterialDictID into mDic_join
@@ -172,7 +172,7 @@ namespace WebApp.Reports
                        PurchaseId = (int?)purchase.PurchaseID ?? 0,
                        DestroyedProof = (float?)dest.ProofGallons ?? 0,
                        ProductionContentProof = (float?)productionContent.ContentValue ?? 0
-                   };
+                   }).Distinct();
         }
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace WebApp.Reports
         /// <returns></returns>
         private IEnumerable<OnHandFirstOfMonth> GetProducedOnHandFirstOfMonthQuery(DateTime startDate, DateTime endDate, int userId)
         {
-            return from sourceProduction in _db.Production
+            return (from sourceProduction in _db.Production
                    join distiller in _db.AspNetUserToDistiller on sourceProduction.DistillerID equals distiller.DistillerID into distiller_join
                    from distiller in distiller_join.DefaultIfEmpty()
                    join dest in _db.Destruction on sourceProduction.ProductionID equals dest.RecordID into dest_join
@@ -215,7 +215,7 @@ namespace WebApp.Reports
                        Proof = (float?)proof.Value ?? 0,
                        DestroyedProof = (float?)dest.ProofGallons ?? 0,
                        ProductionContentProof = (float?)productionContent.ContentValue ?? 0
-                   };
+                   }).Distinct();
         }
 
         /// <summary>
@@ -1025,9 +1025,6 @@ namespace WebApp.Reports
 
             if (records.Any())
             {
-                // store purchase ids
-                List<int> purchIdList = new List<int>();
-
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
@@ -1036,7 +1033,6 @@ namespace WebApp.Reports
                     if (category == null)
                     {
                         var total = rec.Proof + rec.DestroyedProof;
-                        purchIdList.Add(rec.PurchaseId);
 
                         if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
@@ -1057,12 +1053,7 @@ namespace WebApp.Reports
                     else
                     {
                         category.r23_OnHandEndOfMonth += rec.DestroyedProof;
-                        // if proof for this purchase id was not previously added, do so.
-                        if (!purchIdList.Contains(rec.PurchaseId))
-                        {
-                            category.r23_OnHandEndOfMonth += rec.Proof;
-                            purchIdList.Add(rec.PurchaseId);
-                        }
+                        category.r23_OnHandEndOfMonth += rec.Proof;
 
                         if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
@@ -1078,9 +1069,6 @@ namespace WebApp.Reports
 
             if (records.Any())
             {
-                // store production ids
-                List<int> prodIdList = new List<int>();
-
                 foreach (var rec in records)
                 {
                     // Search for existing category with matching name
@@ -1105,17 +1093,12 @@ namespace WebApp.Reports
                             cat.r23_OnHandEndOfMonth = (float)Math.Round(cat.r23_OnHandEndOfMonth, 3);
                             storageReportBody.Add(cat);
                         }
-                        prodIdList.Add(rec.ProductionId);
                     }
                     else
                     {
                         category.r23_OnHandEndOfMonth += rec.DestroyedProof;
-                        // if proof for this production id was not previously added, do so.
-                        if (!prodIdList.Contains(rec.ProductionId))
-                        {
-                            category.r23_OnHandEndOfMonth += rec.Proof;
-                            prodIdList.Add(rec.ProductionId);
-                        }
+
+                        category.r23_OnHandEndOfMonth += rec.Proof;
 
                         if (rec.ProductionContentProof > 0 && rec.ProductionDate >= nextStart)
                         {
