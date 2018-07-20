@@ -16316,6 +16316,234 @@ namespace WebApp.Helpers.Tests
         }
 
         /// <summary>
+        /// Buy Corn in 1, 1, 2018
+        /// Ferment Corn into Corn Mash in 1, 1, 2018
+        /// Disitl Gauged GNS from Corn Mash in 1, 1, 2018
+        /// Delete Distilled GNS
+        /// Check Fermented Corn Mash record is fully restored.
+        /// </summary>
+        [TestMethod]
+        public void DeleteWorkflow_FermentCornMash_DistillGNS_DeleteGNS_EnsurePreviousRecords_Intact()
+        {
+            // Tuple<recordId, table enum value>
+            List<Tuple<int, Table>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            int materialId = 0;
+            int vendorId = 0;
+            int storageId = 0;
+            int purchaseId = 0;
+            int productionId1 = 0;
+            int productionId2 = 0;
+
+            try
+            {
+                #region Arrange
+                //  raw material setup
+                RawMaterialObject corn = new RawMaterialObject();
+                corn.RawMaterialName = "Corn";
+                corn.PurchaseMaterialTypes = new PurchaseMaterialBooleanTypes { Fermentable = true };
+                corn.MaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Grain;
+                corn.UnitTypeId = 2;
+                corn.UnitType = "lbs";
+
+                materialId = _dictionary.CreateRawMaterial(_userId, corn);
+                tablesForCleanupTupleList.Add(Tuple.Create(materialId, Table.MaterialDict));
+
+                // setup Vendor object
+                VendorObject vendor = new VendorObject();
+                vendor.VendorName = "testVendor";
+
+                vendorId = _dictionary.CreateVendor(_userId, vendor);
+                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
+
+                // setup Storage Object
+                StorageObject storage = new StorageObject();
+                storage.StorageName = "testStorage";
+                storage.SerialNumber = "2H29NNS";
+
+                storageId = _dictionary.CreateStorage(_userId, storage);
+                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
+
+                // create Purchase Record (minimal required fields)
+                PurchaseObject purchO = new PurchaseObject();
+                purchO.PurBatchName = "Corn";
+                purchO.PurchaseType = "Fermentable";
+                purchO.PurchaseDate = new DateTime(2018, 1, 1);
+                purchO.VolumeByWeight = 50f; // 50 lbs
+                purchO.RecordId = materialId;
+                purchO.Price = 1f;
+                purchO.VendorId = vendorId;
+                purchO.Gauged = true;
+
+                List<StorageObject> storageList = new List<StorageObject>();
+                StorageObject storageObject = new StorageObject();
+                storageObject.StorageId = storageId;
+                storageList.Add(storageObject);
+                purchO.Storage = storageList;
+
+                purchaseId = _purchase.CreatePurchase(purchO, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
+
+                // Ferment Corn into a Mash
+                ProductionObject prodFermentedCornMash = new ProductionObject();
+                prodFermentedCornMash.BatchName = "FermentedCorn";
+                prodFermentedCornMash.ProductionDate = new DateTime(2018, 1, 1);
+                prodFermentedCornMash.ProductionStart = new DateTime(2018, 1, 1);
+                prodFermentedCornMash.ProductionEnd = new DateTime(2018, 1, 1);
+                prodFermentedCornMash.Gauged = true;
+                prodFermentedCornMash.ProductionType = "Fermentation";
+                prodFermentedCornMash.Quantity = 500f; // 500 gallons of alcohol
+                prodFermentedCornMash.VolumeByWeight = 0f;
+                prodFermentedCornMash.AlcoholContent = 50f; // 50%
+                prodFermentedCornMash.ProofGallon = 500f; // 500 pg
+                prodFermentedCornMash.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodFermentedCornMash.SpiritTypeReportingID = 10; // Other
+                prodFermentedCornMash.ProductionTypeId = 1;
+
+                List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
+                ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
+                uMat.ID = purchaseId;
+                uMat.NewVal = 50f;
+                uMat.OldVal = 0f;
+                uMat.Proof = 0f;
+                uMat.DistillableOrigin = "pur";
+                uMat.BurningDownMethod = "weight";
+
+                usedMats.Add(uMat);
+
+                prodFermentedCornMash.UsedMats = usedMats;
+
+                productionId1 = _production.CreateProduction(prodFermentedCornMash, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId1, Table.Production));
+
+                #endregion
+
+                #region Act
+
+                int janDays = DateTime.DaysInMonth(2018, 1);
+                var janStart = new DateTime(2018, 1, 1);
+                var janEnd = new DateTime(2018, 1, janDays);
+
+                StorageReportObject janStorageReport = _storageReport.GetStorageReportData(janStart, janEnd, _userId);
+                ProductionReportingObject janProductionReport = _productionReport.GetProductionReportData(janStart, janEnd, _userId);
+                // Distill Corn Mash into GNS and mark it as Gauged
+                ProductionObject prodGNS = new ProductionObject();
+                prodGNS.BatchName = "DistillGNS";
+                prodGNS.ProductionDate = new DateTime(2018, 1, 1);
+                prodGNS.ProductionStart = new DateTime(2018, 1, 1);
+                prodGNS.ProductionEnd = new DateTime(2018, 1, 1);
+                prodGNS.SpiritCutId = 11; // mixed
+                prodGNS.Gauged = true;
+                prodGNS.ProductionType = "Distillation";
+                prodGNS.Quantity = 1000f; // 1000 gallons of alcohol
+                prodGNS.VolumeByWeight = 0f;
+                prodGNS.AlcoholContent = 50f; // 50%
+                prodGNS.ProofGallon = 1000f; // 1000 pg
+                prodGNS.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
+                prodGNS.SpiritTypeReportingID = 9; // Alcohol>190 "GNS"
+                prodGNS.MaterialKindReportingID = 75; // Grain
+                prodGNS.ProductionTypeId = 2;
+
+                usedMats.Clear();
+                uMat.ID = productionId1;
+                uMat.NewVal = 500f;
+                uMat.OldVal = 0f;
+                uMat.Proof = 0f;
+                uMat.DistillableOrigin = "prod";
+                uMat.BurningDownMethod = "volume";
+
+                usedMats.Add(uMat);
+
+                prodGNS.UsedMats = usedMats;
+
+                productionId2 = _production.CreateProduction(prodGNS, _userId);
+                tablesForCleanupTupleList.Add(Tuple.Create(productionId2, Table.Production));
+
+                // validate that the burndowns have happened
+                var amounts =
+                    (from prod in _db.Production
+                     where prod.ProductionID == productionId1
+                     join volume in _db.Volume on prod.VolumeID equals volume.VolumeID into volume_join
+                     from volume in volume_join.DefaultIfEmpty()
+                     join weight in _db.Weight on prod.WeightID equals weight.WeightID into weight_join
+                     from weight in weight_join.DefaultIfEmpty()
+                     join alcohol in _db.Alcohol on prod.AlcoholID equals alcohol.AlcoholID into alcohol_join
+                     from alcohol in alcohol_join.DefaultIfEmpty()
+                     join proof in _db.Proof on prod.ProofID equals proof.ProofID into proof_join
+                     from proof in proof_join.DefaultIfEmpty()
+                     select new
+                     {
+                         volume = (float?)volume.Value ?? (float?)0,
+                         weight = (float?)weight.Value ?? (float?)0,
+                         alcohol = (float?)alcohol.Value ?? (float?)0,
+                         proof = (float?)proof.Value ?? (float?)0
+                     }).FirstOrDefault();
+
+                if (amounts != null)
+                {
+                    Assert.AreEqual(0f, amounts.volume);
+                    Assert.AreEqual(0f, amounts.proof);
+                }
+                else
+                {
+                    Assert.Inconclusive("amounts query yielded no results so could not perform this part of the test");
+                }
+
+                #endregion
+
+                #region Assert
+
+                // Delete GNS Record
+                DeleteRecordObject deleteObject = new DeleteRecordObject();
+                deleteObject.DeleteRecordID = prodGNS.ProductionId;
+                deleteObject.DeleteRecordType = prodGNS.ProductionType;
+                bool DistillationDeleted = _production.DeleteProductionExecute(deleteObject, _userId);
+
+                // let's verify the values in Fermented Corn Mash record have been restored after we deleted bottling                
+                amounts =
+                    (from prod in _db.Production
+                     where prod.ProductionID == productionId1
+                     join volume in _db.Volume on prod.VolumeID equals volume.VolumeID into volume_join
+                     from volume in volume_join.DefaultIfEmpty()
+                     join weight in _db.Weight on prod.WeightID equals weight.WeightID into weight_join
+                     from weight in weight_join.DefaultIfEmpty()
+                     join alcohol in _db.Alcohol on prod.AlcoholID equals alcohol.AlcoholID into alcohol_join
+                     from alcohol in alcohol_join.DefaultIfEmpty()
+                     join proof in _db.Proof on prod.ProofID equals proof.ProofID into proof_join
+                     from proof in proof_join.DefaultIfEmpty()
+                     select new
+                     {
+                         volume = (float?)volume.Value ?? (float?)0,
+                         weight = (float?)weight.Value ?? (float?)0,
+                         alcohol = (float?)alcohol.Value ?? (float?)0,
+                         proof = (float?)proof.Value ?? (float?)0
+                     }).FirstOrDefault();
+
+                if (amounts != null)
+                {
+                    Assert.AreEqual(500f, amounts.volume);
+                    Assert.AreEqual(0f, amounts.weight);
+                    Assert.AreEqual(50f, amounts.alcohol);
+                    Assert.AreEqual(500f, amounts.proof);
+                }
+                else
+                {
+                    Assert.Inconclusive("amounts query yielded no results so could not perform this part of the test");
+                }
+            }
+
+            #endregion
+            finally
+            {
+                // Cleanup
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
+        }
+
+        /// <summary>
         /// Buy Grapes in March, 2018
         /// Ferment Wine in March, 2018
         /// Delete Fermented record
