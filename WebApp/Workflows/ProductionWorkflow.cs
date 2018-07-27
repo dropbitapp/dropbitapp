@@ -1343,7 +1343,7 @@ namespace WebApp.Workflows
 
                             if (productionValues != null)
                             {
-                                if (i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledVolume || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedVolume || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedAlcohol) // Volume
+                                if (i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledVolume || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedVolume || i.valueKind == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedVolume) // Volume
                                 {
                                     var vol =
                                         (from volume in _db.Volume

@@ -24,6 +24,21 @@
         return "Parameters did'n't match any known records in DB when trying to get Additive Units";
     }
 
+     /**
+     * Rounding of a number with Number.EPSILON
+     * Takes care of little quirks with wrong roundings 
+     * in some cases when .round and .toFixed functions used
+     * details are here - https://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-only-if-necessary
+     * @param   {Number}     type   The type of adjustment.
+     * @returns {Number}            The adjusted value.
+     */
+    this.roundWithEpsilon = function (valueToBeRounded){
+        if (Number.EPSILON === undefined) {
+            Number.Epsilon = Math.pow(2, -52);
+        }
+        return Math.round((valueToBeRounded + Number.EPSILON) * 100) / 100;
+    }
+
     // this function empties the controls on request.
     /*
     params: fieldSet- is a artificial set of  subset of selectors in html. we make them up ourselves so make sure this name is unique.

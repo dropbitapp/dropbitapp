@@ -488,6 +488,9 @@
                         var currentTotalProof = $( '#EditDialogProofInput' ).val() != 'undefined' ? $( '#EditDialogProofInput' ).val() : 0;
                         var updatedTotalProof = currentTotalProof >= taxedProof ? currentTotalProof - taxedProof : 0;
 
+                        // let's round the value
+                        updatedTotalProof = genericWorkflowHelper.roundWithEpsilon(updatedTotalProof);
+
                         $( "#EditDialogProofInput" ).val( updatedTotalProof );
                     } );
                 });
