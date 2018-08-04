@@ -2043,6 +2043,8 @@ namespace WebApp.Workflows
                         _db.SaveChanges();
                     }
 
+                    SaveProductionHistory(pObj, userId);
+
                     retMthdExecResult = true;
                 }
                 else
