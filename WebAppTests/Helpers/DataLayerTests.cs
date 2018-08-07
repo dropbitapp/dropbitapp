@@ -236,7 +236,7 @@ namespace WebApp.Helpers.Tests
                 #region Assert
 
                 // October
-                Assert.AreEqual(1, octStorageReport.ReportBody.Count); // Only totals are calculated
+                Assert.AreEqual(0, octStorageReport.ReportBody.Count);
 
                 // November
                 Assert.AreEqual(3, novStorageReport.ReportBody.Count);
@@ -1368,9 +1368,7 @@ namespace WebApp.Helpers.Tests
                 #region Assert
 
                 // October 2016
-
-                // Only totals are calculated
-                Assert.AreEqual(1, octStorageReport.ReportBody.Count);
+                Assert.AreEqual(0, octStorageReport.ReportBody.Count);
 
                 // November 2016 Storage Report
 
@@ -1448,9 +1446,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(196f, decStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 3).Select(x => x.r24_Lines7Through23).Single());
 
                 // January 2017
-
-                // No data records are generated other than totals
-                Assert.AreEqual(1, janStorageReport.ReportBody.Count);
+                Assert.AreEqual(0, janStorageReport.ReportBody.Count);
 
                 #endregion
             }
@@ -2666,9 +2662,7 @@ namespace WebApp.Helpers.Tests
                 #region Assert
 
                 // December 2016
-
-                // Only totals are calculated
-                Assert.AreEqual(1, decStorageReport.ReportBody.Count);
+                Assert.AreEqual(0, decStorageReport.ReportBody.Count);
 
                 // January 2017 Storage Report
 
