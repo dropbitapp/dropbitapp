@@ -304,7 +304,7 @@ namespace WebApp.Helpers
     public class DeleteRecordObject
     {
         public int DeleteRecordID { get; set; }
-        public string DeleteRecordType { get; set; }
+        public string DeleteRecordType { get; set; } // type of the production record being deleted
     }
 
     /// <summary>

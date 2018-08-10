@@ -1091,24 +1091,21 @@ namespace WebApp.Workflows
                         var prod4Rep =
                            (from rec in _db.Production4Reporting
                             where rec.ProductionID == prodRec.ProductionID
-                            select rec).FirstOrDefault();
+                            select rec).ToList();
 
                         if (prod4Rep != null)
                         {
-                            _db.Production4Reporting.Remove(prod4Rep);
+                            _db.Production4Reporting.RemoveRange(prod4Rep);
                         }
 
                         var purch4Rep =
                             (from rec in _db.Purchase4Reporting
                              where rec.ProductionID == prodRec.ProductionID
                              select rec).ToList();
+
                         if (purch4Rep != null)
                         {
-                            foreach (var item in purch4Rep)
-                            {
-                                _db.Purchase4Reporting.Remove(item);
-                            }
-
+                            _db.Purchase4Reporting.RemoveRange(purch4Rep);
                         }
 
                         var prodC =
