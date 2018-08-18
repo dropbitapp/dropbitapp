@@ -137,18 +137,11 @@
                     usedMat.OldVal = usedMat.OldVal - usedMat.NewVal;
                 } );
 
-                // todo: this was a start of the experimentation for toggling on/off isModal features. This, somehow, didn't work. so need to investigate further.
-                // this is why I kept commented out code here.
-                //$( '#MatBurnDwnDialog' ).on( "close", ( e ) => {
-                //    $( '#MatBurnDwnDialog' ).jqxWindow( { isModal: false } );
-                //    var isModal = $( '#MatBurnDwnDialog' ).jqxWindow( 'isModal' );
-                //} );
-
                 // listen to add button click in burndown dialog
                 $("#MatBurnDwnDialogAdd").click(function () {
                     if ($('#MatBurnDwnDialogRadioBtnPartial').jqxRadioButton('checked')) {
                         if ($('#MatBurnDwnDialogRadioBtnGal').jqxRadioButton('checked')) {
-                            // burning down weight case
+                            // burning down volume case
                             usedMat.NewVal = $("#MatBurnDwnDialogQuantityInput").val();
                             usedMat.BurningDownMethod = "volume";
                         }
