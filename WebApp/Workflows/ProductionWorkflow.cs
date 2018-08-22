@@ -1893,7 +1893,7 @@ namespace WebApp.Workflows
                         // Widrawn For Tax update:
                         TaxWithdrawn taxes = new TaxWithdrawn();
                         taxes.DateOfSale = pObj.WithdrawalDate;
-                        taxes.DateRecorded = DateTime.UtcNow;
+                        taxes.DateRecorded = DateTime.UtcNow; //  hmm, I am not sure why we need this. We do store withdrawal date. in any case, we have to be carefull with this date as it is stored in UTC format so possible adjustment would be needed
                         taxes.ProductionID = pObj.ProductionId;
                         taxes.Value = pObj.TaxedProof;
 

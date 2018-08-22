@@ -111,7 +111,7 @@ namespace WebApp.Helpers
 
     public class ProcessReportingPart2
     {
-        public string FinishedProduct { get; set; } // either bottled or packaged
+        public string FinishedProduct { get; set; } // either 'bottled' or 'packaged'
         public float OnHandFirstofMonth { get; set; }
         public float AmtBottledPackaged { get; set; }
         public float Recd4Process { get; set; }
@@ -123,6 +123,8 @@ namespace WebApp.Helpers
         public float InventoryShortage { get; set; }
         public float OnHandEndofMonth { get; set; }
         public float TaxWithdrawn { get; set; }
+        public float TotalLine31 { get; set; } // Line 31 Total for Lines 27 through 30
+        public float TotalLine47 { get; set; } // Line 47 Total for Lines 32 through 46
     }
 
     public class ProcessReportingPart4

@@ -84,11 +84,17 @@ namespace WebApp.Reports
             // 28(b) Bottled or Packaged
             BottledOrPackagedpart2(startOfReporting, endOfReporting, userId, ref procRepP2);
 
-            // 46 (b) On hand End of Month
-            OnHandEndOfMonthPart2(endOfReporting, userId, ref procRepP2);
+            // 31 (b) 
+            TotalLines27Through30(ref procRepP2);
 
             // line 33 - Withdrawn for Tax Determined
             WithdrawnTaxDetermined(startOfReporting, endOfReporting, ref procRepP2);
+
+            // 46 (b) On hand End of Month
+            OnHandEndOfMonthPart2(endOfReporting, userId, ref procRepP2);
+
+            // 47 (b)
+            TotalLines32Through46(ref procRepP2);
 
             // Processing Report Part 4
             Part4ProcessingReport(startOfReporting, endOfReporting, userId, ref procRepP4L);
@@ -103,6 +109,26 @@ namespace WebApp.Reports
             Round(ref procRepObj);
 
             return procRepObj;
+        }
+
+        /// <summary>
+        /// TotalLines27Through30 method simply adds up Lines 27 through 31
+        /// </summary>
+        /// <param name="procRepP2"></param>
+        private void TotalLines27Through30(ref ProcessReportingPart2 procRepP2)
+        {
+            procRepP2.TotalLine31 = procRepP2.OnHandFirstofMonth + procRepP2.AmtBottledPackaged; // continue on adding extra rows as we add support for them
+            Math.Round(procRepP2.TotalLine31, 3);
+        }
+
+        /// <summary>
+        /// TotalLines32Through46 method simply adds up Lines 32 through 47
+        /// </summary>
+        /// <param name="procRepP2"></param>
+        private void TotalLines32Through46(ref ProcessReportingPart2 procRepP2)
+        {
+            procRepP2.TotalLine47 = procRepP2.TaxWithdrawn; // continue on adding extra rows as we add support for them
+            Math.Round(procRepP2.TotalLine47, 3);
         }
 
         /// <summary>
@@ -885,34 +911,9 @@ namespace WebApp.Reports
         /// <param name="procRepP2"></param>
         private void OnHandEndOfMonthPart2(DateTime endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
         {
-            var onHandEndOfMonthP2 =
-                (from prod in _db.Production
-                    join proof in _db.Proof on prod.ProofID equals proof.ProofID into proof_join
-                    from proof in proof_join.DefaultIfEmpty()
-                    join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                    from distillers in distillers_join.DefaultIfEmpty()
-                    where
-                    distillers.UserId == userId &&
-                    prod.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Bottling &&
-                    prod.ProductionEndTime <= endOfReporting &&
-                    prod.Gauged == true &&
-                    (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
-                    prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing ||
-                    prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled)
-                    select new
-                    {
-                        OnHandEndOfMonth = (System.Single?)proof.Value ?? (System.Single?)0,
-                    }).ToList();
-
-            if (onHandEndOfMonthP2 != null)
-            {
-                foreach (var i in onHandEndOfMonthP2)
-                {
-                    procRepP2.OnHandEndofMonth += (float)i.OnHandEndOfMonth;
-                }
-            }
+            procRepP2.OnHandEndofMonth = procRepP2.TotalLine31 - procRepP2.TotalLine47;
             // round to 3 decimals
-            Math.Round(procRepP2.OnHandEndofMonth, 2);
+            Math.Round(procRepP2.OnHandEndofMonth, 3);
         }
 
         /// <summary>
