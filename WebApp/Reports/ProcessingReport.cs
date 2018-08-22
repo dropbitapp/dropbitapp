@@ -88,7 +88,7 @@ namespace WebApp.Reports
             TotalLines27Through30(ref procRepP2);
 
             // line 33 - Withdrawn for Tax Determined
-            WithdrawnTaxDetermined(startOfReporting, endOfReporting, ref procRepP2);
+            WithdrawnTaxDetermined(startOfReporting, endOfReporting, ref procRepP2, userId);
 
             // 46 (b) On hand End of Month
             OnHandEndOfMonthPart2(endOfReporting, userId, ref procRepP2);
@@ -880,11 +880,17 @@ namespace WebApp.Reports
         /// <param name="startOfReporting"></param>
         /// <param name="endOfReporting"></param>
         /// <param name="procRepP2"></param>
-        private void WithdrawnTaxDetermined(DateTime startOfReporting, DateTime endOfReporting, ref ProcessReportingPart2 procRepP2)
+        private void WithdrawnTaxDetermined(DateTime startOfReporting, DateTime endOfReporting, ref ProcessReportingPart2 procRepP2, int userId)
         {
             var taxWithdrawn =
                 from tax in _db.TaxWithdrawn
-                where tax.DateOfSale >= startOfReporting && tax.DateOfSale <= endOfReporting
+                join productions in _db.Production on tax.ProductionID equals productions.ProductionID into productions_join
+                from productions in productions_join.DefaultIfEmpty()
+                join distillers in _db.AspNetUserToDistiller on productions.DistillerID equals distillers.DistillerID into distillers_join
+                from distillers in distillers_join.DefaultIfEmpty()
+                where tax.DateOfSale >= startOfReporting
+                && tax.DateOfSale <= endOfReporting
+                && distillers.UserId == userId
                 select new
                 {
                     TaxPaid = (System.Single?)tax.Value ?? (System.Single?)0
