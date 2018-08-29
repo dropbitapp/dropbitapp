@@ -3407,7 +3407,7 @@ namespace WebApp.Helpers.Tests
 
                 // Storage report in July 2018
                 StorageReportObject julyStorageReport = _storageReport.GetStorageReportData(julyStart, julyEnd, _userId);
-                
+
                 // 190 AND OVER
                 Assert.AreEqual(50f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r1_OnHandFirstOfMonth).Single());
                 Assert.AreEqual(0f, julyStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r2_DepositedInBulkStorage).Single());

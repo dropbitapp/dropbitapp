@@ -33,7 +33,7 @@
                 };
             */
 
-            var usedMatsList = []; // this is a new arra of objects of type UsedMats. It is a replacementto PurchaseIdList.
+            var usedMatsList = []; // this is a new array of objects of type UsedMats. It is a replacementto PurchaseIdList.
 
             var storageList = [];
             var StorageObject = {};
@@ -173,7 +173,7 @@
                             var name = distilsAdapter.records[curRawMatIndex].BatchName;
                             window.alert("Selected record, " + name + ", doesn't include alcohol content. Update the Alcohol value of the selected record and try again.");
                         }
-                        usedMat.Proof = distillCompInstance.calculateProof(usedMat.OldVal, distilsAdapter.records[curRawMatIndex].AlcoholContent);
+                        usedMat.Proof = distillCompInstance.calculateProof(usedMat.OldVal, distilsAdapter.records[curRawMatIndex].AlcoholContent);                     
                     }
 
                     usedMatsList.push(usedMat);
@@ -215,7 +215,7 @@
                         var index = args.index;
                         if ( distilsAdapter.records[index].Quantity !== undefined && distilsAdapter.records[index].VolumeByWeight !== undefined ) {
                             initializeDialogs();
-                            
+
                             var minDate = new Date();
                             var recordDate;
                             // set prdouction min date based on purchase/prod object used.
@@ -266,13 +266,47 @@
                     }
                 });
 
+                // calculates the diff in proof gallons between production record and burndown record.
+                function getBurndownDiff() {
+                    var burnProof = 0;
+                    var prodProof = 0;
+                    for (var i = 0; i < usedMatsList.length; i++) {
+                        burnProof += distillCompInstance.calculateProof(usedMatsList[i].NewVal, distilsAdapter.records[curRawMatIndex].AlcoholContent);
+                    }
+                    prodProof = $("#BlendingProof").val();
+                    return prodProof - burnProof;
+                }
+
                 // re-enables distilation source batch listbox.
                 $('#MatBurnDwnDialog').on('close', function (event) {
                     $('#DistilList').jqxListBox({ disabled: false });
                 })
 
                 $("#BlendingCreateButton").click(function () {
-                    $('#validationForm').jqxValidator('validate');
+                    // display losses and gains to user at record creation
+                    var diff = getBurndownDiff();
+                    if (diff == 0) {
+                        $('#validationForm').jqxValidator('validate');
+                    } else {
+                        $('#GainLossDialog').css('visibility', 'visible');
+                        if (diff > 0) {
+                            var message = "Note we've detected production gains. " + diff + " proof gallons will be reported in Processing report as gains. Continue with record creation?";
+                        } else {
+                            var message = "Note we've detected production losses. " + Math.abs(diff) + " proof gallons will be reported in Processing report as losses. Continue with record creation?";
+                        }
+                        $('#GainLossMessage').append(message);
+                        $('#GainLossDialog').jqxWindow('open');
+                        // if user accepts loss/gain create record (go to validation)
+                        $('#GainLossDialogYes').off('click').on('click', function () {
+                            $('#GainLossDialog').jqxWindow('close');
+                            $('#GainLossMessage').empty()
+                            $('#validationForm').jqxValidator('validate');
+                        })
+                        $('#GainLossDialogNo').on('click', function () {
+                            $('#GainLossDialog').jqxWindow('close');
+                            $('#GainLossMessage').empty()
+                        })
+                    }
                 });
 
                 $("#AdditiveRemoveButton").click(function () {
@@ -567,7 +601,7 @@
                             }
                         },
                         {
-                            input: '#BlendingAlcohol', message: 'Please Enter Price', action: 'blur', rule: function () {
+                            input: '#BlendingAlcohol', message: 'Please Enter Alcohol Content', action: 'blur', rule: function () {
                                 var value = $('#BlendingAlcohol').val();
                                 return value > 0 ? true : false;
                             }
@@ -796,7 +830,23 @@
                         $( '#MatBurnDwnDialogCancel' ).jqxButton( { height: '25px', width: '80px' } );
                         $( '#MatBurnDwnDialogAdd' ).jqxButton( { height: '25px', width: '80px' } );
                     }
-                } );
+                });
+            }
+
+            function initializeGainLossConfirmation() {
+                $('#GainLossDialog').jqxWindow ( {
+                    width: 400,
+                    height: 240,
+                    draggable: false,
+                    resizable: false,
+                    autoOpen: false,
+                    isModal: false,
+                    showCloseButton: false,
+                    initContent: function () {
+                        $( '#GainLossDialogYes' ).jqxButton( { height: '25px', width: '80px' } );
+                        $( '#GainLossDialogNo' ).jqxButton( { height: '25px', width: '80px' } );
+                    }
+                });
             }
 
             function _bindRawMaterialTypes() {
@@ -1108,6 +1158,7 @@
                     //Attaching event listeners
                     _addEventListeners();
                     //Adding jqxWindow
+                    initializeGainLossConfirmation();
                 }
             };
         }());
@@ -1440,6 +1491,32 @@
                             </div>
                             <div class="col-md-6">
                                 <button class="center-block" id="MatBurnDwnDialogCancel">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Hidden markup. Production GainLoss dialog-->
+    <div id="GainLossDialog" style="visibility: hidden;">
+        <div id="GainLossHeader">
+            <span>Gain/Loss Notification</span>
+        </div>
+        <div id="GainLossDialogContent" style="overflow:hidden">
+            <div class="panel-wrapper">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Attention</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="GainLossMessage"></div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="center-block" id="GainLossDialogYes">Yes</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="center-block" id="GainLossDialogNo">No</button>
                             </div>
                         </div>
                     </div>
