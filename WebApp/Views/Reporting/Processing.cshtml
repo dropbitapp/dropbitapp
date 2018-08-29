@@ -105,8 +105,7 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                     $('#p2_28b_Bottled').val(result.Part2.AmtBottledPackaged);
                     $('#p2_29b_Bottled').val(result.Part2.Recd4Process);
                     $('#p2_30b_Bottled').val(result.Part2.InventoryOverage);
-                    $('#p2_31b_Bottled').val(result.Part2.OnHandFirstofMonth + result.Part2.AmtBottledPackaged + result.Part2.Recd4Process +
-                        result.Part2.InventoryOverage );
+                    $('#p2_31b_Bottled').val(result.Part2.TotalLine31);
                     $( '#p2_33b_Bottled' ).val(result.Part2.TaxWithdrawn);
                     $('#p2_37b_Bottled').val(result.Part2.Transf2Prod4Redistil);
                     $('#p2_39b_Bottled').val(result.Part2.Destroyed);
@@ -114,25 +113,21 @@ The IDs of elements should follow the pattern: Part of the report + cell number
                     $('#p2_44b_Bottled').val(result.Part2.RecordedLosses);
                     $('#p2_45b_Bottled').val(result.Part2.InventoryShortage);
                     $('#p2_46b_Bottled').val(result.Part2.OnHandEndofMonth);
-                    var line47 = genericWorkflowHelper.roundWithEpsilon(result.Part2.TaxWithdrawn + result.Part2.Transf2Prod4Redistil + result.Part2.Destroyed + result.Part2.Dumped4Processing +
-                        result.Part2.RecordedLosses + result.Part2.InventoryShortage + result.Part2.OnHandEndofMonth);
-                    $( '#p2_47b_Bottled' ).val( line47);
+                    $('#p2_47b_Bottled').val(result.Part2.TotalLine47);
                 }
                 if (result.Part2.FinishedProduct === "packaged") {
                     $('#p2_27c_Packaged').val(result.Part2.OnHandFirstofMonth);
                     $('#p2_28c_Packaged').val(result.Part2.AmtBottledPackaged);
                     $('#p2_29c_Packaged').val(result.Part2.Recd4Process);
                     $('#p2_30c_Packaged').val(result.Part2.InventoryOverage);
-                    $('#p2_31c_Packaged').val(result.Part2.OnHandFirstofMonth + result.Part2.AmtBottledPackaged + result.Part2.Recd4Process +
-                        result.Part2.InventoryOverage);
+                    $('#p2_31c_Packaged').val(result.Part2.TotalLine31);
                     $('#p2_37c_Packaged').val(result.Part2.Transf2Prod4Redistil);
                     $('#p2_39c_Packaged').val(result.Part2.Destroyed);
                     $('#p2_40c_Packaged').val(result.Part2.Dumped4Processing);
                     $('#p2_44c_Packaged').val(result.Part2.RecordedLosses);
                     $('#p2_45c_Packaged').val(result.Part2.InventoryShortage);
                     $('#p2_46c_Packaged').val(result.Part2.OnHandEndofMonth);
-                    $('#p2_47c_Packaged').val(result.Part2.Transf2Prod4Redistil + result.Part2.Destroyed + result.Part2.Dumped4Processing +
-                        result.Part2.RecordedLosses + result.Part2.InventoryShortage + result.Part2.OnHandEndofMonth);
+                    $('#p2_47c_Packaged').val(result.Part2.TotalLine47);
                 }
                 // part 4 of the processing report 
                 var bulkTotals = 0;

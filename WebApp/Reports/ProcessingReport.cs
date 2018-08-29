@@ -127,7 +127,7 @@ namespace WebApp.Reports
         /// <param name="procRepP2"></param>
         private void TotalLines32Through46(ref ProcessReportingPart2 procRepP2)
         {
-            procRepP2.TotalLine47 = procRepP2.TaxWithdrawn; // continue on adding extra rows as we add support for them
+            procRepP2.TotalLine47 = procRepP2.TaxWithdrawn + procRepP2.OnHandEndofMonth; // continue on adding extra rows as we add support for them
             Math.Round(procRepP2.TotalLine47, 3);
         }
 
@@ -917,7 +917,7 @@ namespace WebApp.Reports
         /// <param name="procRepP2"></param>
         private void OnHandEndOfMonthPart2(DateTime endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
         {
-            procRepP2.OnHandEndofMonth = procRepP2.TotalLine31 - procRepP2.TotalLine47;
+            procRepP2.OnHandEndofMonth = procRepP2.TotalLine31 - procRepP2.TaxWithdrawn; // grisha:todo: as we continue on adding new cases for rows 32 through 45 we need to keep subtracting it
             // round to 3 decimals
             Math.Round(procRepP2.OnHandEndofMonth, 3);
         }
