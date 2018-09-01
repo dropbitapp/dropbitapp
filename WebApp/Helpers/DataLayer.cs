@@ -1517,7 +1517,7 @@ namespace WebApp.Helpers
 
                 IEnumerable<GainLoss> queryGainLoss =
                 from gainloss in _db.GainLoss
-                join prod in _db.Production on new { BottledRecordId = gainloss.BottledRecordId } equals new { BottledRecordId = prod.ProductionID }
+                join prod in _db.Production on new { ProductionId = gainloss.ProductionId } equals new { ProductionId = prod.ProductionID }
                 join us2Distills in _db.AspNetUserToDistiller on new { DistillerID = prod.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
                 from us2Distills in us2Distills_join.DefaultIfEmpty()
                 where us2Distills.UserId == userId

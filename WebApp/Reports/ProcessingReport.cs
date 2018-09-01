@@ -40,39 +40,55 @@ namespace WebApp.Reports
             int distillerID = _dl.GetDistillerId(userId);
             procRepObj.Header = _dl.GetDistillerInfoForReportHeader(distillerID, startOfReporting);
 
+            // 7(c) gains - moved to beginning of method because they are used to adjust received and last of month
+            // Existing queries don't account for gain/loss
+            GetGains(startOfReporting, endOfReporting, userId, ref procRepP1);
+
+            // 24 (c) Losses - moved to beginning of method because they are used to adjust received and last of month
+            // Existing queries don't account for gain/loss
+            Losses(startOfReporting, endOfReporting, userId, ref procRepP1);
+
             // Processing Report Part 1 Section
             procRepP1.BulkIngredients = "spirit";
 
             // 1(c) previous month
             OnHandFirstOfMonth(startOfReporting, userId, ref procRepP1);
 
-            line8RunningSum += procRepP1.OnHandFirstofMonth;
-
             // 2(c) current month received bulk
             Received(startOfReporting, endOfReporting, userId, ref procRepP1);
 
-            line8RunningSum += procRepP1.Recd4Process;
+            // Remove gains from received in bulk (existing query doesn't account for this)
+            procRepP1.Recd4Process -= procRepP1.Gains;
+
+            // Add losses to received in bulk (existing query doesn't account for this)
+            procRepP1.Recd4Process += procRepP1.Losses;
+
+            // Update line 8 totals
+            line8RunningSum += procRepP1.OnHandFirstofMonth + procRepP1.Recd4Process + procRepP1.Gains;
 
             // 9 (c) Bottled or Packaged
             BottledOrPackaged(startOfReporting, endOfReporting, userId, ref procRepP1);
 
-            line26RunningSum = procRepP1.AmtBottledPackaged;
+            // 25(c) On hand end of month
+            OnHandEndOfMonth(ref procRepP1, line8RunningSum, line26RunningSum);
 
-            // 24 (c) Losses
-            Losses(startOfReporting, endOfReporting, userId, ref procRepP1);
+            // Remove losses from on hand end of month (existing query doesn't account for this)
+            procRepP1.OnHandEndofMonth -= procRepP1.Losses;
 
-            line26RunningSum += (float)Math.Round(procRepP1.Losses, 3);
+            // Add on hand end of month to line 26 totals
+            line26RunningSum += procRepP1.OnHandEndofMonth;
+
+            // Update line 26 totals
+            line26RunningSum = procRepP1.AmtBottledPackaged + procRepP1.Losses;
 
             // Round to three decimals
+            line8RunningSum = (float)Math.Round(line8RunningSum, 3);
             line26RunningSum = (float)Math.Round(line26RunningSum, 3);
 
             if ((line8RunningSum - line26RunningSum) < 0)
             {
                 throw new InvalidOperationException();
             }
-
-            // 25(c) On hand end of month
-            OnHandEndOfMonth(ref procRepP1, line8RunningSum, line26RunningSum);
 
             // Processing Report Part 2 Section
             // Bottled Column(b)
@@ -129,6 +145,50 @@ namespace WebApp.Reports
         {
             procRepP2.TotalLine47 = procRepP2.TaxWithdrawn + procRepP2.OnHandEndofMonth; // continue on adding extra rows as we add support for them
             Math.Round(procRepP2.TotalLine47, 3);
+        }
+
+
+        /// <summary>
+        /// Line 7 of Processing Report
+        /// Gains in blending
+        /// </summary>
+        /// <param name="startOfReporting"></param>
+        /// <param name="endOfReporting"></param>
+        /// <param name="userId"></param>
+        /// <param name="procRepP1"></param>
+        private void GetGains(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
+        {
+            var accumulatedGains =
+            (from prod in
+            (from prod in _db.Production
+             join gl in _db.GainLoss on new { ProductionID = prod.ProductionID } equals new { ProductionID = gl.ProductionId } into gl_join
+             from gl in gl_join.DefaultIfEmpty()
+             join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+             from distillers in distillers_join.DefaultIfEmpty()
+             where
+             distillers.UserId == userId &&
+             prod.Gauged == true &&
+             gl.Type == true &&
+             prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
+             && prod.ProductionEndTime >= startOfReporting
+             && prod.ProductionEndTime <= endOfReporting
+             select new
+             {
+                 Quantity = (System.Single?)gl.Quantity ?? (System.Single?)0,
+                 Dummy = "x"
+             })
+             group prod by new { prod.Dummy } into g
+             select new
+             {
+                 Gains = g.Sum(p => p.Quantity) ?? 0
+             }).FirstOrDefault();
+
+            if (accumulatedGains != null)
+            {
+                procRepP1.Gains = accumulatedGains.Gains;
+            }
+            // round to 3 decimals
+            Math.Round(procRepP1.Gains, 3);
         }
 
         /// <summary>
@@ -1023,6 +1083,7 @@ namespace WebApp.Reports
 
         /// <summary>
         /// Line 24 of Processing Report
+        /// Blending losses
         /// </summary>
         /// <param name="startOfReporting"></param>
         /// <param name="endOfReporting"></param>
@@ -1033,14 +1094,15 @@ namespace WebApp.Reports
             var accumulatedLoss =
             (from prod in
             (from prod in _db.Production
-                join gl in _db.GainLoss on new { ProductionID = prod.ProductionID } equals new { ProductionID = gl.BottledRecordId } into gl_join
+                join gl in _db.GainLoss on new { ProductionID = prod.ProductionID } equals new { ProductionID = gl.ProductionId } into gl_join
                 from gl in gl_join.DefaultIfEmpty()
                 join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
                 from distillers in distillers_join.DefaultIfEmpty()
                 where
                 distillers.UserId == userId &&
                 prod.Gauged == true &&
-                prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled
+                gl.Type == false &&
+                prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
                 && prod.ProductionEndTime >= startOfReporting
                 && prod.ProductionEndTime <= endOfReporting
                 select new

@@ -27,6 +27,7 @@
                     ID: "",
                     OldVal: "",
                     NewVal: "",
+                    AlcoholContent: "", // Used to calculate gainLoss and forward to the api
                     Proof: "", // sent to back-end for Proof recalculation if material is partially burned down in volume (gallons)
                     DistillableOrigin: "", // whether it came from purchase or production
                     BurningDownMethod: "" // are we burning down by Volume or by Weight? {volume, weight}
@@ -84,12 +85,14 @@
                             $( '#MatBurnDwnDialogRadioBtnVBW' ).jqxRadioButton( { checked: true } );
                             $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( distilsAdapter.records[curRawMatIndex].VolumeByWeight );
                             usedMat.OldVal = distilsAdapter.records[curRawMatIndex].VolumeByWeight;
+                            usedMat.AlcoholContent = distilsAdapter.records[curRawMatIndex].AlcoholContent;
                             usedMat.BurningDownMethod = "weight";
                         }
                         else if ( distilsAdapter.records[curRawMatIndex].Quantity > 0 && distilsAdapter.records[curRawMatIndex].Quantity != undefined ) {
                             $( '#MatBurnDwnDialogRadioBtnGal' ).jqxRadioButton( { checked: true } );
                             $( "#MatBurnDwnDialogQuantityInputOriginal" ).val( distilsAdapter.records[curRawMatIndex].Quantity );
                             usedMat.OldVal = distilsAdapter.records[curRawMatIndex].Quantity;
+                            usedMat.AlcoholContent = distilsAdapter.records[curRawMatIndex].AlcoholContent;
                             usedMat.BurningDownMethod = "volume";
                         }
                     }
@@ -316,7 +319,7 @@
 
                 $("#ClearInputElementsButton").click(function () {
                     genericWorkflowHelper.emptyControls();
-                    $("#BlendingAdditiveList").empty(); // clearing additive input here so we don't have to create special case in generic emptyControls method. 
+                    $("#BlendingAdditiveList").empty(); // clearing additive input here so we don't have to create special case in generic emptyControls method.
                 });
 
                 // listen to the Add button when adding additives in the creation of new blending workflow
@@ -401,7 +404,7 @@
                     }
 
                     /* adding event listeners for calculation of Proof Gallons when editing existing record.
-                       They have to be registered here becasue this is a new window dialog. 
+                       They have to be registered here becasue this is a new window dialog.
                        Registering it's inputs change events in the main page's markup doesn't actually register the event listeners
                     */
                     $('#EditDialogQuantityInput').on('change', function (event) {
@@ -543,7 +546,7 @@
                     onSuccess: function () {
                         _createBlendingRecord();
                         genericWorkflowHelper.emptyControls();
-                        $("#BlendingAdditiveList").empty(); // clearing additive input here so we don't have to create special case in generic emptyControls method. 
+                        $("#BlendingAdditiveList").empty(); // clearing additive input here so we don't have to create special case in generic emptyControls method.
                     },
                     onError: function () {
                         alert('Please complete filling out the form');
@@ -574,7 +577,7 @@
                                 return index != -1;
                             }
                         },
-                        {   
+                        {
                             input: '#BlendingQuantity', message: 'Please Enter Quantity', action: 'blur', rule: function () {
                                 var quantityValue = $("#BlendingQuantity").val();
                                 var volumeValue = $('#BlendingWeight').val();
@@ -787,7 +790,7 @@
 
             // create and initialize child table
             function _initializeChildTable() {
-                
+
                 $("#dataTableAdditives").jqxDataTable(
                 {
                     width: '100%',
@@ -1078,6 +1081,17 @@
                     }
                 }
 
+                var usedMaterialProofSum = 0;
+
+                var blendProof = $('#BlendingProof').jqxNumberInput('val');
+
+                for(var material of usedMatsList)
+                {
+                    usedMaterialProofSum += distillCompInstance.calculateProof(material.NewVal, material.AlcoholContent);
+                }
+
+                var gainLoss = blendProof - usedMaterialProofSum;
+
                 var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStartDate").jqxDateTimeInput('val'), true);
                 var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProductionEndDate").jqxDateTimeInput('val'), true);
 
@@ -1088,10 +1102,11 @@
                     ProductionDate: prodEndUtc,
                     ProductionStart: prodStartUtc,
                     ProductionEnd: prodEndUtc,
+                    GainLoss: gainLoss,
                     Quantity: $('#BlendingQuantity').jqxNumberInput('val'),
                     VolumeByWeight: $('#BlendingWeight').jqxNumberInput('val'),
                     AlcoholContent: $('#BlendingAlcohol').jqxNumberInput('val'),
-                    ProofGallon: $('#BlendingProof').jqxNumberInput('val'),
+                    ProofGallon: blendProof,
                     Storage: storageList,
                     SpiritId: $("#SpiritType").jqxDropDownList('getSelectedItem').originalItem.SpiritId,
                     SpiritName: $("#SpiritType").jqxDropDownList('getSelectedItem').label,

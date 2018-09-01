@@ -200,6 +200,10 @@
     <Compile Include="Migrations\201802160531532_Feb15.Designer.cs">
       <DependentUpon>201802160531532_Feb15.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201808210648225_UpdatingGainLoss.cs" />
+    <Compile Include="Migrations\201808210648225_UpdatingGainLoss.Designer.cs">
+      <DependentUpon>201808210648225_UpdatingGainLoss.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
@@ -1137,6 +1141,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201802160531532_Feb15.resx">
       <DependentUpon>201802160531532_Feb15.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201808210648225_UpdatingGainLoss.resx">
+      <DependentUpon>201808210648225_UpdatingGainLoss.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

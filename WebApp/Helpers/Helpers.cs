@@ -227,6 +227,7 @@ namespace WebApp.Helpers
         public int ID { get; set; }
         public float OldVal { get; set; }
         public float NewVal { get; set; }
+        public float AlcoholContent { get; set; } // Used in loss/gains calculation during blending
         public float Proof { get; set; }
         public string DistillableOrigin { get; set; } // {"pur", "prod"} values used to in AvaiableFor[Distillation, Blending or Bottling].
         public string BurningDownMethod { get; set; } // this is used in distillation when at the time of burning down used materials. Currently, possible values are {"weight", "volume"}

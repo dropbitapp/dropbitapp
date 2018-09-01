@@ -329,8 +329,11 @@ namespace WebApp.Reports
                 (from productionContent in _db.ProductionContent
                  join production in _db.Production on productionContent.ProductionID equals production.ProductionID into production_join
                  from production in production_join.DefaultIfEmpty()
+                 join gainLoss in _db.GainLoss on production.ProductionID equals gainLoss.ProductionId into gainLoss_join
+                 from gainLoss in gainLoss_join.DefaultIfEmpty()
                  join prod4Rep in _db.Production4Reporting on productionContent.ProductionID equals prod4Rep.ProductionID
                  where productionContent.RecordID == record.ProductionID
+                 && gainLoss.Type == false
                  && production.ProductionEndTime >= start
                  && production.ProductionEndTime <= end
                  && prod4Rep.Redistilled == false
@@ -338,14 +341,15 @@ namespace WebApp.Reports
                  select new
                  {
                      id = prod4Rep.ProductionID,
-                     proof = (float?)prod4Rep.Proof ?? (float?)0
+                     proof = (float?)prod4Rep.Proof ?? (float?)0,
+                     loss = (float?)gainLoss.Quantity
                  }).Distinct().ToList();
 
             if (blended != null)
             {
                 foreach (var i in blended)
                 {
-                    blendedProof += (float)Math.Round((float)i.proof, 3);
+                    blendedProof += (float)Math.Round((float)i.proof + (float)i.loss, 3);
                 }
             }
             else

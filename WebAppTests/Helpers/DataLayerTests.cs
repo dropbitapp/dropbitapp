@@ -626,15 +626,26 @@ namespace WebApp.Helpers.Tests
             }
         }
 
+        public float VerifyProof(float volumeInGallons, float alcoholContent, float proof)
+        {
+            if (volumeInGallons <= 0 && alcoholContent <= 0)
+            {
+                throw new ArgumentException("Invalid volume or alcohol content in argument.");
+            }
 
+            float calulatedProof = (volumeInGallons * alcoholContent * 2) / 100;
 
-        // This covers a full workflow test for Brandy Under 170
-        /*
-         * We need to make Brandy Under 170 and test its appearance in 
-         * Production/Storage/Processing Report
-         * 
-         * 
-         */
+            if (calulatedProof != proof)
+            {
+                throw new ArgumentException("Invalid proof in argument.");
+            }
+
+            return proof;
+        }
+
+        /// <summary>
+        /// This covers a full workflow test for Brandy Under 170
+        /// </summary>
         [TestMethod()]
         public void Buy_Wine_Make_Brandy_Under_170_Test()
         {
@@ -1032,7 +1043,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(reportHeaderE.ReportDate, actualProdReportObject.Header.ReportDate);
 
                 // verify Production report Part 1
-                Assert.AreEqual(part1E.ProccessingAcct, actualProdReportObject.Part1List[0].ProccessingAcct);
+                Assert.AreEqual(0f, actualProdReportObject.Part1List[0].ProccessingAcct);
                 Assert.AreEqual(part1E.ProducedTotal, actualProdReportObject.Part1List[0].ProducedTotal);
                 Assert.AreEqual(part1E.Recd4RedistilL17, actualProdReportObject.Part1List[0].Recd4RedistilL17);
 
@@ -1049,7 +1060,7 @@ namespace WebApp.Helpers.Tests
                     Assert.AreEqual("Wine", actualWine.SpiritCatName);
                 }
 
-                Assert.AreEqual(part1E.StorageAcct, actualProdReportObject.Part1List[0].StorageAcct);
+                Assert.AreEqual(18f, actualProdReportObject.Part1List[0].StorageAcct);
                 Assert.AreEqual(part1E.SpiritCatName, actualProdReportObject.Part1List[0].SpiritCatName);
                 Assert.AreEqual(part1E.SpiritTypeReportingID, actualProdReportObject.Part1List[0].SpiritTypeReportingID);
                 Assert.AreEqual(part1E.UnfinishedSpiritsEndOfQuarterL17, actualProdReportObject.Part1List[0].UnfinishedSpiritsEndOfQuarterL17);
@@ -1108,8 +1119,8 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(processingReportP1.Destroyed, actualProcessingReportObject.Part1.Destroyed);
                 Assert.AreEqual(processingReportP1.Dumped4Processing, actualProcessingReportObject.Part1.Dumped4Processing);
                 Assert.AreEqual(processingReportP1.Gains, actualProcessingReportObject.Part1.Gains);
-                Assert.AreEqual(processingReportP1.Losses, actualProcessingReportObject.Part1.Losses);
-                Assert.AreEqual(processingReportP1.OnHandEndofMonth, actualProcessingReportObject.Part1.OnHandEndofMonth);
+                Assert.AreEqual(0f, actualProcessingReportObject.Part1.Losses);
+                Assert.AreEqual(18f, actualProcessingReportObject.Part1.OnHandEndofMonth);
                 Assert.AreEqual(processingReportP1.OnHandFirstofMonth, actualProcessingReportObject.Part1.OnHandFirstofMonth);
                 Assert.AreEqual(processingReportP1.Recd4Process, actualProcessingReportObject.Part1.Recd4Process);
                 Assert.AreEqual(processingReportP1.Transf2Prod4Redistil, actualProcessingReportObject.Part1.Transf2Prod4Redistil);
@@ -1603,6 +1614,7 @@ namespace WebApp.Helpers.Tests
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 55f; // 55 gallons of alcohol
                 prodBlend.VolumeByWeight = 0f;
+                prodBlend.GainLoss = -7.7f;
                 prodBlend.AlcoholContent = 43f; // 43%
                 prodBlend.ProofGallon = 47.3f; // 47.3 pfg
                 prodBlend.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
@@ -1740,10 +1752,10 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(0f, mayProcessingReport.Part1.Destroyed);
                 Assert.AreEqual(0f, mayProcessingReport.Part1.Dumped4Processing);
                 Assert.AreEqual(0f, mayProcessingReport.Part1.Gains);
-                Assert.AreEqual(0f, mayProcessingReport.Part1.Losses);
+                Assert.AreEqual(7.7f, mayProcessingReport.Part1.Losses);
                 Assert.AreEqual(47.3f, mayProcessingReport.Part1.OnHandEndofMonth);
                 Assert.AreEqual(0f, mayProcessingReport.Part1.OnHandFirstofMonth);
-                Assert.AreEqual(47.3f, mayProcessingReport.Part1.Recd4Process);
+                Assert.AreEqual(55f, mayProcessingReport.Part1.Recd4Process);
                 Assert.AreEqual(0f, mayProcessingReport.Part1.Transf2Prod4Redistil);
                 Assert.AreEqual(0f, mayProcessingReport.Part1.Used4Redistil);
                 Assert.AreEqual(0f, mayProcessingReport.Part1.WineMixedWithSpirit);
@@ -1935,10 +1947,10 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.Destroyed);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.Dumped4Processing);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.Gains);
-                Assert.AreEqual(1.3f, mayAfterBottlingProcessingReport.Part1.Losses);
-                Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.OnHandEndofMonth);
+                Assert.AreEqual(7.7f, mayAfterBottlingProcessingReport.Part1.Losses);
+                Assert.AreEqual(47.3f, mayAfterBottlingProcessingReport.Part1.OnHandEndofMonth);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.OnHandFirstofMonth);
-                Assert.AreEqual(47.3f, mayAfterBottlingProcessingReport.Part1.Recd4Process);
+                Assert.AreEqual(55f, mayAfterBottlingProcessingReport.Part1.Recd4Process);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.Transf2Prod4Redistil);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.Used4Redistil);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.WineMixedWithSpirit);
@@ -2800,7 +2812,7 @@ namespace WebApp.Helpers.Tests
 
         /// <summary>
         /// 1. Purchase 100 PFG (100 Gal @ 50% ABV) of GNS on 6/1/2018.
-        /// 2. Burn down 50 PFG (50 Gal at 50%ABV) of GNS to product 40 PFG (40 Gal at 50%) of Gin (No redistilling, go straight to Blending) on 6/1/2018.
+        /// 2. Blend 50 PFG (50 Gal at 50%ABV) of GNS to produce 40 PFG (40 Gal at 50%) of Gin on 6/1/2018.
         /// 3. 10 PFG should be accounted for on line 24 Losses in the Processing.
         /// </summary>
         [TestMethod()]
@@ -2885,6 +2897,7 @@ namespace WebApp.Helpers.Tests
                 prodBlendGin.ProductionStart = new DateTime(2018, 6, 1);
                 prodBlendGin.ProductionEnd = new DateTime(2018, 6, 1);
                 prodBlendGin.Gauged = true;
+                prodBlendGin.GainLoss = -10f;
                 prodBlendGin.ProductionType = "Blending";
                 prodBlendGin.Quantity = 40f; // 40 gallons of alcohol
                 prodBlendGin.VolumeByWeight = 0f;
@@ -2897,7 +2910,7 @@ namespace WebApp.Helpers.Tests
                 List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
                 ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
                 uMat.ID = purchaseId;
-                uMat.NewVal = 40f;
+                uMat.NewVal = 50f;
                 uMat.OldVal = 50f;
                 uMat.Proof = 50f;
                 uMat.DistillableOrigin = "pur";
@@ -2961,7 +2974,7 @@ namespace WebApp.Helpers.Tests
                 // Part 1
                 Assert.AreEqual("spirit", processingReportObject.Part1.BulkIngredients);
                 Assert.AreEqual(0f, processingReportObject.Part1.OnHandFirstofMonth);
-                Assert.AreEqual(40f, processingReportObject.Part1.Recd4Process);
+                Assert.AreEqual(50f, processingReportObject.Part1.Recd4Process);
                 Assert.AreEqual(0f, processingReportObject.Part1.WineMixedWithSpirit);
                 Assert.AreEqual(0f, processingReportObject.Part1.Dumped4Processing);
                 Assert.AreEqual(0f, processingReportObject.Part1.Gains);
@@ -3000,7 +3013,7 @@ namespace WebApp.Helpers.Tests
 
         /// <summary>
         /// 1. Purchase 100 PFG (100 Gal @ 50% ABV) of GNS on 6/1/2018.
-        /// 2. Burn down 50 PFG (50 Gal at 50%ABV) of GNS to product 60 PFG (60 Gal at 50%) of Gin (No redistilling, go straight to Blending) on 6/1/2018.
+        /// 2. Blend 50 PFG (50 Gal at 50%ABV) of GNS to produce 60 PFG (60 Gal at 50%) of Gin on 6/1/2018.
         /// 3. 10 PFG should be accounted for on line 7 Gains in the Processing.
         /// </summary>
         [TestMethod()]
@@ -3085,6 +3098,7 @@ namespace WebApp.Helpers.Tests
                 prodBlendGin.ProductionStart = new DateTime(2018, 6, 1);
                 prodBlendGin.ProductionEnd = new DateTime(2018, 6, 1);
                 prodBlendGin.Gauged = true;
+                prodBlendGin.GainLoss = 10f;
                 prodBlendGin.ProductionType = "Blending";
                 prodBlendGin.Quantity = 60f; // 40 gallons of alcohol
                 prodBlendGin.VolumeByWeight = 0f;
@@ -3097,9 +3111,10 @@ namespace WebApp.Helpers.Tests
                 List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
                 ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
                 uMat.ID = purchaseId;
-                uMat.NewVal = 40f;
+                uMat.NewVal = 50f;
                 uMat.OldVal = 50f;
                 uMat.Proof = 50f;
+                uMat.AlcoholContent = purchO.AlcoholContent;
                 uMat.DistillableOrigin = "pur";
                 uMat.BurningDownMethod = "volume";
 
@@ -3161,7 +3176,7 @@ namespace WebApp.Helpers.Tests
                 // Part 1
                 Assert.AreEqual("spirit", processingReportObject.Part1.BulkIngredients);
                 Assert.AreEqual(0f, processingReportObject.Part1.OnHandFirstofMonth);
-                Assert.AreEqual(60f, processingReportObject.Part1.Recd4Process);
+                Assert.AreEqual(50f, processingReportObject.Part1.Recd4Process);
                 Assert.AreEqual(0f, processingReportObject.Part1.WineMixedWithSpirit);
                 Assert.AreEqual(0f, processingReportObject.Part1.Dumped4Processing);
                 Assert.AreEqual(10f, processingReportObject.Part1.Gains);
@@ -3199,9 +3214,9 @@ namespace WebApp.Helpers.Tests
         }
 
         /// <summary>
-        /// 1. Purchase 100 PFG (100 Gal @ 50% ABV) of GNS on 6/1/2018.
-        /// 2. Burn down 50 PFG (50 Gal at 50%ABV) of GNS to product 50 PFG (50 Gal at 50%) of Gin on 6/1/2018.
-        /// 3. Burn down 25 PFG (25 Gal at 50%ABV) of Gin to produce 15 PFG Gin (15 Gal @ 50%) on 7/1/2018
+        /// 1. Purchase 100 PFG (100 Gal @ 50% ABV) of Gns on 6/1/2018.
+        /// 2. Blend 50 PFG (50 Gal at 50%ABV) of Gns to produce 50 PFG (50 Gal at 50%) of Gin on 6/1/2018.
+        /// 3. Blend 25 PFG (25 Gal at 50%ABV) of Gin to produce 15 PFG (15 Gal @ 50%) of Gin on 7/1/2018.
         /// 4. 10 PFG should be accounted for on line 24 Losses in the Processing.
         /// </summary>
         [TestMethod()]
@@ -3299,9 +3314,10 @@ namespace WebApp.Helpers.Tests
                 List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
                 ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
                 uMat.ID = purchaseId;
-                uMat.NewVal = 50f; // Wine gallons of new record.
-                uMat.OldVal = 50f; // Wine gallons used
-                uMat.Proof = 50f; //remaining proof in record which is being burned down
+                uMat.NewVal = 50f; // wine gallons of new record
+                uMat.OldVal = 50f; // wine gallons used
+                uMat.Proof = 50f; // remaining proof in record which is being burned down
+                uMat.AlcoholContent = purchO.AlcoholContent;
                 uMat.DistillableOrigin = "pur";
                 uMat.BurningDownMethod = "volume";
 
@@ -3321,6 +3337,7 @@ namespace WebApp.Helpers.Tests
                 prodBlendGin.ProductionType = "Blending";
                 prodBlendGin.Quantity = 15f; // 15 gallons of alcohol
                 prodBlendGin.VolumeByWeight = 0f;
+                prodBlendGin.GainLoss = -10f;
                 prodBlendGin.AlcoholContent = 50f; // 50%
                 prodBlendGin.ProofGallon = 15f; // 15 pfg
                 prodBlendGin.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
@@ -3329,7 +3346,7 @@ namespace WebApp.Helpers.Tests
 
                 usedMats.Clear();
                 uMat.ID = productionId1;
-                uMat.NewVal = 15f;
+                uMat.NewVal = 25f;
                 uMat.OldVal = 25f;
                 uMat.Proof = 25f;
                 uMat.DistillableOrigin = "prod";
@@ -3442,7 +3459,7 @@ namespace WebApp.Helpers.Tests
                 // Part 1
                 Assert.AreEqual("spirit", processingReportObject.Part1.BulkIngredients);
                 Assert.AreEqual(0f, processingReportObject.Part1.OnHandFirstofMonth);
-                Assert.AreEqual(15f, processingReportObject.Part1.Recd4Process);
+                Assert.AreEqual(25f, processingReportObject.Part1.Recd4Process);
                 Assert.AreEqual(0f, processingReportObject.Part1.WineMixedWithSpirit);
                 Assert.AreEqual(0f, processingReportObject.Part1.Dumped4Processing);
                 Assert.AreEqual(0f, processingReportObject.Part1.Gains);
@@ -3561,7 +3578,7 @@ namespace WebApp.Helpers.Tests
                 purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
-                // Blend GNS into GIN
+                // Distill GNS into GIN
                 ProductionObject prodDistilGin = new ProductionObject();
                 prodDistilGin.BatchName = "DistilGin";
                 prodDistilGin.ProductionDate = new DateTime(2018, 6, 1);
@@ -3599,6 +3616,7 @@ namespace WebApp.Helpers.Tests
                 prodBlendGin.ProductionStart = new DateTime(2018, 7, 1);
                 prodBlendGin.ProductionEnd = new DateTime(2018, 7, 1);
                 prodBlendGin.Gauged = true;
+                prodBlendGin.GainLoss = 10f;
                 prodBlendGin.ProductionType = "Blending";
                 prodBlendGin.Quantity = 35f; // 15 gallons of alcohol
                 prodBlendGin.VolumeByWeight = 0f;
@@ -3610,7 +3628,7 @@ namespace WebApp.Helpers.Tests
 
                 usedMats.Clear();
                 uMat.ID = productionId1;
-                uMat.NewVal = 15f;
+                uMat.NewVal = 25f;
                 uMat.OldVal = 25f;
                 uMat.Proof = 25f;
                 uMat.DistillableOrigin = "prod";
@@ -3723,7 +3741,7 @@ namespace WebApp.Helpers.Tests
                 // Part 1
                 Assert.AreEqual("spirit", processingReportObject.Part1.BulkIngredients);
                 Assert.AreEqual(0f, processingReportObject.Part1.OnHandFirstofMonth);
-                Assert.AreEqual(35f, processingReportObject.Part1.Recd4Process);
+                Assert.AreEqual(25f, processingReportObject.Part1.Recd4Process);
                 Assert.AreEqual(0f, processingReportObject.Part1.WineMixedWithSpirit);
                 Assert.AreEqual(0f, processingReportObject.Part1.Dumped4Processing);
                 Assert.AreEqual(10f, processingReportObject.Part1.Gains);
@@ -4008,8 +4026,8 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Destroyed);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Dumped4Processing);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Gains);
-                Assert.AreEqual(0.4f, actualProcessingReportObject.Part1.Losses);
-                Assert.AreEqual(0.1f, actualProcessingReportObject.Part1.OnHandEndofMonth);
+                Assert.AreEqual(0f, actualProcessingReportObject.Part1.Losses);
+                Assert.AreEqual(98f, actualProcessingReportObject.Part1.OnHandEndofMonth);
                 Assert.AreEqual(98f, actualProcessingReportObject.Part1.OnHandFirstofMonth);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Recd4Process);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Transf2Prod4Redistil);
@@ -4120,7 +4138,7 @@ namespace WebApp.Helpers.Tests
                 storageList.Add(storageObject);
                 purchO.Storage = storageList;
 
-                
+
                 purchaseId = _purchase.CreatePurchase(purchO, _userId);
                 tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
 
@@ -5516,11 +5534,11 @@ namespace WebApp.Helpers.Tests
                 #region Produciton
                 /* PRODUCTION REPORT */
                 ProdReportPart1 part1E = new ProdReportPart1();
-                part1E.ProccessingAcct = 160f;
+                part1E.ProccessingAcct = 0f;
                 part1E.ProducedTotal = 160f;
                 part1E.Recd4RedistilL17 = 0f;
                 part1E.Recd4RedistilaltionL15 = 180f;
-                part1E.StorageAcct = 0f;
+                part1E.StorageAcct = 160f;
                 part1E.SpiritCatName = "Gin";
                 part1E.SpiritTypeReportingID = 6;
                 part1E.UnfinishedSpiritsEndOfQuarterL17 = 0f;
@@ -5582,8 +5600,8 @@ namespace WebApp.Helpers.Tests
                 processingReportP1.Destroyed = 0f;
                 processingReportP1.Dumped4Processing = 0f;
                 processingReportP1.Gains = 0f;
-                processingReportP1.Losses = 0.08f;
-                processingReportP1.OnHandEndofMonth = 0f;
+                processingReportP1.Losses = 0f;
+                processingReportP1.OnHandEndofMonth = 160f;
                 processingReportP1.OnHandFirstofMonth = 0f;
                 processingReportP1.Recd4Process = 160f;
                 processingReportP1.Transf2Prod4Redistil = 0f;
@@ -10763,7 +10781,7 @@ namespace WebApp.Helpers.Tests
                     Price = 350f,
                     VendorId = vendorId,
                 };
-               
+
                 List<StorageObject> storageList = new List<StorageObject>();
                 StorageObject storageObject = new StorageObject();
                 storageObject.StorageId = storageId;
@@ -11378,8 +11396,8 @@ namespace WebApp.Helpers.Tests
                 else
                 {
                     // Brandy expected output
-                    Assert.AreEqual(25, expectedBrandy.ProccessingAcct);
-                    Assert.AreEqual(25, expectedBrandy.StorageAcct);
+                    Assert.AreEqual(0, expectedBrandy.ProccessingAcct);
+                    Assert.AreEqual(50, expectedBrandy.StorageAcct);
                     Assert.AreEqual(0, expectedBrandy.Recd4RedistilL17);
                     Assert.AreEqual(50, expectedBrandy.ProducedTotal);
                 }
@@ -12310,11 +12328,11 @@ namespace WebApp.Helpers.Tests
                 /* PRODUCTION REPORT */
 
                 ProdReportPart1 part1E = new ProdReportPart1();
-                part1E.ProccessingAcct = 18f;
+                part1E.ProccessingAcct = 0f;
                 part1E.ProducedTotal = 18f;
                 part1E.Recd4RedistilL17 = 0f;
                 part1E.Recd4RedistilaltionL15 = 0f;
-                part1E.StorageAcct = 0f;
+                part1E.StorageAcct = 18f;
                 part1E.SpiritTypeReportingID = 3;
                 part1E.UnfinishedSpiritsEndOfQuarterL17 = 0f;
 
@@ -12405,8 +12423,8 @@ namespace WebApp.Helpers.Tests
                 processingReportP1.Destroyed = 0f;
                 processingReportP1.Dumped4Processing = 0f;
                 processingReportP1.Gains = 0f;
-                processingReportP1.Losses = 0.1f;
-                processingReportP1.OnHandEndofMonth = 0f;
+                processingReportP1.Losses = 0f;
+                processingReportP1.OnHandEndofMonth = 18f;
                 processingReportP1.OnHandFirstofMonth = 0f;
                 processingReportP1.Recd4Process = 18f;
                 processingReportP1.Transf2Prod4Redistil = 0f;
@@ -12955,6 +12973,7 @@ namespace WebApp.Helpers.Tests
                 prodO2.ProductionEnd = new DateTime(2017, 09, 4);
                 prodO2.SpiritCutId = 9; // hearts
                 prodO2.Gauged = true;
+                prodO2.GainLoss = -10f;
                 prodO2.ProductionType = "Distillation";
                 prodO2.Quantity = 15f; // 15 gallons of alcohol
                 prodO2.VolumeByWeight = 0f;
@@ -13038,11 +13057,11 @@ namespace WebApp.Helpers.Tests
                 /* PRODUCTION REPORT */
 
                 ProdReportPart1 part1E = new ProdReportPart1();
-                part1E.ProccessingAcct = 18f;
+                part1E.ProccessingAcct = 0f;
                 part1E.ProducedTotal = 18f;
                 part1E.Recd4RedistilL17 = 0f;
                 part1E.Recd4RedistilaltionL15 = 0f;
-                part1E.StorageAcct = 0f;
+                part1E.StorageAcct = 18f;
                 part1E.SpiritTypeReportingID = 3;
                 part1E.UnfinishedSpiritsEndOfQuarterL17 = 0f;
 
@@ -14430,8 +14449,8 @@ namespace WebApp.Helpers.Tests
                 processingReportP1.Destroyed = 0f;
                 processingReportP1.Dumped4Processing = 0f;
                 processingReportP1.Gains = 0f;
-                processingReportP1.Losses = 0.1f;
-                processingReportP1.OnHandEndofMonth = 0f;
+                processingReportP1.Losses = 0f;
+                processingReportP1.OnHandEndofMonth = 18f;
                 processingReportP1.OnHandFirstofMonth = 0f;
                 processingReportP1.Recd4Process = 18f;
                 processingReportP1.Transf2Prod4Redistil = 0f;
@@ -14601,8 +14620,8 @@ namespace WebApp.Helpers.Tests
                 else
                 {
                     // Brandy expected output
-                    Assert.AreEqual(18, expectedBrandy.ProccessingAcct);
-                    Assert.AreEqual(0, expectedBrandy.StorageAcct);
+                    Assert.AreEqual(0, expectedBrandy.ProccessingAcct);
+                    Assert.AreEqual(18, expectedBrandy.StorageAcct);
                     Assert.AreEqual(0, expectedBrandy.Recd4RedistilL17);
                     Assert.AreEqual(18, expectedBrandy.ProducedTotal);
                 }
@@ -16820,7 +16839,7 @@ namespace WebApp.Helpers.Tests
                 spirit.SpiritName = "Gin";
                 spirit.ProcessingReportTypeID = 18;
 
-                spiritId =_dictionary.CreateSpirit(_userId, spirit);
+                spiritId = _dictionary.CreateSpirit(_userId, spirit);
                 tupleL.Add(Tuple.Create(spiritId, Table.Spirit));
 
                 // setup Vendor object
@@ -19410,7 +19429,7 @@ namespace WebApp.Helpers.Tests
 
                                 var gainsLosses =
                                     (from rec in _db.GainLoss
-                                     where rec.BottledRecordId == prod.ProductionID
+                                     where rec.ProductionId == prod.ProductionID
                                      select rec);
 
                                 if (gainsLosses != null)

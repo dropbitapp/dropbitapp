@@ -563,8 +563,7 @@ namespace WebApp.Models
     }
 
     /// <summary>
-    /// Table that contains differences between Blending and Bottling records when Blending record flows into Bottling record.
-    /// This is important for two reasons. First, it is needed in government reporting. Second, it is needed for potential data mining in the future.
+    /// Contains gain/loss data for blending or bottling workflows.
     /// </summary>
     public class GainLoss
     {
@@ -573,7 +572,7 @@ namespace WebApp.Models
         public bool Type { get; set; } // true - gain, false - loss
         public float Quantity { get; set; }
         public DateTime DateRecorded { get; set; }
-        public int BottledRecordId { get; set; } //  since we can ony bottle one blend at a time, we expect it to be Bottled record ID
+        public int ProductionId { get; set; } // Blending or bottling production during which a gain or a loss has been observed (production proof - used material sum proof)
     }
 
     /// <summary>

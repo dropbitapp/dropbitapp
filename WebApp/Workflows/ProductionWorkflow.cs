@@ -243,6 +243,30 @@ namespace WebApp.Workflows
                         _db.SaveChanges();
                     }
 
+                    // now, lets register gains/losses
+                    if (prodObject.GainLoss > 0)
+                    {
+                        // gain
+                        GainLoss glt = new GainLoss();
+                        glt.Type = true;
+                        glt.Quantity = prodObject.GainLoss;
+                        glt.DateRecorded = DateTime.UtcNow;
+                        glt.ProductionId = prod.ProductionID;
+                        _db.GainLoss.Add(glt);
+                        _db.SaveChanges();
+                    }
+                    else if (prodObject.GainLoss < 0)
+                    {
+                        // loss
+                        GainLoss glt = new GainLoss();
+                        glt.Type = false;
+                        glt.Quantity = Math.Abs(prodObject.GainLoss); // since cumulativeGainLoss is negative, making it to be positive
+                        glt.DateRecorded = DateTime.UtcNow;
+                        glt.ProductionId = prod.ProductionID;
+                        _db.GainLoss.Add(glt);
+                        _db.SaveChanges();
+                    }
+
                     // update Blended Components related information
                     if (prodObject.BlendingAdditives != null)
                     {
@@ -294,7 +318,7 @@ namespace WebApp.Workflows
                         glt.Type = true;
                         glt.Quantity = prodObject.GainLoss;
                         glt.DateRecorded = DateTime.UtcNow;
-                        glt.BottledRecordId = prod.ProductionID;
+                        glt.ProductionId = prod.ProductionID;
                         _db.GainLoss.Add(glt);
                         _db.SaveChanges();
                     }
@@ -305,7 +329,7 @@ namespace WebApp.Workflows
                         glt.Type = false;
                         glt.Quantity = Math.Abs(prodObject.GainLoss); // since cumulativeGainLoss is negative, making it to be positive
                         glt.DateRecorded = DateTime.UtcNow;
-                        glt.BottledRecordId = prod.ProductionID;
+                        glt.ProductionId = prod.ProductionID;
                         _db.GainLoss.Add(glt);
                         _db.SaveChanges();
                     }
