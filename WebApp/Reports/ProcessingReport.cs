@@ -1094,27 +1094,30 @@ namespace WebApp.Reports
             var accumulatedLoss =
             (from prod in
             (from prod in _db.Production
-                join gl in _db.GainLoss on new { ProductionID = prod.ProductionID } equals new { ProductionID = gl.ProductionId } into gl_join
-                from gl in gl_join.DefaultIfEmpty()
-                join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                from distillers in distillers_join.DefaultIfEmpty()
-                where
-                distillers.UserId == userId &&
-                prod.Gauged == true &&
-                gl.Type == false &&
-                prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
-                && prod.ProductionEndTime >= startOfReporting
-                && prod.ProductionEndTime <= endOfReporting
-                select new
-                {
-                    Quantity = (System.Single?)gl.Quantity ?? (System.Single?)0,
-                    Dummy = "x"
-                })
-                group prod by new { prod.Dummy } into g
-                select new
-                {
-                    Losses = g.Sum(p => p.Quantity) ?? 0
-                }).FirstOrDefault();
+             join gl in _db.GainLoss on new { ProductionID = prod.ProductionID } equals new { ProductionID = gl.ProductionId } into gl_join
+             from gl in gl_join.DefaultIfEmpty()
+             join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+             from distillers in distillers_join.DefaultIfEmpty()
+             where
+             distillers.UserId == userId &&
+             prod.Gauged == true &&
+             gl.Type == false &&
+             (
+                 prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended 
+                 || prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled
+             )
+            && prod.ProductionEndTime >= startOfReporting
+            && prod.ProductionEndTime <= endOfReporting
+            select new
+            {
+                Quantity = (System.Single?)gl.Quantity ?? (System.Single?)0,
+                Dummy = "x"
+            })
+            group prod by new { prod.Dummy } into g
+            select new
+            {
+                Losses = g.Sum(p => p.Quantity) ?? 0
+            }).FirstOrDefault();
 
             if (accumulatedLoss != null)
             {
