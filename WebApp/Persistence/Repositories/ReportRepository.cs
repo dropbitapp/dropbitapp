@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApp.Helpers;
 using WebApp.Models;
-using WebApp.Persistence.BusinessLogicEnums;
 using WebApp.ReportDTO;
+using WebApp.Persistence.BusinessLogicEnums;
 
 namespace WebApp.Persistence.Repositories
 {

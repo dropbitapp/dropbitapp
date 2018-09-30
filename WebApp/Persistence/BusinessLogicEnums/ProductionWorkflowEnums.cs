@@ -107,4 +107,30 @@ namespace WebApp.Persistence.BusinessLogicEnums
         ,lt = 6
         ,pc = 7
     }
+
+    public enum ProcessingReportType
+    {
+        AlcoholAndNeutralSpiritsOtherThanVodka = 1
+        ,BlendedStraightWhiskey
+        ,BlendedWhiskeyWithNeutralSpirits
+        ,BlendedWhiskeyWithLightWhiskey
+        ,BlendedLightWhiskey
+        ,AnyOtherBlendsOf100Whiskey
+        ,ImportedWhiskeyScotch
+        ,ImportedWhiskeyCanadian
+        ,ImportedWhiskeyIrishAndOthers
+        ,DomesticWhiskeyDistilledAt160AndUnder
+        ,DomesticWhiskeyDistilledAtOver160
+        ,BrandyDistilledAt170AndUnder
+        ,BrandyDistilledAtOver170
+        ,SpiritsRumPuertoRican
+        ,SpiritsRumVirginIslands
+        ,RumDomestic
+        ,RumOtherImported
+        ,Gin
+        ,Vodka
+        ,CordialsLiqueursAndSpecialties
+        ,CocktailsAndMixedDrinks
+        ,Tequila
+    }
 }

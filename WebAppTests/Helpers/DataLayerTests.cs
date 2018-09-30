@@ -9,21 +9,6 @@ using WebApp.Workflows;
 
 namespace WebApp.Helpers.Tests
 {
-    public static class TestContstant
-    {
-        public static ReportHeader GetProductionReportHeader()
-        {
-            ReportHeader header = new ReportHeader();
-            header.ProprietorName = "Test Distillery";
-            header.EIN = "12-3456789";
-            header.ReportDate = "October 2017";
-            header.PlantAddress = "123 Cognac Drive Renton 98059 WASHINGTON";
-            header.DSP = "DSP-WA-21086";
-
-            return header;
-        }
-    }
-
     [TestClass()]
     public class DataLayerTests
     {
@@ -38,6 +23,17 @@ namespace WebApp.Helpers.Tests
         private readonly ProductionReport _productionReport;
         private readonly ProcessingReport _processingReport;
         private readonly StorageReport _storageReport;
+
+        private List<Tuple<int, Table>> _cleanup;
+
+        private ReportHeader _header;
+        private Dictionary<string, SpiritObject> _spirits;
+        private Dictionary<string, VendorObject> _vendors;
+        private Dictionary<string, StorageObject> _storages;
+        private Dictionary<string, RawMaterialObject> _rawMaterials;
+
+        private Dictionary<string, PurchaseObject> _purchases;
+        private Dictionary<string, ProductionObject> _productions;
 
         public DataLayerTests()
         {
@@ -65,6 +61,1136 @@ namespace WebApp.Helpers.Tests
             Purchase,
             Production,
             TaxWithdrawn
+        }
+
+        /// <summary>
+        /// Runs once before each TestMethod is called.
+        /// </summary>
+        [TestInitialize()]
+        public void Initialize()
+        {
+            _cleanup = new List<Tuple<int, Table>>();
+
+            _spirits = new Dictionary<string, SpiritObject>();
+            _vendors = new Dictionary<string, VendorObject>();
+            _storages = new Dictionary<string, StorageObject>();
+            _rawMaterials = new Dictionary<string, RawMaterialObject>();
+
+            _purchases = new Dictionary<string, PurchaseObject>();
+            _productions = new Dictionary<string, ProductionObject>();
+
+            _header = new ReportHeader
+            {
+                ProprietorName = "Test Distillery",
+                EIN = "12-3456789",
+                PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059",
+                DSP = "DSP-WA-21086"
+            };
+
+            CreateSpirit("Gin", (int)Persistence.BusinessLogicEnums.ReportSpiritTypes.Gin);
+            CreateSpirit("BrandyUnder170", (int)Persistence.BusinessLogicEnums.ProcessingReportType.BrandyDistilledAt170AndUnder);
+            CreateVendor("Vendor");
+            CreateStorage("Storage");
+            DefineRawMaterialFermentable("Grapes", (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb, (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit);
+            DefineRawMaterialFermented("Pomace", (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb, (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit);
+            DefineRawMaterialFermented("Wine", (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.gal, (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit);
+            DefineRawMaterialDistilled("Gns", (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.gal);
+            DefineRawMaterialAdditive("DistilledWater", (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.gal);
+            DefineRawMaterialSupply("Sticker", (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.pc);
+        }
+
+        /// <summary>
+        /// Runs once after each method is called, even if exception is thrown.
+        /// </summary>
+        [TestCleanup()]
+        public void Cleanup()
+        {
+            foreach (var i in _cleanup)
+            {
+                TestRecordCleanup(i.Item1, i.Item2);
+            }
+        }
+
+        [TestMethod()]
+        public void TestTemplate()
+        {
+            // Arrange
+            PurchaseFermentable(name: "GrapesPurchase",
+                date: new DateTime(2018, 6, 1),
+                volume: 0f,
+                weight: 1000f,
+                alcoholContent: 0f,
+                proof: 0f,
+                materialDictId: _rawMaterials["Grapes"].RawMaterialId,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            PurchaseFermented(name: "PomacePurchase",
+                date: new DateTime(2018, 6, 1),
+                volume: 0f,
+                weight: 100f,
+                alcoholContent: 10f,
+                proof: 20f,
+                materialDictId: _rawMaterials["Pomace"].RawMaterialId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            PurchaseFermented(name: "WinePurchase",
+                date: new DateTime(2018, 6, 1),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 10f,
+                proof: 20f,
+                materialDictId: _rawMaterials["Wine"].RawMaterialId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            PurchaseDistilled(name: "GnsPurchase",
+                date: new DateTime(2018, 6, 1),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 50f,
+                proof: 100f,
+                materialDictId: _rawMaterials["Gns"].RawMaterialId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.AlcoholUnder190,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            PurchaseAdditive(name: "DistilledWaterPurchase",
+                date: new DateTime(2018, 6, 1),
+                volume: 1000f,
+                weight: 0f,
+                alcoholContent: 0f,
+                proof: 0f,
+                materialDictId: _rawMaterials["DistilledWater"].RawMaterialId,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            PurchaseSupply(name: "Stickers",
+                date: new DateTime(2018, 6, 1),
+                volume: 100f,
+                materialDictId: _rawMaterials["Sticker"].RawMaterialId,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            ProduceFerment(name: "Wine",
+                start: new DateTime(2018, 6, 2),
+                end: new DateTime(2018, 6, 3),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 10f,
+                proof: 20f,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _purchases["GrapesPurchase"].PurchaseId,
+                        OldVal = 1000f,
+                        NewVal = 0f,
+                        DistillableOrigin = "pur",
+                        BurningDownMethod = "weight"
+                    }
+                });
+
+            ProduceDistill(name: "Brandy",
+                start: new DateTime(2018, 6, 4),
+                end: new DateTime(2018, 6, 5),
+                volume: 25f,
+                weight: 0f,
+                alcoholContent: 50f,
+                proof: 25f,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
+                spiritCut: "Heart",
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["Wine"].ProductionId,
+                        OldVal = 20f,
+                        NewVal = 0f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                });
+
+            ProduceBlend(name: "NotWateredDownBrandy",
+                start: new DateTime(2018, 6, 6),
+                end: new DateTime(2018, 6, 7),
+                volume: 25f,
+                weight: 0f,
+                alcoholContent: 50f,
+                proof: 25f,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
+                spiritId: _spirits["BrandyUnder170"].SpiritId,
+                gainLoss: 0f,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["Brandy"].ProductionId,
+                        OldVal = 25f,
+                        NewVal = 0f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                },
+                blendingAdditives: new List<BlendingAdditive>
+                {
+                    new BlendingAdditive
+                    {
+                        RawMaterialId = _rawMaterials["DistilledWater"].RawMaterialId,
+                        RawMaterialQuantity = 0f,
+                        RawMaterialName = "DistilledWater",
+                        UnitOfMeasurement = "gal"
+                    }
+                });
+
+            ProduceBottle(name: "BrandedBrandy",
+                start: new DateTime(2018, 6, 8),
+                end: new DateTime(2018, 6, 9),
+                volume: 23.78f, // Use bottling UI workflow to calculate desired volume for given number of cases/bottles
+                weight: 0f,
+                alcoholContent: 50f,
+                proof: 23.78f, // Use bottling UI workflow to calculate desired proof for given number of cases/bottles
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
+                spiritId: _spirits["BrandyUnder170"].SpiritId,
+                gainLoss: 0f,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["NotWateredDownBrandy"].ProductionId,
+                        OldVal = 23.78f,
+                        NewVal = 0f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                },
+                bottlingInfo: new BottlingObject
+                {
+                    CaseCapacity = 12,
+                    CaseQuantity = 10f,
+                    BottleCapacity = 750f,
+                    BottleQuantity = 120,
+                });
+
+            // Act
+            var storageReport = GetStorageReport(2018, 6);
+            var productionReport = GetProductionReport(new DateTime(2018, 6, 1), new DateTime(2018, 6, 30));
+            var processingReport = GetProcessingReport(new DateTime(2018, 6, 1), new DateTime(2018, 6, 30));
+
+            // Assert
+            AssertStorage(storageReport,
+                new ReportHeader
+                {
+                    ReportDate = "June 2018"
+                },
+                new List<StorageReportCategory>
+                {
+                    new StorageReportCategory
+                    {
+                        SpiritTypeReportingID = (int)ReportSpiritTypes.AlcoholUnder190,
+                        r2_DepositedInBulkStorage =  100f,
+                        r6_TotalLines1Through5 = 100f,
+                        r23_OnHandEndOfMonth = 100f,
+                        r24_Lines7Through23 = 100f
+                    },
+                    new StorageReportCategory
+                    {
+                        SpiritTypeReportingID = (int)ReportSpiritTypes.Other,
+                        r2_DepositedInBulkStorage = 40f,
+                        r6_TotalLines1Through5 = 40f,
+                        r18_TransferredToProductionAccount = 20f,
+                        r23_OnHandEndOfMonth = 20f,
+                        r24_Lines7Through23 = 40f
+                    },
+                    new StorageReportCategory
+                    {
+                        SpiritTypeReportingID = (int)ReportSpiritTypes.Total,
+                        r2_DepositedInBulkStorage = 140f,
+                        r6_TotalLines1Through5 = 140f,
+                        r18_TransferredToProductionAccount = 20f,
+                        r23_OnHandEndOfMonth = 120f,
+                        r24_Lines7Through23 = 140f
+                    }
+                });
+
+            AssertProduction(productionReport,
+                new ReportHeader
+                {
+                    ReportDate = "June 2018"
+                },
+                new List<ProdReportPart1> {
+                    new ProdReportPart1
+                    {
+                        ProducedTotal = 25f,
+                        SpiritCatName = "BrandyUnder170",
+                        SpiritTypeReportingID = (int)ReportSpiritTypes.BrandyUnder170,
+                        StorageAcct = 25f,
+                    },
+                    new ProdReportPart1
+                    {
+                        Recd4RedistilaltionL15 = 20f,
+                        SpiritCatName = "Other",
+                        SpiritTypeReportingID = (int)ReportSpiritTypes.Other,
+                    },
+                    new ProdReportPart1
+                    {
+                        ProccessingAcct = 0f,
+                        ProducedTotal = 25f,
+                        Recd4RedistilaltionL15 = 20f,
+                        SpiritCatName = "Total",
+                        SpiritTypeReportingID = (int)ReportSpiritTypes.Total,
+                        StorageAcct = 25f,
+                    }
+                },
+                new List<ProdReportParts2Through4> { },
+                new List<ProdReportPart5> {
+                    new ProdReportPart5
+                    {
+                        KindofSpirits = "Other",
+                        Proof = 20f
+                    }
+                },
+                new List<ProdReportPart6> {
+                    new ProdReportPart6
+                    {
+                        KindOfMaterial = "Grapes",
+                        ProdReportMaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit
+                    }
+                });
+
+            AssertProcessing(processingReport,
+                new ReportHeader
+                {
+                    ReportDate = "June 2018"
+                },
+                new ProcessReportingPart1
+                {
+                    AmtBottledPackaged = 23.78f,
+                    BulkIngredients = "spirit",
+                    OnHandEndofMonth = 25f,
+                    Recd4Process = 25f
+                },
+                new ProcessReportingPart2
+                {
+                    AmtBottledPackaged = 23.78f,
+                    FinishedProduct = "bottled",
+                    OnHandEndofMonth = 23.78f,
+                    TotalLine31 = 23.78f,
+                    TotalLine47 = 23.78f
+                },
+                new List<ProcessReportingPart4>
+                {
+                    new ProcessReportingPart4
+                    {
+                        Brandy170Under = 25f,
+                        ProcessingSpirits = "bulkSpiritDumped",
+                        ProcessingTypeID = (int)Persistence.BusinessLogicEnums.ProcessingReportType.BrandyDistilledAt170AndUnder,
+                        StateID = 4
+                    },
+                    new ProcessReportingPart4
+                    {
+                        Brandy170Under = 23.78f,
+                        ProcessingSpirits = "bottled",
+                        ProcessingTypeID = (int)Persistence.BusinessLogicEnums.ProcessingReportType.BrandyDistilledAt170AndUnder,
+                        StateID = 5
+                    }
+                });
+        }
+
+        private void CreateSpirit(string name, int processingReportTypeId)
+        {
+            SpiritObject spirit = new SpiritObject
+            {
+                SpiritName = name,
+                ProcessingReportTypeID = processingReportTypeId
+            };
+
+            int id = _dictionary.CreateSpirit(_userId, spirit);
+
+            // id will be 0 if CreateSpirit failed
+            if (id == 0)
+            {
+                throw new Exception();
+            }
+
+            // Update dummy object with an actual record id
+            spirit.SpiritId = id;
+
+            // Add to dictionary for use in test method
+            _spirits.Add(spirit.SpiritName, spirit);
+
+            // Add record id to cleanup list
+            _cleanup.Add(Tuple.Create(id, Table.Spirit));
+        }
+
+        private void CreateVendor(string name)
+        {
+            VendorObject vendor = new VendorObject
+            {
+                VendorName = name
+            };
+
+            int id = _dictionary.CreateVendor(_userId, vendor);
+
+            // id will be 0 if CreateVendor failed
+            if (id == 0)
+            {
+                throw new Exception();
+            }
+
+            // Update dummy object with an actual record id
+            vendor.VendorId = id;
+
+            // Add to dictionary for use in test method
+            _vendors.Add(vendor.VendorName, vendor);
+
+            // Add record id to cleanup list
+            _cleanup.Add(Tuple.Create(id, Table.Vendor));
+        }
+
+        private void CreateStorage(string name)
+        {
+            StorageObject storage = new StorageObject
+            {
+                StorageName = name,
+                SerialNumber = Guid.NewGuid().ToString()
+            };
+
+            int id = _dictionary.CreateStorage(_userId, storage);
+
+            // id will be 0 if CreateStorage failed
+            if (id == 0)
+            {
+                throw new Exception();
+            }
+
+            // Update dummy object with an actual record id
+            storage.StorageId = id;
+
+            // Add to dictionary for use in test method
+            _storages.Add(storage.StorageName, storage);
+
+            // Add record id to cleanup list
+            _cleanup.Add(Tuple.Create(id, Table.Storage));
+        }
+
+        private void DefineRawMaterialFermentable(string name, int unit, int category)
+        {
+            PurchaseMaterialBooleanTypes types = new PurchaseMaterialBooleanTypes { Fermentable = true };
+            DefineRawMaterial(name, unit, types, category);
+        }
+
+        private void DefineRawMaterialFermented(string name, int unit, int category)
+        {
+            PurchaseMaterialBooleanTypes types = new PurchaseMaterialBooleanTypes { Fermented = true };
+            DefineRawMaterial(name, unit, types, category);
+        }
+
+        private void DefineRawMaterialDistilled(string name, int unit)
+        {
+            PurchaseMaterialBooleanTypes types = new PurchaseMaterialBooleanTypes { Distilled = true };
+            DefineRawMaterial(name, unit, types);
+        }
+
+        private void DefineRawMaterialSupply(string name, int unit)
+        {
+            PurchaseMaterialBooleanTypes types = new PurchaseMaterialBooleanTypes { Supply = true };
+            DefineRawMaterial(name, unit, types);
+        }
+
+        private void DefineRawMaterialAdditive(string name, int unit)
+        {
+            PurchaseMaterialBooleanTypes types = new PurchaseMaterialBooleanTypes { Additive = true };
+            DefineRawMaterial(name, unit, types);
+        }
+
+        private void DefineRawMaterial(string name, int unit, PurchaseMaterialBooleanTypes types, int category = 0)
+        {
+            RawMaterialObject material = new RawMaterialObject
+            {
+                RawMaterialName = name,
+                PurchaseMaterialTypes = types,
+                UnitTypeId = unit,
+                MaterialCategoryID = category
+            };
+
+            int id = _dictionary.CreateRawMaterial(_userId, material);
+
+            // id will be 0 if CreateRawMaterial failed
+            if (id == 0)
+            {
+                throw new Exception();
+            }
+
+            // Update dummy object with an actual record id
+            material.RawMaterialId = id;
+
+            // Add to dictionary for use in test method
+            _rawMaterials.Add(material.RawMaterialName, material);
+
+            // Add record id to cleanup list
+            _cleanup.Add(Tuple.Create(id, Table.MaterialDict));
+        }
+
+        private void PurchaseFermentable(
+            string name,
+            DateTime date,
+            float volume,
+            float weight,
+            float alcoholContent,
+            float proof,
+            int materialDictId,
+            float price,
+            int vendorId,
+            int storageId)
+        {
+            Purchase(name, "Fermentable", date, materialDictId, price, vendorId, storageId, volume, weight, alcoholContent, proof);
+        }
+
+        private void PurchaseFermented(
+            string name,
+            DateTime date,
+            float volume,
+            float weight,
+            float alcoholContent,
+            float proof,
+            int materialDictId,
+            int spiritTypeReportingId,
+            float price,
+            int vendorId,
+            int storageId)
+        {
+            Purchase(name, "Fermented", date, materialDictId, price, vendorId, storageId, volume, weight, alcoholContent, proof, spiritTypeReportingId);
+        }
+
+        private void PurchaseDistilled(
+            string name,
+            DateTime date,
+            float volume,
+            float weight,
+            float alcoholContent,
+            float proof,
+            int materialDictId,
+            int spiritTypeReportingId,
+            float price,
+            int vendorId,
+            int storageId)
+        {
+            Purchase(name, "Distilled", date, materialDictId, price, vendorId, storageId, volume, weight, alcoholContent, proof, spiritTypeReportingId);
+        }
+
+        private void PurchaseAdditive(
+            string name,
+            DateTime date,
+            float volume,
+            float weight,
+            float alcoholContent,
+            float proof,
+            int materialDictId,
+            float price,
+            int vendorId,
+            int storageId)
+        {
+            Purchase(name, "Additive", date, materialDictId, price, vendorId, storageId, volume, weight, alcoholContent, proof);
+        }
+
+        private void PurchaseSupply(
+            string name,
+            DateTime date,
+            float volume,
+            int materialDictId,
+            float price,
+            int vendorId,
+            int storageId)
+        {
+            Purchase(name, "Supply", date, materialDictId, price, vendorId, storageId, volume);
+        }
+
+        private void Purchase(
+            string name,
+            string type,
+            DateTime date,
+            int materialDictId,
+            float price,
+            int vendorId,
+            int storageId,
+            float volume = 0f, // optional
+            float weight = 0f, // optional
+            float alcoholContent = 0f, // optional
+            float proof = 0f, // optional
+            int spiritTypeReportingId = 0) // optional)
+        {
+            PurchaseObject purchase = new PurchaseObject
+            {
+                PurBatchName = name,
+                PurchaseType = type,
+                PurchaseDate = date,
+                Quantity = volume,
+                VolumeByWeight = weight,
+                AlcoholContent = alcoholContent,
+                ProofGallon = proof,
+                RecordId = materialDictId,
+                Price = price,
+                VendorId = vendorId,
+                SpiritTypeReportingID = spiritTypeReportingId,
+                Gauged = true,
+                Storage = new List<StorageObject>
+                    {
+                        new StorageObject
+                        {
+                            StorageId = storageId
+                        }
+                    }
+            };
+
+            int id = _purchase.CreatePurchase(purchase, _userId);
+
+            // id will be 0 if CreateRawMaterial failed
+            if (id == 0)
+            {
+                throw new Exception();
+            }
+
+            // Update dummy object with an actual record id
+            purchase.RawMaterialId = id;
+
+            // Add to dictionary for use in test method
+            _purchases.Add(purchase.PurBatchName, purchase);
+
+            // Add record id to cleanup list
+            _cleanup.Add(Tuple.Create(id, Table.Purchase));
+        }
+
+        private void ProduceFerment(
+            string name,
+            DateTime start,
+            DateTime end,
+            float volume,
+            float weight,
+            float alcoholContent,
+            float proof,
+            float price,
+            int vendorId,
+            int storageId,
+            int spiritTypeReportingId,
+            bool gauged,
+            List<ObjInfo4Burndwn> materialsUsed)
+        {
+            Produce(name, "Fermentation", start, end, volume, weight, alcoholContent, proof, price, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed);
+        }
+
+        private void ProduceDistill(
+            string name,
+            DateTime start,
+            DateTime end,
+            float volume,
+            float weight,
+            float alcoholContent,
+            float proof,
+            float price,
+            int vendorId,
+            int storageId,
+            int spiritTypeReportingId,
+            string spiritCut,
+            bool gauged,
+            List<ObjInfo4Burndwn> materialsUsed)
+        {
+            // Requires spiritType and materialKindReporting
+            Produce(name, "Distillation", start, end, volume, weight, alcoholContent, proof, price, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritCut: spiritCut);
+        }
+
+        private void ProduceBlend(
+            string name,
+            DateTime start,
+            DateTime end,
+            float volume,
+            float weight,
+            float alcoholContent,
+            float proof,
+            float price,
+            int vendorId,
+            int storageId,
+            int spiritTypeReportingId,
+            int spiritId,
+            float gainLoss,
+            bool gauged,
+            List<ObjInfo4Burndwn> materialsUsed,
+            List<BlendingAdditive> blendingAdditives)
+        {
+            Produce(name, "Blending", start, end, volume, weight, alcoholContent, proof, price, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritId: spiritId, gainLoss: gainLoss, blendingAdditives: blendingAdditives);
+        }
+
+        private void ProduceBottle(
+            string name,
+            DateTime start,
+            DateTime end,
+            float volume,
+            float weight,
+            float alcoholContent,
+            float proof,
+            float price,
+            int vendorId,
+            int storageId,
+            int spiritTypeReportingId,
+            int spiritId,
+            float gainLoss,
+            bool gauged,
+            List<ObjInfo4Burndwn> materialsUsed,
+            BottlingObject bottlingInfo = null)
+        {
+            Produce(name, "Bottling", start, end, volume, weight, alcoholContent, proof, price, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritId: spiritId, gainLoss: gainLoss, bottlingInfo: bottlingInfo);
+        }
+
+        private int GetSpiritCutId(string spiritCut)
+        {
+            return (from rec in _db.SpiritCut
+                      where rec.Name == spiritCut
+                      select rec.SpiritCutID).Single();
+        }
+
+        private void Produce(
+            string name,
+            string type,
+            DateTime start,
+            DateTime end,
+            float volume,
+            float weight,
+            float alcoholContent,
+            float proof,
+            float price,
+            int vendorId,
+            int storageId,
+            int spiritTypeReportingId,
+            bool gauged,
+            List<ObjInfo4Burndwn> materialsUsed,
+            string spiritCut = "",
+            float gainLoss = 0f,
+            int spiritId = 0,
+            List<BlendingAdditive> blendingAdditives = null,
+            BottlingObject bottlingInfo = null)
+        {
+            int spiritCutId = 0;
+
+            if (spiritCut != string.Empty)
+            {
+                // Get spirit cut id
+                spiritCutId = GetSpiritCutId(spiritCut);
+            }
+
+            ProductionObject production = new ProductionObject
+            {
+                BatchName = name,
+                ProductionType = type,
+                ProductionDate = start,
+                ProductionStart = start,
+                ProductionEnd = end,
+                Gauged = gauged,
+                GainLoss = gainLoss,
+                SpiritCutId = spiritCutId,
+                SpiritId = spiritId,
+                SpiritTypeReportingID = spiritTypeReportingId,
+                Quantity = volume,
+                VolumeByWeight = weight,
+                AlcoholContent = alcoholContent,
+                ProofGallon = proof,
+                Storage = new List<StorageObject>
+                {
+                    new StorageObject
+                    {
+                        StorageId = storageId
+                    }
+                },
+                UsedMats = materialsUsed,
+                BlendingAdditives = blendingAdditives
+            };
+
+            int id = _production.CreateProduction(production, _userId);
+
+            // id will be 0 if CreateProduction failed
+            if (id == 0)
+            {
+                throw new Exception();
+            }
+
+            // Update dummy object with an actual record id
+            production.ProductionId = id;
+
+            // Add to dictionary for use in test method
+            _productions.Add(production.BatchName, production);
+
+            // Add record id to cleanup list
+            _cleanup.Add(Tuple.Create(id, Table.Production));
+        }
+
+        private StorageReportObject GetStorageReport(int year, int month)
+        {
+            var start = GetReportStart(year, month);
+            var end = GetReportEnd(year, month);
+
+            return _storageReport.GetStorageReportData(
+                GetReportStart(year, month),
+                GetReportEnd(year, month),
+                _userId);
+        }
+
+        private DateTime GetReportStart(int year, int month)
+        {
+            return new DateTime(year, month, 1);
+        }
+
+        private DateTime GetReportEnd(int year, int month)
+        {
+            int lastDayOfMonth = DateTime.DaysInMonth(year, month);
+            return new DateTime(year, month, lastDayOfMonth);
+        }
+
+        private ProductionReportingObject GetProductionReport(DateTime start, DateTime end)
+        {
+            return _productionReport.GetProductionReportData(start, end, _userId);
+        }
+
+        private ProcessingReportingObject GetProcessingReport(DateTime start, DateTime end)
+        {
+            return _processingReport.GetProcessingReportData(start, end, _userId);
+        }
+
+        private void AssertReportHeader(ReportHeader header)
+        {
+            Assert.AreEqual(_header.DSP, header.DSP);
+            Assert.AreEqual(_header.EIN, header.EIN);
+            Assert.AreEqual(_header.PlantAddress, header.PlantAddress);
+            Assert.AreEqual(_header.ProprietorName, header.ProprietorName);
+            Assert.AreEqual(_header.ReportDate, header.ReportDate);
+        }
+
+        private void AssertStorage(
+            StorageReportObject report,
+            ReportHeader header,
+            List<StorageReportCategory> categories)
+        {
+            _header.ReportDate = header.ReportDate;
+            AssertReportHeader(report.Header);
+            Assert.AreEqual(categories.Count, report.ReportBody.Count);
+
+            foreach (var cat in categories)
+            {
+                Assert.AreEqual(cat.r1_OnHandFirstOfMonth, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r1_OnHandFirstOfMonth)
+                    .Single());
+                Assert.AreEqual(cat.r2_DepositedInBulkStorage, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r2_DepositedInBulkStorage)
+                    .Single());
+                Assert.AreEqual(cat.r4_ReturnedToBulkStorage, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r4_ReturnedToBulkStorage)
+                    .Single());
+                Assert.AreEqual(cat.r6_TotalLines1Through5, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r6_TotalLines1Through5)
+                    .Single());
+                Assert.AreEqual(cat.r7_TaxPaid, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r7_TaxPaid)
+                    .Single());
+                Assert.AreEqual(cat.r17_TransferredToProcessingAccount, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r17_TransferredToProcessingAccount)
+                    .Single());
+                Assert.AreEqual(cat.r18_TransferredToProductionAccount, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r18_TransferredToProductionAccount)
+                    .Single());
+                Assert.AreEqual(cat.r19_TransferredToOtherBondedPremises, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r19_TransferredToOtherBondedPremises)
+                    .Single());
+                Assert.AreEqual(cat.r20_Destroyed, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r20_Destroyed)
+                    .Single());
+                Assert.AreEqual(cat.r22_OtherLosses, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r22_OtherLosses)
+                    .Single());
+                Assert.AreEqual(cat.r23_OnHandEndOfMonth, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r23_OnHandEndOfMonth)
+                    .Single());
+                Assert.AreEqual(cat.r24_Lines7Through23, report.ReportBody
+                    .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                    .Select(x => x.r24_Lines7Through23)
+                    .Single());
+            }
+        }
+
+        private void AssertProduction(
+            ProductionReportingObject report,
+            ReportHeader header,
+            List<ProdReportPart1> part1 = null,
+            List<ProdReportParts2Through4> part2to4 = null,
+            List<ProdReportPart5> part5 = null,
+            List<ProdReportPart6> part6 = null)
+        {
+            _header.ReportDate = header.ReportDate;
+            AssertReportHeader(report.Header);
+
+            if (part1 != null)
+            {
+                Assert.AreEqual(part1.Count, report.Part1List.Count);
+
+                foreach (var cat in part1)
+                {
+                    Assert.AreEqual(cat.ProccessingAcct, report.Part1List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.ProccessingAcct)
+                        .Single());
+                    Assert.AreEqual(cat.StorageAcct, report.Part1List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.StorageAcct)
+                        .Single());
+                    Assert.AreEqual(cat.ProducedTotal, report.Part1List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.ProducedTotal)
+                        .Single());
+                    Assert.AreEqual(cat.Recd4RedistilaltionL15, report.Part1List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.Recd4RedistilaltionL15)
+                        .Single());
+                    Assert.AreEqual(cat.Recd4RedistilL17, report.Part1List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.Recd4RedistilL17)
+                        .Single());
+                    Assert.AreEqual(cat.UnfinishedSpiritsEndOfQuarterL17, report.Part1List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.UnfinishedSpiritsEndOfQuarterL17)
+                        .Single());
+                }
+            }
+
+            if (part2to4 != null)
+            {
+                foreach (var cat in part2to4)
+                {
+                    Assert.AreEqual(cat.KindOfMaterial, report.Part2Through4List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.KindOfMaterial)
+                        .Single());
+                    Assert.AreEqual(cat.ProofGallons, report.Part2Through4List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.ProofGallons)
+                        .Single());
+                    Assert.AreEqual(cat.MaterialKindReportingID, report.Part2Through4List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.MaterialKindReportingID)
+                        .Single());
+                    Assert.AreEqual(cat.NewCoop, report.Part2Through4List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.NewCoop)
+                        .Single());
+                    Assert.AreEqual(cat.UsedCoop, report.Part2Through4List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.UsedCoop)
+                        .Single());
+                    Assert.AreEqual(cat.Tanks, report.Part2Through4List
+                        .Where(x => x.SpiritTypeReportingID == cat.SpiritTypeReportingID)
+                        .Select(x => x.Tanks)
+                        .Single());
+                }
+            }
+
+            if (part5 != null)
+            {
+                foreach (var cat in part5)
+                {
+                    Assert.AreEqual(cat.Proof, part5.Where(x => x.KindofSpirits == cat.KindofSpirits).Select(x => x.Proof).Single());
+                }
+            }
+
+            if (part6 != null)
+            {
+                foreach (var cat in part6)
+                {
+                    Assert.AreEqual(cat.Volume, report.ProdReportPart6List
+                        .Where(x => x.KindOfMaterial == cat.KindOfMaterial)
+                        .Where(x => x.ProdReportMaterialCategoryID == cat.ProdReportMaterialCategoryID)
+                        .Select(x => x.Volume)
+                        .Single());
+                    Assert.AreEqual(cat.Weight, report.ProdReportPart6List
+                        .Where(x => x.KindOfMaterial == cat.KindOfMaterial)
+                        .Where(x => x.ProdReportMaterialCategoryID == cat.ProdReportMaterialCategoryID)
+                        .Select(x => x.Weight)
+                        .Single());
+                }
+            }
+        }
+
+        private void AssertProcessing(
+            ProcessingReportingObject report,
+            ReportHeader header,
+            ProcessReportingPart1 part1 = null,
+            ProcessReportingPart2 part2 = null,
+            List<ProcessReportingPart4> part4 = null)
+        {
+            _header.ReportDate = header.ReportDate;
+            AssertReportHeader(report.Header);
+
+            if (part1 != null)
+            {
+                Assert.AreEqual(part1.BulkIngredients, report.Part1.BulkIngredients);
+                Assert.AreEqual(part1.OnHandFirstofMonth, report.Part1.OnHandFirstofMonth);
+                Assert.AreEqual(part1.Recd4Process, report.Part1.Recd4Process);
+                Assert.AreEqual(part1.WineMixedWithSpirit, report.Part1.WineMixedWithSpirit);
+                Assert.AreEqual(part1.Dumped4Processing, report.Part1.Dumped4Processing);
+                Assert.AreEqual(part1.Gains, report.Part1.Gains);
+                Assert.AreEqual(part1.AmtBottledPackaged, report.Part1.AmtBottledPackaged);
+                Assert.AreEqual(part1.Transf2Prod4Redistil, report.Part1.Transf2Prod4Redistil);
+                Assert.AreEqual(part1.Destroyed, report.Part1.Destroyed);
+                Assert.AreEqual(part1.Used4Redistil, report.Part1.Used4Redistil);
+                Assert.AreEqual(part1.Losses, report.Part1.Losses);
+                Assert.AreEqual(part1.OnHandEndofMonth, report.Part1.OnHandEndofMonth);
+            }
+
+            if(part2 != null)
+            {
+                Assert.AreEqual(part2.FinishedProduct, report.Part2.FinishedProduct);
+                Assert.AreEqual(part2.OnHandFirstofMonth, report.Part2.OnHandFirstofMonth);
+                Assert.AreEqual(part2.AmtBottledPackaged, report.Part2.AmtBottledPackaged);
+                Assert.AreEqual(part2.Recd4Process, report.Part2.Recd4Process);
+                Assert.AreEqual(part2.InventoryOverage, report.Part2.InventoryOverage);
+                Assert.AreEqual(part2.Transf2Prod4Redistil, report.Part2.Transf2Prod4Redistil);
+                Assert.AreEqual(part2.Destroyed, report.Part2.Destroyed);
+                Assert.AreEqual(part2.Dumped4Processing, report.Part2.Dumped4Processing);
+                Assert.AreEqual(part2.RecordedLosses, report.Part2.RecordedLosses);
+                Assert.AreEqual(part2.InventoryOverage, report.Part2.InventoryOverage);
+                Assert.AreEqual(part2.OnHandEndofMonth, report.Part2.OnHandEndofMonth);
+                Assert.AreEqual(part2.TaxWithdrawn, report.Part2.TaxWithdrawn);
+                Assert.AreEqual(part2.TotalLine31, report.Part2.TotalLine31);
+                Assert.AreEqual(part2.TotalLine47, report.Part2.TotalLine47);
+            }
+
+            if(part4 != null)
+            {
+                foreach (var cat in part4)
+                {
+                    Assert.AreEqual(cat.AlcoholNeutral, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.AlcoholNeutral)
+                        .Single());
+                    Assert.AreEqual(cat.BlendedStraightWhiskey, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.BlendedStraightWhiskey)
+                        .Single());
+                    Assert.AreEqual(cat.BlendedWhiskeyWithNeutral, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.BlendedWhiskeyWithNeutral)
+                        .Single());
+                    Assert.AreEqual(cat.BlendedWhiskeyWithLight, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.BlendedWhiskeyWithLight)
+                        .Single());
+                    Assert.AreEqual(cat.BlendedLightWhiskey, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.BlendedLightWhiskey)
+                        .Single());
+                    Assert.AreEqual(cat.BlendedOtherWhiskey, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.BlendedOtherWhiskey)
+                        .Single());
+                    Assert.AreEqual(cat.ImportedWhiskeyScotch, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.ImportedWhiskeyScotch)
+                        .Single());
+                    Assert.AreEqual(cat.ImportedWhiskeyCanadian, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.ImportedWhiskeyCanadian)
+                        .Single());
+                    Assert.AreEqual(cat.ImportedWhiskeyIrish, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.ImportedWhiskeyIrish)
+                        .Single());
+                    Assert.AreEqual(cat.DomesticWhiskey160Under, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.DomesticWhiskey160Under)
+                        .Single());
+                    Assert.AreEqual(cat.DomesticWhiskeyOver160, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.DomesticWhiskeyOver160)
+                        .Single());
+                    Assert.AreEqual(cat.Brandy170Under, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.Brandy170Under)
+                        .Single());
+                    Assert.AreEqual(cat.BrandyOver170, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.BrandyOver170)
+                        .Single());
+                    Assert.AreEqual(cat.RumPuertoRican, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.RumPuertoRican)
+                        .Single());
+                    Assert.AreEqual(cat.RumVirginIslands, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.RumVirginIslands)
+                        .Single());
+                    Assert.AreEqual(cat.RumDomestic, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.RumDomestic)
+                        .Single());
+                    Assert.AreEqual(cat.RumOtherImported, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.RumOtherImported)
+                        .Single());
+                    Assert.AreEqual(cat.Gin, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.Gin)
+                        .Single());
+                    Assert.AreEqual(cat.Vodka, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.Vodka)
+                        .Single());
+                    Assert.AreEqual(cat.Liqueur, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.Liqueur)
+                        .Single());
+                    Assert.AreEqual(cat.Cocktail, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.Cocktail)
+                        .Single());
+                    Assert.AreEqual(cat.Tequila, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.Tequila)
+                        .Single());
+                    Assert.AreEqual(cat.ProcessingTypeID, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.ProcessingTypeID)
+                        .Single());
+                    Assert.AreEqual(cat.StateID, report.Part4List
+                        .Where(x => x.ProcessingSpirits == cat.ProcessingSpirits)
+                        .Select(x => x.StateID)
+                        .Single());
+                }
+            }
         }
 
         /// <summary>
