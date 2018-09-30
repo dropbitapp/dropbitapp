@@ -1219,6 +1219,17 @@ namespace WebApp.Workflows
                             {
                                 _db.BlendedComponent.RemoveRange(blendedComp);
                             }
+
+                            var gainLoss =
+                                (from rec in _db.GainLoss
+                                 where rec.ProductionId == prodRec.ProductionID
+                                 select rec);
+
+                            if (gainLoss != null)
+                            {
+                                _db.GainLoss.RemoveRange(gainLoss);
+                            }
+
                         }
 
                         if (productionType == "Bottling")
@@ -1251,6 +1262,16 @@ namespace WebApp.Workflows
                             if (fillTest != null)
                             {
                                 _db.FillTest.RemoveRange(fillTest);
+                            }
+
+                            var gainLoss =
+                                (from rec in _db.GainLoss
+                                 where rec.ProductionId == prodRec.ProductionID
+                                 select rec);
+
+                            if (gainLoss != null)
+                            {
+                                _db.GainLoss.RemoveRange(gainLoss);
                             }
                         }
 
