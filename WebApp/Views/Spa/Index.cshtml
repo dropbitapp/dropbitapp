@@ -1,0 +1,11 @@
+﻿
+@{
+    Layout = null;
+}
+
+@using Microsoft.AspNet.Identity
+@if (Request.IsAuthenticated)
+{
+    @Html.AntiForgeryToken()
+    @Html.Raw(File.ReadAllText(Server.MapPath("~/spa/dist/index.html")))
+}

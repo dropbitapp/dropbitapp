@@ -19,9 +19,9 @@
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort>44363</IISExpressSSLPort>
-    <IISExpressAnonymousAuthentication />
-    <IISExpressWindowsAuthentication />
-    <IISExpressUseClassicPipelineMode />
+    <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>disabled</IISExpressWindowsAuthentication>
+    <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -181,6 +181,7 @@
     <Compile Include="Controllers\PurchaseController.cs" />
     <Compile Include="Controllers\ReportingController.cs" />
     <Compile Include="Controllers\DeveloperController.cs" />
+    <Compile Include="Controllers\SpaController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -1021,6 +1022,8 @@
     <Content Include="Scripts\Helpers\genericWorkflowHelpers.js" />
     <None Include="Properties\PublishProfiles\merakiprod - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\merakiprod - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\merakistage - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\merakistage - Web Deploy.pubxml" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
@@ -1031,6 +1034,19 @@
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\_references.js" />
+    <Content Include="spa\.eslintrc.js" />
+    <Content Include="spa\.gitignore" />
+    <Content Include="spa\babel.config.js" />
+    <Content Include="spa\dist\app.js" />
+    <Content Include="spa\dist\favicon.ico" />
+    <Content Include="spa\dist\img\logo.82b9c7a5.png" />
+    <Content Include="spa\dist\index.html" />
+    <Content Include="spa\postcss.config.js" />
+    <Content Include="spa\public\favicon.ico" />
+    <Content Include="spa\public\index.html" />
+    <Content Include="spa\src\assets\logo.png" />
+    <Content Include="spa\src\main.js" />
+    <Content Include="spa\vue.config.js" />
     <Content Include="SQL Server\DeleteUserDataFromALLRelevantTables.sql" />
     <Content Include="SQL Server\DictRawMaterialView_v3.sql" />
     <Content Include="SQL Server\DICT_GetVendorList.sql" />
@@ -1121,6 +1137,13 @@
     <Content Include="Views\Reporting\Storage.cshtml" />
     <Content Include="Views\Destruction\Index.cshtml" />
     <Content Include="Views\Developer\Developer.cshtml" />
+    <Content Include="spa\.browserslistrc" />
+    <Content Include="spa\package-lock.json" />
+    <Content Include="spa\package.json" />
+    <Content Include="spa\README.md" />
+    <Content Include="spa\src\App.vue" />
+    <Content Include="spa\src\components\HelloWorld.vue" />
+    <Content Include="Views\Spa\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
