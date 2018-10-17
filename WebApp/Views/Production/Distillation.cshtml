@@ -582,10 +582,10 @@
                                 }
                             },
                             {
-                                input: '#ProdQuantityInput', message: 'Please Enter Quantity', action: 'blur', rule: function () {
+                                input: '#ProdQuantityInput', message: 'Please Enter Volume', action: 'blur', rule: function () {
                                     var quantityValue = $("#ProdQuantityInput").val();
-                                    var volumeValue = $('#ProdVolumeByWeightInput').val();
-                                    if (volumeValue != 0) {
+                                    var weightValue = $('#ProdVolumeByWeightInput').val();
+                                    if (weightValue > 0) {
                                         return true;
                                     } else if (quantityValue > 0) {
                                         $('#validationForm').jqxValidator('validateInput', '#ProdVolumeByWeightInput');
@@ -595,16 +595,36 @@
                                 }
                             },
                             {
-                                input: '#ProdVolumeByWeightInput', message: 'Please Enter Volume', action: 'blur', rule: function () {
-                                    var volumeValue = $('#ProdVolumeByWeightInput').val();
+                                input: '#ProdQuantityInput', message: 'Please Either Select Volume or Weight', action: 'blur', rule: function () {
                                     var quantityValue = $("#ProdQuantityInput").val();
-                                    if (quantityValue != 0) {
+                                    var weightValue = $('#ProdVolumeByWeightInput').val();
+                                    if (quantityValue > 0 && weightValue > 0) {
+                                        return false;
+                                    }
+                                    return true;
+                                }
+                            },
+                            {
+                                input: '#ProdVolumeByWeightInput', message: 'Please Enter Weight', action: 'blur', rule: function () {
+                                    var weightValue = $('#ProdVolumeByWeightInput').val();
+                                    var quantityValue = $("#ProdQuantityInput").val();
+                                    if (quantityValue > 0) {
                                         return true;
-                                    } else if (volumeValue > 0) {
+                                    } else if (weightValue > 0) {
                                         $('#validationForm').jqxValidator('validateInput', '#ProdQuantityInput');
                                         return true;
                                     }
                                     return false;
+                                }
+                            },
+                            {
+                                input: '#ProdVolumeByWeightInput', message: 'Please Select Either Volume or Weight', action: 'blur', rule: function () {
+                                    var weightValue = $('#ProdVolumeByWeightInput').val();
+                                    var quantityValue = $("#ProdQuantityInput").val();
+                                    if (weightValue > 0 && quantityValue > 0) {
+                                        return false;
+                                    }
+                                    return true;
                                 }
                             },
                             {

@@ -1195,6 +1195,134 @@ namespace WebApp.Helpers.Tests
         }
 
         /// <summary>
+        /// Test backend validation which prevent user from creating purchase/production record that contains both weight and volume.
+        /// 1) Create two puchase fermentable records, one with only volume and the other with only weight.
+        /// 2) Create two produce fermentation recoreds, one with burning down volume purchase, the other with buring down weight purchase.
+        /// 3) Assert that both purchase and both production records have been created.
+        /// 4) Attempt to create a purchase record with both volume and weight and assert that System.Exception is thrown.
+        /// 5) Attempt to create a production record with both volume and weight and asser that System.Exception is thrown.
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(System.Exception), AllowDerivedTypes = true)]
+        public void Purchase_and_Production_Weight_Volume_Validation()
+        {
+            // Arrange
+            PurchaseFermentable(name: "GrapesByVolume",
+                    date: new DateTime(2018, 6, 1),
+                    volume: 1000f,
+                    weight: 0f,
+                    alcoholContent: 0f,
+                    proof: 0f,
+                    materialDictId: _rawMaterials["Grapes"].RawMaterialId,
+                    price: 1f,
+                    vendorId: _vendors["Vendor"].VendorId,
+                    storageId: _storages["Storage"].StorageId);
+
+            PurchaseFermentable(name: "GrapesByWeight",
+                    date: new DateTime(2018, 6, 1),
+                    volume: 0f,
+                    weight: 1000f,
+                    alcoholContent: 0f,
+                    proof: 0f,
+                    materialDictId: _rawMaterials["Grapes"].RawMaterialId,
+                    price: 1f,
+                    vendorId: _vendors["Vendor"].VendorId,
+                    storageId: _storages["Storage"].StorageId);
+
+            ProduceFerment(name: "WineByVolume",
+                start: new DateTime(2018, 6, 2),
+                end: new DateTime(2018, 6, 3),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 10f,
+                proof: 20f,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _purchases["GrapesByVolume"].PurchaseId,
+                        OldVal = 500f,
+                        NewVal = 0f,
+                        DistillableOrigin = "pur",
+                        BurningDownMethod = "volume"
+                    }
+                });
+
+            ProduceFerment(name: "WineByWeight",
+                start: new DateTime(2018, 6, 2),
+                end: new DateTime(2018, 6, 3),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 10f,
+                proof: 20f,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _purchases["GrapesByWeight"].PurchaseId,
+                        OldVal = 500f,
+                        NewVal = 0f,
+                        DistillableOrigin = "pur",
+                        BurningDownMethod = "weight"
+                    }
+                });
+
+            // Assert
+            Assert.IsNotNull(_purchases["GrapesByVolume"].PurchaseId);
+            Assert.IsNotNull(_purchases["GrapesByWeight"].PurchaseId);
+            Assert.IsNotNull(_productions["WineByVolume"].ProductionId);
+            Assert.IsNotNull(_productions["WineByWeight"].ProductionId);
+
+            // Assert Exception is thrown when there's an attempt to create recrds with both weight and volume. 
+            PurchaseFermentable(name: "GrapesByVolumeWeight",
+                date: new DateTime(2018, 6, 1),
+                volume: 1000f,
+                weight: 1000f,
+                alcoholContent: 0f,
+                proof: 0f,
+                materialDictId: _rawMaterials["Grapes"].RawMaterialId,
+                price: 1f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            ProduceFerment(name: "WineByVolumeWeight",
+                start: new DateTime(2018, 6, 2),
+                end: new DateTime(2018, 6, 3),
+                volume: 100f,
+                weight: 100f,
+                alcoholContent: 10f,
+                proof: 20f,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                new ObjInfo4Burndwn {
+                    ID = _purchases["GrapesByVolume"].PurchaseId,
+                    OldVal = 100f,
+                    NewVal = 0f,
+                    DistillableOrigin = "pur",
+                    BurningDownMethod = "volume"
+                },
+                new ObjInfo4Burndwn
+                {
+                    ID = _purchases["GrapesByWeight"].PurchaseId,
+                    OldVal = 100f,
+                    NewVal = 0f,
+                    DistillableOrigin = "pur",
+                    BurningDownMethod = "weight"
+                }
+                });
+        }
+
+        /// <summary>
         /// 1) Purchase(Fermentable): 4,753 lb on 11/2/2016
         /// 2) Production(Fermented): 640@11.5%147.2 on 11/5/2016
         /// 3) Production(Distilled): 350/640 of fermented batch for a total of 41.27@55%45.39 on 11/6/2016 to 11/29/2016

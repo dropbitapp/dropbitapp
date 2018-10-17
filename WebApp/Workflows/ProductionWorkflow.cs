@@ -59,6 +59,12 @@ namespace WebApp.Workflows
                 prod.ProductionTypeID = pTypes.ProductionTypeID;
             }
 
+            if (prodObject.Quantity > 0 && prodObject.VolumeByWeight > 0)
+            {
+                retMthdExecResult = 0;
+                throw new Exception("A record cannot be created with both volume and weigt values");
+            }
+
             if (prodObject.Quantity > 0 && prodObject?.Quantity != null)
             {
                 Volume quantG = new Volume();
