@@ -33,20 +33,18 @@ namespace WebApp.Reports
 
             List<ProductionReportHelper> tempRepObjList = new List<ProductionReportHelper>();
 
-            var line8RunningSum = 0F;
-            var line26RunningSum = 0F;
-
             // get distiller information for header report
             int distillerID = _dl.GetDistillerId(userId);
+
             procRepObj.Header = _dl.GetDistillerInfoForReportHeader(distillerID, startOfReporting);
 
             // 7(c) gains - moved to beginning of method because they are used to adjust received and last of month
             // Existing queries don't account for gain/loss
             GetGains(startOfReporting, endOfReporting, userId, ref procRepP1);
 
-            // 24 (c) Losses - moved to beginning of method because they are used to adjust received and last of month
+            // 24 (c) LossesLine24 - moved to beginning of method because they are used to adjust received and last of month
             // Existing queries don't account for gain/loss
-            Losses(startOfReporting, endOfReporting, userId, ref procRepP1);
+            LossesLine24(startOfReporting, endOfReporting, userId, ref procRepP1);
 
             // Processing Report Part 1 Section
             procRepP1.BulkIngredients = "spirit";
@@ -63,39 +61,24 @@ namespace WebApp.Reports
             // Add losses to received in bulk (existing query doesn't account for this)
             procRepP1.Recd4Process += procRepP1.Losses;
 
-            // Update line 8 totals
-            line8RunningSum += procRepP1.OnHandFirstofMonth + procRepP1.Recd4Process + procRepP1.Gains;
+            // 8 (c) Total - Lines 1 through7
+            TotalLines1Through7(ref procRepP1);
 
             // 9 (c) Bottled or Packaged
             BottledOrPackaged(startOfReporting, endOfReporting, userId, ref procRepP1);
 
+            // 26 (c) Totals - Lines 9 through 25. This method needs to be called before OnHandEndOfMonth as results from line 26 are used there
+            TotalLines9Through25(ref procRepP1);
+
             // 25(c) On hand end of month
-            OnHandEndOfMonth(ref procRepP1, line8RunningSum, line26RunningSum);
-
-            // Remove losses from on hand end of month (existing query doesn't account for this)
-            procRepP1.OnHandEndofMonth -= procRepP1.Losses;
-
-            // Add on hand end of month to line 26 totals
-            line26RunningSum += procRepP1.OnHandEndofMonth;
-
-            // Update line 26 totals
-            line26RunningSum = procRepP1.AmtBottledPackaged + procRepP1.Losses;
-
-            // Round to three decimals
-            line8RunningSum = (float)Math.Round(line8RunningSum, 3);
-            line26RunningSum = (float)Math.Round(line26RunningSum, 3);
-
-            if ((line8RunningSum - line26RunningSum) < 0)
-            {
-                throw new InvalidOperationException();
-            }
+            OnHandEndOfMonth(ref procRepP1);
 
             // Processing Report Part 2 Section
             // Bottled Column(b)
             procRepP2.FinishedProduct = "bottled";
 
             // 27(c) previous month
-            OnHandFirstOfMonthBottled(startOfReporting, userId, ref procRepP2);
+            OnHandFirstOfMonthBottled(startOfReporting, endOfReporting, userId, ref procRepP2);
 
             // 28(b) Bottled or Packaged
             BottledOrPackagedpart2(startOfReporting, endOfReporting, userId, ref procRepP2);
@@ -106,11 +89,14 @@ namespace WebApp.Reports
             // line 33 - Withdrawn for Tax Determined
             WithdrawnTaxDetermined(startOfReporting, endOfReporting, ref procRepP2, userId);
 
+            // line 44
+            LossesLine44(startOfReporting, endOfReporting, ref procRepP2, userId);
+
+            // 47 (b) this method needs to be excuted first, before OnHandEndOfMonthPart2 since it is used there.
+            TotalLines32Through46(ref procRepP2);
+
             // 46 (b) On hand End of Month
             OnHandEndOfMonthPart2(endOfReporting, userId, ref procRepP2);
-
-            // 47 (b)
-            TotalLines32Through46(ref procRepP2);
 
             // Processing Report Part 4
             Part4ProcessingReport(startOfReporting, endOfReporting, userId, ref procRepP4L);
@@ -128,6 +114,72 @@ namespace WebApp.Reports
         }
 
         /// <summary>
+        /// This method keeps track of losses that accrued during this reporting period. One example is Losses that
+        /// occur during the transfer from Blended into Bottling.
+        /// </summary>
+        /// <param name="startOfReporting"></param>
+        /// <param name="endOfReporting"></param>
+        /// <param name="procRepP2"></param>
+        /// <param name="userId"></param>
+        private void LossesLine44(DateTime startOfReporting, DateTime endOfReporting, ref ProcessReportingPart2 procRepP2, int userId)
+        {
+            var accumulatedLoss =
+            (from prod in
+            (from prod in _db.Production
+             join gl in _db.GainLoss on new { ProductionID = prod.ProductionID } equals new { ProductionID = gl.ProductionId } into gl_join
+             from gl in gl_join.DefaultIfEmpty()
+             join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+             from distillers in distillers_join.DefaultIfEmpty()
+             where
+             distillers.UserId == userId &&
+             prod.Gauged == true &&
+             gl.Type == false &&
+             (
+                 prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled
+             )
+            && prod.ProductionEndTime >= startOfReporting
+            && prod.ProductionEndTime <= endOfReporting
+             select new
+             {
+                 Quantity = (System.Single?)gl.Quantity ?? (System.Single?)0,
+                 Dummy = "x"
+             })
+             group prod by new { prod.Dummy } into g
+             select new
+             {
+                 Losses = g.Sum(p => p.Quantity) ?? 0
+             }).FirstOrDefault();
+
+            if (accumulatedLoss != null)
+            {
+                procRepP2.RecordedLosses = accumulatedLoss.Losses;
+            }
+            // round to 3 decimals
+            Math.Round(procRepP2.RecordedLosses, 3);
+        }
+
+        /// <summary>
+        /// Method that sums up lines 1 through 7 of processing report
+        /// </summary>
+        /// <param name="procRepP1"></param>
+        private void TotalLines1Through7(ref ProcessReportingPart1 procRepP1)
+        {
+            procRepP1.TotalLine8 += procRepP1.OnHandFirstofMonth + procRepP1.Recd4Process + procRepP1.Gains;
+            Math.Round(procRepP1.TotalLine8, 3);
+        }
+
+        /// <summary>
+        /// Method that sums up lines 9 through 25 of processing report
+        /// </summary>
+        /// <param name="procRepP1"></param>
+        private void TotalLines9Through25(ref ProcessReportingPart1 procRepP1)
+        {
+            procRepP1.TotalLine26 += procRepP1.AmtBottledPackaged + procRepP1.Losses;
+            Math.Round(procRepP1.TotalLine26, 3);
+        }
+
+
+        /// <summary>
         /// TotalLines27Through30 method simply adds up Lines 27 through 31
         /// </summary>
         /// <param name="procRepP2"></param>
@@ -143,7 +195,7 @@ namespace WebApp.Reports
         /// <param name="procRepP2"></param>
         private void TotalLines32Through46(ref ProcessReportingPart2 procRepP2)
         {
-            procRepP2.TotalLine47 = procRepP2.TaxWithdrawn + procRepP2.OnHandEndofMonth; // continue on adding extra rows as we add support for them
+            procRepP2.TotalLine47 = procRepP2.TaxWithdrawn + procRepP2.RecordedLosses; // continue on adding extra rows as we add support for them
             Math.Round(procRepP2.TotalLine47, 3);
         }
 
@@ -977,7 +1029,7 @@ namespace WebApp.Reports
         /// <param name="procRepP2"></param>
         private void OnHandEndOfMonthPart2(DateTime endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
         {
-            procRepP2.OnHandEndofMonth = procRepP2.TotalLine31 - procRepP2.TaxWithdrawn; // grisha:todo: as we continue on adding new cases for rows 32 through 45 we need to keep subtracting it
+            procRepP2.OnHandEndofMonth = procRepP2.TotalLine31 - procRepP2.TotalLine47; // grisha:todo: as we continue on adding new cases for rows 32 through 45 we need to keep subtracting it
             // round to 3 decimals
             Math.Round(procRepP2.OnHandEndofMonth, 3);
         }
@@ -994,38 +1046,40 @@ namespace WebApp.Reports
         /// <param name="procRepP2"></param>
         private void BottledOrPackagedpart2(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
         {
-            var bottledPackagedp2 =
-                            (from prod in
-                                (from prod in _db.Production
-                                 join prod4Rep in _db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
-                                 from prod4Rep in prod4Rep_join.DefaultIfEmpty()
-                                 join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
-                                 from distillers in distillers_join.DefaultIfEmpty()
-                                 where
-                                    distillers.UserId == userId &&
-                                    prod.Gauged == true &&
-                                    prod.ProductionEndTime >= startOfReporting &&
-                                    prod.ProductionEndTime <= endOfReporting &&
-                                    (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
-                                    prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing) &&
-                                    prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled
-                                 select new
-                                 {
-                                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
-                                     Dummy = "x"
-                                 })
-                             group prod by new { prod.Dummy } into g
-                             select new
-                             {
-                                 BottledPackagedBottled = g.Sum(p => p.Value)
-                             }).FirstOrDefault();
+            var bottledPackaged =
+                (from prod in
+                (from prod in _db.Production
+                 join prod4Rep in _db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
+                 from prod4Rep in prod4Rep_join.DefaultIfEmpty()
+                 join gl in _db.GainLoss on new { ProductionID = prod.ProductionID } equals new { ProductionID = gl.ProductionId } into gl_join
+                 from gl in gl_join.DefaultIfEmpty()
+                 join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 where
+                   distillers.UserId == userId &&
+                   prod.Gauged == true &&
+                   prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled &&
+                   (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
+                   prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing) &&
+                   prod.ProductionEndTime >= startOfReporting &&
+                   prod.ProductionEndTime <= endOfReporting
+                 select new
+                 {
+                     Value = (System.Single?)prod4Rep.Proof + (System.Single?)gl.Quantity ?? 0,
+                     Dummy = "x"
+                 })
+                 group prod by new { prod.Dummy } into g
+                 select new
+                 {
+                     BottledPackagedBottled = g.Sum(p => p.Value)
+                 }).FirstOrDefault();
 
-            if (bottledPackagedp2 != null)
+            if (bottledPackaged != null)
             {
-                procRepP2.AmtBottledPackaged = (float)bottledPackagedp2.BottledPackagedBottled;
+                procRepP2.AmtBottledPackaged = (float)bottledPackaged.BottledPackagedBottled;
+                // round to 3 decimals
+                Math.Round(procRepP2.AmtBottledPackaged, 3);
             }
-            // round to 3 decimals
-            Math.Round(procRepP2.AmtBottledPackaged, 3);
         }
 
         /// <summary>
@@ -1034,7 +1088,7 @@ namespace WebApp.Reports
         /// <param name="startOfReporting"></param>
         /// <param name="userId"> userID is used to get DistillerID for which we are quering the reports</param>
         /// <param name="procRepP2"></param>
-        private void OnHandFirstOfMonthBottled(DateTime startOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
+        private void OnHandFirstOfMonthBottled(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
         {
             var p2OnHand2stMo =
                             (from prod in
@@ -1066,19 +1120,88 @@ namespace WebApp.Reports
             {
                 procRepP2.OnHandFirstofMonth = (float)p2OnHand2stMo.OnHandFirstOfMonthBottled;
             }
+
+            // Get taxes from this reporting period to be added to OnHandFirstOfMonth
+            var taxWithdrawnThisReportingPeriod =
+                            (from prod in
+                               (from prod in _db.Production
+                                join proof in _db.Proof on prod.ProofID equals proof.ProofID into proof_join
+                                from proof in proof_join.DefaultIfEmpty()
+                                join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                                from distillers in distillers_join.DefaultIfEmpty()
+                                join tax in _db.TaxWithdrawn on prod.ProductionID equals tax.ProductionID into tax_join
+                                from tax in tax_join.DefaultIfEmpty()
+                                where
+                                    distillers.UserId == userId &&
+                                    prod.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Bottling &&
+                                    prod.Gauged == true &&
+                                    prod.ProductionEndTime < startOfReporting &&
+                                    (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
+                                    prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing ||
+                                    prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled)
+                                    && tax.DateOfSale >= startOfReporting
+                                    && tax.DateOfSale <= endOfReporting
+                                select new
+                                {
+                                    Value = (System.Single?)tax.Value ?? (System.Single?)0,
+                                    Dummy = "x"
+                                })
+                             group prod by new { prod.Dummy } into g
+                             select new
+                             {
+                                 taxes = g.Sum(p => p.Value)
+                             }).FirstOrDefault();
+
+            if (taxWithdrawnThisReportingPeriod != null)
+            {
+                procRepP2.OnHandFirstofMonth += (float)taxWithdrawnThisReportingPeriod.taxes;
+            }
+
+            // get taxed amounts that have happened after this reporting period to add it to the current ammount so the values shown are correct
+            // example: january reporting 100 PfG -> withdraw 30 PfG in February. Rerun January report and it will show 70PfG since the reports are 
+            // generated off existing values. So we need to recover those 30PfG from February and add them to 70PfG.
+            var taxesFromFutureReportingPeriods =
+                (from taxes in
+                (from taxes in _db.TaxWithdrawn
+                 join prod in _db.Production on taxes.ProductionID equals prod.ProductionID into prod_join
+                 from prod in prod_join.DefaultIfEmpty()
+                 join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
+                 from distillers in distillers_join.DefaultIfEmpty()
+                 where
+                 taxes.DateOfSale > endOfReporting
+                 && distillers.UserId == userId
+                 && prod.ProductionEndTime < startOfReporting // this is to not include taxed amounts in the first reporting period as they haven't happened yet
+                 select new
+                 {
+                     Value = (System.Single?)taxes.Value ?? (System.Single?)0,
+                     Dummy = "x"
+                 })
+                 group taxes by new { taxes.Dummy } into g
+                 select new
+                 {
+                     totalAccumulatedTaxes = g.Sum(x => x.Value)
+                 }).FirstOrDefault();
+
+            if (taxesFromFutureReportingPeriods != null)
+            {
+                procRepP2.OnHandFirstofMonth += (float)taxesFromFutureReportingPeriods.totalAccumulatedTaxes;
+            }
+
             // round to 3 decimals
             Math.Round(procRepP2.OnHandFirstofMonth, 3);
         }
 
         /// <summary>
         /// Line 25 of Processing Report
+        /// This line is being calculated by subtracting Line 26 from line 8
         /// </summary>
         /// <param name="procRepP1"></param>
         /// <param name="line8RunningSum"></param>
         /// <param name="line26RunningSum"></param>
-        private void OnHandEndOfMonth(ref ProcessReportingPart1 procRepP1, float line8RunningSum, float line26RunningSum)
+        private void OnHandEndOfMonth(ref ProcessReportingPart1 procRepP1)
         {
-            procRepP1.OnHandEndofMonth = (float)Math.Round(Convert.ToDouble(line8RunningSum - line26RunningSum), 3);
+            procRepP1.OnHandEndofMonth = procRepP1.TotalLine8 - procRepP1.TotalLine26;
+            Math.Round(procRepP1.OnHandEndofMonth, 3);
         }
 
         /// <summary>
@@ -1089,7 +1212,7 @@ namespace WebApp.Reports
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <param name="procRepP1"></param>
-        private void Losses(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
+        private void LossesLine24(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
         {
             var accumulatedLoss =
             (from prod in
@@ -1103,8 +1226,7 @@ namespace WebApp.Reports
              prod.Gauged == true &&
              gl.Type == false &&
              (
-                 prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended 
-                 || prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled
+                 prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
              )
             && prod.ProductionEndTime >= startOfReporting
             && prod.ProductionEndTime <= endOfReporting
@@ -1129,6 +1251,8 @@ namespace WebApp.Reports
 
         /// <summary>
         /// Lines 9 and 28 of Processing Report
+        /// The following conditions are used in obtaining the value:
+        /// Get All Bottling Records for the reporting period + Bottling losses that have occured during the same reporting period
         /// </summary>
         /// <param name="startOfReporting"></param>
         /// <param name="endOfReporting"></param>
@@ -1141,6 +1265,8 @@ namespace WebApp.Reports
                 (from prod in _db.Production
                  join prod4Rep in _db.Production4Reporting on prod.ProductionID equals prod4Rep.ProductionID into prod4Rep_join
                  from prod4Rep in prod4Rep_join.DefaultIfEmpty()
+                 join gl in _db.GainLoss on new { ProductionID = prod.ProductionID } equals new { ProductionID = gl.ProductionId } into gl_join
+                 from gl in gl_join.DefaultIfEmpty()
                  join distillers in _db.AspNetUserToDistiller on prod.DistillerID equals distillers.DistillerID into distillers_join
                  from distillers in distillers_join.DefaultIfEmpty()
                  where
@@ -1153,7 +1279,7 @@ namespace WebApp.Reports
                    prod.ProductionEndTime <= endOfReporting
                  select new
                  {
-                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
+                     Value = (System.Single?)prod4Rep.Proof + (System.Single?)gl.Quantity ?? 0,
                      Dummy = "x"
                  })
                  group prod by new { prod.Dummy } into g
@@ -1222,6 +1348,7 @@ namespace WebApp.Reports
         private void OnHandFirstOfMonth(DateTime startOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
         {
             var onHands1stMoC =
+                (from prod in
                 (from prod in _db.Production
                  join productionContent in _db.ProductionContent on prod.ProductionID equals productionContent.RecordID into productionContent_join
                  from productionContent in productionContent_join.DefaultIfEmpty()
@@ -1243,19 +1370,21 @@ namespace WebApp.Reports
                  || (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && outputProduction.ProductionEndTime > startOfReporting && productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedProofGal))
                  select new
                  {
-                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0
-                 }).ToList();
+                     Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
+                     Dummy = "x"
+                 }).Distinct()
+                 group prod by new { prod.Dummy } into g
+                 select new
+                 {
+                     onHandFirstofMonth = g.Sum(p => p.Value)
+                 }).FirstOrDefault();
 
             if (onHands1stMoC != null)
             {
-                foreach (var i in onHands1stMoC)
-                {
-                    procRepP1.OnHandFirstofMonth += (float)i.Value;
-                }
-
-                // round to 3 decimals
-                Math.Round(procRepP1.OnHandFirstofMonth, 3);
+                procRepP1.OnHandFirstofMonth += (float)onHands1stMoC.onHandFirstofMonth;
             }
+            // round to 3 decimals
+            Math.Round(procRepP1.OnHandFirstofMonth, 3);
         }
 
         private void Round(ref ProcessingReportingObject report)

@@ -107,6 +107,8 @@ namespace WebApp.Helpers
         public float Used4Redistil { get; set; }
         public float Losses { get; set; }
         public float OnHandEndofMonth { get; set; }
+        public float TotalLine8 { get; set; }
+        public float TotalLine26 { get; set; }
     }
 
     public class ProcessReportingPart2
