@@ -227,159 +227,157 @@ namespace WebApp.Workflows
         {
             int retMthdExecResult = 0;
 
-            try
-            {
-                Purchase purchT = new Purchase();
-                purchT.PurchaseName = purchaseObject.PurBatchName;
-                purchT.PurchaseDate = purchaseObject.PurchaseDate;
-                purchT.MaterialDictID = purchaseObject.RecordId;
-                purchT.Note = purchaseObject.Note;
-                purchT.Price = purchaseObject.Price;
-                purchT.VendorID = purchaseObject.VendorId;
-                purchT.DistillerID = _dl.GetDistillerId(userId);
-
-                var pTypes =
-                    (from rec in _db.PurchaseType
-                     where rec.Name == purchaseObject.PurchaseType
-                     select rec).FirstOrDefault();
-
-                if (pTypes != null)
-                {
-                    purchT.Gauged = pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled ? true : false;
-                    purchT.PurchaseTypeID = pTypes.PurchaseTypeID;
-                }
-
-                if (purchaseObject.Quantity > 0 && purchaseObject?.Quantity != null)
-                {
-                    Volume quantG = new Volume();
-                    quantG.Value = purchaseObject.Quantity;
-                    _db.Volume.Add(quantG);
-                    _db.SaveChanges();
-
-                    purchT.VolumeID = quantG.VolumeID;
-                }
-                else
-                {
-                    purchT.VolumeID = 0;
-                }
-
-                if (purchaseObject.VolumeByWeight > 0 && purchaseObject?.VolumeByWeight != null)
-                {
-                    Weight vBW = new Weight();
-                    vBW.Value = purchaseObject.VolumeByWeight;
-                    _db.Weight.Add(vBW);
-                    _db.SaveChanges();
-
-                    purchT.WeightID = vBW.WeightID;
-                }
-                else
-                {
-                    purchT.WeightID = 0;
-                }
-
-                if (purchaseObject.AlcoholContent > 0 && purchaseObject?.AlcoholContent != null)
-                {
-                    Alcohol alc = new Alcohol();
-                    alc.Value = purchaseObject.AlcoholContent;
-                    _db.Alcohol.Add(alc);
-                    _db.SaveChanges();
-
-                    purchT.AlcoholID = alc.AlcoholID;
-                }
-                else
-                {
-                    purchT.AlcoholID = 0;
-                }
-
-                if (purchaseObject.ProofGallon > 0 && purchaseObject?.ProofGallon != null)
-                {
-                    Proof proof = new Proof();
-                    proof.Value = purchaseObject.ProofGallon;
-                    _db.Proof.Add(proof);
-                    _db.SaveChanges();
-
-                    purchT.ProofID = proof.ProofID;
-                }
-                else
-                {
-                    purchT.ProofID = 0;
-                }
-
-                purchT.StatusID =
-                    (from rec in _db.Status
-                     where rec.Name == "Active"
-                     select rec.StatusID).FirstOrDefault();
-
-                purchT.StateID =
-                    (from rec in _db.State
-                     where rec.Name == purchaseObject.PurchaseType
-                     select rec.StateID).FirstOrDefault();
-
-                _db.Purchase.Add(purchT);
-                _db.SaveChanges();
-
-                // Only fermented and distilled purchase records can be reported on storage report
-                if ((pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled) && purchaseObject?.SpiritTypeReportingID != null && purchaseObject?.SpiritTypeReportingID != 0)
-                {
-                    PurchaseToSpiritTypeReporting pstr = new PurchaseToSpiritTypeReporting();
-                    pstr.PurchaseID = purchT.PurchaseID;
-                    pstr.SpiritTypeReportingID = purchaseObject.SpiritTypeReportingID;
-                    _db.PurchaseToSpiritTypeReporting.Add(pstr);
-                    _db.SaveChanges();
-
-                    // Persistent Reporting: call Update Storage Report method here
-                    ReportRepository reportRepository = new ReportRepository(_db, _dl);
-                    reportRepository.UpdateReportDataDuringPurchase(purchaseObject, userId);
-                }
-
-                //update StorageToRecord
-                if (purchaseObject.Storage != null)
-                {
-                    foreach (var iter in purchaseObject.Storage)
-                    {
-                        StorageToRecord storToRec = new StorageToRecord();
-                        storToRec.StorageID = iter.StorageId;
-                        storToRec.RecordId = purchT.PurchaseID;
-                        storToRec.TableIdentifier = "pur";
-                        _db.StorageToRecord.Add(storToRec);
-                        _db.SaveChanges();
-                    }
-                }
-
-                if (purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermentable || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Additive)
-                {
-                    try
-                    {
-                        // save purchase fermentable, fermented and distil data and quantities into Purchase4Reporting table which is used for reporting
-                        Purchase4Reporting purch4RepT = new Purchase4Reporting();
-                        purch4RepT.PurchaseID = purchT.PurchaseID;
-                        purch4RepT.Weight = purchaseObject.VolumeByWeight;
-                        purch4RepT.Volume = purchaseObject.Quantity;
-                        purch4RepT.Proof = purchaseObject.ProofGallon;
-                        purch4RepT.Alcohol = purchaseObject.AlcoholContent;
-                        purch4RepT.Redistilled = false;
-
-                        _db.Purchase4Reporting.Add(purch4RepT);
-                        _db.SaveChanges();
-                    }
-                    catch (Exception e)
-                    {
-                        throw;
-                    }
-                }
-
-                retMthdExecResult = purchT.PurchaseID;
-
-                // now, lets' try to save to history table
-                purchaseObject.PurchaseId = purchT.PurchaseID;
-                purchaseObject.Status = "Active";
-                _dl.SavePurchaseHistory(purchaseObject, userId);
-            }
-            catch (Exception e)
+            if (purchaseObject.Quantity > 0 && purchaseObject.VolumeByWeight > 0)
             {
                 retMthdExecResult = 0;
-                throw e;
+                throw new Exception("A record cannot be created with both volume and weigt values");
             }
+
+            Purchase purchT = new Purchase();
+            purchT.PurchaseName = purchaseObject.PurBatchName;
+            purchT.PurchaseDate = purchaseObject.PurchaseDate;
+            purchT.MaterialDictID = purchaseObject.RecordId;
+            purchT.Note = purchaseObject.Note;
+            purchT.Price = purchaseObject.Price;
+            purchT.VendorID = purchaseObject.VendorId;
+            purchT.DistillerID = _dl.GetDistillerId(userId);
+
+            var pTypes =
+                (from rec in _db.PurchaseType
+                    where rec.Name == purchaseObject.PurchaseType
+                    select rec).FirstOrDefault();
+
+            if (pTypes != null)
+            {
+                purchT.Gauged = pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled ? true : false;
+                purchT.PurchaseTypeID = pTypes.PurchaseTypeID;
+            }
+
+            if (purchaseObject.Quantity > 0 && purchaseObject?.Quantity != null)
+            {
+                Volume quantG = new Volume();
+                quantG.Value = purchaseObject.Quantity;
+                _db.Volume.Add(quantG);
+                _db.SaveChanges();
+
+                purchT.VolumeID = quantG.VolumeID;
+            }
+            else
+            {
+                purchT.VolumeID = 0;
+            }
+
+            if (purchaseObject.VolumeByWeight > 0 && purchaseObject?.VolumeByWeight != null)
+            {
+                Weight vBW = new Weight();
+                vBW.Value = purchaseObject.VolumeByWeight;
+                _db.Weight.Add(vBW);
+                _db.SaveChanges();
+
+                purchT.WeightID = vBW.WeightID;
+            }
+            else
+            {
+                purchT.WeightID = 0;
+            }
+
+            if (purchaseObject.AlcoholContent > 0 && purchaseObject?.AlcoholContent != null)
+            {
+                Alcohol alc = new Alcohol();
+                alc.Value = purchaseObject.AlcoholContent;
+                _db.Alcohol.Add(alc);
+                _db.SaveChanges();
+
+                purchT.AlcoholID = alc.AlcoholID;
+            }
+            else
+            {
+                purchT.AlcoholID = 0;
+            }
+
+            if (purchaseObject.ProofGallon > 0 && purchaseObject?.ProofGallon != null)
+            {
+                Proof proof = new Proof();
+                proof.Value = purchaseObject.ProofGallon;
+                _db.Proof.Add(proof);
+                _db.SaveChanges();
+
+                purchT.ProofID = proof.ProofID;
+            }
+            else
+            {
+                purchT.ProofID = 0;
+            }
+
+            purchT.StatusID =
+                (from rec in _db.Status
+                    where rec.Name == "Active"
+                    select rec.StatusID).FirstOrDefault();
+
+            purchT.StateID =
+                (from rec in _db.State
+                    where rec.Name == purchaseObject.PurchaseType
+                    select rec.StateID).FirstOrDefault();
+
+            _db.Purchase.Add(purchT);
+            _db.SaveChanges();
+
+            // Only fermented and distilled purchase records can be reported on storage report
+            if ((pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || pTypes.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled) && purchaseObject?.SpiritTypeReportingID != null && purchaseObject?.SpiritTypeReportingID != 0)
+            {
+                PurchaseToSpiritTypeReporting pstr = new PurchaseToSpiritTypeReporting();
+                pstr.PurchaseID = purchT.PurchaseID;
+                pstr.SpiritTypeReportingID = purchaseObject.SpiritTypeReportingID;
+                _db.PurchaseToSpiritTypeReporting.Add(pstr);
+                _db.SaveChanges();
+
+                // Persistent Reporting: call Update Storage Report method here
+                ReportRepository reportRepository = new ReportRepository(_db, _dl);
+                reportRepository.UpdateReportDataDuringPurchase(purchaseObject, userId);
+            }
+
+            //update StorageToRecord
+            if (purchaseObject.Storage != null)
+            {
+                foreach (var iter in purchaseObject.Storage)
+                {
+                    StorageToRecord storToRec = new StorageToRecord();
+                    storToRec.StorageID = iter.StorageId;
+                    storToRec.RecordId = purchT.PurchaseID;
+                    storToRec.TableIdentifier = "pur";
+                    _db.StorageToRecord.Add(storToRec);
+                    _db.SaveChanges();
+                }
+            }
+
+            if (purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermentable || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled || purchT.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Additive)
+            {
+                try
+                {
+                    // save purchase fermentable, fermented and distil data and quantities into Purchase4Reporting table which is used for reporting
+                    Purchase4Reporting purch4RepT = new Purchase4Reporting();
+                    purch4RepT.PurchaseID = purchT.PurchaseID;
+                    purch4RepT.Weight = purchaseObject.VolumeByWeight;
+                    purch4RepT.Volume = purchaseObject.Quantity;
+                    purch4RepT.Proof = purchaseObject.ProofGallon;
+                    purch4RepT.Alcohol = purchaseObject.AlcoholContent;
+                    purch4RepT.Redistilled = false;
+
+                    _db.Purchase4Reporting.Add(purch4RepT);
+                    _db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    throw;
+                }
+            }
+
+            retMthdExecResult = purchT.PurchaseID;
+
+            // now, lets' try to save to history table
+            purchaseObject.PurchaseId = purchT.PurchaseID;
+            purchaseObject.Status = "Active";
+            _dl.SavePurchaseHistory(purchaseObject, userId);
 
             return retMthdExecResult;
         }

@@ -323,23 +323,20 @@
                             rule: 'required'
                         },
                         {
-                            input: '#QuantityInput',
-                            message: 'Please Enter Quantity',
-                            action: 'blur',
-                            rule: function () {
+                            input: '#QuantityInput', message: 'Please Enter Volume', action: 'blur', rule: function () {
                                 // get material type unit of measurement (gal or lb)
                                 var selectedItem = $('#MaterialTypeInput').jqxListBox('getSelectedItem');
                                 if (selectedItem) {
                                     var unitType = selectedItem.originalItem.UnitType;
                                     // material type measured in lb (e.g pomace)
-                                    if (unitType && unitType === 'lb') {
+                                    if (unitType && unitType === 'gal') {
                                         return true;
                                     }
                                     else
                                     {
                                         var quantityValue = $("#QuantityInput").val();
-                                        var volumeValue = $('#VolumeByWeightInput').val();
-                                        if (volumeValue > 0) {
+                                        var weightValue = $('#VolumeByWeightInput').val();
+                                        if (weightValue > 0) {
                                             return true;
                                         } else if (quantityValue > 0) {
                                             $('#validationForm').jqxValidator('validateInput', '#VolumeByWeightInput');
@@ -351,19 +348,36 @@
                             }
                         },
                         {
-                            input: '#VolumeByWeightInput',
-                            message: 'Please Enter Volume',
-                            action: 'blur',
-                            rule: function () {
-                                var volumeValue = $('#VolumeByWeightInput').val();
+                            input: '#QuantityInput', message: 'Please Either Select Volume or Weight', action: 'blur', rule: function () {
                                 var quantityValue = $("#QuantityInput").val();
-                                if (quantityValue != 0) {
+                                var weightValue = $('#VolumeByWeightInput').val();
+                                if (quantityValue > 0 && weightValue > 0) {
+                                    return false;
+                                }
+                                return true;
+                            }
+                        },
+                        {
+                            input: '#VolumeByWeightInput', message: 'Please Enter Weight', action: 'blur', rule: function () {
+                                var weightValue = $('#VolumeByWeightInput').val();
+                                var quantityValue = $("#QuantityInput").val();
+                                if (quantityValue > 0) {
                                     return true;
-                                } else if (volumeValue > 0) {
+                                } else if (weightValue > 0) {
                                     $('#validationForm').jqxValidator('validateInput', '#QuantityInput');
                                     return true;
                                 }
                                 return false;
+                            }
+                        },
+                        {
+                            input: '#VolumeByWeightInput', message: 'Please Select Either Volume or Weight', action: 'blur', rule: function () {
+                                var weightValue = $('#VolumeByWeightInput').val();
+                                var quantityValue = $("#QuantityInput").val();
+                                if (weightValue > 0 && quantityValue > 0) {
+                                    return false;
+                                }
+                                return true;
                             }
                         },
                         {

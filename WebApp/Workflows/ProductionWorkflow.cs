@@ -59,6 +59,12 @@ namespace WebApp.Workflows
                 prod.ProductionTypeID = pTypes.ProductionTypeID;
             }
 
+            if (prodObject.Quantity > 0 && prodObject.VolumeByWeight > 0)
+            {
+                retMthdExecResult = 0;
+                throw new Exception("A record cannot be created with both volume and weigt values");
+            }
+
             if (prodObject.Quantity > 0 && prodObject?.Quantity != null)
             {
                 Volume quantG = new Volume();
@@ -1805,7 +1811,7 @@ namespace WebApp.Workflows
         /// <param name="pObj"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        internal bool UpdateProduction(ProductionObject pObj, int userId)
+        public bool UpdateProduction(ProductionObject pObj, int userId)
         {
             bool retMthdExecResult = false;
             try
@@ -1825,17 +1831,17 @@ namespace WebApp.Workflows
                         prodT.ProductionName = pObj.BatchName;
                     }
 
-                    if (prodT.ProductionDate != pObj.ProductionDate && pObj?.ProductionDate != null)
+                    if (prodT.ProductionDate != pObj.ProductionDate && pObj?.ProductionDate != null && pObj.ProductionDate != default(DateTime))
                     {
                         prodT.ProductionDate = pObj.ProductionDate;
                     }
 
-                    if (prodT.ProductionStartTime != pObj.ProductionStart && pObj?.ProductionStart != null)
+                    if (prodT.ProductionStartTime != pObj.ProductionStart && pObj?.ProductionStart != null && pObj.ProductionStart != default(DateTime))
                     {
                         prodT.ProductionStartTime = pObj.ProductionStart;
                     }
 
-                    if (prodT.ProductionEndTime != pObj.ProductionEnd && pObj?.ProductionEnd != null)
+                    if (prodT.ProductionEndTime != pObj.ProductionEnd && pObj?.ProductionEnd != null && pObj.ProductionEnd != default(DateTime))
                     {
                         prodT.ProductionEndTime = pObj.ProductionEnd;
                     }

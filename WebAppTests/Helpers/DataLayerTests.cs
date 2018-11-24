@@ -87,7 +87,7 @@ namespace WebApp.Helpers.Tests
                 DSP = "DSP-WA-21086"
             };
 
-            CreateSpirit("Gin", (int)Persistence.BusinessLogicEnums.ReportSpiritTypes.Gin);
+            CreateSpirit("Gin", (int)Persistence.BusinessLogicEnums.ProcessingReportType.Gin);
             CreateSpirit("BrandyUnder170", (int)Persistence.BusinessLogicEnums.ProcessingReportType.BrandyDistilledAt170AndUnder);
             CreateVendor("Vendor");
             CreateStorage("Storage");
@@ -122,7 +122,7 @@ namespace WebApp.Helpers.Tests
                 alcoholContent: 0f,
                 proof: 0f,
                 materialDictId: _rawMaterials["Grapes"].RawMaterialId,
-                price: 0f,
+                price: 500f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId);
 
@@ -134,7 +134,7 @@ namespace WebApp.Helpers.Tests
                 proof: 20f,
                 materialDictId: _rawMaterials["Pomace"].RawMaterialId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Other,
-                price: 0f,
+                price: 777f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId);
 
@@ -146,7 +146,7 @@ namespace WebApp.Helpers.Tests
                 proof: 20f,
                 materialDictId: _rawMaterials["Wine"].RawMaterialId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Other,
-                price: 0f,
+                price: 123f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId);
 
@@ -158,7 +158,7 @@ namespace WebApp.Helpers.Tests
                 proof: 100f,
                 materialDictId: _rawMaterials["Gns"].RawMaterialId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.AlcoholUnder190,
-                price: 0f,
+                price: 432f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId);
 
@@ -169,7 +169,7 @@ namespace WebApp.Helpers.Tests
                 alcoholContent: 0f,
                 proof: 0f,
                 materialDictId: _rawMaterials["DistilledWater"].RawMaterialId,
-                price: 0f,
+                price: 0.1f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId);
 
@@ -177,7 +177,7 @@ namespace WebApp.Helpers.Tests
                 date: new DateTime(2018, 6, 1),
                 volume: 100f,
                 materialDictId: _rawMaterials["Sticker"].RawMaterialId,
-                price: 0f,
+                price: 15f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId);
 
@@ -188,7 +188,6 @@ namespace WebApp.Helpers.Tests
                 weight: 0f,
                 alcoholContent: 10f,
                 proof: 20f,
-                price: 0f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Other,
@@ -196,8 +195,8 @@ namespace WebApp.Helpers.Tests
                 materialsUsed: new List<ObjInfo4Burndwn> {
                     new ObjInfo4Burndwn {
                         ID = _purchases["GrapesPurchase"].PurchaseId,
-                        OldVal = 1000f,
-                        NewVal = 0f,
+                        OldVal = 0f,
+                        NewVal = 1000f,
                         DistillableOrigin = "pur",
                         BurningDownMethod = "weight"
                     }
@@ -210,7 +209,6 @@ namespace WebApp.Helpers.Tests
                 weight: 0f,
                 alcoholContent: 50f,
                 proof: 25f,
-                price: 0f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
@@ -219,8 +217,8 @@ namespace WebApp.Helpers.Tests
                 materialsUsed: new List<ObjInfo4Burndwn> {
                     new ObjInfo4Burndwn {
                         ID = _productions["Wine"].ProductionId,
-                        OldVal = 20f,
-                        NewVal = 0f,
+                        OldVal = 0f,
+                        NewVal = 20f,
                         DistillableOrigin = "prod",
                         BurningDownMethod = "volume"
                     }
@@ -233,7 +231,6 @@ namespace WebApp.Helpers.Tests
                 weight: 0f,
                 alcoholContent: 50f,
                 proof: 25f,
-                price: 0f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
@@ -243,8 +240,8 @@ namespace WebApp.Helpers.Tests
                 materialsUsed: new List<ObjInfo4Burndwn> {
                     new ObjInfo4Burndwn {
                         ID = _productions["Brandy"].ProductionId,
-                        OldVal = 25f,
-                        NewVal = 0f,
+                        OldVal = 0f,
+                        NewVal = 25f,
                         DistillableOrigin = "prod",
                         BurningDownMethod = "volume"
                     }
@@ -267,7 +264,6 @@ namespace WebApp.Helpers.Tests
                 weight: 0f,
                 alcoholContent: 50f,
                 proof: 23.78f, // Use bottling UI workflow to calculate desired proof for given number of cases/bottles
-                price: 0f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
@@ -277,8 +273,8 @@ namespace WebApp.Helpers.Tests
                 materialsUsed: new List<ObjInfo4Burndwn> {
                     new ObjInfo4Burndwn {
                         ID = _productions["NotWateredDownBrandy"].ProductionId,
-                        OldVal = 23.78f,
-                        NewVal = 0f,
+                        OldVal = 0f,
+                        NewVal = 23.78f,
                         DistillableOrigin = "prod",
                         BurningDownMethod = "volume"
                     }
@@ -287,8 +283,8 @@ namespace WebApp.Helpers.Tests
                 {
                     CaseCapacity = 12,
                     CaseQuantity = 10f,
-                    BottleCapacity = 750f,
                     BottleQuantity = 120,
+                    BottleCapacity = 750f,
                 });
 
             // Act
@@ -373,7 +369,8 @@ namespace WebApp.Helpers.Tests
                     new ProdReportPart6
                     {
                         KindOfMaterial = "Grapes",
-                        ProdReportMaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit
+                        ProdReportMaterialCategoryID = (int)Persistence.BusinessLogicEnums.ProductionReportMaterialCategory.Fruit,
+                        Weight = 200
                     }
                 });
 
@@ -384,18 +381,25 @@ namespace WebApp.Helpers.Tests
                 },
                 new ProcessReportingPart1
                 {
-                    AmtBottledPackaged = 23.78f,
-                    BulkIngredients = "spirit",
-                    OnHandEndofMonth = 25f,
-                    Recd4Process = 25f
+                    OnHandFirstofMonth = 0f, // line 1
+                    Recd4Process = 25f, // line 2
+                    Gains = 0f, // line 7
+                    TotalLine8 = 0f/*OnHandFirstofMonth*/ + 25f/*Recd4Process*/ + 0/*Gains*/,
+                    AmtBottledPackaged = 0f, // line 9
+                    BulkIngredients = "spirit", // column (b) or (c)
+                    Losses = 0f, // line 24
+                    OnHandEndofMonth = 25f/*TotalLine8*/ - 0f/*TotalLine26*/, // line 25
+                    TotalLine26 = 0f
                 },
                 new ProcessReportingPart2
                 {
-                    AmtBottledPackaged = 23.78f,
+                    AmtBottledPackaged = 0f,
                     FinishedProduct = "bottled",
-                    OnHandEndofMonth = 23.78f,
-                    TotalLine31 = 23.78f,
-                    TotalLine47 = 23.78f
+                    TaxWithdrawn = 0f,
+                    OnHandEndofMonth = 0f,
+                    TotalLine31 = 0f,
+                    RecordedLosses = 0f,
+                    TotalLine47 = 0f/*Line 44 Losses*/ + 0f/*Tax withdrawn */
                 },
                 new List<ProcessReportingPart4>
                 {
@@ -688,14 +692,13 @@ namespace WebApp.Helpers.Tests
             float weight,
             float alcoholContent,
             float proof,
-            float price,
             int vendorId,
             int storageId,
             int spiritTypeReportingId,
             bool gauged,
             List<ObjInfo4Burndwn> materialsUsed)
         {
-            Produce(name, "Fermentation", start, end, volume, weight, alcoholContent, proof, price, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed);
+            Produce(name, "Fermentation", start, end, volume, weight, alcoholContent, proof, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed);
         }
 
         private void ProduceDistill(
@@ -706,7 +709,6 @@ namespace WebApp.Helpers.Tests
             float weight,
             float alcoholContent,
             float proof,
-            float price,
             int vendorId,
             int storageId,
             int spiritTypeReportingId,
@@ -715,7 +717,7 @@ namespace WebApp.Helpers.Tests
             List<ObjInfo4Burndwn> materialsUsed)
         {
             // Requires spiritType and materialKindReporting
-            Produce(name, "Distillation", start, end, volume, weight, alcoholContent, proof, price, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritCut: spiritCut);
+            Produce(name, "Distillation", start, end, volume, weight, alcoholContent, proof, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritCut: spiritCut);
         }
 
         private void ProduceBlend(
@@ -726,7 +728,6 @@ namespace WebApp.Helpers.Tests
             float weight,
             float alcoholContent,
             float proof,
-            float price,
             int vendorId,
             int storageId,
             int spiritTypeReportingId,
@@ -736,7 +737,7 @@ namespace WebApp.Helpers.Tests
             List<ObjInfo4Burndwn> materialsUsed,
             List<BlendingAdditive> blendingAdditives)
         {
-            Produce(name, "Blending", start, end, volume, weight, alcoholContent, proof, price, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritId: spiritId, gainLoss: gainLoss, blendingAdditives: blendingAdditives);
+            Produce(name, "Blending", start, end, volume, weight, alcoholContent, proof, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritId: spiritId, gainLoss: gainLoss, blendingAdditives: blendingAdditives);
         }
 
         private void ProduceBottle(
@@ -747,7 +748,6 @@ namespace WebApp.Helpers.Tests
             float weight,
             float alcoholContent,
             float proof,
-            float price,
             int vendorId,
             int storageId,
             int spiritTypeReportingId,
@@ -757,7 +757,7 @@ namespace WebApp.Helpers.Tests
             List<ObjInfo4Burndwn> materialsUsed,
             BottlingObject bottlingInfo = null)
         {
-            Produce(name, "Bottling", start, end, volume, weight, alcoholContent, proof, price, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritId: spiritId, gainLoss: gainLoss, bottlingInfo: bottlingInfo);
+            Produce(name, "Bottling", start, end, volume, weight, alcoholContent, proof, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritId: spiritId, gainLoss: gainLoss, bottlingInfo: bottlingInfo);
         }
 
         private int GetSpiritCutId(string spiritCut)
@@ -776,7 +776,6 @@ namespace WebApp.Helpers.Tests
             float weight,
             float alcoholContent,
             float proof,
-            float price,
             int vendorId,
             int storageId,
             int spiritTypeReportingId,
@@ -1069,6 +1068,8 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part1.Used4Redistil, report.Part1.Used4Redistil);
                 Assert.AreEqual(part1.Losses, report.Part1.Losses);
                 Assert.AreEqual(part1.OnHandEndofMonth, report.Part1.OnHandEndofMonth);
+                Assert.AreEqual(part1.TotalLine8, report.Part1.TotalLine8);
+                Assert.AreEqual(part1.TotalLine26, report.Part1.TotalLine26);
             }
 
             if(part2 != null)
@@ -1086,7 +1087,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part2.OnHandEndofMonth, report.Part2.OnHandEndofMonth);
                 Assert.AreEqual(part2.TaxWithdrawn, report.Part2.TaxWithdrawn);
                 Assert.AreEqual(part2.TotalLine31, report.Part2.TotalLine31);
-                Assert.AreEqual(part2.TotalLine47, report.Part2.TotalLine47);
+                Assert.AreEqual(part2.TotalLine47, report.Part2.TotalLine47, "Processing Report Line 47 values do not match");
             }
 
             if(part4 != null)
@@ -1191,6 +1192,131 @@ namespace WebApp.Helpers.Tests
                         .Single());
                 }
             }
+        }
+
+        /// <summary>
+        /// Test backend validation which prevent user from creating purchase/production record that contains both weight and volume.
+        /// 1) Create two puchase fermentable records, one with only volume and the other with only weight.
+        /// 2) Create two produce fermentation recoreds, one with burning down volume purchase, the other with buring down weight purchase.
+        /// 3) Assert that both purchase and both production records have been created.
+        /// 4) Attempt to create a purchase record with both volume and weight and assert that System.Exception is thrown.
+        /// 5) Attempt to create a production record with both volume and weight and asser that System.Exception is thrown.
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(System.Exception), AllowDerivedTypes = true)]
+        public void Purchase_and_Production_Weight_Volume_Validation()
+        {
+            // Arrange
+            PurchaseFermentable(name: "GrapesByVolume",
+                    date: new DateTime(2018, 6, 1),
+                    volume: 1000f,
+                    weight: 0f,
+                    alcoholContent: 0f,
+                    proof: 0f,
+                    materialDictId: _rawMaterials["Grapes"].RawMaterialId,
+                    price: 1f,
+                    vendorId: _vendors["Vendor"].VendorId,
+                    storageId: _storages["Storage"].StorageId);
+
+            PurchaseFermentable(name: "GrapesByWeight",
+                    date: new DateTime(2018, 6, 1),
+                    volume: 0f,
+                    weight: 1000f,
+                    alcoholContent: 0f,
+                    proof: 0f,
+                    materialDictId: _rawMaterials["Grapes"].RawMaterialId,
+                    price: 1f,
+                    vendorId: _vendors["Vendor"].VendorId,
+                    storageId: _storages["Storage"].StorageId);
+
+            ProduceFerment(name: "WineByVolume",
+                start: new DateTime(2018, 6, 2),
+                end: new DateTime(2018, 6, 3),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 10f,
+                proof: 20f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _purchases["GrapesByVolume"].PurchaseId,
+                        OldVal = 500f,
+                        NewVal = 0f,
+                        DistillableOrigin = "pur",
+                        BurningDownMethod = "volume"
+                    }
+                });
+
+            ProduceFerment(name: "WineByWeight",
+                start: new DateTime(2018, 6, 2),
+                end: new DateTime(2018, 6, 3),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 10f,
+                proof: 20f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _purchases["GrapesByWeight"].PurchaseId,
+                        OldVal = 500f,
+                        NewVal = 0f,
+                        DistillableOrigin = "pur",
+                        BurningDownMethod = "weight"
+                    }
+                });
+
+            // Assert
+            Assert.IsNotNull(_purchases["GrapesByVolume"].PurchaseId);
+            Assert.IsNotNull(_purchases["GrapesByWeight"].PurchaseId);
+            Assert.IsNotNull(_productions["WineByVolume"].ProductionId);
+            Assert.IsNotNull(_productions["WineByWeight"].ProductionId);
+
+            // Assert Exception is thrown when there's an attempt to create recrds with both weight and volume. 
+            PurchaseFermentable(name: "GrapesByVolumeWeight",
+                date: new DateTime(2018, 6, 1),
+                volume: 1000f,
+                weight: 1000f,
+                alcoholContent: 0f,
+                proof: 0f,
+                materialDictId: _rawMaterials["Grapes"].RawMaterialId,
+                price: 1f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            ProduceFerment(name: "WineByVolumeWeight",
+                start: new DateTime(2018, 6, 2),
+                end: new DateTime(2018, 6, 3),
+                volume: 100f,
+                weight: 100f,
+                alcoholContent: 10f,
+                proof: 20f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                new ObjInfo4Burndwn {
+                    ID = _purchases["GrapesByVolume"].PurchaseId,
+                    OldVal = 100f,
+                    NewVal = 0f,
+                    DistillableOrigin = "pur",
+                    BurningDownMethod = "volume"
+                },
+                new ObjInfo4Burndwn
+                {
+                    ID = _purchases["GrapesByWeight"].PurchaseId,
+                    OldVal = 100f,
+                    NewVal = 0f,
+                    DistillableOrigin = "pur",
+                    BurningDownMethod = "weight"
+                }
+                });
         }
 
         /// <summary>
@@ -2015,7 +2141,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.BottlingInfo = bottlingObj;
 
-                prodBottl.GainLoss = .10f;
+                prodBottl.GainLoss = -.10f;
 
                 prodBottl.FillTestList = null;
 
@@ -2093,12 +2219,12 @@ namespace WebApp.Helpers.Tests
                 ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
 
                 ProcessReportingPart1 processingReportP1 = new ProcessReportingPart1();
-                processingReportP1.AmtBottledPackaged = 17.9f;
+                processingReportP1.AmtBottledPackaged = 18f;
                 processingReportP1.BulkIngredients = "spirit";
                 processingReportP1.Destroyed = 0f;
                 processingReportP1.Dumped4Processing = 0f;
                 processingReportP1.Gains = 0f;
-                processingReportP1.Losses = 0.1f;
+                processingReportP1.Losses = 0f;
                 processingReportP1.OnHandEndofMonth = 0f;
                 processingReportP1.OnHandFirstofMonth = 0f;
                 processingReportP1.Recd4Process = 18f;
@@ -2107,7 +2233,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP1.WineMixedWithSpirit = 0f;
 
                 ProcessReportingPart2 processingReportP2 = new ProcessReportingPart2();
-                processingReportP2.AmtBottledPackaged = 17.9f;
+                processingReportP2.AmtBottledPackaged = 18f;
                 processingReportP2.Destroyed = 0f;
                 processingReportP2.Dumped4Processing = 0f;
                 processingReportP2.FinishedProduct = "bottled";
@@ -2116,7 +2242,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP2.OnHandEndofMonth = 17.9f;
                 processingReportP2.OnHandFirstofMonth = 0f;
                 processingReportP2.Recd4Process = 0f;
-                processingReportP2.RecordedLosses = 0f;
+                processingReportP2.RecordedLosses = .10f;
                 processingReportP2.TaxWithdrawn = 0f;
                 processingReportP2.Transf2Prod4Redistil = 0f;
 
@@ -2245,8 +2371,8 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(processingReportP1.Destroyed, actualProcessingReportObject.Part1.Destroyed);
                 Assert.AreEqual(processingReportP1.Dumped4Processing, actualProcessingReportObject.Part1.Dumped4Processing);
                 Assert.AreEqual(processingReportP1.Gains, actualProcessingReportObject.Part1.Gains);
-                Assert.AreEqual(0f, actualProcessingReportObject.Part1.Losses);
-                Assert.AreEqual(18f, actualProcessingReportObject.Part1.OnHandEndofMonth);
+                Assert.AreEqual(processingReportP1.Losses, actualProcessingReportObject.Part1.Losses);
+                Assert.AreEqual(processingReportP1.OnHandEndofMonth, actualProcessingReportObject.Part1.OnHandEndofMonth);
                 Assert.AreEqual(processingReportP1.OnHandFirstofMonth, actualProcessingReportObject.Part1.OnHandFirstofMonth);
                 Assert.AreEqual(processingReportP1.Recd4Process, actualProcessingReportObject.Part1.Recd4Process);
                 Assert.AreEqual(processingReportP1.Transf2Prod4Redistil, actualProcessingReportObject.Part1.Transf2Prod4Redistil);
@@ -2979,7 +3105,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.BottlingInfo = bottlingObj;
 
-                prodBottl.GainLoss = 1.3f; // Add comment on what this value is in definition
+                prodBottl.GainLoss = -1.3f; // Add comment on what this value is in definition
 
                 prodBottl.FillTestList = null;
 
@@ -3068,13 +3194,13 @@ namespace WebApp.Helpers.Tests
                 // May 2018
 
                 // Processing Report Part 1
-                Assert.AreEqual(46f, mayAfterBottlingProcessingReport.Part1.AmtBottledPackaged);
+                Assert.AreEqual(47.3f, mayAfterBottlingProcessingReport.Part1.AmtBottledPackaged);
                 Assert.AreEqual("spirit", mayAfterBottlingProcessingReport.Part1.BulkIngredients);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.Destroyed);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.Dumped4Processing);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.Gains);
                 Assert.AreEqual(7.7f, mayAfterBottlingProcessingReport.Part1.Losses);
-                Assert.AreEqual(47.3f, mayAfterBottlingProcessingReport.Part1.OnHandEndofMonth);
+                Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.OnHandEndofMonth);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.OnHandFirstofMonth);
                 Assert.AreEqual(55f, mayAfterBottlingProcessingReport.Part1.Recd4Process);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.Transf2Prod4Redistil);
@@ -3082,7 +3208,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part1.WineMixedWithSpirit);
 
                 // Processing Report Part 2
-                Assert.AreEqual(46f, mayAfterBottlingProcessingReport.Part2.AmtBottledPackaged);
+                Assert.AreEqual(47.3f, mayAfterBottlingProcessingReport.Part2.AmtBottledPackaged);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part2.Destroyed);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part2.Dumped4Processing);
                 Assert.AreEqual("bottled", mayAfterBottlingProcessingReport.Part2.FinishedProduct);
@@ -3091,7 +3217,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(46f, mayAfterBottlingProcessingReport.Part2.OnHandEndofMonth);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part2.OnHandFirstofMonth);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part2.Recd4Process);
-                Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part2.RecordedLosses);
+                Assert.AreEqual(1.3f, mayAfterBottlingProcessingReport.Part2.RecordedLosses);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part2.TaxWithdrawn);
                 Assert.AreEqual(0f, mayAfterBottlingProcessingReport.Part2.Transf2Prod4Redistil);
 
@@ -4340,34 +4466,34 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(50f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r23_OnHandEndOfMonth).Single());
                 Assert.AreEqual(100f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 9).Select(x => x.r24_Lines7Through23).Single());
 
-                // July 2018 Processing Report after Purchase and Blending
+                // June 2018 Processing Report after Purchase and Blending
                 ProcessingReportingObject processingReportObject = _processingReport.GetProcessingReportData(juneStart, juneEnd, _userId);
 
                 // Part 1
                 Assert.AreEqual("spirit", processingReportObject.Part1.BulkIngredients);
                 Assert.AreEqual(0f, processingReportObject.Part1.OnHandFirstofMonth);
-                Assert.AreEqual(50.78f, processingReportObject.Part1.Recd4Process); // we need to include losses in Received cell as well
+                Assert.AreEqual(50f, processingReportObject.Part1.Recd4Process); // we need to include losses in Received cell as well
                 Assert.AreEqual(0f, processingReportObject.Part1.WineMixedWithSpirit);
                 Assert.AreEqual(0f, processingReportObject.Part1.Dumped4Processing);
                 Assert.AreEqual(0f, processingReportObject.Part1.Gains);
-                Assert.AreEqual(39.22f, processingReportObject.Part1.AmtBottledPackaged);
+                Assert.AreEqual(40f, processingReportObject.Part1.AmtBottledPackaged);
                 Assert.AreEqual(0f, processingReportObject.Part1.Destroyed);
-                Assert.AreEqual(10.78f, processingReportObject.Part1.Losses);
-                Assert.AreEqual(40f, processingReportObject.Part1.OnHandEndofMonth);
+                Assert.AreEqual(10f, processingReportObject.Part1.Losses);
+                Assert.AreEqual(0f, processingReportObject.Part1.OnHandEndofMonth);
                 Assert.AreEqual(0f, processingReportObject.Part1.Transf2Prod4Redistil);
                 Assert.AreEqual(0f, processingReportObject.Part1.Used4Redistil);
 
                 // Part 2
                 Assert.AreEqual("bottled", processingReportObject.Part2.FinishedProduct);
                 Assert.AreEqual(39.22f, processingReportObject.Part2.OnHandEndofMonth);
-                Assert.AreEqual(39.22f, processingReportObject.Part2.AmtBottledPackaged);
+                Assert.AreEqual(40f, processingReportObject.Part2.AmtBottledPackaged);
                 Assert.AreEqual(0f, processingReportObject.Part2.Recd4Process);
                 Assert.AreEqual(0f, processingReportObject.Part2.InventoryOverage);
                 Assert.AreEqual(0f, processingReportObject.Part2.TaxWithdrawn);
                 Assert.AreEqual(0f, processingReportObject.Part2.Transf2Prod4Redistil);
                 Assert.AreEqual(0f, processingReportObject.Part2.Destroyed);
                 Assert.AreEqual(0f, processingReportObject.Part2.Dumped4Processing);
-                Assert.AreEqual(0f, processingReportObject.Part2.RecordedLosses);
+                Assert.AreEqual(.78f, processingReportObject.Part2.RecordedLosses);
                 Assert.AreEqual(0f, processingReportObject.Part2.InventoryShortage);
                 Assert.AreEqual(0f, processingReportObject.Part2.OnHandFirstofMonth);
 
@@ -5363,7 +5489,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.BottlingInfo = bottlingObj;
 
-                prodBottl.GainLoss = .4f;
+                prodBottl.GainLoss = -.5f;
 
                 prodBottl.FillTestList = null;
 
@@ -5393,20 +5519,20 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(reportHeaderE.ProprietorName, actualProcessingReportObject.Header.ProprietorName);
                 Assert.AreEqual(reportHeaderE.ReportDate, actualProcessingReportObject.Header.ReportDate);
 
-                Assert.AreEqual(97.5f, actualProcessingReportObject.Part1.AmtBottledPackaged);
+                Assert.AreEqual(98f, actualProcessingReportObject.Part1.AmtBottledPackaged);
                 Assert.AreEqual("spirit", actualProcessingReportObject.Part1.BulkIngredients);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Destroyed);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Dumped4Processing);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Gains);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Losses);
-                Assert.AreEqual(98f, actualProcessingReportObject.Part1.OnHandEndofMonth);
+                Assert.AreEqual(0f, actualProcessingReportObject.Part1.OnHandEndofMonth);
                 Assert.AreEqual(98f, actualProcessingReportObject.Part1.OnHandFirstofMonth);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Recd4Process);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Transf2Prod4Redistil);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.Used4Redistil);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part1.WineMixedWithSpirit);
 
-                Assert.AreEqual(97.5f, actualProcessingReportObject.Part2.AmtBottledPackaged);
+                Assert.AreEqual(98f, actualProcessingReportObject.Part2.AmtBottledPackaged);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part2.Destroyed);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part2.Dumped4Processing);
                 Assert.AreEqual("bottled", actualProcessingReportObject.Part2.FinishedProduct);
@@ -5415,7 +5541,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(97.5f, actualProcessingReportObject.Part2.OnHandEndofMonth);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part2.OnHandFirstofMonth);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part2.Recd4Process);
-                Assert.AreEqual(0f, actualProcessingReportObject.Part2.RecordedLosses);
+                Assert.AreEqual(.5f, actualProcessingReportObject.Part2.RecordedLosses);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part2.TaxWithdrawn);
                 Assert.AreEqual(0f, actualProcessingReportObject.Part2.Transf2Prod4Redistil);
 
@@ -6880,7 +7006,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.BottlingInfo = bottlingObj;
 
-                prodBottl.GainLoss = .08f;
+                prodBottl.GainLoss = -.08f;
 
                 prodBottl.FillTestList = null;
 
@@ -6967,13 +7093,13 @@ namespace WebApp.Helpers.Tests
                 ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
 
                 ProcessReportingPart1 processingReportP1 = new ProcessReportingPart1();
-                processingReportP1.AmtBottledPackaged = 159.92f;
+                processingReportP1.AmtBottledPackaged = 160f;
                 processingReportP1.BulkIngredients = "spirit";
                 processingReportP1.Destroyed = 0f;
                 processingReportP1.Dumped4Processing = 0f;
                 processingReportP1.Gains = 0f;
                 processingReportP1.Losses = 0f;
-                processingReportP1.OnHandEndofMonth = 160f;
+                processingReportP1.OnHandEndofMonth = 0f;
                 processingReportP1.OnHandFirstofMonth = 0f;
                 processingReportP1.Recd4Process = 160f;
                 processingReportP1.Transf2Prod4Redistil = 0f;
@@ -6981,7 +7107,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP1.WineMixedWithSpirit = 0f;
 
                 ProcessReportingPart2 processingReportP2 = new ProcessReportingPart2();
-                processingReportP2.AmtBottledPackaged = 159.92f;
+                processingReportP2.AmtBottledPackaged = 160f;
                 processingReportP2.Destroyed = 0f;
                 processingReportP2.Dumped4Processing = 0f;
                 processingReportP2.FinishedProduct = "bottled";
@@ -6993,6 +7119,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP2.RecordedLosses = 0f;
                 processingReportP2.TaxWithdrawn = 0f;
                 processingReportP2.Transf2Prod4Redistil = 0f;
+                processingReportP2.RecordedLosses = .08f;
 
                 ProcessReportingPart4 processingReportP4 = new ProcessReportingPart4();
                 processingReportP4.AlcoholNeutral = 0f;
@@ -13678,7 +13805,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.BottlingInfo = bottlingObj;
 
-                prodBottl.GainLoss = .10f;
+                prodBottl.GainLoss = -.10f;
 
                 prodBottl.FillTestList = null;
 
@@ -13790,13 +13917,13 @@ namespace WebApp.Helpers.Tests
                 ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
 
                 ProcessReportingPart1 processingReportP1 = new ProcessReportingPart1();
-                processingReportP1.AmtBottledPackaged = 17.9f;
+                processingReportP1.AmtBottledPackaged = 18f;
                 processingReportP1.BulkIngredients = "spirit";
                 processingReportP1.Destroyed = 0f;
                 processingReportP1.Dumped4Processing = 0f;
                 processingReportP1.Gains = 0f;
                 processingReportP1.Losses = 0f;
-                processingReportP1.OnHandEndofMonth = 18f;
+                processingReportP1.OnHandEndofMonth = 0f;
                 processingReportP1.OnHandFirstofMonth = 0f;
                 processingReportP1.Recd4Process = 18f;
                 processingReportP1.Transf2Prod4Redistil = 0f;
@@ -13804,7 +13931,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP1.WineMixedWithSpirit = 0f;
 
                 ProcessReportingPart2 processingReportP2 = new ProcessReportingPart2();
-                processingReportP2.AmtBottledPackaged = 17.9f;
+                processingReportP2.AmtBottledPackaged = 18f;
                 processingReportP2.Destroyed = 0f;
                 processingReportP2.Dumped4Processing = 0f;
                 processingReportP2.FinishedProduct = "bottled";
@@ -13813,7 +13940,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP2.OnHandEndofMonth = 17.9f;
                 processingReportP2.OnHandFirstofMonth = 0f;
                 processingReportP2.Recd4Process = 0f;
-                processingReportP2.RecordedLosses = 0f;
+                processingReportP2.RecordedLosses = .1f;
                 processingReportP2.TaxWithdrawn = 0f;
                 processingReportP2.Transf2Prod4Redistil = 0f;
 
@@ -15801,7 +15928,7 @@ namespace WebApp.Helpers.Tests
 
                 prodBottl.BottlingInfo = bottlingObj;
 
-                prodBottl.GainLoss = .10f;
+                prodBottl.GainLoss = -.10f;
 
                 prodBottl.FillTestList = null;
 
@@ -15816,13 +15943,13 @@ namespace WebApp.Helpers.Tests
                 ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
 
                 ProcessReportingPart1 processingReportP1 = new ProcessReportingPart1();
-                processingReportP1.AmtBottledPackaged = 17.9f;
+                processingReportP1.AmtBottledPackaged = 18f;
                 processingReportP1.BulkIngredients = "spirit";
                 processingReportP1.Destroyed = 0f;
                 processingReportP1.Dumped4Processing = 0f;
                 processingReportP1.Gains = 0f;
                 processingReportP1.Losses = 0f;
-                processingReportP1.OnHandEndofMonth = 18f;
+                processingReportP1.OnHandEndofMonth = 0f;
                 processingReportP1.OnHandFirstofMonth = 0f;
                 processingReportP1.Recd4Process = 18f;
                 processingReportP1.Transf2Prod4Redistil = 0f;
@@ -15830,7 +15957,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP1.WineMixedWithSpirit = 0f;
 
                 ProcessReportingPart2 processingReportP2 = new ProcessReportingPart2();
-                processingReportP2.AmtBottledPackaged = 17.9f;
+                processingReportP2.AmtBottledPackaged = 18f;
                 processingReportP2.Destroyed = 0f;
                 processingReportP2.Dumped4Processing = 0f;
                 processingReportP2.FinishedProduct = "bottled";
@@ -15839,7 +15966,7 @@ namespace WebApp.Helpers.Tests
                 processingReportP2.OnHandEndofMonth = 17.9f;
                 processingReportP2.OnHandFirstofMonth = 0f;
                 processingReportP2.Recd4Process = 0f;
-                processingReportP2.RecordedLosses = 0f;
+                processingReportP2.RecordedLosses = .1f;
                 processingReportP2.TaxWithdrawn = 0f;
                 processingReportP2.Transf2Prod4Redistil = 0f;
 
@@ -20319,6 +20446,345 @@ namespace WebApp.Helpers.Tests
                     TestRecordCleanup(i.Item1, i.Item2);
                 }
             }
+        }
+
+        /// <summary>
+        /// This test checks to see that onHandFirstMonth in Processing report is not reduced by the amount of Tax Withdrawn
+        /// 1. Purchase 100 Gallons of GNS @96% with PfG totalling to be 196 on January 1st, 2018
+        /// 2. Purchase Water on January 1st, 2018 to be used in Blending
+        /// 3. Blend 195.75 into GIN on January 2nd
+        /// 4. Bottle 194.57 into Gin on January 3rd
+        /// 5. Check Processing report for mutliple months to ensure proper values are being reported/
+        /// 6. Expected:
+        /// 6.1 losses occured during distil->blending shoud occur in part 1 of processing report
+        /// 6.2 losses occured during blending->bottling shoud occur in part 2 of processing report
+        /// 6.3 Values in processing report should persist on a month to month basis.
+        /// </summary>
+        [TestMethod()]
+        public void Full_Production_Cycle_Withdraw_For_Tax_In_Consequent_Months_Check_MakeSure_OnHandFirst_Of_Month_In_Processing_Is_Correct_For_Each_Month()
+        {
+            // Arrange
+            PurchaseDistilled(name: "GnsPurchase",
+                date: new DateTime(2018, 1, 1),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 98f,
+                proof: 196f,
+                materialDictId: _rawMaterials["Gns"].RawMaterialId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.AlcoholUnder190,
+                price: 1000f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            PurchaseAdditive(name: "WaterPurchase",
+                date: new DateTime(2018, 1, 1),
+                volume: 1000f,
+                weight: 0f,
+                alcoholContent: 0f,
+                proof: 0f,
+                materialDictId: _rawMaterials["DistilledWater"].RawMaterialId,
+                price: 0f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            ProduceBlend(name: "Gin",
+                start: new DateTime(2018, 1, 2),
+                end: new DateTime(2018, 1, 2),
+                volume: 217.5f,
+                weight: 0f,
+                alcoholContent: 45f,
+                proof: 195.75f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Gin,
+                spiritId: _spirits["Gin"].SpiritId,
+                gainLoss: -0.25f,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID =_purchases["GnsPurchase"].PurchaseId,
+                        OldVal = 0f,
+                        NewVal = 100f,
+                        DistillableOrigin = "purch",
+                        BurningDownMethod = "volume"
+                    }
+                },
+                blendingAdditives: new List<BlendingAdditive>
+                {
+                    new BlendingAdditive
+                    {
+                        RawMaterialId = _rawMaterials["DistilledWater"].RawMaterialId,
+                        RawMaterialQuantity = 125f,
+                        RawMaterialName = "DistilledWater",
+                        UnitOfMeasurement = "gal"
+                    }
+                });
+
+            ProduceBottle(name: "GinBottling",
+                start: new DateTime(2018, 1, 3),
+                end: new DateTime(2018, 1, 3),
+                volume: 216.2f, // Use bottling UI workflow to calculate desired volume for given number of cases/bottles
+                weight: 0f,
+                alcoholContent: 45f,
+                proof: 194.57f, // Use bottling UI workflow to calculate desired proof for given number of cases/bottles
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Gin,
+                spiritId: _spirits["Gin"].SpiritId,
+                gainLoss: -1.18f,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["Gin"].ProductionId,
+                        OldVal = 0f,
+                        NewVal = 217.5f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                },
+                bottlingInfo: new BottlingObject
+                {
+                    CaseCapacity = 12,
+                    CaseQuantity = 124f,
+                    BottleQuantity = 120,
+                    BottleCapacity = 1488f,
+                });
+
+
+            // withdraw taxes in January
+            _production.UpdateProduction(
+                new ProductionObject
+                {
+                    ProductionType = "Bottling",
+                    ProductionId = _productions["GinBottling"].ProductionId,
+                    BatchName = null,
+                    WithdrawalDate = new DateTime(2018, 01, 1),
+                    TaxedProof = 34.57f,
+                    ProofGallon = 194.57f - 34.57f
+                },
+                _userId
+                );
+
+            // Act
+            var processingReport = GetProcessingReport(new DateTime(2018, 1, 1), new DateTime(2018, 1, 31));
+
+            AssertProcessing(processingReport,
+                new ReportHeader
+                {
+                    ReportDate = "January 2018"
+                },
+                new ProcessReportingPart1
+                {
+                    OnHandFirstofMonth = 0f, // line 1
+                    Recd4Process = 196f, // line 2
+                    Gains = 0f, // line 7
+                    TotalLine8 = 0f/*OnHandFirstofMonth*/ + 196f/*Recd4Process*/ + 0/*Gains*/,
+                    AmtBottledPackaged = 195.75f, // line 9
+                    BulkIngredients = "spirit", // column (b) or (c)
+                    Losses = .25f, // line 24
+                    OnHandEndofMonth = 196f/*TotalLine8*/ - 196f/*TotalLine26*/, // line 25
+                    TotalLine26 = 196f
+                },
+                new ProcessReportingPart2
+                {
+                    AmtBottledPackaged = 195.75f,
+                    FinishedProduct = "bottled",
+                    TaxWithdrawn = 34.57f,
+                    OnHandEndofMonth = 160f,
+                    TotalLine31 = 195.75f,
+                    RecordedLosses = 1.18f,
+                    TotalLine47 = 1.18f/*Line 44 Losses*/ + 34.57f/*Tax withdrawn */ + 160f /*On Hand End Of Month*/
+                },
+                new List<ProcessReportingPart4>
+                {
+                    new ProcessReportingPart4
+                    {
+                        Gin = 195.75f,
+                        ProcessingSpirits = "bulkSpiritDumped",
+                        ProcessingTypeID = (int)Persistence.BusinessLogicEnums.ProcessingReportType.Gin,
+                        StateID = 4
+                    },
+                    new ProcessReportingPart4
+                    {
+                        Gin = 216.2f,
+                        ProcessingSpirits = "bottled",
+                        ProcessingTypeID = (int)Persistence.BusinessLogicEnums.ProcessingReportType.Gin,
+                        StateID = 5
+                    }
+                });
+
+            // withdraw taxes in February and check processing report
+            _production.UpdateProduction(
+                new ProductionObject
+                {
+                    ProductionType = "Bottling",
+                    ProductionId = _productions["GinBottling"].ProductionId,
+                    BatchName = null,
+                    WithdrawalDate = new DateTime(2018, 02, 1),
+                    TaxedProof = 40f,
+                    ProofGallon = 160f - 40f
+                },
+                _userId
+                );
+
+            // check processing report
+            processingReport = null;
+
+            processingReport = GetProcessingReport(new DateTime(2018, 2, 1), new DateTime(2018, 2, 28));
+
+            AssertProcessing(processingReport,
+                new ReportHeader
+                {
+                    ReportDate = "February 2018"
+                },
+                new ProcessReportingPart1
+                {
+                    OnHandFirstofMonth = 0f, // line 1
+                    Recd4Process = 0, // line 2
+                    Gains = 0f, // line 7
+                    TotalLine8 = 0f/*OnHandFirstofMonth*/ + 0/*Recd4Process*/ + 0/*Gains*/,
+                    AmtBottledPackaged = 0, // line 9
+                    BulkIngredients = "spirit", // column (b) or (c)
+                    Losses = 0, // line 24
+                    OnHandEndofMonth = 0/*TotalLine8*/ - 0/*TotalLine26*/, // line 25
+                    TotalLine26 = 0
+                },
+                new ProcessReportingPart2
+                {
+                    OnHandFirstofMonth = 160f, // line 27
+                    AmtBottledPackaged = 0,
+                    FinishedProduct = "bottled",
+                    TaxWithdrawn = 40f,
+                    OnHandEndofMonth = 120f,
+                    TotalLine31 = 160f,
+                    RecordedLosses = 0,
+                    TotalLine47 = 0/*Line 44 Losses*/ + 40f/*Tax withdrawn */ + 120f /*On Hand End Of Month*/
+                });
+
+            // withdraw taxes in March
+            _production.UpdateProduction(
+                new ProductionObject
+                {
+                    ProductionType = "Bottling",
+                    ProductionId = _productions["GinBottling"].ProductionId,
+                    BatchName = null,
+                    WithdrawalDate = new DateTime(2018, 03, 1),
+                    TaxedProof = 30f,
+                    ProofGallon = 120f - 30f
+                },
+                _userId
+                );
+
+            processingReport = GetProcessingReport(new DateTime(2018, 3, 1), new DateTime(2018, 3, 28));
+
+            AssertProcessing(processingReport,
+                new ReportHeader
+                {
+                    ReportDate = "March 2018"
+                },
+                new ProcessReportingPart1
+                {
+                    OnHandFirstofMonth = 0f, // line 1
+                    Recd4Process = 0, // line 2
+                    Gains = 0f, // line 7
+                    TotalLine8 = 0f/*OnHandFirstofMonth*/ + 0/*Recd4Process*/ + 0/*Gains*/,
+                    AmtBottledPackaged = 0, // line 9
+                    BulkIngredients = "spirit", // column (b) or (c)
+                    Losses = 0, // line 24
+                    OnHandEndofMonth = 0/*TotalLine8*/ - 0/*TotalLine26*/, // line 25
+                    TotalLine26 = 0
+                },
+                new ProcessReportingPart2
+                {
+                    OnHandFirstofMonth = 120f, // line 27
+                    AmtBottledPackaged = 0,
+                    FinishedProduct = "bottled",
+                    TaxWithdrawn = 30f,
+                    OnHandEndofMonth = 90f,
+                    TotalLine31 = 120f,
+                    RecordedLosses = 0,
+                    TotalLine47 = 0/*Line 44 Losses*/ + 30f/*Tax withdrawn */ + 90f /*On Hand End Of Month*/
+                });
+
+            // Now let's go in the past to ensure all values persist
+            // Check January
+            processingReport = GetProcessingReport(new DateTime(2018, 1, 1), new DateTime(2018, 1, 31));
+            AssertProcessing(processingReport,
+                new ReportHeader
+                {
+                    ReportDate = "January 2018"
+                },
+                new ProcessReportingPart1
+                {
+                    OnHandFirstofMonth = 0f, // line 1
+                    Recd4Process = 196f, // line 2
+                    Gains = 0f, // line 7
+                    TotalLine8 = 0f/*OnHandFirstofMonth*/ + 196f/*Recd4Process*/ + 0/*Gains*/,
+                    AmtBottledPackaged = 195.75f, // line 9
+                    BulkIngredients = "spirit", // column (b) or (c)
+                    Losses = .25f, // line 24
+                    OnHandEndofMonth = 196f/*TotalLine8*/ - 196f/*TotalLine26*/, // line 25
+                    TotalLine26 = 196f
+                },
+                new ProcessReportingPart2
+                {
+                    AmtBottledPackaged = 195.75f,
+                    FinishedProduct = "bottled",
+                    TaxWithdrawn = 34.57f,
+                    OnHandEndofMonth = 160f,
+                    TotalLine31 = 195.75f,
+                    RecordedLosses = 1.18f,
+                    TotalLine47 = 1.18f/*Line 44 Losses*/ + 34.57f/*Tax withdrawn */ + 160f /*On Hand End Of Month*/
+                },
+                new List<ProcessReportingPart4>
+                {
+                    new ProcessReportingPart4
+                    {
+                        Gin = 195.75f,
+                        ProcessingSpirits = "bulkSpiritDumped",
+                        ProcessingTypeID = (int)Persistence.BusinessLogicEnums.ProcessingReportType.Gin,
+                        StateID = 4
+                    },
+                    new ProcessReportingPart4
+                    {
+                        Gin = 216.2f,
+                        ProcessingSpirits = "bottled",
+                        ProcessingTypeID = (int)Persistence.BusinessLogicEnums.ProcessingReportType.Gin,
+                        StateID = 5
+                    }
+                });
+
+            // Check February
+            processingReport = GetProcessingReport(new DateTime(2018, 2, 1), new DateTime(2018, 2, 28));
+
+            AssertProcessing(processingReport,
+                new ReportHeader
+                {
+                    ReportDate = "February 2018"
+                },
+                new ProcessReportingPart1
+                {
+                    OnHandFirstofMonth = 0f, // line 1
+                    Recd4Process = 0, // line 2
+                    Gains = 0f, // line 7
+                    TotalLine8 = 0f/*OnHandFirstofMonth*/ + 0/*Recd4Process*/ + 0/*Gains*/,
+                    AmtBottledPackaged = 0, // line 9
+                    BulkIngredients = "spirit", // column (b) or (c)
+                    Losses = 0, // line 24
+                    OnHandEndofMonth = 0/*TotalLine8*/ - 0/*TotalLine26*/, // line 25
+                    TotalLine26 = 0
+                },
+                new ProcessReportingPart2
+                {
+                    OnHandFirstofMonth = 160f, // line 27
+                    AmtBottledPackaged = 0,
+                    FinishedProduct = "bottled",
+                    TaxWithdrawn = 40f,
+                    OnHandEndofMonth = 120f,
+                    TotalLine31 = 160f,
+                    RecordedLosses = 0,
+                    TotalLine47 = 0/*Line 44 Losses*/ + 40f/*Tax withdrawn */ + 120f /*On Hand End Of Month*/
+                });
         }
 
         /// <summary>

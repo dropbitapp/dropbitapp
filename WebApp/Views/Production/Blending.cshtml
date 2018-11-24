@@ -578,10 +578,10 @@
                             }
                         },
                         {
-                            input: '#BlendingQuantity', message: 'Please Enter Quantity', action: 'blur', rule: function () {
+                            input: '#BlendingQuantity', message: 'Please Enter Volume', action: 'blur', rule: function () {
                                 var quantityValue = $("#BlendingQuantity").val();
-                                var volumeValue = $('#BlendingWeight').val();
-                                if (volumeValue != 0) {
+                                var weightValue = $('#BlendingWeight').val();
+                                if (weightValue > 0) {
                                     return true;
                                 } else if (quantityValue > 0) {
                                     $('#validationForm').jqxValidator('validateInput', '#BlendingWeight');
@@ -591,16 +591,36 @@
                             }
                         },
                         {
-                            input: '#BlendingWeight', message: 'Please Enter Volume', action: 'blur', rule: function () {
-                                var volumeValue = $('#BlendingWeight').val();
+                            input: '#BlendingQuantity', message: 'Please Either Select Volume or Weight', action: 'blur', rule: function () {
                                 var quantityValue = $("#BlendingQuantity").val();
-                                if (quantityValue != 0) {
+                                var weightValue = $('#BlendingWeight').val();
+                                if (quantityValue > 0 && weightValue > 0) {
+                                    return false;
+                                }
+                                return true;
+                            }
+                        },
+                        {
+                            input: '#BlendingWeight', message: 'Please Enter Weight', action: 'blur', rule: function () {
+                                var weightValue = $('#BlendingWeight').val();
+                                var quantityValue = $("#BlendingQuantity").val();
+                                if (quantityValue > 0) {
                                     return true;
-                                } else if (volumeValue > 0) {
+                                } else if (weightValue > 0) {
                                     $('#validationForm').jqxValidator('validateInput', '#BlendingQuantity');
                                     return true;
                                 }
                                 return false;
+                            }
+                        },
+                        {
+                            input: '#BlendingWeight', message: 'Please Select Either Volume or Weight', action: 'blur', rule: function () {
+                                var weightValue = $('#BlendingWeight').val();
+                                var quantityValue = $("#BlendingQuantity").val();
+                                if (weightValue > 0 && quantityValue > 0) {
+                                    return false;
+                                }
+                                return true;
                             }
                         },
                         {
