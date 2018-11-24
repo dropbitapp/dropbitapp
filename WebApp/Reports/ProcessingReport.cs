@@ -92,11 +92,12 @@ namespace WebApp.Reports
             // line 44
             LossesLine44(startOfReporting, endOfReporting, ref procRepP2, userId);
 
+            // 46 (b) On hand End of Month
+            OnHandEndOfMonthPart2(endOfReporting, userId, ref procRepP2);
+
             // 47 (b) this method needs to be excuted first, before OnHandEndOfMonthPart2 since it is used there.
             TotalLines32Through46(ref procRepP2);
 
-            // 46 (b) On hand End of Month
-            OnHandEndOfMonthPart2(endOfReporting, userId, ref procRepP2);
 
             // Processing Report Part 4
             Part4ProcessingReport(startOfReporting, endOfReporting, userId, ref procRepP4L);
@@ -195,10 +196,9 @@ namespace WebApp.Reports
         /// <param name="procRepP2"></param>
         private void TotalLines32Through46(ref ProcessReportingPart2 procRepP2)
         {
-            procRepP2.TotalLine47 = procRepP2.TaxWithdrawn + procRepP2.RecordedLosses; // continue on adding extra rows as we add support for them
+            procRepP2.TotalLine47 = procRepP2.TaxWithdrawn + procRepP2.RecordedLosses + procRepP2.OnHandEndofMonth; // continue on adding extra rows as we add support for them
             Math.Round(procRepP2.TotalLine47, 3);
         }
-
 
         /// <summary>
         /// Line 7 of Processing Report
@@ -1029,7 +1029,7 @@ namespace WebApp.Reports
         /// <param name="procRepP2"></param>
         private void OnHandEndOfMonthPart2(DateTime endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
         {
-            procRepP2.OnHandEndofMonth = procRepP2.TotalLine31 - procRepP2.TotalLine47; // grisha:todo: as we continue on adding new cases for rows 32 through 45 we need to keep subtracting it
+            procRepP2.OnHandEndofMonth = procRepP2.TotalLine31 - (procRepP2.TaxWithdrawn + procRepP2.RecordedLosses); //as we continue on adding new cases for rows 32 through 45 we need to keep adding additional rows to the parentheses
             // round to 3 decimals
             Math.Round(procRepP2.OnHandEndofMonth, 3);
         }

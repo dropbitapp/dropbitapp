@@ -1087,7 +1087,7 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part2.OnHandEndofMonth, report.Part2.OnHandEndofMonth);
                 Assert.AreEqual(part2.TaxWithdrawn, report.Part2.TaxWithdrawn);
                 Assert.AreEqual(part2.TotalLine31, report.Part2.TotalLine31);
-                Assert.AreEqual(part2.TotalLine47, report.Part2.TotalLine47);
+                Assert.AreEqual(part2.TotalLine47, report.Part2.TotalLine47, "Processing Report Line 47 values do not match");
             }
 
             if(part4 != null)
@@ -1236,7 +1236,6 @@ namespace WebApp.Helpers.Tests
                 weight: 0f,
                 alcoholContent: 10f,
                 proof: 20f,
-                price: 0f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Other,
@@ -1258,7 +1257,6 @@ namespace WebApp.Helpers.Tests
                 weight: 0f,
                 alcoholContent: 10f,
                 proof: 20f,
-                price: 0f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Other,
@@ -1298,7 +1296,6 @@ namespace WebApp.Helpers.Tests
                 weight: 100f,
                 alcoholContent: 10f,
                 proof: 20f,
-                price: 0f,
                 vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Other,
@@ -20596,7 +20593,7 @@ namespace WebApp.Helpers.Tests
                     OnHandEndofMonth = 160f,
                     TotalLine31 = 195.75f,
                     RecordedLosses = 1.18f,
-                    TotalLine47 = 1.18f/*Line 44 Losses*/ + 34.57f/*Tax withdrawn */
+                    TotalLine47 = 1.18f/*Line 44 Losses*/ + 34.57f/*Tax withdrawn */ + 160f /*On Hand End Of Month*/
                 },
                 new List<ProcessReportingPart4>
                 {
@@ -20661,7 +20658,7 @@ namespace WebApp.Helpers.Tests
                     OnHandEndofMonth = 120f,
                     TotalLine31 = 160f,
                     RecordedLosses = 0,
-                    TotalLine47 = 0/*Line 44 Losses*/ + 40f/*Tax withdrawn */
+                    TotalLine47 = 0/*Line 44 Losses*/ + 40f/*Tax withdrawn */ + 120f /*On Hand End Of Month*/
                 });
 
             // withdraw taxes in March
@@ -20706,7 +20703,7 @@ namespace WebApp.Helpers.Tests
                     OnHandEndofMonth = 90f,
                     TotalLine31 = 120f,
                     RecordedLosses = 0,
-                    TotalLine47 = 0/*Line 44 Losses*/ + 30f/*Tax withdrawn */
+                    TotalLine47 = 0/*Line 44 Losses*/ + 30f/*Tax withdrawn */ + 90f /*On Hand End Of Month*/
                 });
 
             // Now let's go in the past to ensure all values persist
@@ -20737,7 +20734,7 @@ namespace WebApp.Helpers.Tests
                     OnHandEndofMonth = 160f,
                     TotalLine31 = 195.75f,
                     RecordedLosses = 1.18f,
-                    TotalLine47 = 1.18f/*Line 44 Losses*/ + 34.57f/*Tax withdrawn */
+                    TotalLine47 = 1.18f/*Line 44 Losses*/ + 34.57f/*Tax withdrawn */ + 160f /*On Hand End Of Month*/
                 },
                 new List<ProcessReportingPart4>
                 {
@@ -20786,7 +20783,7 @@ namespace WebApp.Helpers.Tests
                     OnHandEndofMonth = 120f,
                     TotalLine31 = 160f,
                     RecordedLosses = 0,
-                    TotalLine47 = 0/*Line 44 Losses*/ + 40f/*Tax withdrawn */
+                    TotalLine47 = 0/*Line 44 Losses*/ + 40f/*Tax withdrawn */ + 120f /*On Hand End Of Month*/
                 });
         }
 
