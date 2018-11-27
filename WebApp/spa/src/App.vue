@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <router-link class="brand" :to="{name: 'Home'}" exact>DropBit</router-link>
     <nav-bar></nav-bar>
     <router-view/>
   </div>
@@ -18,17 +17,12 @@ export default {
 </script>
 
 <style>
-.brand {
-  text-decoration: none;
-  color: inherited;
-}
-
 #app {
-  /* font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px; */
+  margin-top: 60px;
 }
 </style>

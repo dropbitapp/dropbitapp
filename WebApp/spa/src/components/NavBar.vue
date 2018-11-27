@@ -1,8 +1,8 @@
 <template>
   <div>
-    <router-link :to="{name: 'Home'}" exact>Home</router-link>
-    <router-link to="/purchase" exact>Purchase</router-link>
-    <router-link to="/production" exact>Production</router-link>
+    <router-link class="brand" :to="{name: 'Home'}" exact>DROPBIT.IO</router-link>
+    <router-link class="link" to="/purchase" exact>Purchase</router-link>
+    <router-link class="link" to="/production" exact>Production</router-link>
   </div>
 </template>
 
@@ -13,7 +13,23 @@ export default {
 </script>
 
 <style scoped>
+.brand {
+  text-decoration: none;
+  color: inherited;
+}
+
 .router-link-active {
   color: red;
+}
+
+div,
+.brand,
+.link {
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+.link {
+  width: 50px;
 }
 </style>

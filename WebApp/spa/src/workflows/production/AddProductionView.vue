@@ -1,10 +1,7 @@
 <template>
   <div>
-    <h1>Create Production</h1>
-    <p>
-      View creating new production batches.
-      Form fields may differ depending on the production type.
-    </p>
+    <h1>Add Production Batch</h1>
+    <p>View for adding new production batches</p>
     <router-link to="/production" exact>Back to Production Batch List</router-link>
   </div>
 </template>
