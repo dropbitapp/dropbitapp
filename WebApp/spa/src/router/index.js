@@ -2,53 +2,55 @@ import Vue from 'vue';
 import Router from 'vue-router';
 
 import HomeView from '../views/HomeView.vue';
-import NotFound from '../views/NotFound.vue';
 
-// purchase imports
-import Purchase from '../views/purchase/Purchase.vue';
-import PurchaseView from '../views/purchase/PurchaseView.vue';
-import AddPurchaseView from '../views/purchase/AddPurchaseView.vue';
-import FermentableDetail from '../views/purchase/FermentableDetail.vue';
-import FermentedDetail from '../views/purchase/FermentedDetail.vue';
-import DistilledDetail from '../views/purchase/DistilledDetail.vue';
-import SupplyDetail from '../views/purchase/SupplyDetail.vue';
-import AdditiveDetail from '../views/purchase/AdditiveDetail.vue';
-import FermentableEdit from '../views/purchase/FermentableEdit.vue';
-import FermentedEdit from '../views/purchase/FermentedEdit.vue';
-import DistilledEdit from '../views/purchase/DistilledEdit.vue';
-import SupplyEdit from '../views/purchase/SupplyEdit.vue';
-import AdditiveEdit from '../views/purchase/AdditiveEdit.vue';
+// lazy load generic views
+const NotFound = () => import('../views/NotFound.vue');
 
-// production imports
-import Production from '../views/production/Production.vue';
-import ProductionView from '../views/production/ProductionView.vue';
-import AddProductionView from '../views/production/AddProductionView.vue';
-import FermentationDetail from '../views/production/FermentationDetail.vue';
-import DistillationDetail from '../views/production/DistillationDetail.vue';
-import BlendingDetail from '../views/production/BlendingDetail.vue';
-import BottlingDetail from '../views/production/BottlingDetail.vue';
-import FermentationEdit from '../views/production/FermentationEdit.vue';
-import DistillationEdit from '../views/production/DistillationEdit.vue';
-import BlendingEdit from '../views/production/BlendingEdit.vue';
-import BottlingEdit from '../views/production/BottlingEdit.vue';
+// lazy load purchase views
+const Purchase = () => import('../views/purchase/Purchase.vue');
+const PurchaseView = () => import('../views/purchase/PurchaseView.vue');
+const AddPurchaseView = () => import('../views/purchase/AddPurchaseView.vue');
+const FermentableDetail = () => import('../views/purchase/FermentableDetail.vue');
+const FermentedDetail = () => import('../views/purchase/FermentedDetail.vue');
+const DistilledDetail = () => import('../views/purchase/DistilledDetail.vue');
+const SupplyDetail = () => import('../views/purchase/SupplyDetail.vue');
+const AdditiveDetail = () => import('../views/purchase/AdditiveDetail.vue');
+const FermentableEdit = () => import('../views/purchase/FermentableEdit.vue');
+const FermentedEdit = () => import('../views/purchase/FermentedEdit.vue');
+const DistilledEdit = () => import('../views/purchase/DistilledEdit.vue');
+const SupplyEdit = () => import('../views/purchase/SupplyEdit.vue');
+const AdditiveEdit = () => import('../views/purchase/AdditiveEdit.vue');
 
-// dictionary imports
-import Dictionary from '../views/dictionary/Dictionary.vue';
-import DictionaryView from '../views/dictionary/DictionaryView.vue';
-import AddDictionaryView from '../views/dictionary/AddDictionaryView.vue';
-import SpiritDetail from '../views/dictionary/SpiritDetail.vue';
-import VendorDetail from '../views/dictionary/VendorDetail.vue';
-import StorageDetail from '../views/dictionary/StorageDetail.vue';
-import MaterialDetail from '../views/dictionary/MaterialDetail.vue';
-import SpiritEdit from '../views/dictionary/SpiritEdit.vue';
-import VendorEdit from '../views/dictionary/VendorEdit.vue';
-import StorageEdit from '../views/dictionary/StorageEdit.vue';
-import MaterialEdit from '../views/dictionary/MaterialEdit.vue';
+// lazy load production views
+const Production = () => import('../views/production/Production.vue');
+const ProductionView = () => import('../views/production/ProductionView.vue');
+const AddProductionView = () => import('../views/production/AddProductionView.vue');
+const FermentationDetail = () => import('../views/production/FermentationDetail.vue');
+const DistillationDetail = () => import('../views/production/DistillationDetail.vue');
+const BlendingDetail = () => import('../views/production/BlendingDetail.vue');
+const BottlingDetail = () => import('../views/production/BottlingDetail.vue');
+const FermentationEdit = () => import('../views/production/FermentationEdit.vue');
+const DistillationEdit = () => import('../views/production/DistillationEdit.vue');
+const BlendingEdit = () => import('../views/production/BlendingEdit.vue');
+const BottlingEdit = () => import('../views/production/BottlingEdit.vue');
 
-// reporting imports
-import StorageReport from '../views/reporting/StorageReport.vue';
-import ProductionReport from '../views/reporting/ProductionReport.vue';
-import ProcessingReport from '../views/reporting/ProcessingReport.vue';
+// lazy load dictionary views
+const Dictionary = () => import('../views/dictionary/Dictionary.vue');
+const DictionaryView = () => import('../views/dictionary/DictionaryView.vue');
+const AddDictionaryView = () => import('../views/dictionary/AddDictionaryView.vue');
+const SpiritDetail = () => import('../views/dictionary/SpiritDetail.vue');
+const VendorDetail = () => import('../views/dictionary/VendorDetail.vue');
+const StorageDetail = () => import('../views/dictionary/StorageDetail.vue');
+const MaterialDetail = () => import('../views/dictionary/MaterialDetail.vue');
+const SpiritEdit = () => import('../views/dictionary/SpiritEdit.vue');
+const VendorEdit = () => import('../views/dictionary/VendorEdit.vue');
+const StorageEdit = () => import('../views/dictionary/StorageEdit.vue');
+const MaterialEdit = () => import('../views/dictionary/MaterialEdit.vue');
+
+// lazy load reporting views
+const StorageReport = () => import('../views/reporting/StorageReport.vue');
+const ProductionReport = () => import('../views/reporting/ProductionReport.vue');
+const ProcessingReport = () => import('../views/reporting/ProcessingReport.vue');
 
 Vue.use(Router);
 
