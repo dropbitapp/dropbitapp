@@ -44,6 +44,11 @@ import VendorEdit from '../views/dictionary/VendorEdit.vue';
 import StorageEdit from '../views/dictionary/StorageEdit.vue';
 import MaterialEdit from '../views/dictionary/MaterialEdit.vue';
 
+// reporting imports
+import StorageReport from '../views/reporting/StorageReport.vue';
+import ProductionReport from '../views/reporting/ProductionReport.vue';
+import ProcessingReport from '../views/reporting/ProcessingReport.vue';
+
 Vue.use(Router);
 
 export default new Router({
@@ -218,6 +223,23 @@ export default new Router({
       path: 'material/edit/:id',
       component: MaterialEdit,
       props: true,
+    },
+    ],
+  },
+  {
+    path: '/reporting',
+    component: Dictionary,
+    children: [{
+      path: 'storage',
+      component: StorageReport,
+    },
+    {
+      path: 'production',
+      component: ProductionReport,
+    },
+    {
+      path: 'processing',
+      component: ProcessingReport,
     },
     ],
   },
