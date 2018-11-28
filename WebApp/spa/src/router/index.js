@@ -1,48 +1,48 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
-import HomeView from '../workflows/HomeView.vue';
+import HomeView from '../views/HomeView.vue';
 
 // purchase imports
-import Purchase from '../workflows/purchase/Purchase.vue';
-import PurchaseView from '../workflows/purchase/PurchaseView.vue';
-import AddPurchaseView from '../workflows/purchase/AddPurchaseView.vue';
-import FermentableDetail from '../workflows/purchase/FermentableDetail.vue';
-import FermentedDetail from '../workflows/purchase/FermentedDetail.vue';
-import DistilledDetail from '../workflows/purchase/DistilledDetail.vue';
-import SupplyDetail from '../workflows/purchase/SupplyDetail.vue';
-import AdditiveDetail from '../workflows/purchase/AdditiveDetail.vue';
-import FermentableEdit from '../workflows/purchase/FermentableEdit.vue';
-import FermentedEdit from '../workflows/purchase/FermentedEdit.vue';
-import DistilledEdit from '../workflows/purchase/DistilledEdit.vue';
-import SupplyEdit from '../workflows/purchase/SupplyEdit.vue';
-import AdditiveEdit from '../workflows/purchase/AdditiveEdit.vue';
+import Purchase from '../views/purchase/Purchase.vue';
+import PurchaseView from '../views/purchase/PurchaseView.vue';
+import AddPurchaseView from '../views/purchase/AddPurchaseView.vue';
+import FermentableDetail from '../views/purchase/FermentableDetail.vue';
+import FermentedDetail from '../views/purchase/FermentedDetail.vue';
+import DistilledDetail from '../views/purchase/DistilledDetail.vue';
+import SupplyDetail from '../views/purchase/SupplyDetail.vue';
+import AdditiveDetail from '../views/purchase/AdditiveDetail.vue';
+import FermentableEdit from '../views/purchase/FermentableEdit.vue';
+import FermentedEdit from '../views/purchase/FermentedEdit.vue';
+import DistilledEdit from '../views/purchase/DistilledEdit.vue';
+import SupplyEdit from '../views/purchase/SupplyEdit.vue';
+import AdditiveEdit from '../views/purchase/AdditiveEdit.vue';
 
 // production imports
-import Production from '../workflows/production/Production.vue';
-import ProductionView from '../workflows/production/ProductionView.vue';
-import AddProductionView from '../workflows/production/AddProductionView.vue';
-import FermentationDetail from '../workflows/production/FermentationDetail.vue';
-import DistillationDetail from '../workflows/production/DistillationDetail.vue';
-import BlendingDetail from '../workflows/production/BlendingDetail.vue';
-import BottlingDetail from '../workflows/production/BottlingDetail.vue';
-import FermentationEdit from '../workflows/production/FermentationEdit.vue';
-import DistillationEdit from '../workflows/production/DistillationEdit.vue';
-import BlendingEdit from '../workflows/production/BlendingEdit.vue';
-import BottlingEdit from '../workflows/production/BottlingEdit.vue';
+import Production from '../views/production/Production.vue';
+import ProductionView from '../views/production/ProductionView.vue';
+import AddProductionView from '../views/production/AddProductionView.vue';
+import FermentationDetail from '../views/production/FermentationDetail.vue';
+import DistillationDetail from '../views/production/DistillationDetail.vue';
+import BlendingDetail from '../views/production/BlendingDetail.vue';
+import BottlingDetail from '../views/production/BottlingDetail.vue';
+import FermentationEdit from '../views/production/FermentationEdit.vue';
+import DistillationEdit from '../views/production/DistillationEdit.vue';
+import BlendingEdit from '../views/production/BlendingEdit.vue';
+import BottlingEdit from '../views/production/BottlingEdit.vue';
 
 // dictionary imports
-import Dictionary from '../workflows/dictionary/Dictionary.vue';
-import DictionaryView from '../workflows/dictionary/DictionaryView.vue';
-import AddDictionaryView from '../workflows/dictionary/AddDictionaryView.vue';
-import SpiritDetail from '../workflows/dictionary/SpiritDetail.vue';
-import VendorDetail from '../workflows/dictionary/VendorDetail.vue';
-import StorageDetail from '../workflows/dictionary/StorageDetail.vue';
-import MaterialDetail from '../workflows/dictionary/MaterialDetail.vue';
-import SpiritEdit from '../workflows/dictionary/SpiritEdit.vue';
-import VendorEdit from '../workflows/dictionary/VendorEdit.vue';
-import StorageEdit from '../workflows/dictionary/StorageEdit.vue';
-import MaterialEdit from '../workflows/dictionary/MaterialEdit.vue';
+import Dictionary from '../views/dictionary/Dictionary.vue';
+import DictionaryView from '../views/dictionary/DictionaryView.vue';
+import AddDictionaryView from '../views/dictionary/AddDictionaryView.vue';
+import SpiritDetail from '../views/dictionary/SpiritDetail.vue';
+import VendorDetail from '../views/dictionary/VendorDetail.vue';
+import StorageDetail from '../views/dictionary/StorageDetail.vue';
+import MaterialDetail from '../views/dictionary/MaterialDetail.vue';
+import SpiritEdit from '../views/dictionary/SpiritEdit.vue';
+import VendorEdit from '../views/dictionary/VendorEdit.vue';
+import StorageEdit from '../views/dictionary/StorageEdit.vue';
+import MaterialEdit from '../views/dictionary/MaterialEdit.vue';
 
 Vue.use(Router);
 
