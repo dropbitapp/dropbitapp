@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 
 import HomeView from '../views/HomeView.vue';
+import NotFound from '../views/NotFound.vue';
 
 // purchase imports
 import Purchase from '../views/purchase/Purchase.vue';
@@ -242,6 +243,10 @@ export default new Router({
       component: ProcessingReport,
     },
     ],
+  },
+  {
+    path: '*',
+    component: NotFound,
   },
   ],
 });
