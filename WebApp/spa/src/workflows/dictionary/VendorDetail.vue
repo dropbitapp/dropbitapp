@@ -1,15 +1,15 @@
 <template>
   <div>
-    <h1>Distillation {{id}}</h1>
+    <h1>Vendor {{id}}</h1>
     <button @click="edit()">Edit</button>
-    <p>Detail for production distillation batch</p>
-    <router-link to="/production" exact>Back to Production Batch</router-link>
+    <p>Detail for dictionary vendor item</p>
+    <router-link to="/dictionary" exact>Back to Dictionary Item</router-link>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'DistillationDetail',
+  name: 'VendorDetail',
   props: {
     id: {
       type: [Number, String],
@@ -20,7 +20,7 @@ export default {
   },
   methods: {
     edit() {
-      this.$router.push(`/production/distillation/edit/${this.id}`);
+      this.$router.push(`/dictionary/vendor/edit/${this.id}`);
     },
   },
 };

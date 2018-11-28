@@ -2,8 +2,8 @@
   <div>
     <h1>Fermentation {{id}}</h1>
     <p>Edit production fermentation batch</p>
-    <router-link :to="{ path: `/production/fermentation/detail/${id}`}" exact>
-      Back to Production Batch List
+    <router-link :to="{ path: `/production/fermentation/detail/${id}` }" exact>
+      Back to Production Batch
     </router-link>
   </div>
 </template>

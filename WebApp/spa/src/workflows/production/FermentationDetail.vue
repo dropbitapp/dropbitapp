@@ -3,7 +3,7 @@
     <h1>Fermentation {{id}}</h1>
     <button @click="edit()">Edit</button>
     <p>Detail for production fermentation batch</p>
-    <router-link to="/production" exact>Back to Production Batch List</router-link>
+    <router-link to="/production" exact>Back to Production Batch</router-link>
   </div>
 </template>
 

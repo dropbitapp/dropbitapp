@@ -1,16 +1,16 @@
 <template>
   <div>
-    <h1>Distillation {{id}}</h1>
-    <p>Edit production distillation batch</p>
-    <router-link :to="{ path: `/production/distillation/detail/${id}` }" exact>
-      Back to Production Batch
+    <h1>Material {{id}}</h1>
+    <p>Edit dictionary material item</p>
+    <router-link :to="{ path: `/dictionary/material/detail/${id}` }" exact>
+      Back to Dictionary Item
     </router-link>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'DistillationEdit',
+  name: 'MaterialEdit',
   props: {
     id: {
       type: [Number, String],

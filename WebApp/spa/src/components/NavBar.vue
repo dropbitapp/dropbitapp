@@ -1,8 +1,9 @@
 <template>
   <div>
     <router-link class="brand" :to="{name: 'Home'}" exact>DROPBIT.IO</router-link>
-    <router-link class="link" to="/purchase" exact>Purchase</router-link>
-    <router-link class="link" to="/production" exact>Production</router-link>
+    <router-link active-class="link-active" class="link" to="/purchase">Purchase</router-link>
+    <router-link active-class="link-active" class="link" to="/production">Production</router-link>
+    <router-link active-class="link-active" class="link" to="/dictionary">Dictionary</router-link>
   </div>
 </template>
 
@@ -18,7 +19,7 @@ export default {
   color: inherited;
 }
 
-.router-link-active {
+.foo {
   color: red;
 }
 
@@ -29,7 +30,7 @@ div,
   padding-left: 5px;
 }
 
-.link {
+.link-active {
   width: 50px;
 }
 </style>

@@ -3,7 +3,7 @@
     <h1>Additive {{id}}</h1>
     <button @click="edit()">Edit</button>
     <p>Detail for purchase additive batch</p>
-    <router-link to="/purchase" exact>Back to Purchase Batch List</router-link>
+    <router-link to="/purchase" exact>Back to Purchase Batch</router-link>
   </div>
 </template>
 

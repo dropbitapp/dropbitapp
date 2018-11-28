@@ -31,6 +31,19 @@ import DistillationEdit from '../workflows/production/DistillationEdit.vue';
 import BlendingEdit from '../workflows/production/BlendingEdit.vue';
 import BottlingEdit from '../workflows/production/BottlingEdit.vue';
 
+// dictionary imports
+import Dictionary from '../workflows/dictionary/Dictionary.vue';
+import DictionaryView from '../workflows/dictionary/DictionaryView.vue';
+import AddDictionaryView from '../workflows/dictionary/AddDictionaryView.vue';
+import SpiritDetail from '../workflows/dictionary/SpiritDetail.vue';
+import VendorDetail from '../workflows/dictionary/VendorDetail.vue';
+import StorageDetail from '../workflows/dictionary/StorageDetail.vue';
+import MaterialDetail from '../workflows/dictionary/MaterialDetail.vue';
+import SpiritEdit from '../workflows/dictionary/SpiritEdit.vue';
+import VendorEdit from '../workflows/dictionary/VendorEdit.vue';
+import StorageEdit from '../workflows/dictionary/StorageEdit.vue';
+import MaterialEdit from '../workflows/dictionary/MaterialEdit.vue';
+
 Vue.use(Router);
 
 export default new Router({
@@ -151,6 +164,59 @@ export default new Router({
     {
       path: 'bottling/edit/:id',
       component: BottlingEdit,
+      props: true,
+    },
+    ],
+  },
+  {
+    path: '/dictionary',
+    component: Dictionary,
+    children: [{
+      path: '',
+      component: DictionaryView,
+    },
+    {
+      path: 'add',
+      component: AddDictionaryView,
+    },
+    {
+      path: 'spirit/detail/:id',
+      component: SpiritDetail,
+      props: true,
+    },
+    {
+      path: 'vendor/detail/:id',
+      component: VendorDetail,
+      props: true,
+    },
+    {
+      path: 'storage/detail/:id',
+      component: StorageDetail,
+      props: true,
+    },
+    {
+      path: 'material/detail/:id',
+      component: MaterialDetail,
+      props: true,
+    },
+    {
+      path: 'spirit/edit/:id',
+      component: SpiritEdit,
+      props: true,
+    },
+    {
+      path: 'vendor/edit/:id',
+      component: VendorEdit,
+      props: true,
+    },
+    {
+      path: 'storage/edit/:id',
+      component: StorageEdit,
+      props: true,
+    },
+    {
+      path: 'material/edit/:id',
+      component: MaterialEdit,
       props: true,
     },
     ],
