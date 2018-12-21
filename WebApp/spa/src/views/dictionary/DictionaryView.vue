@@ -2,6 +2,7 @@
   <div>
     <h1>Dictionary</h1>
     <p>View for displaying a list of existing dictionary items</p>
+    <p>Spirit Count: {{spiritCount}}</p>
     <router-link to="/dictionary/add" exact>
       <button>Add Dictionary Item</button>
     </router-link>
@@ -10,14 +11,14 @@
         <tr>
           <th>id</th>
           <th>name</th>
-          <th>type</th>
+          <th>note</th>
           <th>actions</th>
         </tr>
-        <template v-for="item in dictionaryItems">
-          <tr :key="item.id">
-            <td @click="showDetail(item)">{{item.id}}</td>
-            <td @click="showDetail(item)">{{item.name}}</td>
-            <td @click="showDetail(item)">{{item.type}}</td>
+        <template v-for="item in spirits">
+          <tr :key="item.SpiritId">
+            <td @click="showDetail(item)">{{item.SpiritId}}</td>
+            <td @click="showDetail(item)">{{item.SpiritName}}</td>
+            <td @click="showDetail(item)">{{item.Note}}</td>
             <td>
               <button @click="deleteItem(item)">delete</button>
             </td>
@@ -31,24 +32,26 @@
 <script>
 export default {
   name: 'DictionaryView',
-  data() {
-    return {
-      dictionaryItems: [
-        { id: 1, type: 'spirit', name: 'Brandy' },
-        { id: 2, type: 'vendor', name: 'Spirited Productions' },
-        { id: 3, type: 'storage', name: 'Barrel' },
-        { id: 4, type: 'material', name: 'Anise' },
-      ],
-    };
+  created() {
+    this.$store.dispatch('dictionary/getSpirits');
+  },
+  computed: {
+    spirits() {
+      return this.$store.state.dictionary.spirits;
+    },
+    spiritCount() {
+      return this.$store.getters['dictionary/spiritCount'];
+    },
   },
   methods: {
     showDetail(item) {
-      this.$router.push(`/dictionary/${item.type}/detail/${item.id}`);
+      // this.$router.push(`/dictionary/${item.type}/detail/${item.id}`);
+      this.$router.push(`/dictionary/spirit/detail/${item.SpiritId}`);
     },
     deleteItem(item) {
-      // eslint-disable-next-line no-alert
-      // eslint-disable-next-line no-restricted-globals
-      confirm(`Delete ${item.name}?`);
+      const spirit = { DeleteRecordID: item.SpiritId, DeleteRecordType: 'Spirit' };
+      this.$store.dispatch('dictionary/deleteSpirit', spirit);
+      this.$store.dispatch('dictionary/getSpirits');
     },
   },
 };
