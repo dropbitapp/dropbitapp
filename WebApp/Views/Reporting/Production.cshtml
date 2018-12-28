@@ -568,6 +568,10 @@
                                 isUnknownMaterial = true;
                             }
                         }
+                        if (isUnknownMaterial) 
+                        {
+                            unknownMaterialsList.push(result.ProdReportPart6List[i]);
+                        }
                     }
                     else if ( result.ProdReportPart6List[i].ProdReportMaterialCategoryID === 2 ) // fruit and fruit products case
                     {
@@ -600,6 +604,11 @@
                                 isUnknownMaterial = true;
                             }
                         }
+
+                        if (isUnknownMaterial)
+                        {
+                            unknownMaterialsList.push(result.ProdReportPart6List[i]);
+                        }
                     }
                     else if ( result.ProdReportPart6List[i].ProdReportMaterialCategoryID === 3 ) // cane and cane products case
                     {
@@ -627,6 +636,10 @@
                                 isUnknownMaterial = true;
                             }
                         }
+                        if (isUnknownMaterial)
+                        {
+                            unknownMaterialsList.push(result.ProdReportPart6List[i]);
+                        }
                     }
                     else if ( result.ProdReportPart6List[i].ProdReportMaterialCategoryID === 4 ) // other products case
                     {
@@ -639,13 +652,28 @@
                     for ( var l = 0; l < unknownMaterialsList.length; l++ ) {
 
                         if ( unknownMaterialsList[l].ProdReportMaterialCategoryID === 1 ) { // Whiskey
-                            // find first availabe empty spot and insert there
+                            // find first available empty cell and insert
                             for ( var h = 10; h <= 11; h++ ) {
                                 var currentString = table.rows[h].cells[0].getElementsByTagName( 'p' )[0].innerText;
                                 var index = currentString.indexOf( '.' );
                                 var secondHalfOfString = currentString.substr( ++index );
-                                if ( secondHalfOfString !== "" ) {
-                                    continue;
+                                if (secondHalfOfString !== "") {
+                                    if (secondHalfOfString.toUpperCase() === unknownMaterialsList[l].KindOfMaterial.toUpperCase())
+                                    {
+                                        var idLbs = '#' + table.rows[h].cells[1].getElementsByTagName('input')[0].id;
+                                        var idGals = '#' + table.rows[h].cells[2].getElementsByTagName('input')[0].id;
+
+                                        var tempVolume = $(idGals).val() + unknownMaterialsList[l].Volume;
+                                        var tempWeight = $(idLbs).val() + unknownMaterialsList[l].Weight;
+
+                                        $(idGals).val(tempVolume);
+                                        $(idLbs).val(tempWeight);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
                                 }
                                 else {
                                     var curElem = table.rows[h].cells[0].getElementsByTagName( 'p' )[0];
@@ -672,7 +700,22 @@
                                 var index = currentString.indexOf( '.' );
                                 var secondHalfOfString = currentString.substr( ++index );
                                 if ( secondHalfOfString !== "" ) {
-                                    continue;
+                                    if (secondHalfOfString.toUpperCase() === unknownMaterialsList[l].KindOfMaterial.toUpperCase())
+                                    {
+                                        var idLbs = '#' + table.rows[h].cells[1].getElementsByTagName('input')[0].id;
+                                        var idGals = '#' + table.rows[h].cells[2].getElementsByTagName('input')[0].id;
+
+                                        var tempVolume = $(idGals).val() + unknownMaterialsList[l].Volume;
+                                        var tempWeight = $(idLbs).val() + unknownMaterialsList[l].Weight;
+
+                                        $(idGals).val(tempVolume);
+                                        $(idLbs).val(tempWeight);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
                                 }
 
                                 else {
@@ -699,8 +742,24 @@
                                 var currentString = table.rows[h].cells[0].getElementsByTagName( 'p' )[0].innerText;
                                 var index = currentString.indexOf( '.' );
                                 var secondHalfOfString = currentString.substr( ++index );
-                                if ( secondHalfOfString !== "" ) {
-                                    continue;
+                                if (secondHalfOfString !== "")
+                                {
+                                    if (secondHalfOfString.toUpperCase() === unknownMaterialsList[l].KindOfMaterial.toUpperCase())
+                                    {
+                                        var idLbs = '#' + table.rows[h].cells[1].getElementsByTagName('input')[0].id;
+                                        var idGals = '#' + table.rows[h].cells[2].getElementsByTagName('input')[0].id;
+
+                                        var tempVolume = $(idGals).val() + unknownMaterialsList[l].Volume;
+                                        var tempWeight = $(idLbs).val() + unknownMaterialsList[l].Weight;
+
+                                        $(idGals).val(tempVolume);
+                                        $(idLbs).val(tempWeight);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
                                 }
                                 else {
                                     var curElem = table.rows[h].cells[0].getElementsByTagName( 'p' )[0];
