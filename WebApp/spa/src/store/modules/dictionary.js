@@ -10,29 +10,40 @@ export default {
     units: null,
     materialCategories: null,
     rawMaterials: null,
+    /*
+    {
+      MaterialCategoryID: 0
+      Note: null
+      PurchaseMaterialTypes: null
+      RawMaterialId: 0
+      RawMaterialName: ''
+      UnitType: 'lb'
+      UnitTypeId: 0
+    }
+    */
   },
   // modify state only through mutations
   mutations: {
     updateProcessingReportTypes(state, types) {
-      state.processingReportTypes = types;
+      state.processingReportTypes = types; // eslint-disable-line no-param-reassign
     },
     updateSpirits(state, spirits) {
-      state.spirits = spirits;
+      state.spirits = spirits; // eslint-disable-line no-param-reassign
     },
     updateVendors(state, vendors) {
-      state.vendors = vendors;
+      state.vendors = vendors; // eslint-disable-line no-param-reassign
     },
     updateStorages(state, storages) {
-      state.storages = storages;
+      state.storages = storages; // eslint-disable-line no-param-reassign
     },
     updateUnits(state, units) {
-      state.units = units;
+      state.units = units; // eslint-disable-line no-param-reassign
     },
     updateMaterialCategories(state, categories) {
-      state.materialCategories = categories;
+      state.materialCategories = categories; // eslint-disable-line no-param-reassign
     },
     updateRawMaterials(state, materials) {
-      state.rawMaterials = materials;
+      state.rawMaterials = materials; // eslint-disable-line no-param-reassign
     },
   },
   // actions are for async calls, such as calling an api
@@ -77,9 +88,9 @@ export default {
         .then(result => commit('updateMaterialCategories', result.data))
         .catch(console.error);
     },
-    getMaterials({ commit }) {
+    getRawMaterials({ commit }) {
       return axios.get('/Dictionary/GetRawMaterialList')
-        .then(result => commit('updateMaterials', result.data))
+        .then(result => commit('updateRawMaterials', result.data))
         .catch(console.error);
     },
   },

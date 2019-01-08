@@ -6,6 +6,24 @@
       <button>Add Purchase Batch</button>
     </router-link>
     <div class="table-wrapper">
+      Raw Materials List
+      <table>
+        <tr>
+          <th>Material Id</th>
+          <th>Material Name</th>
+          <th>Unit of Measurement</th>
+        </tr>
+        <template v-for="batch in rawMaterials">
+          <tr :key="batch.RawMaterialId">
+            <td @click="showDetail(batch)">{{batch.RawMaterialId}}</td>
+            <td @click="showDetail(batch)">{{batch.RawMaterialName}}</td>
+            <td @click="showDetail(batch)">{{batch.UnitType}}</td>
+          </tr>
+        </template>
+      </table>
+    </div>
+    <div class="table-wrapper">
+      Purchases
       <table>
         <tr>
           <th>id</th>
@@ -13,11 +31,11 @@
           <th>type</th>
           <th>actions</th>
         </tr>
-        <template v-for="batch in purchaseBatches">
-          <tr :key="batch.id">
-            <td @click="showDetail(batch)">{{batch.id}}</td>
-            <td @click="showDetail(batch)">{{batch.name}}</td>
-            <td @click="showDetail(batch)">{{batch.type}}</td>
+        <template v-for="batch in purchases">
+          <tr :key="batch.purchaseId">
+            <td @click="showDetail(batch)">{{batch.purchaseId}}</td>
+            <td @click="showDetail(batch)">{{batch.PurBatchName}}</td>
+            <td @click="showDetail(batch)">{{batch.PurchaseType}}</td>
             <td>
               <button @click="deleteBatch(batch)">delete</button>
             </td>
@@ -31,16 +49,17 @@
 <script>
 export default {
   name: 'PurchaseView',
-  data() {
-    return {
-      purchaseBatches: [
-        { id: 1, type: 'fermentable', name: 'Grapes' },
-        { id: 2, type: 'fermented', name: 'Pomace' },
-        { id: 3, type: 'distilled', name: 'Vodka' },
-        { id: 4, type: 'supply', name: 'Bottles' },
-        { id: 5, type: 'additive', name: 'Special Ingrients' },
-      ],
-    };
+  created() {
+    this.$store.dispatch('purchase/getFermentable');
+    this.$store.dispatch('dictionary/getRawMaterials');
+  },
+  computed: {
+    purchases() {
+      return this.$store.state.purchase.fermentable;
+    },
+    rawMaterials(){
+      return this.$store.state.dictionary.rawMaterials;
+    },
   },
   methods: {
     showDetail(batch) {
