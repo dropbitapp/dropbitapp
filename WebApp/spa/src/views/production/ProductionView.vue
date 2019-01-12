@@ -13,11 +13,11 @@
           <th>type</th>
           <th>actions</th>
         </tr>
-        <template v-for="batch in productionBatches">
-          <tr :key="batch.id">
-            <td @click="showDetail(batch)">{{batch.id}}</td>
-            <td @click="showDetail(batch)">{{batch.name}}</td>
-            <td @click="showDetail(batch)">{{batch.type}}</td>
+        <template v-for="batch in productions">
+          <tr :key="batch.ProductionId">
+            <td @click="showDetail(batch)">{{batch.ProductionId}}</td>
+            <td @click="showDetail(batch)">{{batch.BatchName}}</td>
+            <td @click="showDetail(batch)">{{batch.ProductionType}}</td>
             <td>
               <button @click="deleteBatch(batch)">delete</button>
             </td>
@@ -31,15 +31,13 @@
 <script>
 export default {
   name: 'ProductionView',
-  data() {
-    return {
-      productionBatches: [
-        { id: 1, type: 'fermentation', name: 'Fermenting Pomace' },
-        { id: 2, type: 'distillation', name: 'Distilling Vodka' },
-        { id: 3, type: 'blending', name: 'Blending Gin' },
-        { id: 4, type: 'bottling', name: 'Bottling Brandy' },
-      ],
-    };
+  created() {
+    this.$store.dispatch('production/getDistilled');
+  },
+  computed: {
+    productions() {
+      return this.$store.state.production.distilled;
+    },
   },
   methods: {
     showDetail(batch) {

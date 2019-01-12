@@ -23,7 +23,7 @@ export default {
     StateID: 0
     Status: ''
     StatusID: 0
-    Storage: Array
+    Storage: [{…}]
       Capacity: 0
       Note: null
       SerialNumber: null
