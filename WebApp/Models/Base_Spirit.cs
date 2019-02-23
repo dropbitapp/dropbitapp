@@ -156,7 +156,7 @@ namespace WebApp.Models
         public int AspNetUserToDistillerID { get; set; }
         [Required]
         public int UserId { get; set; }
-        [Required Column(Order = 2), ForeignKey("Distiller")]
+        [Required, Column(Order = 2), ForeignKey("Distiller")]
         public int DistillerID { get; set; }
 
         public virtual Distiller Distiller { get; set; }
@@ -214,7 +214,7 @@ namespace WebApp.Models
         [Key]
         public int MaterialKindReportingID { get; set; }
         public string MaterialKindName { get; set; }
-        [Required Column(Order = 2), ForeignKey("Distiller")]
+        [Required, Column(Order = 2), ForeignKey("Distiller")]
         public int DistillerID { get; set; }
 
         public virtual Distiller Distiller { get; set; }
@@ -633,9 +633,9 @@ namespace WebApp.Models
     /// </summary>
     public class MaterialDict2MaterialCategory
     {
-        [Key ForeignKey("MaterialDict") Column(Order = 0)]
+        [Key, ForeignKey("MaterialDict"), Column(Order = 0)]
         public int MaterialDictID { get; set; }
-        [ForeignKey("ProductionReportMaterialCategory") Column(Order = 1)]
+        [ForeignKey("ProductionReportMaterialCategory"), Column(Order = 1)]
         public int ProductionReportMaterialCategoryID { get; set; }
 
         public virtual MaterialDict MaterialDict { get; set; }
@@ -675,7 +675,7 @@ namespace WebApp.Models
     {
         [Key]
         public int SpiritCutID { get; set; }
-        [Required ForeignKey("Distiller")]
+        [Required, ForeignKey("Distiller")]
         public int DistillerId { get; set; }
         [Required]
         public string Name { get; set; }
