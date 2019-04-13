@@ -6,6 +6,13 @@ import HomeView from '../views/HomeView.vue';
 // lazy load generic views
 const NotFound = () => import('../views/NotFound.vue');
 
+// lazy load mockup views
+const Mockup = () => import('../mockup/Mockup.vue');
+const AddRecord = () => import('../mockup/AddRecord.vue');
+const EditRecord = () => import('../mockup/EditRecord.vue');
+const RecordDetail = () => import('../mockup/RecordDetail.vue');
+const ViewRecords = () => import('../mockup/ViewRecords.vue');
+
 // lazy load purchase views
 const Purchase = () => import('../views/purchase/Purchase.vue');
 const PurchaseView = () => import('../views/purchase/PurchaseView.vue');
@@ -59,6 +66,23 @@ export default new Router({
     path: '/',
     name: 'Home',
     component: HomeView,
+  },
+  {
+    path: '/mockup',
+    component: Mockup,
+    children: [{
+      path: 'add',
+      component: AddRecord,
+    }, {
+      path: 'edit',
+      component: EditRecord,
+    }, {
+      path: 'detail',
+      component: RecordDetail,
+    }, {
+      path: 'records',
+      component: ViewRecords,
+    }],
   },
   {
     path: '/purchase',

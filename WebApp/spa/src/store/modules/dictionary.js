@@ -97,7 +97,8 @@ export default {
   getters: {
     // getters are useful if you want to filter/sort/etc data before it is accessed
     spiritCount(state) {
-      return state.spirits ? state.spirits.length : 0;
+      return 0;
+      // state.spirits ? state.spirits.length : 0;
     },
   },
 };

@@ -9,8 +9,11 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "buefy": "^0.7.1",
+    "bulma-o-steps": "^1.0.9",
     "vue": "^2.5.17",
     "vue-router": "^3.0.2",
+    "vue-scrollto": "^2.13.0",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
