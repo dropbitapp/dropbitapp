@@ -17,6 +17,11 @@ const ViewRecords = () => import('../mockup/ViewRecords.vue');
 const Purchase = () => import('../views/purchase/Purchase.vue');
 const PurchaseView = () => import('../views/purchase/PurchaseView.vue');
 const AddPurchaseView = () => import('../views/purchase/AddPurchaseView.vue');
+const FermentableView = () => import('../views/purchase/FermentableView.vue');
+const FermentedView = () => import('../views/purchase/FermentedView.vue');
+const DistilledView = () => import('../views/purchase/DistilledView.vue');
+const SupplyView = () => import('../views/purchase/SupplyView.vue');
+const AdditiveView = () => import('../views/purchase/AdditiveView.vue');
 const FermentableDetail = () => import('../views/purchase/FermentableDetail.vue');
 const FermentedDetail = () => import('../views/purchase/FermentedDetail.vue');
 const DistilledDetail = () => import('../views/purchase/DistilledDetail.vue');
@@ -32,6 +37,10 @@ const AdditiveEdit = () => import('../views/purchase/AdditiveEdit.vue');
 const Production = () => import('../views/production/Production.vue');
 const ProductionView = () => import('../views/production/ProductionView.vue');
 const AddProductionView = () => import('../views/production/AddProductionView.vue');
+const FermentationView = () => import('../views/production/FermentationView.vue');
+const DistillationView = () => import('../views/production/DistillationView.vue');
+const BlendingView = () => import('../views/production/BlendingView.vue');
+const BottlingView = () => import('../views/production/BottlingView.vue');
 const FermentationDetail = () => import('../views/production/FermentationDetail.vue');
 const DistillationDetail = () => import('../views/production/DistillationDetail.vue');
 const BlendingDetail = () => import('../views/production/BlendingDetail.vue');
@@ -45,6 +54,10 @@ const BottlingEdit = () => import('../views/production/BottlingEdit.vue');
 const Dictionary = () => import('../views/dictionary/Dictionary.vue');
 const DictionaryView = () => import('../views/dictionary/DictionaryView.vue');
 const AddDictionaryView = () => import('../views/dictionary/AddDictionaryView.vue');
+const SpiritView = () => import('../views/dictionary/SpiritView.vue');
+const VendorView = () => import('../views/dictionary/VendorView.vue');
+const StorageView = () => import('../views/dictionary/StorageView.vue');
+const MaterialView = () => import('../views/dictionary/MaterialView.vue');
 const SpiritDetail = () => import('../views/dictionary/SpiritDetail.vue');
 const VendorDetail = () => import('../views/dictionary/VendorDetail.vue');
 const StorageDetail = () => import('../views/dictionary/StorageDetail.vue');
@@ -89,7 +102,28 @@ export default new Router({
     component: Purchase,
     children: [{
       path: '',
+      redirect: 'fermentable',
       component: PurchaseView,
+      children: [{
+        path: 'fermentable',
+        component: FermentableView,
+      },
+      {
+        path: 'fermented',
+        component: FermentedView,
+      },
+      {
+        path: 'distilled',
+        component: DistilledView,
+      },
+      {
+        path: 'supply',
+        component: SupplyView,
+      },
+      {
+        path: 'additive',
+        component: AdditiveView,
+      }],
     },
     {
       path: 'add',
@@ -152,7 +186,24 @@ export default new Router({
     component: Production,
     children: [{
       path: '',
+      redirect: 'fermentation',
       component: ProductionView,
+      children: [{
+        path: 'fermentation',
+        component: FermentationView,
+      },
+      {
+        path: 'distillation',
+        component: DistillationView,
+      },
+      {
+        path: 'blending',
+        component: BlendingView,
+      },
+      {
+        path: 'bottling',
+        component: BottlingView,
+      }],
     },
     {
       path: 'add',
@@ -205,7 +256,24 @@ export default new Router({
     component: Dictionary,
     children: [{
       path: '',
+      redirect: 'spirit',
       component: DictionaryView,
+      children: [{
+        path: 'spirit',
+        component: SpiritView,
+      },
+      {
+        path: 'vendor',
+        component: VendorView,
+      },
+      {
+        path: 'storage',
+        component: StorageView,
+      },
+      {
+        path: 'material',
+        component: MaterialView,
+      }],
     },
     {
       path: 'add',
