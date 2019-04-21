@@ -1,111 +1,116 @@
 import axios from 'axios';
+import parseDateString from '../../helpers/parse-date-string';
 
 export default {
   namespaced: true,
   state: {
-  /*
-  {
-    AlcoholContent: 0
-    Gauged: false
-    Note: null
-    Price: ''
-    ProofGallon: 0
-    PurBatchName: ''
-    PurchaseDate: "/Date(1518451200000)/"
-    PurchaseId: 0
-    PurchaseType: ''
-    Quantity: 0
-    RawMaterialId: 0
-    RecordId: 0
-    RecordName: ''
-    SpiritTypeReportingID: 0
-    State: ''
-    StateID: 0
-    Status: ''
-    StatusID: 0
-    Storage: [{…}]
-      Capacity: 0
-      Note: null
-      SerialNumber: null
-      StorageId: 0
-      StorageName: ''
-    StorageId: 0
-    StorageName: null
-    UnitOfMeasurementId: 0
-    UnitOfMeasurementName: null
-    VendorId: 0
-    VendorName: ''
-    VolumeByWeight: 0
-    }
-    */
-    fermentable: null,
+    fermentables: null,
     fermented: null,
     distilled: null,
-    additive: null,
-    supply: null,
+    supplies: null,
+    additives: null,
   },
+  // modify state only through mutations
   mutations: {
-    updateFermentable(state, fermentable) {
-      state.fermentable = fermentable; // eslint-disable-line no-param-reassign
+    updateFermentables(state, purchases) {
+      // eslint-disable-next-line no-param-reassign
+      state.fermentables = purchases;
     },
-    updateFermented(state, fermented) {
-      state.fermented = fermented; // eslint-disable-line no-param-reassign
+    updateFermented(state, purchases) {
+      // eslint-disable-next-line no-param-reassign
+      state.fermented = purchases;
     },
-    updateDistilled(state, distilled) {
-      state.distilled = distilled; // eslint-disable-line no-param-reassign
+    updateDistilled(state, purchases) {
+      // eslint-disable-next-line no-param-reassign
+      state.distilled = purchases;
     },
-    updateAdditive(state, additive) {
-      state.additive = additive; // eslint-disable-line no-param-reassign
+    updateSupplies(state, purchases) {
+      // eslint-disable-next-line no-param-reassign
+      state.supplies = purchases;
     },
-    updateSupply(state, supply) {
-      state.supply = supply; // eslint-disable-line no-param-reassign
+    updateAdditives(state, purchases) {
+      // eslint-disable-next-line no-param-reassign
+      state.additives = purchases;
     },
   },
+  // actions are for async calls, such as calling an api
   actions: {
-    getFermentable({ commit }) {
-      const pType = 'Fermentable';
+    getPurchases({
+      commit,
+    }, purchaseType) {
+      if (!purchaseType) {
+        throw new Error('getPurchases: invalid parameters');
+      }
       return axios.get('/Purchase/GetListOfPurchases', {
         params: {
-          purchaseType: pType,
+          purchaseType,
         },
-      }).then(result => commit('updateFermentable', result.data))
-        .catch(console.error);
+      })
+        .then((result) => {
+          result.data.map((purchase) => {
+            // eslint-disable-next-line no-param-reassign
+            purchase.PurchaseDate = parseDateString(purchase.PurchaseDate, false);
+            return purchase;
+          });
+          switch (purchaseType) {
+            case 'Fermentable':
+              commit('updateFermentables', result.data);
+              break;
+            case 'Fermented':
+              commit('updateFermented', result.data);
+              break;
+            case 'Distilled':
+              commit('updateDistilled', result.data);
+              break;
+            case 'Supply':
+              commit('updateSupplies', result.data);
+              break;
+            case 'Additive':
+              commit('updateAdditives', result.data);
+              break;
+            default:
+              throw new Error('getPurchases: invalid parameters');
+          }
+        })
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          // TODO: Remove all console.log()
+          console.log(error);
+          throw error;
+        });
     },
-    getFermented({ commit }) {
-      const pType = 'Fermented';
-      return axios.get('/Purchase/GetListOfPurchases', {
-        params: {
-          purchaseType: pType,
-        },
-      }).then(result => commit('updateFermented', result.data))
-        .catch(console.error);
-    },
-    getDistilled({ commit }) {
-      const pType = 'Distilled';
-      return axios.get('/Purchase/GetListOfPurchases', {
-        params: {
-          purchaseType: pType,
-        },
-      }).then(result => commit('updateDistilled', result.data))
-        .catch(console.error);
-    },
-    getSupplies({ commit }) {
-      const pType = 'Supply';
-      return axios.get('/Purchase/GetListOfPurchases', {
-        params: {
-          purchaseType: pType,
-        },
-      }).then(result => commit('updateAdditive', result.data))
-        .catch(console.error);
-    },
-    getAdditives({ commit }) {
-      const pType = 'Additive';
-      return axios.get('/Purchase/GetListOfPurchases', {
-        params: {
-          purchaseType: pType,
-        },
-      }).then(result => commit('updateSupply', result.data))
-        .catch(console.error);
+    deletePurchase({
+      dispatch,
+    }, {
+      workflow,
+      id,
+    }) {
+      if (!workflow || !id) {
+        throw new Error('deletePurchase: invalid parameters');
+      }
+      const purchase = {
+        DeleteRecordID: id,
+        DeleteRecordType: workflow,
+      };
+      return axios.post('/Purchase/DeleteRecord', purchase)
+        .then(() => {
+          switch (workflow) {
+            case 'Fermentable':
+            case 'Fermented':
+            case 'Distilled':
+            case 'Supply':
+            case 'Additive':
+              dispatch('getPurchases', workflow);
+              break;
+            default:
+              throw new Error('deletePurchase: invalid parameters');
+          }
+        })
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
     },
   },
 };
