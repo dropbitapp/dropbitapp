@@ -1,121 +1,107 @@
 import axios from 'axios';
+import parseDateString from '../../helpers/parse-date-string';
 
 export default {
   namespaced: true,
   state: {
-  /*
-  {
-    AlcoholContent: 0
-    BatchName: ''
-    BlendingAdditives: null
-    BottlingInfo: null
-    DistilledFrom: null
-    FillTestList: null
-    GainLoss: 0
-    Gauged: false
-    MaterialKindReportingID: 0
-    Note: null
-    ProductionDate: "/Date(1518624000000)/"
-    ProductionEnd: "/Date(1518624000000)/"
-    ProductionId: 0
-    ProductionStart: "/Date(1518624000000)/"
-    ProductionType: ''
-    ProductionTypeId: 0
-    ProofGallon: 0
-    PurchaseId: 0
-    PurchaseIdList: null
-    Quantity: 0
-    RecordId: null
-    RecordIds: null
-    RecordName: null
-    SpiritCutId: 9
-    SpiritCutName: ''
-    SpiritId: 0
-    SpiritName: ''
-    SpiritTypeReportingID: 0
-    StatusName: null
-    Storage: [{…}]
-        Capacity: 0
-        Note: null
-        SerialNumber: null
-        StorageId: 0
-        StorageName: ''
-    StorageId: 0
-    StorageName: null
-    TaxedProof: 0
-    UsedMats: null
-    VolumeByWeight: 0
-    WithdrawalDate: "/Date(-62135568000000)/"
-  }
-  */
-    production: null,
-    fermented: null,
-    distilled: null,
-    blended: null,
-    bottled: null,
+    fermentations: null,
+    distillations: null,
+    blendings: null,
+    bottlings: null,
   },
+  // modify state only through mutations
   mutations: {
-    updateProductions(state, production) {
-      state.production = production; // eslint-disable-line no-param-reassign
+    updateFermentations(state, productions) {
+      // eslint-disable-next-line no-param-reassign
+      state.fermentations = productions;
     },
-    updateFermented(state, fermented) {
-      state.fermented = fermented; // eslint-disable-line no-param-reassign
+    updateDistillations(state, productions) {
+      // eslint-disable-next-line no-param-reassign
+      state.distillations = productions;
     },
-    updateDistilled(state, distilled) {
-      state.distilled = distilled; // eslint-disable-line no-param-reassign
+    updateBlendings(state, productions) {
+      // eslint-disable-next-line no-param-reassign
+      state.blendings = productions;
     },
-    updateBlended(state, blended) {
-      state.blended = blended; // eslint-disable-line no-param-reassign
-    },
-    updateBottled(state, bottled) {
-      state.bottled = bottled; // eslint-disable-line no-param-reassign
+    updateBottlings(state, productions) {
+      // eslint-disable-next-line no-param-reassign
+      state.bottlings = productions;
     },
   },
+  // actions are for async calls, such as calling an api
   actions: {
-    getProductions({ commit }) {
-      const pType = 'Distillation';
+    getProductions({
+      commit,
+    }, productionType) {
+      if (!productionType) {
+        throw new Error('getProductions: invalid parameters');
+      }
       return axios.get('/Production/GetProductionData', {
         params: {
-          prodType: pType,
+          prodType: productionType,
         },
-      }).then(result => commit('updatedProductions', result.data))
-        .catch(console.error);
+      })
+        .then((result) => {
+          result.data.map((production) => {
+            // eslint-disable-next-line no-param-reassign
+            production.ProductionDate = parseDateString(production.ProductionDate, false);
+            return production;
+          });
+          switch (productionType) {
+            case 'Fermentation':
+              commit('updateFermentations', result.data);
+              break;
+            case 'Distillation':
+              commit('updateDistillations', result.data);
+              break;
+            case 'Blending':
+              commit('updateBlendings', result.data);
+              break;
+            case 'Bottling':
+              commit('updateBottlings', result.data);
+              break;
+            default:
+              throw new Error('getProductions: invalid parameters');
+          }
+        })
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          // TODO: Remove all console.log()
+          console.log(error);
+          throw error;
+        });
     },
-    getFermented({ commit }) {
-      const pType = 'Fermentation';
-      return axios.get('/Production/GetProductionData', {
-        params: {
-          prodType: pType,
-        },
-      }).then(result => commit('updateFermented', result.data))
-        .catch(console.error);
-    },
-    getDistilled({ commit }) {
-      const pType = 'Distillation';
-      return axios.get('/Production/GetProductionData', {
-        params: {
-          prodType: pType,
-        },
-      }).then(result => commit('updateDistilled', result.data))
-        .catch(console.error);
-    },
-    getBlended({ commit }) {
-      const pType = 'Blending';
-      return axios.get('/Production/GetProductionData', {
-        params: {
-          prodType: pType,
-        },
-      }).then(result => commit('updateBlended', result.data))
-        .catch(console.error);
-    },
-    getBottled({ commit }) {
-      const pType = 'Bottling';
-      return axios.get('/Production/GetProductionData', {
-        params: {
-          prodType: pType,
-        },
-      }).then(result => commit('updateBottled', result.data))
-        .catch(console.error);
+    deleteProduction({
+      dispatch,
+    }, {
+      workflow,
+      id,
+    }) {
+      if (!workflow || !id) {
+        throw new Error('deleteProduction: invalid parameters');
+      }
+      const production = {
+        DeleteRecordID: id,
+        DeleteRecordType: workflow,
+      };
+      return axios.post('/Production/DeleteRecord', production)
+        .then(() => {
+          switch (workflow) {
+            case 'Fermentation':
+            case 'Distillation':
+            case 'Blending':
+            case 'Bottling':
+              dispatch('getProductions', workflow);
+              break;
+            default:
+              throw new Error('deleteProductions: invalid parameters');
+          }
+        })
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
     },
   },
 };
