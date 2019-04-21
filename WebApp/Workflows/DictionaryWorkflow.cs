@@ -596,12 +596,16 @@ namespace WebApp.Workflows
                     from spirit in _db.Spirit
                     join us2Distills in _db.AspNetUserToDistiller on new { DistillerID = spirit.DistillerID } equals new { DistillerID = us2Distills.DistillerID } into us2Distills_join
                     from us2Distills in us2Distills_join.DefaultIfEmpty()
+                    join reportTypes in _db.ProcessingReportType on spirit.ProcessingReportTypeID equals reportTypes.ProcessingReportTypeID into reportTypes_join
+                    from reportTypes in reportTypes_join.DefaultIfEmpty()
                     where
                       us2Distills.UserId == userId
                     select new
                     {
                         SpiritID = (System.Int32?)spirit.SpiritID ?? (System.Int32?)0,
                         Name = spirit.Name ?? string.Empty,
+                        ProcessingReportTypeID = (System.Int32?)reportTypes.ProcessingReportTypeID ?? (System.Int32)0,
+                        ProcessingReportTypeName = reportTypes.ProcessingReportTypeName ?? string.Empty,
                         Note = spirit.Note ?? string.Empty
                     };
 
@@ -610,6 +614,8 @@ namespace WebApp.Workflows
                     var curSpirit = new SpiritObject();
                     curSpirit.SpiritId = (int)iter.SpiritID;
                     curSpirit.SpiritName = iter.Name;
+                    curSpirit.ProcessingReportTypeID = iter.ProcessingReportTypeID;
+                    curSpirit.ProcessingReportTypeName = iter.ProcessingReportTypeName;
                     curSpirit.Note = iter.Note;
                     spiritList.Add(curSpirit);
                 }

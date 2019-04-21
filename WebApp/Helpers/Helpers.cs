@@ -299,6 +299,7 @@ namespace WebApp.Helpers
         public int SpiritId { get; set; }
         public string SpiritName { get; set; }
         public int ProcessingReportTypeID { get; set; }
+        public string ProcessingReportTypeName { get; set; }
         public string Note { get; set; }
     }
 
