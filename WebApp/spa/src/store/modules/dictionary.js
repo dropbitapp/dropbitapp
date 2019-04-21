@@ -10,95 +10,181 @@ export default {
     units: null,
     materialCategories: null,
     rawMaterials: null,
-    /*
-    {
-      MaterialCategoryID: 0
-      Note: null
-      PurchaseMaterialTypes: null
-      RawMaterialId: 0
-      RawMaterialName: ''
-      UnitType: 'lb'
-      UnitTypeId: 0
-    }
-    */
   },
   // modify state only through mutations
   mutations: {
     updateProcessingReportTypes(state, types) {
-      state.processingReportTypes = types; // eslint-disable-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign
+      state.processingReportTypes = types;
     },
     updateSpirits(state, spirits) {
-      state.spirits = spirits; // eslint-disable-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign
+      state.spirits = spirits;
     },
     updateVendors(state, vendors) {
-      state.vendors = vendors; // eslint-disable-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign
+      state.vendors = vendors;
     },
     updateStorages(state, storages) {
-      state.storages = storages; // eslint-disable-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign
+      state.storages = storages;
     },
     updateUnits(state, units) {
-      state.units = units; // eslint-disable-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign
+      state.units = units;
     },
     updateMaterialCategories(state, categories) {
-      state.materialCategories = categories; // eslint-disable-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign
+      state.materialCategories = categories;
     },
     updateRawMaterials(state, materials) {
-      state.rawMaterials = materials; // eslint-disable-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign
+      state.rawMaterials = materials;
     },
   },
   // actions are for async calls, such as calling an api
   actions: {
-    getProcessingReportTypes({ commit }) {
+    getProcessingReportTypes({
+      commit,
+    }) {
       return axios.get('/Dictionary/GetProcessingReportTypes')
         .then(result => commit('updateProcessingReportTypes', result.data))
         .catch(console.error);
     },
-    getSpirits({ commit }) {
+    // SPIRITS
+    getSpirits({
+      commit,
+    }) {
       return axios.get('/Dictionary/GetSpiritList')
         .then(result => commit('updateSpirits', result.data))
-        .catch(console.error);
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
     },
-    addSpirit({ dispatch }, spirit) {
+    addSpirit({
+      dispatch,
+    }, spirit) {
       return axios.post('/Dictionary/CreateSpirit', spirit)
         .then(() => dispatch('getSpirits'))
         .catch(console.error);
     },
-    deleteSpirit({ dispatch }, spirit) {
+    deleteSpirit({
+      dispatch,
+    }, spiritId) {
+      const spirit = {
+        DeleteRecordID: spiritId,
+        DeleteRecordType: 'Spirit',
+      };
       return axios.post('/Dictionary/DeleteRecord', spirit)
         .then(() => dispatch('getSpirits'))
-        .catch(console.error);
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
     },
-    getVendors({ commit }) {
+    // VENDORS
+    getVendors({
+      commit,
+    }) {
       return axios.get('/Dictionary/GetVendorList')
         .then(result => commit('updateVendors', result.data))
-        .catch(console.error);
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
     },
-    getStorages({ commit }) {
+    deleteVendor({
+      dispatch,
+    }, vendorId) {
+      const vendor = {
+        DeleteRecordID: vendorId,
+        DeleteRecordType: 'Vendor',
+      };
+      return axios.post('/Dictionary/DeleteRecord', vendor)
+        .then(() => dispatch('getVendors'))
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
+    },
+    // STORAGES
+    getStorages({
+      commit,
+    }) {
       return axios.get('/Dictionary/GetStorageList')
         .then(result => commit('updateStorages', result.data))
-        .catch(console.error);
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
     },
-    getUnits({ commit }) {
+    deleteStorage({
+      dispatch,
+    }, storageId) {
+      const storage = {
+        DeleteRecordID: storageId,
+        DeleteRecordType: 'Storage',
+      };
+      return axios.post('/Dictionary/DeleteRecord', storage)
+        .then(() => dispatch('getStorages'))
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
+    },
+    // RAW MATERIALS
+    getRawMaterials({
+      commit,
+    }) {
+      return axios.get('/Dictionary/GetRawMaterialList')
+        .then(result => commit('updateRawMaterials', result.data))
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
+    },
+    deleteRawMaterial({
+      dispatch,
+    }, rawMaterialId) {
+      const spirit = {
+        DeleteRecordID: rawMaterialId,
+        DeleteRecordType: 'RawMaterial',
+      };
+      return axios.post('/Dictionary/DeleteRecord', spirit)
+        .then(() => dispatch('getRawMaterials'))
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
+    },
+    getUnits({
+      commit,
+    }) {
       return axios.get('Dictionary/GetUnitList')
         .then(result => commit('updateUnits', result.data))
         .catch(console.error);
     },
-    getMaterialCategories({ commit }) {
+    getMaterialCategories({
+      commit,
+    }) {
       return axios.get('/Dictionary/GetMaterialCategory')
         .then(result => commit('updateMaterialCategories', result.data))
-        .catch(console.error);
-    },
-    getRawMaterials({ commit }) {
-      return axios.get('/Dictionary/GetRawMaterialList')
-        .then(result => commit('updateRawMaterials', result.data))
         .catch(console.error);
     },
   },
   getters: {
     // getters are useful if you want to filter/sort/etc data before it is accessed
     spiritCount(state) {
-      return 0;
-      // state.spirits ? state.spirits.length : 0;
+      return state.spirits ? state.spirits.length : 0;
     },
   },
 };
