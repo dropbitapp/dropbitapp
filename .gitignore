@@ -24,3 +24,4 @@
 /packages
 /WebApp/connections.config
 /WebAppTests/connections.config
+WebApp/_connections.config
