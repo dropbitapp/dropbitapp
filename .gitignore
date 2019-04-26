@@ -2,13 +2,16 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/config
+/.vs
+/$tf
 /WebApp/Web.config
 /WebApp/bin
 /WebAppTests/App.config
 /WebApp/obj/Debug
 /WebAppTests/obj/Debug
-
+/WebApp/WebApp.csproj.vspscc
+/WebAppTests/WebAppTests.csproj.vspscc
+merakiprod.PublishSettings
 *.suo
 *.xml
 *.cache

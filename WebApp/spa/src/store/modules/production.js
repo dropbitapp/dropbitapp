@@ -1,5 +1,5 @@
 import axios from 'axios';
-import parseDateString from '../../helpers/parse-date-string';
+import dateHelper from '../../helpers/date-helper';
 
 export default {
   namespaced: true,
@@ -44,7 +44,7 @@ export default {
         .then((result) => {
           result.data.map((production) => {
             // eslint-disable-next-line no-param-reassign
-            production.ProductionDate = parseDateString(production.ProductionDate, false);
+            production.ProductionDate = dateHelper.convertFromUTC(production.ProductionDate);
             return production;
           });
           switch (productionType) {

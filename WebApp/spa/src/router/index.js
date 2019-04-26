@@ -42,9 +42,10 @@ const StorageView = () => import('../views/dictionary/StorageView.vue');
 const MaterialView = () => import('../views/dictionary/MaterialView.vue');
 
 // lazy load reporting views
+const Reporting = () => import('../views/reporting/Reporting.vue');
 const StorageReport = () => import('../views/reporting/StorageReport.vue');
 const ProductionReport = () => import('../views/reporting/ProductionReport.vue');
-const ProcessingReport = () => import('../views/reporting/ProcessingReport.vue');
+const ProcessingReportView = () => import('../views/reporting/ProcessingReportView.vue');
 
 Vue.use(Router);
 
@@ -167,7 +168,7 @@ export default new Router({
   },
   {
     path: '/reporting',
-    component: Dictionary,
+    component: Reporting,
     children: [{
       path: 'storage',
       component: StorageReport,
@@ -178,7 +179,8 @@ export default new Router({
     },
     {
       path: 'processing',
-      component: ProcessingReport,
+      props: true,
+      component: ProcessingReportView,
     },
     ],
   },

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import parseDateString from '../../helpers/parse-date-string';
+import dateHelper from '../../helpers/date-helper';
 
 export default {
   namespaced: true,
@@ -49,7 +49,7 @@ export default {
         .then((result) => {
           result.data.map((purchase) => {
             // eslint-disable-next-line no-param-reassign
-            purchase.PurchaseDate = parseDateString(purchase.PurchaseDate, false);
+            purchase.PurchaseDate = dateHelper.convertFromUTC(purchase.PurchaseDate);
             return purchase;
           });
           switch (purchaseType) {

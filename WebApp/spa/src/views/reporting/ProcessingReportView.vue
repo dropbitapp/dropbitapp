@@ -1,0 +1,1526 @@
+<!-- eslint-disable -->
+<template>
+<div>
+  <h1>Processing Report</h1>
+  <div class="row">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label class="pull-left" for="ReportingYear" style="padding-left: 10pt; padding-right: 10pt">Reporting Year</label>
+                        <div id="ReportingYear"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="pull-left" for="ReportingMonth" style="padding-left: 10pt; padding-right: 10pt">Reporting Month</label>
+                        <div id="ReportingMonth"></div>
+                    </div>
+                    <input v-on:click="getReport" type="button" value="Generate Report" id="GenerateReportBtn" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <p class="s1" style="padding-top: 4pt;padding-bottom: 1pt;padding-left: 623pt;text-indent: 0pt;text-align: left;">OMB No. 1513-0041 <span class="s2">(04/30/2017)</span></p>
+    <table style="border-collapse:collapse;margin-left:5.05pt" cellspacing="0">
+        <tr style="height:34pt">
+            <td style="width:456pt;border-top-style:solid;border-top-width:2pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" colspan="4">
+                <p class="s3" style="padding-left: 77pt;padding-right: 77pt;text-indent: 0pt;line-height: 11pt;text-align: center;">DEPARTMENT OF THE TREASURY</p>
+                <p class="s4" style="padding-left: 77pt;padding-right: 77pt;text-indent: 0pt;line-height: 9pt;text-align: center;">ALCOHOL AND TOBACCO TAX AND TRADE BUREAU (TTB)</p>
+                <p class="s5" style="padding-left: 77pt;padding-right: 77pt;text-indent: 0pt;line-height: 13pt;text-align: center;">MONTHLY REPORT OF PROCESSING OPERATIONS</p>
+            </td>
+            <td style="width:144pt;border-top-style:solid;border-top-width:2pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">1. PLANT NUMBER<div v-if="processingRecords" id="h_1_PlantNumber">{{ reportHeader.DSP }}</div></p>
+            </td>
+            <td style="width:144pt;border-top-style:solid;border-top-width:2pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p class="s6" style="padding-left: 1pt;text-indent: 0pt;line-height: 8pt;text-align: left;">2. MONTH AND YEAR<div v-if="processingRecords" id="h_2_MonthAndYear">{{ reportHeader.ReportDate }}</div></p>
+            </td>
+        </tr>
+        <tr style="height:35pt">
+            <td style="width:456pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" colspan="4" rowspan="2">
+                <ol id="l1">
+                    <li style="padding-top: 3pt;padding-left: 11pt;text-indent: -11pt;text-align: left;">
+                        <p class="s6" style="display: inline;">Every proprietor engaged in processing operations must prepare this form each month in duplicate.</p>
+                    </li>
+                    <li style="padding-left: 11pt;padding-right: 16pt;text-indent: -11pt;text-align: left;">
+                        <p class="s6" style="display: inline;">The proprietor must forward the original to the Director, National Revenue Center, 550 Main St, Ste 8002, Cincinnati, OH 45202-5215, on or before the 15th day of the month following the month for which prepared.</p>
+                    </li>
+                    <li style="padding-left: 12pt;text-indent: -12pt;text-align: left;" >
+                        <p class="s6" style="display: inline;">The copy is to be kept on file by the proprietor.</p>
+                    </li>
+                </ol>
+            </td>
+            <td style="width:288pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616" colspan="2">
+                <p class="s6" style="padding-left: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">3. NAME OF PROPRIETOR<div v-if="processingRecords" id="h_3_NameOfProprietor">{{ reportHeader.ProprietorName }}</div></p>
+            </td>
+        </tr>
+        <tr style="height:10pt">
+            <td style="width:288pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616" colspan="2" rowspan="2">
+                <p class="s6" style="padding-left: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">5. Employer Identification Number (EIN)<div v-if="processingRecords" id="h_5_EIN">{{ reportHeader.EIN }}</div></p>
+            </td>
+        </tr>
+        <tr style="height:23pt">
+            <td style="width:456pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" colspan="4">
+                <p class="s6" style="text-indent: 0pt;text-align: left;">4. LOCATION OF PLANT<div v-if="processingRecords" id="h_4_LocationOfPlant">{{ reportHeader.PlantAddress }}</div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:372pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" colspan="3">
+                <p class="s4" style="padding-top: 3pt;padding-left: 128pt;padding-right: 128pt;text-indent: 0pt;line-height: 7pt;text-align: center;">PART I - BULK INGREDIENTS</p>
+            </td>
+            <td style="width:372pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616" colspan="3">
+                <p class="s4" style="padding-top: 3pt;padding-left: 124pt;padding-right: 124pt;text-indent: 0pt;line-height: 7pt;text-align: center;">PART II - FINISHED PRODUCTS</p>
+            </td>
+        </tr>
+        <tr style="height:35pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s4" style="padding-top: 3pt;padding-left: 71pt;padding-right: 71pt;text-indent: 0pt;text-align: center;">TRANSACTION</p>
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+                <p class="s6" style="padding-left: 71pt;padding-right: 71pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(a)</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s4" style="padding-top: 3pt;padding-left: 2pt;padding-right: 2pt;text-indent: 0pt;text-align: center;">WINE</p>
+                <p class="s7" style="padding-left: 2pt;padding-right: 2pt;text-indent: 0pt;text-align: center;">(Proof gallons)</p>
+                <p class="s6" style="padding-top: 3pt;padding-left: 2pt;padding-right: 2pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(b)</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s4" style="padding-top: 3pt;padding-left: 2pt;padding-right: 2pt;text-indent: 0pt;text-align: center;">SPIRITS</p>
+                <p class="s7" style="padding-left: 2pt;padding-right: 2pt;text-indent: 0pt;text-align: center;">(Proof gallons)</p>
+                <p class="s6" style="padding-top: 3pt;padding-left: 2pt;padding-right: 2pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(c)</p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s4" style="padding-top: 4pt;padding-left: 71pt;padding-right: 71pt;text-indent: 0pt;text-align: center;">TRANSACTION</p>
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+                <p class="s6" style="padding-left: 71pt;padding-right: 71pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(a)</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s4" style="padding-top: 6pt;padding-left: 14pt;padding-right: 14pt;text-indent: 0pt;text-align: center;">BOTTLED</p>
+                <p class="s7" style="padding-left: 14pt;padding-right: 14pt;text-indent: 0pt;text-align: center;">(Proof gallons)</p>
+                <p class="s6" style="padding-top: 1pt;padding-left: 14pt;padding-right: 14pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(b)</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p class="s4" style="padding-top: 5pt;padding-left: 14pt;padding-right: 15pt;text-indent: 0pt;text-align: center;">PACKAGED</p>
+                <p class="s7" style="padding-left: 14pt;padding-right: 15pt;text-indent: 0pt;text-align: center;">(Proof gallons)</p>
+                <p class="s6" style="padding-top: 1pt;padding-left: 14pt;padding-right: 14pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(c)</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;text-indent: 0pt;line-height: 7pt;text-align: left;">1. ON HAND FIRST OF MONTH</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_1b_Wine" readonly=readonly />{{ processingPart1Wine.OnHandFirstofMonth }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_1c_Spirits" readonly=readonly />{{ processingPart1Spirit.OnHandFirstofMonth }}</p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 4pt;padding-left: 1pt;text-indent: 0pt;line-height: 6pt;text-align: left;">27. ON HAND FIRST OF MONTH</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_27b_Bottled" readonly=readonly />{{ processingPart2Bottled.OnHandFirstofMonth }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_27c_Packaged" readonly=readonly />{{ processingPart2Packaged.OnHandFirstofMonth }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;text-indent: 0pt;line-height: 8pt;text-align: left;">2. RECEIVED (Other than line 3)</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p  v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_2b_Wine" readonly=readonly />{{ processingPart1Wine.Recd4Process }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_2c_Spirits" readonly=readonly />{{ processingPart1Spirit.Recd4Process }}</p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 4pt;padding-left: 1pt;text-indent: 0pt;line-height: 6pt;text-align: left;">28. BOTTLED OR PACKAGED</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_28b_Bottled" readonly=readonly />{{ processingPart2Bottled.AmtBottledPackaged }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_28c_Packaged" readonly=readonly />{{ processingPart2Packaged.AmtBottledPackaged }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p class="s6" style="padding-top: 2pt;padding-left: 18pt;text-indent: -18pt;text-align: left;">3. ALCOHOL FOR FUEL USE RECEIVED FROM CUSTOMS CUSTODY</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_3b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_3c_Spirits"></div></p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 4pt;padding-left: 1pt;text-indent: 0pt;line-height: 6pt;text-align: left;">29. RECEIVED</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_29b_Bottled" readonly=readonly />{{ processingPart2Bottled.Recd4Process }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_29c_Packaged" readonly=readonly />{{ processingPart2Packaged.Recd4Process }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 4pt;padding-left: 1pt;text-indent: 0pt;line-height: 6pt;text-align: left;">30. INVENTORY OVERAGES</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_30b_Bottled" readonly=readonly />{{ processingPart2Bottled.InventoryOverage }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_30c_Packaged" readonly=readonly />{{ processingPart2Packaged.InventoryOverage }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;text-indent: 0pt;line-height: 7pt;text-align: left;">4. ALCOHOL, FLAVOR, MATERIALS DUMPED</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_4b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_4c_Spirits"></div></p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="3">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+                <p class="s6" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">31. TOTAL - LINES 27 THROUGH 30</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="3">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_31b_Bottled" readonly=readonly />{{ processingPart2Bottled.TotalLine31 }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616" rowspan="3">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_31c_Packaged" readonly=readonly />{{ processingPart2Packaged.TotalLine31 }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;text-indent: 0pt;line-height: 8pt;text-align: left;">5. WINE MIXED WITH SPIRITS</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_5b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_5c_Spirits" readonly=readonly />{{ processingPart1Spirit.WineMixedWithSpirit }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;text-indent: 0pt;line-height: 8pt;text-align: left;">6. DUMPED FOR FURTHER PROCESSING</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_6b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_6c_Spirits" readonly=readonly />{{ processingPart1Spirit.Dumped4Processing }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;text-indent: 0pt;line-height: 8pt;text-align: left;">7. GAINS</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_7b_Wine" readonly=readonly />{{ processingPart1Wine.Gains }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_7c_Spirits" readonly=readonly />{{ processingPart1Spirit.Gains }}</p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 1pt;padding-left: 1pt;text-indent: 0pt;line-height: 10pt;text-align: left;">32. TRANSFERRED IN BOND <span class="s8">1</span></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_32b_Bottled"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_32c_Packaged"></div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p class="s6" style="padding-top: 8pt;text-indent: 0pt;text-align: left;">8. TOTAL - LINES 1 THROUGH 7</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_8b_Wine" readonly=readonly />{{ processingPart1Wine.TotalLine8 }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_8c_Spirits" readonly=readonly />{{ processingPart1Spirit.TotalLine8 }}</p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;padding-left: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">33. WITHDRAWN TAX DETERMINED</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_33b_Bottled" readonly=readonly />{{ processingPart2Bottled.TaxWithdrawn }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_33c_Packaged" readonly=readonly /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p class="s6" style="padding-top: 3pt;padding-left: 19pt;text-indent: -18pt;line-height: 10pt;text-align: left;">34. WITHDRAWN FREE OF TAX: FOR U.S. HOSPITAL, SCIENTIFIC, OR EDUCATIONAL USE</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_34b_Bottled"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616" rowspan="2">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_34c_Packaged"></div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;text-indent: 0pt;line-height: 9pt;text-align: left;">9. BOTTLED OR PACKAGED</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_9b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_9c_Spirits" readonly=readonly />{{ processingPart1Spirit.AmtBottledPackaged }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;text-indent: 0pt;line-height: 7pt;text-align: left;">10. WINE MIXED WITH SPIRITS</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_10b_Wine" readonly=readonly />{{ processingPart1Wine.WineMixedWithSpirit }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_10c_Spirits"></div></p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p class="s6" style="padding-top: 3pt;padding-left: 19pt;padding-right: 23pt;text-indent: -18pt;text-align: left;">35. WITHDRAWN WITHOUT PAYMENT OF TAX: FOR ADDITION TO WINE</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_35b_Bottled"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616" rowspan="2">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_35c_Packaged"></div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;text-indent: 0pt;line-height: 8pt;text-align: left;">11. USED FOR DENATURATION</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_11b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_11c_Spirits"></div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;text-indent: 0pt;line-height: 8pt;text-align: left;">12. TRANSFERRED IN BOND</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_12b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_12c_Spirits"></div></p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p class="s6" style="padding-top: 3pt;padding-left: 19pt;text-indent: -18pt;text-align: left;">36. FOR EXPORTATION, VESSELS, AND AIRCRAFT, AND TRANSFER TO C.B.W.</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_36b_Bottled"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616" rowspan="2">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_36c_Packaged"></div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;text-indent: 0pt;line-height: 8pt;text-align: left;">13. WITHDRAWN TAX DETERMINED</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_13b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_13c_Spirits"></div></p>
+            </td>
+        </tr>
+        <tr style="height:23pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;padding-left: 18pt;text-indent: -18pt;text-align: left;">14. WITHDRAWN FREE OF TAX: FOR U.S., HOSPITAL, SCIENTIFIC, OR EDUCATIONAL USE</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_14b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_14c_Spirits"></div></p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;padding-left: 19pt;padding-right: 1pt;text-indent: -18pt;text-align: left;">37. TRANSFERRED TO PRODUCTION ACCOUNT FOR REDISTILLATION</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_37b_Bottled" readonly=readonly />{{ processingPart2Bottled.Transf2Prod4Redistil }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_37c_Packaged" readonly=readonly />{{ processingPart2Packaged.Transf2Prod4Redistil }}</p>
+            </td>
+        </tr>
+        <tr style="height:23pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;padding-left: 18pt;padding-right: 10pt;text-indent: -18pt;text-align: left;">15. WITHDRAWN WITHOUT PAYMENT OF TAX: FOR ADDITION TO WINE</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_15b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_15c_Spirits"></div></p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;padding-left: 19pt;text-indent: -18pt;line-height: 10pt;text-align: left;">38. WITHDRAWN FOR RESEARCH, DEVELOPMENT, OR TESTING (Including Gov. samples)</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_38b_Bottled"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_38c_Packaged"></div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;text-indent: 0pt;line-height: 9pt;text-align: left;">16. FOR EXPORTATION &amp; TRANSFER TO C.B.W.</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" bgcolor="#959595">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_16b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_16c_Spirits"></div></p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;padding-left: 1pt;text-indent: 0pt;line-height: 7pt;text-align: left;">39. DESTROYED</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_39b_Bottled" readonly=readonly /> {{ processingPart2Bottled.Destroyed }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_39c_Packaged" readonly=readonly />{{ processingPart2Packaged.Destroyed }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p class="s6" style="padding-top: 2pt;padding-left: 18pt;padding-right: 10pt;text-indent: -18pt;text-align: left;">17. TRANSFERRED TO PRODUCTION ACCOUNT FOR REDISTILLATION</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2" bgcolor="#959595">
+                <p v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17b_Wine" readonly=readonly />{{ processingPart1Wine.Transf2Prod4Redistil }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_17c_Spirits" readonly=readonly />{{ processingPart1Spirit.Transf2Prod4Redistil }}</p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;padding-left: 1pt;text-indent: 0pt;line-height: 8pt;text-align: left;">40. DUMPED FOR FURTHER PROCESSING</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_40b_Bottled" readonly=readonly /> {{ processingPart2Bottled.Dumped4Processing }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_40c_Packaged" readonly=readonly /> {{ processingPart2Packaged.Dumped4Processing }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;padding-left: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">41.</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_41b_Bottled"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_41c_Packaged"></div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p class="s6" style="padding-top: 3pt;padding-left: 18pt;text-indent: -18pt;text-align: left;">18. WITHDRAWN FOR RESEARCH, DEVELOPMENT, OR TESTING (Including Gov. samples)</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_18b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_18c_Spirits"></div></p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;padding-left: 1pt;text-indent: 0pt;line-height: 8pt;text-align: left;">42.</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_42b_Bottled"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_42c_Packaged"></div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 1pt;padding-left: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">43.</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_43b_Bottled"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p2_43c_Packaged"></div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 4pt;text-indent: 0pt;line-height: 6pt;text-align: left;">19. DESTROYED</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_19b_Wine" readonly=readonly />{{ processingPart1Wine.Destroyed }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_19c_Spirits" readonly=readonly />{{ processingPart1Spirit.Destroyed }}</p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;padding-left: 1pt;text-indent: 0pt;line-height: 8pt;text-align: left;">44. RECORDED LOSSES</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_44b_Bottled" readonly=readonly /> {{ processingPart2Bottled.RecordedLosses }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_44c_Packaged" readonly=readonly /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 4pt;padding-left: 1pt;text-indent: 0pt;line-height: 6pt;text-align: left;">20. USED FOR REDISTILLATION</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_20b_Wine" readonly=readonly />{{ processingPart1Wine.Used4Redistil }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_20c_Spirits" readonly=readonly />{{ processingPart1Spirit.Used4Redistil }}</p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;padding-left: 1pt;text-indent: 0pt;line-height: 8pt;text-align: left;">45. INVENTORY SHORTAGES</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_45b_Bottled" readonly=readonly /> {{ processingPart2Bottled.InventoryShortage }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_45c_Packaged" readonly=readonly /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 4pt;text-indent: 0pt;line-height: 7pt;text-align: left;">21.</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_21b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_21c_Spirits"></div></p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;padding-left: 1pt;text-indent: 0pt;line-height: 8pt;text-align: left;">46. ON HAND END OF MONTH</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_46b_Bottled" readonly=readonly />{{ processingPart2Bottled.OnHandEndofMonth }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_46c_Packaged" readonly=readonly /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;text-indent: 0pt;line-height: 8pt;text-align: left;">22.</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_22b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_22c_Spirits"></div></p>
+            </td>
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p class="s6" style="padding-top: 8pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">47. TOTAL - LINES 32 THROUGH 46</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616" rowspan="2">
+                <p v-if="processingRecords && processingPart2Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_47b_Bottled" readonly=readonly /> {{ processingPart2Bottled.TotalLine47 }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616" rowspan="2">
+                <p v-if="processingRecords && processingPart2Packaged" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p2_47c_Packaged" readonly=readonly /> {{ processingPart2Packaged.TotalLine47 }}</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 2pt;text-indent: 0pt;line-height: 8pt;text-align: left;">23.</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_23b_Wine"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p1_23c_Spirits"></div></p>
+            </td>
+        </tr>
+        <tr style="height:10pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;text-indent: 0pt;line-height: 7pt;text-align: left;">24. LOSSES</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_24b_Wine" readonly=readonly /> {{ processingPart1Wine.Losses }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_24c_Spirits" readonly=readonly />{{ processingPart1Spirit.Losses }}</p>
+            </td>
+            <td style="width:372pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#161616" colspan="3" rowspan="3">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+                <p class="s9" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">1<span class="s6">Bottled nonindustrial (beverage) use spirits may not be received or transferred in bond.</span></p>
+            </td>
+        </tr>
+        <tr style="height:10pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 3pt;text-indent: 0pt;line-height: 6pt;text-align: left;">25. ON HAND END OF MONTH</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_25b_Wine" readonly=readonly />{{ processingPart1Wine.OnHandEndofMonth }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit"  style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_25c_Spirits" readonly=readonly />{{ processingPart1Spirit.OnHandEndofMonth }}</p>
+            </td>
+        </tr>
+        <tr style="height:17pt">
+            <td style="width:204pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p class="s6" style="padding-top: 5pt;text-indent: 0pt;text-align: left;">26. TOTAL - LINES 9 THROUGH 25</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Wine" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_26b_Wine" readonly=readonly />{{ processingPart1Wine.TotalLine26 }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#161616;border-left-style:solid;border-left-width:1pt;border-left-color:#161616;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#161616;border-right-style:solid;border-right-width:1pt;border-right-color:#161616">
+                <p v-if="processingRecords && processingPart1Spirit" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p1_26c_Spirits" readonly=readonly />{{ processingPart1Spirit.TotalLine26 }}</p>
+            </td>
+        </tr>
+    </table>
+    <p class="s1" style="padding-top: 3pt;padding-left: 5pt;text-indent: 0pt;text-align: left;">TTB F 5110.28 <span class="s2">(03/2016)</span></p>
+    <p style="text-indent: 0pt;text-align: left;"><br /></p>
+    <p style="padding-left: 5pt;text-indent: 0pt;line-height: 1pt;text-align: left;"><span><img width="984" height="1" alt="image" src="../../assets/images/reporting/processing/Image_001.png" /></span></p>
+    <h2 style="padding-bottom: 1pt;padding-left: 188pt;text-indent: 0pt;text-align: left;">PART III - PUERTO RICAN AND VIRGIN ISLANDS SPIRITS (RUM) AND &quot;OTHER&quot; IMPORTED RUM<span class="h3">1</span></h2>
+    <table style="border-collapse:collapse;margin-left:5.05pt" cellspacing="0">
+        <tr style="height:10pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
+                <p class="s10" style="padding-top: 6pt;padding-left: 15pt;text-indent: -15pt;text-align: left;">48. PROOF GALLONS REMOVED TAXPAID OR TAX DETER- MINED</p>
+            </td>
+            <td style="width:152pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-top: 1pt;padding-left: 24pt;text-indent: 0pt;line-height: 9pt;text-align: left;">(a) PUERTO RICAN SPIRITS</p>
+            </td>
+            <td style="width:184pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-top: 1pt;padding-left: 38pt;text-indent: 0pt;line-height: 8pt;text-align: left;">(b) VIRGIN ISLANDS SPIRITS</p>
+            </td>
+            <td style="width:165pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p class="s10" style="padding-top: 1pt;padding-left: 26pt;text-indent: 0pt;line-height: 8pt;text-align: left;">(c) &quot;OTHER&quot; IMPORTED RUM</p>
+            </td>
+        </tr>
+        <tr style="height:23pt">
+            <td style="width:152pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p3_48a_PuertoRicanSpirits"></div></p>
+            </td>
+            <td style="width:184pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p3_48b_VirginIslandSpirits"></div></p>
+            </td>
+            <td style="width:165pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:2pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p3_48c_OtherImportedRum"></div></p>
+            </td>
+        </tr>
+    </table>
+    <h2 style="text-indent: 0pt;line-height: 9pt;text-align: left;">PART IV - PROCESSING OF BEVERAGE</h2>
+    <p style="text-indent: 0pt;text-align: left;" />
+    <h2 style="text-indent: 0pt;line-height: 9pt;text-align: left;">(Nonindustrial use) SPIRITS</h2>
+    <p style="text-indent: 0pt;text-align: left;" />
+    <p style="text-indent: 0pt;text-align: left;"><span><img width="347" height="15" alt="image" src="../../assets/images/reporting/processing/Image_002.png" /></span></p>
+    <h1 style="padding-left: 250pt;text-indent: 0pt;text-align: left;">PART IV – PROCESSING OF BEVERAGE (Nonindustrial use) SPIRITS</h1>
+    <table style="border-collapse:collapse;margin-left:5.44pt" cellspacing="0">
+        <tr style="height:47pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s11" style="padding-top: 8pt;padding-left: 109pt;padding-right: 109pt;text-indent: 0pt;text-align: center;">KIND</p>
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+                <p class="s11" style="padding-left: 109pt;padding-right: 109pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(a)</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s11" style="padding-top: 3pt;padding-left: 4pt;padding-right: 3pt;text-indent: 0pt;text-align: center;">BULK SPIRITS DUMPED INTO PROCESSING<span class="s12">2</span></p>
+                <p class="s13" style="padding-left: 4pt;padding-right: 2pt;text-indent: 0pt;text-align: center;">(Whole proof gallons)</p>
+                <p class="s11" style="padding-top: 6pt;padding-left: 3pt;padding-right: 3pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(b)</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s11" style="padding-top: 3pt;padding-left: 3pt;padding-right: 3pt;text-indent: 0pt;text-align: center;">BOTTLED - IMPORTED<span class="s12">3</span></p>
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+                <p class="s13" style="padding-left: 4pt;padding-right: 3pt;text-indent: 0pt;text-align: center;">(Whole proof gallons)</p>
+                <p class="s11" style="padding-top: 6pt;padding-left: 2pt;padding-right: 3pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(c)</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s11" style="padding-left: 4pt;padding-right: 3pt;text-indent: 0pt;text-align: center;">BOTTLED</p>
+                <p class="s11" style="padding-left: 4pt;padding-right: 3pt;text-indent: 0pt;text-align: center;">(Excluded bottled in bond and export)</p>
+                <p class="s13" style="padding-left: 4pt;padding-right: 2pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(Whole wine gallons)</p>
+                <p class="s11" style="padding-left: 3pt;padding-right: 3pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(d)</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s11" style="padding-left: 2pt;padding-right: 2pt;text-indent: 0pt;text-align: center;">BOTTLED IN BOND<span class="s12">4 </span>27 CFR 5.42(b)</p>
+                <p class="s11" style="padding-left: 2pt;padding-right: 2pt;text-indent: 0pt;text-align: center;">(Exclude export)</p>
+                <p class="s13" style="padding-left: 2pt;padding-right: 1pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(Whole wine gallons)</p>
+                <p class="s11" style="padding-left: 2pt;padding-right: 2pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(e)</p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p class="s11" style="padding-left: 20pt;padding-right: 20pt;text-indent: 0pt;text-align: center;">BOTTLED FOR EXPORT</p>
+                <p class="s13" style="padding-left: 8pt;padding-right: 7pt;text-indent: 0pt;text-align: center;">(Whole wine gallons)</p>
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+                <p class="s11" style="padding-left: 7pt;padding-right: 7pt;text-indent: 0pt;line-height: 9pt;text-align: center;">(f)</p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">49. ALCOHOL AND NEUTRAL SPIRITS (Other than vodka)</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_49b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.AlcoholNeutral }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_49c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_49d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.AlcoholNeutral }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_49e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_49f_BottledForExport"></div></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 2pt;text-indent: 0pt;line-height: 9pt;text-align: left;">50. BLENDED STRAIGHT WHISKEY<span class="s14">5</span></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_50b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.BlendedStraightWhiskey }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_50c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_50d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.BlendedStraightWhiskey }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_50e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
+                <p class="s10" style="padding-top: 5pt;text-indent: 0pt;text-align: left;">51. BLENDED WHISKEY:</p>
+            </td>
+            <td style="width:132pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-top: 2pt;padding-left: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">a. With neutral spirits<span class="s14">6</span></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_51a_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.BlendedWhiskeyWithNeutral }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_51a_c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_51a_d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.BlendedWhiskeyWithNeutral }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_51a_e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:132pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-top: 1pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">b. With light whiskey<span class="s14">7</span></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_51b_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.BlendedWhiskeyWithLight }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_51b_c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_51b_d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.BlendedWhiskeyWithLight }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_51b_e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 2pt;text-indent: 0pt;line-height: 9pt;text-align: left;">52. BLENDED LIGHT WHISKEY<span class="s14">8</span></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_52b_BulkSpiritsDumpedIntoProcessing" readonly=readonly /> {{ processingPart4BulkSpiritDumped.BlendedLightWhiskey }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_52c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_52d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.BlendedLightWhiskey }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_52e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 2pt;text-indent: 0pt;line-height: 9pt;text-align: left;">53. ANY OTHER BLENDS OF 100% WHISKEY</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_53b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.BlendedOtherWhiskey }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_53c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_53d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.BlendedOtherWhiskey }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_53e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="3">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+                <p class="s10" style="text-indent: 0pt;text-align: left;">54. IMPORTED WHISKEY:</p>
+            </td>
+            <td style="width:132pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-top: 1pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">a. Scotch</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_54a_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.ImportedWhiskeyScotch }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_54a_c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_54a_d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.ImportedWhiskeyScotch }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_54a_e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:132pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-top: 1pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">b. Canadian</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_54b_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.ImportedWhiskeyCanadian }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_54b_c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_54b_d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.ImportedWhiskeyCanadian }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_54b_e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:132pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-top: 1pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">c. Irish and Others</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_54c_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.ImportedWhiskeyIrish }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_54c_c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_54c_d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.ImportedWhiskeyIrish }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_54c_e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 1pt;text-indent: 0pt;line-height: 10pt;text-align: left;">55. DOMESTIC WHISKEY DISTILLED AT 160<span class="s15"></span><span class="s16"> </span>AND UNDER</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_55b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.DomesticWhiskey160Under }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_55c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_55d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.DomesticWhiskey160Under }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_55e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">56. DOMESTIC WHISKEY DISTILLED AT OVER 160<span class="s15"></span></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_56b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.DomesticWhiskeyOver160 }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_56c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_56d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.DomesticWhiskeyOver160 }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_56e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 1pt;text-indent: 0pt;line-height: 10pt;text-align: left;">57. BRANDY DISTILLED AT 170<span class="s15"></span><span class="s16"> </span>AND UNDER</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_57b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.Brandy170Under }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_57c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_57d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.Brandy170Under }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_57e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="text-indent: 0pt;text-align: left;">58. BRANDY DISTILLED AT OVER 170<span class="s15"></span></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_58b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.BrandyOver170 }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_58c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_58d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.BrandyOver170 }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_58e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
+                <p class="s10" style="padding-top: 3pt;text-indent: 0pt;text-align: left;">59. SPIRITS (Rum)<span class="s14">1</span></p>
+            </td>
+            <td style="width:132pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-top: 1pt;padding-left: 1pt;text-indent: 0pt;text-align: left;">a. Puerto Rican</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59a_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.RumPuertoRican }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59a_c_BottledImported" readonly=readonly /></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59a_d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.RumPuertoRican }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59a_e_BottledInBond" readonly=readonly /></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:132pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-top: 1pt;padding-left: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">1b. Virgin Islands</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59b_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.RumVirginIslands }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59b_c_BottledImported" readonly=readonly /></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59b_d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.RumVirginIslands }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_59b_e_BottledInBond" readonly=readonly /></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" rowspan="2">
+                <p class="s10" style="padding-top: 3pt;text-indent: 0pt;text-align: left;">60. RUM</p>
+            </td>
+            <td style="width:132pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">a. Domestic</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60a_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.RumDomestic }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60a_c_BottledImported" readonly=readonly /></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60a_d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.RumDomestic }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60a_e_BottledInBond" readonly=readonly /></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:132pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">b. &quot;Other&quot; Imported</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60b_b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.RumOtherImported }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60b_c_BottledImported" readonly=readonly /></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60b_d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.RumOtherImported }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_60b_e_BottledInBond" readonly=readonly /></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 1pt;text-indent: 0pt;line-height: 9pt;text-align: left;">61. GIN</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_61b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.Gin }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_61c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_61d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.Gin }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_61e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 2pt;text-indent: 0pt;line-height: 9pt;text-align: left;">62. VODKA</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_62b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.Vodka }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_62c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_62d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.Vodka }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_62e_BottledInBond" readonly=readonly /></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 1pt;text-indent: 0pt;text-align: left;">63. CORDIALS, LIQUEURS, AND SPECIALTIES<span class="s17">9</span></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_63b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.Liqueur }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_63c_BottledImported" readonly=readonly /></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_63d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.Liqueur }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_63e_BottledInBond" readonly=readonly /></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="text-indent: 0pt;text-align: left;">64. COCKTAILS AND MIXED DRINKS</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_64b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.Cocktail }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_64c_BottledImported" readonly=readonly /></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_64d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.Cocktail }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_64e_BottledInBond" readonly=readonly /></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="text-indent: 0pt;text-align: left;">65. TEQUILA</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_65b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />{{ processingPart4BulkSpiritDumped.Tequila }}</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_65c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_65d_BottledExcludedBottledInBondAndExport" readonly=readonly />{{ processingPart4Bottled.Tequila }}</p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" bgcolor="#A7A9AC">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_65e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:11pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 1pt;text-indent: 0pt;text-align: left;">66.</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_66b_BulkSpiritsDumpedIntoProcessing"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_66c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_66d_BottledExcludedBottledInBondAndExport"></div></p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_66e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+        <tr style="height:17pt">
+            <td style="width:240pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20" colspan="2">
+                <p class="s10" style="padding-top: 3pt;text-indent: 0pt;text-align: left;">67. TOTAL - LINES 49 THROUGH 66</p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4BulkSpiritDumped" style="text-indent: 0pt;text-align: left;"><input type="number" style="border:none" id="p4_67b_BulkSpiritsDumpedIntoProcessing" readonly=readonly />
+                {{ processingPart4BulkSpiritDumped.AlcoholNeutral
+                  + processingPart4BulkSpiritDumped.BlendedStraightWhiskey
+                  + processingPart4BulkSpiritDumped.BlendedWhiskeyWithNeutral
+                  + processingPart4BulkSpiritDumped.BlendedWhiskeyWithLight
+                  + processingPart4BulkSpiritDumped.BlendedLightWhiskey
+                  + processingPart4BulkSpiritDumped.BlendedOtherWhiskey
+                  + processingPart4BulkSpiritDumped.ImportedWhiskeyScotch
+                  + processingPart4BulkSpiritDumped.ImportedWhiskeyCanadian
+                  + processingPart4BulkSpiritDumped.ImportedWhiskeyIrish
+                  + processingPart4BulkSpiritDumped.DomesticWhiskey160Under
+                  + processingPart4BulkSpiritDumped.DomesticWhiskeyOver160
+                  + processingPart4BulkSpiritDumped.Brandy170Under
+                  + processingPart4BulkSpiritDumped.BrandyOver170
+                  + processingPart4BulkSpiritDumped.RumPuertoRican
+                  + processingPart4BulkSpiritDumped.RumVirginIslands
+                  + processingPart4BulkSpiritDumped.RumDomestic
+                  + processingPart4BulkSpiritDumped.RumOtherImported
+                  + processingPart4BulkSpiritDumped.Gin
+                  + processingPart4BulkSpiritDumped.Liqueur
+                  + processingPart4BulkSpiritDumped.Cocktail
+                  + processingPart4BulkSpiritDumped.Vodka
+                  + processingPart4BulkSpiritDumped.Tequila }}
+                  </p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_67c_BottledImported"></div></p>
+            </td>
+            <td style="width:108pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p v-if="processingRecords && processingPart4Bottled" style="text-indent: 0pt;text-align: left;">
+                    <input type="number" style="border:none" id="p4_67d_BottledExcludedBottledInBondAndExport" readonly=readonly />
+                    {{
+                    processingPart4Bottled.AlcoholNeutral
+                  + processingPart4Bottled.BlendedStraightWhiskey
+                  + processingPart4Bottled.BlendedWhiskeyWithNeutral
+                  + processingPart4Bottled.BlendedWhiskeyWithLight
+                  + processingPart4Bottled.BlendedLightWhiskey
+                  + processingPart4Bottled.BlendedOtherWhiskey
+                  + processingPart4Bottled.ImportedWhiskeyScotch
+                  + processingPart4Bottled.ImportedWhiskeyCanadian
+                  + processingPart4Bottled.ImportedWhiskeyIrish
+                  + processingPart4Bottled.DomesticWhiskey160Under
+                  + processingPart4Bottled.DomesticWhiskeyOver160
+                  + processingPart4Bottled.Brandy170Under
+                  + processingPart4Bottled.BrandyOver170
+                  + processingPart4Bottled.RumPuertoRican
+                  + processingPart4Bottled.RumVirginIslands
+                  + processingPart4Bottled.RumDomestic
+                  + processingPart4Bottled.RumOtherImported
+                  + processingPart4Bottled.Gin
+                  + processingPart4Bottled.Liqueur
+                  + processingPart4Bottled.Cocktail
+                  + processingPart4Bottled.Vodka
+                  + processingPart4Bottled.Tequila
+                    }}
+                </p>
+            </td>
+            <td style="width:84pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><div id="p4_67e_BottledInBond"></div></p>
+            </td>
+            <td style="width:93pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p style="text-indent: 0pt;text-align: left;"><br /></p>
+            </td>
+        </tr>
+    </table>
+    <h2 style="padding-top: 1pt;padding-bottom: 1pt;padding-left: 5pt;text-indent: 0pt;text-align: left;">UNDER PENALTIES OF PERJURY, I DECLARE that I have examined this report and, to the best of my knowledge and belief, it is a true and complete report.</h2>
+    <table style="border-collapse:collapse;margin-left:5.44pt" cellspacing="0">
+        <tr style="height:23pt">
+            <td style="width:144pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="text-indent: 0pt;text-align: left;">DATE<div id="f_Date"></div></p>
+            </td>
+            <td style="width:312pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20;border-right-style:solid;border-right-width:1pt;border-right-color:#231F20">
+                <p class="s10" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">PROPRIETOR<div id="f_Proprietor"></div></p>
+            </td>
+            <td style="width:285pt;border-top-style:solid;border-top-width:1pt;border-top-color:#231F20;border-left-style:solid;border-left-width:1pt;border-left-color:#231F20;border-bottom-style:solid;border-bottom-width:1pt;border-bottom-color:#231F20">
+                <p class="s10" style="padding-left: 1pt;text-indent: 0pt;text-align: left;">BY <i>(Signature and Title)<div id="f_SignatureAndTitle"></div></i></p>
+            </td>
+        </tr>
+    </table>
+    <p style="padding-top: 2pt;padding-left: 8pt;text-indent: -3pt;text-align: left;"><span class="s18">1</span>Only products containing at least <b>92% RUM </b>should be recorded at line 48(a) and (b), and at lines 59 a and b.</p>
+    <p class="s18" style="padding-left: 8pt;text-indent: -3pt;text-align: left;">2<span class="p">Do not include spirits that have been previously reported as dumped on dump/batch records and retained in processing (27 CFR 19.343).</span></p>
+    <p class="s18" style="padding-left: 8pt;text-indent: -3pt;text-align: left;">3<span class="p">Include spirits from Puerto Rico and Virgin Islands. Imported spirits that are not allowed to be labeled as a product of a foreign country, Puerto Rican, or Virgin Islands spirits under 27 CFR Part 5 must be reported as domestic spirits.</span></p>
+    <p class="s18" style="padding-top: 2pt;padding-left: 8pt;text-indent: -3pt;text-align: left;">4<span class="p">Bottled in bond spirits are those that conform to the standard prescribed by 27 CFR 5.42(b) and are labeled with the words &quot;bond,&quot; &quot;bottled in bond,&quot; &quot;aged in bond,&quot; or similar phrases. Do not include imported spirits.</span></p>
+    <p class="s18" style="padding-left: 5pt;text-indent: 0pt;text-align: left;">5<span class="p">Blends of straight whiskies, all of which are 2 years old or older; no neutral spirits; no light whiskey.</span></p>
+    <p class="s18" style="padding-left: 5pt;text-indent: 0pt;text-align: left;">6<span class="p">Blended whiskey, containing at least 20% star ight whiskey, and the balance, neutral spirits.</span></p>
+    <p class="s18" style="padding-left: 5pt;text-indent: 0pt;text-align: left;">7<span class="p">Blended whiskey containing at least 20% straight whiskey, and the balance, light whiskey.</span></p>
+    <p class="s18" style="padding-left: 5pt;text-indent: 0pt;text-align: left;">8<span class="p">Light whiskey blended with more than 2% but less than 20% straight whiskey; no neutral spirits.</span></p>
+    <p class="s18" style="padding-left: 5pt;text-indent: 0pt;text-align: left;">9<span class="p">Includes flavored whiskies, gins, vodkas, brandies, etc.</span></p>
+    <p style="text-indent: 0pt;text-align: left;"><br /></p>
+    <p style="padding-left: 5pt;text-indent: 0pt;line-height: 1pt;text-align: left;"><span><img width="984" height="1" alt="image" src="../../assets/images/reporting/processing/Image_003.png" /></span></p>
+    <h2 style="text-indent: 0pt;text-align: right;">TTB F 5110.28 <span class="p">(03/2016)</span></h2>
+    <p style="text-indent: 0pt;text-align: left;"><br /></p>
+    <h2 style="padding-top: 4pt;text-indent: 0pt;text-align: center;">PAPERWORK REDUCTION ACT NOTICE</h2>
+    <p style="text-indent: 0pt;text-align: left;"><br /></p>
+    <p style="padding-left: 13pt;text-indent: 0pt;text-align: left;">This information request is in accordance with the Paperwork Reduction Act of 1995. The purpose of this information collection is to monitor the operation of industries regulated by TTB. The information is required to verify unusual activities, errors, and omissions on taxable commodities. The information is mandatory by statute. (26 U.S.C. 5207).</p>
+    <p style="text-indent: 0pt;text-align: left;"><br /></p>
+    <p style="padding-left: 13pt;text-indent: 0pt;text-align: left;">The estimated average burden associated with this collection of information is 2 hours per respondent or recordkeeper, depending on individual circum-</p>
+    <p style="padding-left: 13pt;text-indent: 0pt;text-align: left;">stances. Comments concerning the accuracy of this burden estimate and suggestions for reducing this burden should be addressed to the Reports Management Officer, Regulations and Rulings Division, Alcohol and Tobacco Tax and Trade Bureau, Washington, D.C. 20220.</p>
+    <p style="text-indent: 0pt;text-align: left;"><br /></p>
+    <p style="padding-left: 13pt;text-indent: 0pt;text-align: left;">An agency may not conduct or sponsor, and a person is not required to repond to, a collection of information unless it displays a current, valid OMB control number.</p>
+    <p style="text-indent: 0pt;text-align: left;"><br /></p>
+    <h2 style="text-indent: 0pt;text-align: right;">TTB F 5110.28 <span class="p">(03/2016)</span></h2>
+    </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex';
+import dateHelper from '../../helpers/date-helper';
+
+export default {
+  name: 'ProcessingReportView',
+  computed: {
+    processingRecords() {
+      return this.$store.state.report.processing;
+    },
+    ...mapGetters({ reportHeader: 'report/reportHeader' }),
+    ...mapGetters({ processingPart1Spirit: 'report/processingPart1Spirit' }),
+    ...mapGetters({ processingPart1Wine: 'report/processingPart1Wine' }),
+    ...mapGetters({ processingPart2Bottled: 'report/processingPart2Bottled' }),
+    ...mapGetters({ processingPart2Packaged: 'report/processingPart2Packaged' }),
+    ...mapGetters({ processingPart4BulkSpiritDumped: 'report/processingPart4BulkSpiritDumped' }),
+    ...mapGetters({ processingPart4Bottled: 'report/processingPart4Bottled' }),
+  },
+  methods: {
+    getReport(startDate, endDate) {
+      // get starting year
+      const reportingYear = '2019';
+      // let reportingYear = $("#ReportingYear").jqxDropDownList('getSelectedItem');
+
+      // get starting month
+      const reportingMonth = 'February';
+      // let reportingMonth = $( "#ReportingMonth" ).jqxDropDownList('getSelectedItem');
+
+      // converting to date object and getting starting/ending date
+      const reportingDate = dateHelper.getReportingMonthAndYear(reportingYear, reportingMonth);
+      // convert to UTC since all of the dates in the DB are stored in UTC
+      const start = dateHelper.convertToUTC(reportingDate[0]);
+      const end = dateHelper.convertToUTC(reportingDate[1]);
+      this.$store.dispatch('report/getProcessing', { start, end });
+    },
+  },
+};
+</script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    text-indent: 0;
+  }
+
+.s1 {
+  color: #161616;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+.s2 {
+  color: #161616;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+.s3 {
+  color: #161616;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 10pt;
+}
+
+.s4 {
+  color: #161616;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+.s5 {
+  color: #161616;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 12pt;
+}
+
+.s6 {
+  color: #161616;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+.s7 {
+  color: #161616;
+  font-family: Arial, sans-serif;
+  font-style: italic;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+.s8 {
+  color: black;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 5pt;
+  vertical-align: 4pt;
+}
+
+.s9 {
+  color: #161616;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 4.5pt;
+  vertical-align: 2pt;
+}
+
+h2 {
+  color: #231F20;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+.h3 {
+  color: #231F20;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 4.5pt;
+  vertical-align: 2pt;
+}
+
+.s10 {
+  color: #231F20;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+h1 {
+  color: black;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 9pt;
+}
+
+.s11 {
+  color: #231F20;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+.s12 {
+  color: #231F20;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 4.5pt;
+  vertical-align: 2pt;
+}
+
+.s13 {
+  color: #231F20;
+  font-family: Arial, sans-serif;
+  font-style: italic;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+.s14 {
+  color: #231F20;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 4.5pt;
+  vertical-align: 2pt;
+}
+
+.s15 {
+  color: #231F20;
+  font-family: Symbol, serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+.s16 {
+  color: #231F20;
+  font-family: "Times New Roman", serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 8pt;
+}
+
+.s17 {
+  color: #231F20;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 4.5pt;
+}
+
+.s18 {
+  color: #231F20;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 4.5pt;
+  vertical-align: 2pt;
+}
+
+.p, p {
+  color: #231F20;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: none;
+  font-size: 8pt;
+  margin: 0pt;
+}
+
+li {
+  display: block;
+}
+
+#l1 {
+  padding-left: 0pt;
+  counter-reset: c1 1;
+}
+
+  #l1 > li:before {
+      counter-increment: c1;
+      content: counter(c1, decimal)". ";
+      color: #161616;
+      font-family: Arial, sans-serif;
+      font-style: normal;
+      font-weight: normal;
+      text-decoration: none;
+      font-size: 8pt;
+      vertical-align: 1pt;
+  }
+
+  #l1 > li:first-child:before {
+      counter-increment: c1 0;
+  }
+</style>
