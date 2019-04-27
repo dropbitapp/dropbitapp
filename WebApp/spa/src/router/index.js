@@ -36,6 +36,10 @@ const BottlingView = () => import('../views/production/BottlingView.vue');
 const Dictionary = () => import('../views/dictionary/Dictionary.vue');
 const DictionaryView = () => import('../views/dictionary/DictionaryView.vue');
 const AddDictionaryView = () => import('../views/dictionary/AddDictionaryView.vue');
+const AddSpiritView = () => import('../views/dictionary/AddSpiritView.vue');
+const AddVendorView = () => import('../views/dictionary/AddVendorView.vue');
+const AddStorageView = () => import('../views/dictionary/AddStorageView.vue');
+const AddMaterialView = () => import('../views/dictionary/AddMaterialView.vue');
 const SpiritView = () => import('../views/dictionary/SpiritView.vue');
 const VendorView = () => import('../views/dictionary/VendorView.vue');
 const StorageView = () => import('../views/dictionary/StorageView.vue');
@@ -160,9 +164,32 @@ export default new Router({
         component: MaterialView,
       }],
     },
+    ],
+  },
     {
-      path: 'add',
+    path: '/dictionary/add',
+    component: Dictionary,
+    children: [{
+      path: '',
+      redirect: 'spirit',
       component: AddDictionaryView,
+      children: [{
+        path: 'spirit',
+        component: AddSpiritView,
+      },
+      {
+        path: 'vendor',
+        component: AddVendorView,
+      },
+      {
+        path: 'storage',
+        component: AddStorageView,
+      },
+      {
+        path: 'material',
+        component: AddMaterialView,
+      },
+      ],
     },
     ],
   },
