@@ -49,7 +49,11 @@ export default {
     }) {
       return axios.get('/Dictionary/GetProcessingReportTypes')
         .then(result => commit('updateProcessingReportTypes', result.data))
-        .catch(console.error);
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
     },
     // SPIRITS
     getSpirits({
@@ -63,12 +67,19 @@ export default {
           throw error;
         });
     },
-    addSpirit({
+    createSpirit({
       dispatch,
     }, spirit) {
+      if (!spirit) {
+        throw new Error('createSpirit: invalid parameters');
+      }
       return axios.post('/Dictionary/CreateSpirit', spirit)
         .then(() => dispatch('getSpirits'))
-        .catch(console.error);
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
     },
     deleteSpirit({
       dispatch,
@@ -91,6 +102,20 @@ export default {
     }) {
       return axios.get('/Dictionary/GetVendorList')
         .then(result => commit('updateVendors', result.data))
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
+    },
+    createVendor({
+      dispatch,
+    }, vendor) {
+      if (!vendor) {
+        throw new Error('createVendor: invalid parameters');
+      }
+      return axios.post('/Dictionary/CreateVendor', vendor)
+        .then(() => dispatch('getVendors'))
         .catch((error) => {
           // TODO: Implement front-end logging
           console.log(error);
@@ -124,6 +149,20 @@ export default {
           throw error;
         });
     },
+    createStorage({
+      dispatch,
+    }, storage) {
+      if (!storage) {
+        throw new Error('createStorage: invalid parameters');
+      }
+      return axios.post('/Dictionary/CreateStorage', storage)
+        .then(() => dispatch('getStorages'))
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
+    },
     deleteStorage({
       dispatch,
     }, storageId) {
@@ -151,6 +190,20 @@ export default {
           throw error;
         });
     },
+    createRawMaterial({
+      dispatch,
+    }, rawMaterial) {
+      if (!rawMaterial) {
+        throw new Error('createRawMaterial: invalid parameters');
+      }
+      return axios.post('/Dictionary/CreateRawMaterial', rawMaterial)
+        .then(() => dispatch('getRawMaterials'))
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
+    },
     deleteRawMaterial({
       dispatch,
     }, rawMaterialId) {
@@ -169,16 +222,24 @@ export default {
     getUnits({
       commit,
     }) {
-      return axios.get('Dictionary/GetUnitList')
+      return axios.get('/Dictionary/GetUnitList')
         .then(result => commit('updateUnits', result.data))
-        .catch(console.error);
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
     },
     getMaterialCategories({
       commit,
     }) {
       return axios.get('/Dictionary/GetMaterialCategory')
         .then(result => commit('updateMaterialCategories', result.data))
-        .catch(console.error);
+        .catch((error) => {
+          // TODO: Implement front-end logging
+          console.log(error);
+          throw error;
+        });
     },
   },
   getters: {
