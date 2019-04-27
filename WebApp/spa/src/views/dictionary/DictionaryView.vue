@@ -37,10 +37,26 @@
                     <span>New Dictionary Item</span>
                     <b-icon icon="menu-down"></b-icon>
                   </button>
-                  <b-dropdown-item>Spirit</b-dropdown-item>
-                  <b-dropdown-item>Vendor</b-dropdown-item>
-                  <b-dropdown-item>Storage</b-dropdown-item>
-                  <b-dropdown-item>Material</b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/dictionary/add/spirit">
+                      <div>Spirit</div>
+                    </router-link>
+                  </b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/dictionary/add/vendor">
+                      <div>Vendor</div>
+                    </router-link>
+                  </b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/dictionary/add/storage">
+                      <div>Storage</div>
+                    </router-link>
+                  </b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/dictionary/add/material">
+                      <div>Material</div>
+                    </router-link>
+                  </b-dropdown-item>
                 </b-dropdown>
               </b-field>
             </div>
