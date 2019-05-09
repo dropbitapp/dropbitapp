@@ -468,35 +468,30 @@
                             globals.editDialogTotalProofVal = 0;
                         }
                     } );
-
-                    // Tax Withdrawn field change event listener. We need to do this in order to reduce Total Proof Amount for a given record.
-                    $( "#EditDialogTaxedProof" ).on( 'change', ( e ) => {
-
-                        $( "#EditDialogProofInput" ).val( globals.editDialogTotalProofVal );
-
-                        var taxedProof;
-
-                        if ( $( "#EditDialogTaxedProof" ).val() != 'undefined' ) {
-                            taxedProof = $( "#EditDialogTaxedProof" ).val() > $( '#EditDialogProofInput' ).val() ? $( '#EditDialogProofInput' ).val() : $( "#EditDialogTaxedProof" ).val();
-                            $( "#EditDialogTaxedProof" ).val( taxedProof );
-                        }
-                        else
-                        {
-                            taxedProof = 0
-                        }
-
-                        var currentTotalProof = $( '#EditDialogProofInput' ).val() != 'undefined' ? $( '#EditDialogProofInput' ).val() : 0;
-                        var updatedTotalProof = currentTotalProof >= taxedProof ? currentTotalProof - taxedProof : 0;
-
-                        // let's round the value
-                        updatedTotalProof = genericWorkflowHelper.roundWithEpsilon(updatedTotalProof);
-
-                        $( "#EditDialogProofInput" ).val( updatedTotalProof );
-                    } );
                 });
 
                 // Save record within Edit Dialog
                 $("#EditDialogSaveRecordButton").mousedown(function () {
+                    $("#EditDialogProofInput").val(globals.editDialogTotalProofVal);
+
+                    var taxedProof;
+
+                    if ($("#EditDialogTaxedProof").val() != 'undefined') {
+                        taxedProof = $("#EditDialogTaxedProof").val() > $('#EditDialogProofInput').val() ? $('#EditDialogProofInput').val() : $("#EditDialogTaxedProof").val();
+                        $("#EditDialogTaxedProof").val(taxedProof);
+                    }
+                    else {
+                        taxedProof = 0
+                    }
+
+                    var currentTotalProof = $('#EditDialogProofInput').val() != 'undefined' ? $('#EditDialogProofInput').val() : 0;
+                    var updatedTotalProof = currentTotalProof >= taxedProof ? currentTotalProof - taxedProof : 0;
+
+                    // let's round the value
+                    updatedTotalProof = genericWorkflowHelper.roundWithEpsilon(updatedTotalProof);
+
+                    $("#EditDialogProofInput").val(updatedTotalProof);
+
                     // close jqxWindow.
                     $("#EditDialog").jqxWindow('close');
                     // update edited row.
