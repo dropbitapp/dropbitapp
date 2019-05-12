@@ -40,18 +40,38 @@
                     <span>New Purchase</span>
                     <b-icon icon="menu-down"></b-icon>
                   </button>
-                  <b-dropdown-item>Fermentable</b-dropdown-item>
-                  <b-dropdown-item>Fermented</b-dropdown-item>
-                  <b-dropdown-item>Distilled</b-dropdown-item>
-                  <b-dropdown-item>Supply</b-dropdown-item>
-                  <b-dropdown-item>Additive</b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/purchase/add/fermentable">
+                      <div>Fermentable</div>
+                    </router-link>
+                  </b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/purchase/add/fermented">
+                      <div>Fermented</div>
+                    </router-link>
+                  </b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/purchase/add/distilled">
+                      <div>Distilled</div>
+                    </router-link>
+                  </b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/purchase/add/supply">
+                      <div>Supply</div>
+                    </router-link>
+                  </b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/purchase/add/additive">
+                      <div>Additive</div>
+                    </router-link>
+                  </b-dropdown-item>
                 </b-dropdown>
               </b-field>
             </div>
           </div>
-          <!-- TABLE -->
-          <router-view></router-view>
         </div>
+        <!-- TABLE -->
+        <router-view></router-view>
       </div>
     </section>
   </div>

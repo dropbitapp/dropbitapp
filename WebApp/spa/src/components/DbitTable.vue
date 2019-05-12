@@ -1,10 +1,23 @@
 <template>
   <div id="dbitTable">
-    <div class="is-clearfix">
-      <div
+    <div class="level">
+      <span class="level-left is-clearfix">
+        <button
+          v-show="checkable || selectable"
+          :disabled="(checkable && checkedRows.length < 1) || (selectable && !selectedRow)"
+          class="button is-danger level-item"
+          @click="clearSelected"
+        >
+          <b-icon icon="close"></b-icon>
+          <span>Clear {{ checkable ? 'checked' : '' }} {{ selectable ? 'selected' : '' }}</span>
+        </button>
+      </span>
+      <span
         id="pagingInfo"
-        class="is-size-6 is-pulled-right"
-      >Showing {{ pageRange }} of {{ data.length }}</div>
+        class="level-right is-clearfix"
+       >
+        <span class="level-item is-size-6">Showing {{ pageRange }} of {{ data.length }}</span>
+       </span>
     </div>
     <b-table
       :data="data"
@@ -19,14 +32,19 @@
       :paginated="isPaginated"
       :per-page="pageSize"
       :default-sort-direction="defaultSortDirection"
-      :default-sort="id"
+      :default-sort="rowId"
       :opened-detailed="defaultOpenedDetails"
       detailed
-      :detail-key="id"
+      :detail-key="rowId"
       :show-detail-icon="true"
       :current-page.sync="currentPage"
-      :row-class="(row, index) => 'fix-arrow-icon-detail-width'">
+      :row-class="(row, index) => 'fix-arrow-icon-detail-width'"
+      :checked-rows.sync="checkedRows"
+      :checkable="checkable"
+      :selected="selectedRow"
+      @select="selectRow"
     >
+      >
       >
       <template slot-scope="props">
         <slot name="columns" v-bind:row="props.row"></slot>
@@ -82,6 +100,8 @@ export default {
       defaultOpenedDetails: [1],
       pageSizeString: 5,
       currentPage: 1,
+      checkedRows: [],
+      selectedRow: null,
     };
   },
   props: {
@@ -89,14 +109,41 @@ export default {
       type: Array,
       required: true,
     },
-    id: {
+    rowId: {
       type: String,
       required: true,
+    },
+    checkable: {
+      type: Boolean,
+      default: false,
+    },
+    selectable: {
+      type: Boolean,
+      default: false,
     },
   },
   methods: {
     toggle(row) {
       this.$refs.table.toggleDetails(row);
+    },
+    clearSelected() {
+      this.checkedRows = [];
+      this.selectedRow = null;
+    },
+    selectRow(row) {
+      if (this.selectable) this.selectedRow = row;
+    },
+  },
+  watch: {
+    checkedRows(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.$emit('updated:checkedRows', newVal);
+      }
+    },
+    selectedRow(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.$emit('updated:selectedRow', newVal);
+      }
     },
   },
 };
@@ -110,7 +157,7 @@ export default {
   }
 }
 
-.fix-arrow-icon-detail-width td[class='chevron-cell'] {
+.fix-arrow-icon-detail-width td[class="chevron-cell"] {
   width: 50px;
 }
 </style>

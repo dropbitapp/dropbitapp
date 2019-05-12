@@ -61,9 +61,9 @@
               </b-field>
             </div>
           </div>
-          <!-- TABLE -->
-          <router-view></router-view>
         </div>
+        <!-- TABLE -->
+        <router-view></router-view>
       </div>
     </section>
   </div>

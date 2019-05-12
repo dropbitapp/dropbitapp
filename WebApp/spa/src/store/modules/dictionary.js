@@ -50,8 +50,6 @@ export default {
       return axios.get('/Dictionary/GetProcessingReportTypes')
         .then(result => commit('updateProcessingReportTypes', result.data))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -62,8 +60,6 @@ export default {
       return axios.get('/Dictionary/GetSpiritList')
         .then(result => commit('updateSpirits', result.data))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -76,8 +72,6 @@ export default {
       return axios.post('/Dictionary/CreateSpirit', spirit)
         .then(() => dispatch('getSpirits'))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -91,8 +85,6 @@ export default {
       return axios.post('/Dictionary/DeleteRecord', spirit)
         .then(() => dispatch('getSpirits'))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -103,8 +95,6 @@ export default {
       return axios.get('/Dictionary/GetVendorList')
         .then(result => commit('updateVendors', result.data))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -117,8 +107,6 @@ export default {
       return axios.post('/Dictionary/CreateVendor', vendor)
         .then(() => dispatch('getVendors'))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -132,8 +120,6 @@ export default {
       return axios.post('/Dictionary/DeleteRecord', vendor)
         .then(() => dispatch('getVendors'))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -144,8 +130,6 @@ export default {
       return axios.get('/Dictionary/GetStorageList')
         .then(result => commit('updateStorages', result.data))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -158,8 +142,6 @@ export default {
       return axios.post('/Dictionary/CreateStorage', storage)
         .then(() => dispatch('getStorages'))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -173,8 +155,6 @@ export default {
       return axios.post('/Dictionary/DeleteRecord', storage)
         .then(() => dispatch('getStorages'))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -185,8 +165,6 @@ export default {
       return axios.get('/Dictionary/GetRawMaterialList')
         .then(result => commit('updateRawMaterials', result.data))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -199,8 +177,6 @@ export default {
       return axios.post('/Dictionary/CreateRawMaterial', rawMaterial)
         .then(() => dispatch('getRawMaterials'))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -214,8 +190,6 @@ export default {
       return axios.post('/Dictionary/DeleteRecord', spirit)
         .then(() => dispatch('getRawMaterials'))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -225,8 +199,6 @@ export default {
       return axios.get('/Dictionary/GetUnitList')
         .then(result => commit('updateUnits', result.data))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
@@ -236,8 +208,6 @@ export default {
       return axios.get('/Dictionary/GetMaterialCategory')
         .then(result => commit('updateMaterialCategories', result.data))
         .catch((error) => {
-          // TODO: Implement front-end logging
-          console.log(error);
           throw error;
         });
     },
