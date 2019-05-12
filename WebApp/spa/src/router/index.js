@@ -17,6 +17,11 @@ const ViewRecords = () => import('../mockup/ViewRecords.vue');
 const Purchase = () => import('../views/purchase/Purchase.vue');
 const PurchaseView = () => import('../views/purchase/PurchaseView.vue');
 const AddPurchaseView = () => import('../views/purchase/AddPurchaseView.vue');
+const AddFermentableView = () => import('../views/purchase/AddFermentableView.vue');
+const AddFermentedView = () => import('../views/purchase/AddFermentedView.vue');
+const AddDistilledView = () => import('../views/purchase/AddDistilledView.vue');
+const AddSupplyView = () => import('../views/purchase/AddSupplyView.vue');
+const AddAdditiveView = () => import('../views/purchase/AddAdditiveView.vue');
 const FermentableView = () => import('../views/purchase/FermentableView.vue');
 const FermentedView = () => import('../views/purchase/FermentedView.vue');
 const DistilledView = () => import('../views/purchase/DistilledView.vue');
@@ -104,9 +109,36 @@ export default new Router({
         component: AdditiveView,
       }],
     },
-    {
-      path: 'add',
+    ],
+  },
+  {
+    path: '/purchase/add',
+    component: Purchase,
+    children: [{
+      path: '',
+      redirect: 'spirit',
       component: AddPurchaseView,
+      children: [{
+        path: 'fermentable',
+        component: AddFermentableView,
+      },
+      {
+        path: 'fermented',
+        component: AddFermentedView,
+      },
+      {
+        path: 'distilled',
+        component: AddDistilledView,
+      },
+      {
+        path: 'supply',
+        component: AddSupplyView,
+      },
+      {
+        path: 'additive',
+        component: AddAdditiveView,
+      },
+      ],
     },
     ],
   },
@@ -166,7 +198,7 @@ export default new Router({
     },
     ],
   },
-    {
+  {
     path: '/dictionary/add',
     component: Dictionary,
     children: [{
