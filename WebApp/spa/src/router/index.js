@@ -53,7 +53,7 @@ const MaterialView = () => import('../views/dictionary/MaterialView.vue');
 // lazy load reporting views
 const Reporting = () => import('../views/reporting/Reporting.vue');
 const StorageReportView = () => import('../views/reporting/StorageReportView.vue');
-const ProductionReport = () => import('../views/reporting/ProductionReport.vue');
+const ProductionReportView = () => import('../views/reporting/ProductionReportView.vue');
 const ProcessingReportView = () => import('../views/reporting/ProcessingReportView.vue');
 
 Vue.use(Router);
@@ -235,7 +235,8 @@ export default new Router({
     },
     {
       path: 'production',
-      component: ProductionReport,
+      props: true,
+      component: ProductionReportView,
     },
     {
       path: 'processing',
