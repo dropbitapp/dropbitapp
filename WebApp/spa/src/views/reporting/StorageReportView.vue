@@ -1,24 +1,38 @@
 <!-- eslint-disable -->
 <template>
 <div>
-  <h1>Storage Report</h1>
-    <div class="row">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <form class="form-inline">
-                    <div class="form-group">
-                        <label class="pull-left" for="ReportingYear" style="padding-left: 10pt; padding-right: 10pt">Reporting Year</label>
-                        <div id="ReportingYear"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="pull-left" for="ReportingMonth" style="padding-left: 10pt; padding-right: 10pt">Reporting Month</label>
-                        <div id="ReportingMonth"></div>
-                    </div>
-                    <input v-on:click="getReport" type="button" value="Generate Report" id="GenerateReportBtn" />
-                </form>
-            </div>
+    <section class="hero is-primary">
+      <div class="hero-body">
+        <div class="container is-bold">
+          <h1 class="title">Storage Report</h1>
         </div>
-    </div>
+      </div>
+    </section>
+    <form class="monthYearPicker">
+    <b-field grouped>
+      <b-field label="Reporting Month">
+          <b-select v-model="currentMonth">
+              <option
+              v-for="month in monthList"
+              :key="month.index"
+              v-bind:value="month.index">
+              {{ month.text }}</option>
+          </b-select>
+      </b-field>
+      <b-field label="Reporting Year">
+          <b-select v-model="currentYear">
+              <option
+              v-for="year in yearList"
+              :key="year.index"
+              v-bind:value="year.index">
+              {{ year.value }}</option>
+          </b-select>
+      </b-field>
+    </b-field>
+    <p class="control">
+      <button v-on:click="getReport" id="GenerateReportBtn" class="button level is-primary" type="submit">Generate Report</button>
+    </p>
+  </form>
     <table style="border-collapse:collapse" cellspacing="0">
         <tr style="height:35pt">
             <td style="width:423pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" colspan="11">
@@ -2073,6 +2087,51 @@ import dateHelper from '../../helpers/date-helper';
 
 export default {
   name: 'StorageReportView',
+  data() {
+    return {
+      currentMonth: null,
+      currentYear: null,
+      monthList: [
+        { index: 0, text: 'January' },
+        { index: 1, text: 'February' },
+        { index: 2, text: 'March' },
+        { index: 3, text: 'April' },
+        { index: 4, text: 'May' },
+        { index: 5, text: 'June' },
+        { index: 6, text: 'July' },
+        { index: 7, text: 'August' },
+        { index: 8, text: 'September' },
+        { index: 9, text: 'October' },
+        { index: 10, text: 'November' },
+        { index: 11, text: 'December' },
+      ],
+      yearList: [],
+    };
+  },
+  created() {
+    const date = new Date();
+     // fill years array
+    const yearsList = [];
+    const curYear = date.getFullYear();
+    for (let i = 0; i < (curYear - 2015); i++) {
+      const year = {
+        index: null,
+        value: null,
+      };
+      year.index = i;
+      year.value = curYear - i;
+      yearsList.push(year);
+    }
+    this.yearList = yearsList;
+
+    // set current Month
+    const month = date.getMonth();
+    this.currentMonth = month === 0 ? this.monthList.length - 1 : month - 1;
+
+    // set current year
+    const yearIndex = 0;
+    this.currentYear = month === 0 ? yearIndex + 1 : yearIndex;
+  },
   computed: {
     storageRecords() {
       return this.$store.state.report.storage;
@@ -2092,21 +2151,20 @@ export default {
     ...mapGetters({ total: 'report/storageTotal' }),
   },
   methods: {
-    getReport(startDate, endDate) {
-      // get starting year
-      const reportingYear = '2018';
-      // let reportingYear = $("#ReportingYear").jqxDropDownList('getSelectedItem');
-
-      // get starting month
-      const reportingMonth = 'February';
-      // let reportingMonth = $( "#ReportingMonth" ).jqxDropDownList('getSelectedItem');
-
+    getReport() {
       // converting to date object and getting starting/ending date
-      const reportingDate = dateHelper.getReportingMonthAndYear(reportingYear, reportingMonth);
+      const reportingDate = dateHelper.getReportingMonthAndYear(this.yearList[this.currentYear].value, this.currentMonth);
       // convert to UTC since all of the dates in the DB are stored in UTC
       const start = dateHelper.convertToUTC(reportingDate[0]);
       const end = dateHelper.convertToUTC(reportingDate[1]);
-      this.$store.dispatch('report/getStorage', { start, end });
+      this.$store.dispatch('report/getStorage', { start, end })
+      .then(() => {
+          this.clearControls();
+      });
+    },
+    clearControls() {
+      this.reportingMonth = null;
+      this.reportingYear = null;
     },
   },
 };

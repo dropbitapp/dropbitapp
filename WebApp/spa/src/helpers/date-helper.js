@@ -11,16 +11,8 @@ export default class DateHelper {
      */
     // eslint-disable-next-line func-names
     static getReportingMonthAndYear = function (reportingYear, reportingMonth) {
-      const monthList = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      // todo: either uncomment it or remove it once we know in what format the date will be sent
-      // let year = reportingYear.value;
-      // let month = monthList.indexOf(reportingMonth.value);
-      // let firstDay = new Date( year, month, 1 );
-      // let lastDay = new Date( year, month + 1, 0 );
-
-      const month = monthList.indexOf(reportingMonth);
-      const firstDay = new Date(reportingYear, month, 1);
-      const lastDay = new Date(reportingYear, month + 1, 0);
+      const firstDay = new Date(reportingYear, reportingMonth, 1);
+      const lastDay = new Date(reportingYear, reportingMonth + 1, 0);
       // set time to the earliest possible time of the first day
       firstDay.setHours(0o00, 0o00, 0o00);
       // set the time to the latest possible time of the last day
