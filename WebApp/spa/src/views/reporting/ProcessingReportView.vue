@@ -1293,10 +1293,10 @@ export default {
   },
   created() {
     const date = new Date();
-     // fill years array
+    // fill years array
     const yearsList = [];
     const curYear = date.getFullYear();
-    for (let i = 0; i < (curYear - 2015) ; i++) {
+    for (let i = 0; i < (curYear - 2015); i++) {
       const year = {
         index: null,
         value: null,
@@ -1306,7 +1306,7 @@ export default {
       yearsList.push(year);
     }
     this.yearList = yearsList;
-    
+
     // set current Month
     const month = date.getMonth();
     this.currentMonth = month === 0 ? this.monthList.length - 1 : month - 1;
@@ -1335,9 +1335,9 @@ export default {
       const start = dateHelper.convertToUTC(reportingDate[0]);
       const end = dateHelper.convertToUTC(reportingDate[1]);
       this.$store.dispatch('report/getProcessing', { start, end })
-      .then(() => {
-        this.clearControls();
-      });
+        .then(() => {
+          this.clearControls();
+        });
     },
     clearControls() {
       this.reportingMonth = null;

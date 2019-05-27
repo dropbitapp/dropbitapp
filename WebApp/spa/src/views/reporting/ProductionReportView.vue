@@ -1716,10 +1716,10 @@ export default {
   },
   created() {
     const date = new Date();
-     // fill years array
+    // fill years array
     const yearsList = [];
     const curYear = date.getFullYear();
-    for (let i = 0; i < (curYear - 2015) ; i++) {
+    for (let i = 0; i < (curYear - 2015); i++) {
       const year = {
         index: null,
         value: null,
@@ -1729,7 +1729,7 @@ export default {
       yearsList.push(year);
     }
     this.yearList = yearsList;
-    
+
     // set current Month
     const month = date.getMonth();
     this.currentMonth = month === 0 ? this.monthList.length - 1 : month - 1;
@@ -1754,11 +1754,11 @@ export default {
     ...mapGetters({ alcoholOver190: 'report/productionPart1Under190' }),
     ...mapGetters({ other: 'report/productionPart1Other' }),
     ...mapGetters({ total: 'report/productionPart1Total' }),
-    ...mapGetters({ part2: 'report/productionReportPart2'}),
-    ...mapGetters({ part3: 'report/productionReportPart3'}),
-    ...mapGetters({ part4: 'report/productionReportPart4'}),
-    ...mapGetters({ part5: 'report/productionReportPart5'}),
-    ...mapGetters({ part6: 'report/productionReportPart6'}),
+    ...mapGetters({ part2: 'report/productionReportPart2' }),
+    ...mapGetters({ part3: 'report/productionReportPart3' }),
+    ...mapGetters({ part4: 'report/productionReportPart4' }),
+    ...mapGetters({ part5: 'report/productionReportPart5' }),
+    ...mapGetters({ part6: 'report/productionReportPart6' }),
   },
   methods: {
     getReport() {
@@ -1768,9 +1768,9 @@ export default {
       const start = dateHelper.convertToUTC(reportingDate[0]);
       const end = dateHelper.convertToUTC(reportingDate[1]);
       this.$store.dispatch('report/getProduction', { start, end })
-      .then(() => {
-        this.clearControls();
-      });
+        .then(() => {
+          this.clearControls();
+        });
     },
     clearControls() {
       this.reportingMonth = null;
