@@ -32,6 +32,10 @@ const AdditiveView = () => import('../views/purchase/AdditiveView.vue');
 const Production = () => import('../views/production/Production.vue');
 const ProductionView = () => import('../views/production/ProductionView.vue');
 const AddProductionView = () => import('../views/production/AddProductionView.vue');
+const AddFermentationView = () => import('../views/production/AddFermentationView.vue');
+const AddDistillationView = () => import('../views/production/AddDistillationView.vue');
+const AddBlendingView = () => import('../views/production/AddBlendingView.vue');
+const AddBottlingView = () => import('../views/production/AddBottlingView.vue');
 const FermentationView = () => import('../views/production/FermentationView.vue');
 const DistillationView = () => import('../views/production/DistillationView.vue');
 const BlendingView = () => import('../views/production/BlendingView.vue');
@@ -166,9 +170,32 @@ export default new Router({
         component: BottlingView,
       }],
     },
-    {
-      path: 'add',
+    ],
+  },
+  {
+    path: '/production/add',
+    component: Production,
+    children: [{
+      path: '',
+      redirect: 'fermentation',
       component: AddProductionView,
+      children: [{
+        path: 'fermentation',
+        component: AddFermentationView,
+      },
+      {
+        path: 'distillation',
+        component: AddDistillationView,
+      },
+      {
+        path: 'blending',
+        component: AddBlendingView,
+      },
+      {
+        path: 'bottling',
+        component: AddBottlingView,
+      },
+      ],
     },
     ],
   },

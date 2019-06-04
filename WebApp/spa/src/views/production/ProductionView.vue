@@ -37,10 +37,26 @@
                     <span>New Production</span>
                     <b-icon icon="menu-down"></b-icon>
                   </button>
-                  <b-dropdown-item>Fermentation</b-dropdown-item>
-                  <b-dropdown-item>Distillation</b-dropdown-item>
-                  <b-dropdown-item>Blending</b-dropdown-item>
-                  <b-dropdown-item>Bottling</b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/production/add/fermentation">
+                      <div>Fermentation</div>
+                    </router-link>
+                  </b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/production/add/distillation">
+                      <div>Distillation</div>
+                    </router-link>
+                  </b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/production/add/blending">
+                      <div>Blending</div>
+                    </router-link>
+                  </b-dropdown-item>
+                  <b-dropdown-item>
+                    <router-link to="/production/add/bottling">
+                      <div>Bottling</div>
+                    </router-link>
+                  </b-dropdown-item>
                 </b-dropdown>
               </b-field>
             </div>
