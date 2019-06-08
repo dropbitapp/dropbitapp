@@ -1,5 +1,5 @@
 <template>
-  <div id="addProductionView">
+    <div id="addProductionView">
     <section class="hero is-primary">
       <div class="hero-body">
         <div class="container is-bold">
@@ -85,4 +85,3 @@ export default {
   },
 };
 </script>
-

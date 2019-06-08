@@ -20,15 +20,15 @@
             width="50"
             sortable
           >{{ props.row.RawMaterialId }}</b-table-column>
-
+    
           <!-- Name -->
           <!-- eslint-disable-next-line max-len -->
           <b-table-column field="RawMaterialName" label="Name" sortable><span class="row-content">{{ props.row.RawMaterialName }}</span></b-table-column>
-
+    
           <!-- Unit Type -->
           <!-- eslint-disable-next-line max-len -->
           <b-table-column field="UnitType" label="Unit" sortable><span class="row-content">{{ props.row.UnitType }}</span></b-table-column>
-
+    
           <!-- Fermentable -->
           <b-table-column label="Fe" meta="Fermentable">
             <!-- Workaround for a bug where
@@ -41,7 +41,7 @@
               </template>
             </template>
           </b-table-column>
-
+    
           <!-- Fermented -->
           <b-table-column label="Fd" meta="Fermented">
             <!-- Workaround for a bug where
@@ -54,7 +54,7 @@
               </template>
             </template>
           </b-table-column>
-
+    
           <!-- Distilled -->
           <b-table-column label="Dd" meta="Distilled">
             <!-- Workaround for a bug where
@@ -67,7 +67,7 @@
               </template>
             </template>
           </b-table-column>
-
+    
           <!-- Supply -->
           <b-table-column label="Sy" meta="Supply">
             <!-- Workaround for a bug where
@@ -80,7 +80,7 @@
               </template>
             </template>
           </b-table-column>
-
+    
           <!-- Supply -->
           <b-table-column label="Ae" meta="Additive">
             <!-- Workaround for a bug where
@@ -93,7 +93,7 @@
               </template>
             </template>
           </b-table-column>
-
+    
           <!-- Delete -->
           <b-table-column>
             <button class="button is-small is-primary is-pulled-right" @click="deleteItem(props.row)">

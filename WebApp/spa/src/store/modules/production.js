@@ -8,6 +8,8 @@ export default {
     distillations: null,
     blendings: null,
     bottlings: null,
+    fillList: [],
+    blendsForBottling: null,
     rawMaterialsForFermentation: null,
     materialsForProduction: null,
     storages: null,
@@ -17,20 +19,27 @@ export default {
   // modify state only through mutations
   mutations: {
     updateFermentations(state, productions) {
-      // eslint-disable-next-line no-param-reassign
+      /* eslint-disable no-param-reassign */
       state.fermentations = productions;
     },
     updateDistillations(state, productions) {
-      // eslint-disable-next-line no-param-reassign
+      /* eslint-disable no-param-reassign */
       state.distillations = productions;
     },
     updateBlendings(state, productions) {
-      // eslint-disable-next-line no-param-reassign
+      /* eslint-disable no-param-reassign */
       state.blendings = productions;
     },
     updateBottlings(state, productions) {
-      // eslint-disable-next-line no-param-reassign
+      /* eslint-disable no-param-reassign */
       state.bottlings = productions;
+    },
+    updateBlendsForBottling(state, blends) {
+      /* eslint-disable no-param-reassign */
+      state.blendsForBottling = blends;
+    },
+    updateFillTest(state, fillTest) {
+      state.fillList.push(fillTest);
     },
     updateRawMaterialsForFermentation(state, rawMaterials) {
       // eslint-disable-next-line no-param-reassign
@@ -58,11 +67,24 @@ export default {
     createProduction({
       // eslint-disable-next-line no-unused-vars
       dispatch,
-    }, production) {
-      if (!production) {
+    }, productions) {
+      /* eslint-disable no-param-reassign */
+      if (!productions) {
         throw new Error('createProduction: invalid parameters');
       }
-      return axios.post('/Production/CreateProductionRecord', production)
+      productions.map((production) => {
+        production.ProductionDate =
+        dateHelper.convertToUTC(production.ProductionDate).toLocaleDateString();
+        production.ProductionStart =
+        dateHelper.convertToUTC(production.ProductionStart).toLocaleDateString();
+        production.ProductionEnd =
+        dateHelper.convertToUTC(production.ProductionEnd).toLocaleDateString();
+        return production;
+      });
+      return axios.post('/Production/CreateProductionRecord', productions)
+        .then((result) => {
+          dispatch('updateBottlings', productions);
+        })
         .catch((error) => {
           throw error;
         });
@@ -70,6 +92,7 @@ export default {
     getProductions({
       commit,
     }, productionType) {
+      /* eslint-disable no-param-reassign */
       if (!productionType) {
         throw new Error('getProductions: invalid parameters');
       }
@@ -80,8 +103,12 @@ export default {
       })
         .then((result) => {
           result.data.map((production) => {
-            // eslint-disable-next-line no-param-reassign
-            production.ProductionDate = dateHelper.convertFromUTC(production.ProductionDate);
+            production.ProductionDate =
+            dateHelper.convertFromUTC(production.ProductionDate).toLocaleDateString();
+            production.ProductionStart =
+            dateHelper.convertFromUTC(production.ProductionStart).toLocaleDateString();
+            production.ProductionEnd =
+            dateHelper.convertFromUTC(production.ProductionEnd).toLocaleDateString();
             return production;
           });
           switch (productionType) {
@@ -133,6 +160,28 @@ export default {
         })
         .catch((error) => {
           throw error;
+        });
+    },
+    addFillTest({ commit }, fillTest) {
+      commit('updateFillTest', fillTest);
+    },
+    getRecordsAvaiableForBottling({ commit }, productionType) {
+      /* eslint-disable no-param-reassign */
+      if (!productionType) {
+        throw new Error('getRecordsAvaiableForBottling: productionType is null or undefined');
+      }
+      return axios.get('/Production/GetBlendingData', {
+        params: {
+          prodType: productionType,
+        },
+      })
+        .then((result) => {
+          result.data.map((production) => {
+            production.ProductionEndDate =
+            dateHelper.convertFromUTC(production.ProductionEndDate).toLocaleDateString();
+            return production;
+          });
+          commit('updateBlendsForBottling', result.data);
         });
     },
     getRawMaterialsForFermentation({

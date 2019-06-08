@@ -34,7 +34,6 @@ const ProductionView = () => import('../views/production/ProductionView.vue');
 const AddProductionView = () => import('../views/production/AddProductionView.vue');
 const AddFermentationView = () => import('../views/production/AddFermentationView.vue');
 const AddDistillationView = () => import('../views/production/AddDistillationView.vue');
-const AddBlendingView = () => import('../views/production/AddBlendingView.vue');
 const AddBottlingView = () => import('../views/production/AddBottlingView.vue');
 const FermentationView = () => import('../views/production/FermentationView.vue');
 const DistillationView = () => import('../views/production/DistillationView.vue');
@@ -186,10 +185,6 @@ export default new Router({
       {
         path: 'distillation',
         component: AddDistillationView,
-      },
-      {
-        path: 'blending',
-        component: AddBlendingView,
       },
       {
         path: 'bottling',

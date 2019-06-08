@@ -7,7 +7,7 @@ export default class DateHelper {
      * returns reporting month and year
      * @param {reportingYear} string
      * @param {reportingMonth} string
-     * return {[firstDay, lastDay]} an array with first and last javascript object date
+     * returns {[firstDay, lastDay]} an array with first and last javascript object date
      */
     // eslint-disable-next-line func-names
     static getReportingMonthAndYear = function (reportingYear, reportingMonth) {
@@ -23,7 +23,7 @@ export default class DateHelper {
     /**
      * convert JSON date to javasript date
      * @param {jsonDate} date in JSON format
-     * @return {date} Javascript date object
+     * @returns {date} Javascript date object
      */
     // eslint-disable-next-line func-names
     static convertJSONdatetoJS = function (jsonDate) {
@@ -33,7 +33,7 @@ export default class DateHelper {
     /**
      * configures minimum date for production workflow give date in JSON format
      * @param {jsonDate} JSON string
-     * @return {minDate} returns new min date object
+     * @returns {minDate} returns new min date object
      */
     // eslint-disable-next-line func-names
     static setMinDate = function (jsonDate) {
@@ -45,7 +45,7 @@ export default class DateHelper {
     /**
      * Function that convert local time to UTC
      * @param {inputDate} assumping that the string is of format mm/dd/yyyy
-     * @return {dateUTC} date in UTC format
+     * @returns {dateUTC} date in UTC format
      */
     static convertToUTC(inputDate) {
       const date = new Date(inputDate);
@@ -59,12 +59,11 @@ export default class DateHelper {
     /**
      * Function that convert UTC to local time
      * @param {inputDate} date in UTC format
-     * @return {localDate} local time date object
+     * @returns {localDate} local time date object
      */
     static convertFromUTC(inputDate) {
       let parsedDate;
       const regEx = /Date\([0-9]+\)/;
-
       // check whether the variable of type string because regex can only compare strings
       if (typeof inputDate === 'string') {
         // eslint-disable-next-line max-len
@@ -75,12 +74,29 @@ export default class DateHelper {
       } else {
         parsedDate = new Date(inputDate);
       }
-
       const localOffset = parsedDate.getTimezoneOffset() * 60000;
       let localDate = parsedDate.getTime();
       localDate -= localOffset;
       localDate = new Date(localDate);
-
       return localDate;
+    }
+
+    /**
+     * Concatenates date and time into dat-time object
+     * @param {dateObj} Date object representing the date
+     * @param {timeObj} Date object representing the time
+     * @returns {dateTime} concatenated date time object
+     */
+    static formDateTimeObject(dateObj, timeObj) {
+      const dateTime = new Date(
+        dateObj.getFullYear(),
+        dateObj.getMonth(),
+        dateObj.getDate(),
+        timeObj.getHours(),
+        timeObj.getMinutes(),
+        timeObj.getSeconds(),
+        0,
+      );
+      return dateTime;
     }
 }

@@ -2110,7 +2110,7 @@ export default {
   },
   created() {
     const date = new Date();
-    // fill years array
+     // fill years array
     const yearsList = [];
     const curYear = date.getFullYear();
     for (let i = 0; i < (curYear - 2015); i++) {
@@ -2158,9 +2158,9 @@ export default {
       const start = dateHelper.convertToUTC(reportingDate[0]);
       const end = dateHelper.convertToUTC(reportingDate[1]);
       this.$store.dispatch('report/getStorage', { start, end })
-        .then(() => {
+      .then(() => {
           this.clearControls();
-        });
+      });
     },
     clearControls() {
       this.reportingMonth = null;

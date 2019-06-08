@@ -1763,7 +1763,11 @@ export default {
   methods: {
     getReport() {
       // converting to date object and getting starting/ending date
-      const reportingDate = dateHelper.getReportingMonthAndYear(this.yearList[this.currentYear].value, this.currentMonth);
+      const reportingDate =
+      dateHelper.getReportingMonthAndYear(
+        this.yearList[this.currentYear].value,
+        this.currentMonth,
+      );
       // convert to UTC since all of the dates in the DB are stored in UTC
       const start = dateHelper.convertToUTC(reportingDate[0]);
       const end = dateHelper.convertToUTC(reportingDate[1]);
