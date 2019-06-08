@@ -13,7 +13,9 @@ export default {
     rawMaterialsForFermentation: null,
     materialsForProduction: null,
     storages: null,
+    spiritTypes: null,
     reportingSpiritTypes: null,
+    additives: null,
     spiritCuts: null,
   },
   // modify state only through mutations
@@ -53,9 +55,17 @@ export default {
       // eslint-disable-next-line no-param-reassign
       state.storages = storages;
     },
+    updateSpiritTypes(state, types) {
+      // eslint-disable-next-line no-param-reassign
+      state.spiritTypes = types;
+    },
     updateReportingSpiritTypes(state, types) {
       // eslint-disable-next-line no-param-reassign
       state.reportingSpiritTypes = types;
+    },
+    updateAdditives(state, additives) {
+      // eslint-disable-next-line no-param-reassign
+      state.additives = additives;
     },
     updateSpiritCuts(state, cuts) {
       // eslint-disable-next-line no-param-reassign
@@ -228,12 +238,41 @@ export default {
           throw error;
         });
     },
+    getAdditives({
+      commit,
+    }, materialType) {
+      if (!materialType) {
+        throw new Error('getAdditives: invalid parameters');
+      }
+      return axios.get('/Production/GetAdditivesList', {
+        params: {
+          matType: materialType,
+        },
+      })
+        .then((result) => {
+          commit('updateAdditives', result.data);
+        })
+        .catch((error) => {
+          throw error;
+        });
+    },
     getStorages({
       commit,
     }) {
       return axios.get('/Production/GetStorageData')
         .then((result) => {
           commit('updateStorages', result.data);
+        })
+        .catch((error) => {
+          throw error;
+        });
+    },
+    getSpiritTypes({
+      commit,
+    }) {
+      return axios.get('/Production/GetSpiritTypes')
+        .then((result) => {
+          commit('updateSpiritTypes', result.data);
         })
         .catch((error) => {
           throw error;
