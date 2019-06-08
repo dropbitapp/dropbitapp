@@ -370,7 +370,7 @@ export default {
         VendorId: this.selectedVendor.VendorId,
         Storage: this.selectedStorages,
         PurBatchName: `PUR-${this.batchName}`,
-        PurchaseDate: dateHelper(this.batchDate, true),
+        PurchaseDate: dateHelper.convertFromUTC(this.batchDate, true),
         Quantity: this.batchQuantity,
         Price: this.batchPrice,
         Note: this.batchNote,

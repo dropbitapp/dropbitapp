@@ -469,7 +469,6 @@ export default {
       batchWeight: '',
       batchAlcohol: '',
       batchProof: '',
-      batchPrice: '',
       batchReportingSpiritTypeId: null,
       batchMaterialKindReportingId: null,
       batchSpiritCutId: null,
@@ -501,6 +500,8 @@ export default {
     },
     submit() {
       this.selectedSourceMaterials.map((item) => {
+        // eslint-disable-next-line no-param-reassign
+        item.UsedQty = parseFloat(item.UsedQty);
         if (item.BurningDownMethod === 'volume') {
           // eslint-disable-next-line no-param-reassign
           item.OldVal = item.Quantity - item.UsedQty;
@@ -558,7 +559,7 @@ export default {
           this.clear();
           this.$toast.open({
             duration: 5000,
-            message: `Successfully created fermentation: ${
+            message: `Successfully created distillation: ${
               production.BatchName
             }`,
             type: 'is-success',
@@ -569,7 +570,7 @@ export default {
         .catch(() => {
           this.$toast.open({
             duration: 5000,
-            message: `Unable to create fermentation: ${production.BatchName}`,
+            message: `Unable to create distillation: ${production.BatchName}`,
             type: 'is-danger',
           });
         });
@@ -588,7 +589,6 @@ export default {
       this.batchWeight = '';
       this.batchAlcohol = '';
       this.batchProof = '';
-      this.batchPrice = '';
       this.batchReportingSpiritTypeId = null;
       this.batchMaterialKindReportingId = null;
       this.batchSpiritCutId = null;
@@ -619,7 +619,7 @@ export default {
           // eslint-disable-next-line no-param-reassign
           item.BurningDownMethod = 'weight';
         }
-        return items;
+        return item;
       });
       this.selectedSourceMaterials = items;
     },

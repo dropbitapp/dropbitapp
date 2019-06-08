@@ -1,5 +1,5 @@
 <template>
-  <div id="addDictionaryView">
+  <div id="addPurchaseView">
     <section class="hero is-primary">
       <div class="hero-body">
         <div class="container is-bold">
@@ -78,7 +78,7 @@
 
 <script>
 export default {
-  name: 'AddDictionaryView',
+  name: 'addPurchaseView',
   data() {
     return {
       workflow: 'fermentable', // default workflow
