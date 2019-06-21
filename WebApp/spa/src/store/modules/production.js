@@ -77,23 +77,23 @@ export default {
     createProduction({
       // eslint-disable-next-line no-unused-vars
       dispatch,
-    }, productions) {
+    }, production) {
       /* eslint-disable no-param-reassign */
-      if (!productions) {
+      if (!production) {
         throw new Error('createProduction: invalid parameters');
       }
-      productions.map((production) => {
-        production.ProductionDate =
-        dateHelper.convertToUTC(production.ProductionDate).toLocaleDateString();
-        production.ProductionStart =
-        dateHelper.convertToUTC(production.ProductionStart).toLocaleDateString();
-        production.ProductionEnd =
-        dateHelper.convertToUTC(production.ProductionEnd).toLocaleDateString();
-        return production;
-      });
-      return axios.post('/Production/CreateProductionRecord', productions)
+
+      // convert production dates to UTC
+      production.ProductionDate =
+      dateHelper.convertToUTC(production.ProductionDate);
+      production.ProductionStart =
+      dateHelper.convertToUTC(production.ProductionStart);
+      production.ProductionEnd =
+      dateHelper.convertToUTC(production.ProductionEnd);
+
+      return axios.post('/Production/CreateProductionRecord', production)
         .then((result) => {
-          dispatch('updateBottlings', productions);
+          dispatch('updateBottlings', production);
         })
         .catch((error) => {
           throw error;
