@@ -2108,6 +2108,65 @@ namespace WebApp.Workflows
         }
 
         /// <summary>
+        /// RecordTaxedProof creates tax reord, updates proof value
+        /// for existing record and updates produciton history table
+        /// returns true on success, false otherwise
+        /// </summary>
+        /// <param name="recs"> List of TaxedRecord objects received from Inventory workflow</param>
+        /// <param name="userId">user id of the person recording</param>
+        /// <returns>bool</returns>
+        public bool RecordTaxedProof(TaxedRecordList records, int userId)
+        {
+            try
+            {
+                List<TaxWithdrawn> taxesList = new List<TaxWithdrawn>();
+                List<ProductionHistory> historyList = new List<ProductionHistory>();
+                foreach (var record in records.TaxedRecords)
+                {
+                    TaxWithdrawn taxes = new TaxWithdrawn();
+                    taxes.DateOfSale = record.WithdrawalDate;
+                    taxes.DateRecorded = DateTime.UtcNow;
+                    taxes.ProductionID = record.ProductionId;
+                    taxes.Value = record.TaxedProof;
+                    taxesList.Add(taxes);
+
+                    // update proof for existing record
+                    var prfRec =
+                        (from rec in _db.Proof
+                         join production in _db.Production on rec.ProofID equals production.ProofID into production_join
+                         from production in production_join.DefaultIfEmpty()
+                         join distillers in _db.AspNetUserToDistiller on production.DistillerID equals distillers.DistillerID
+                         into distillers_join from distillers in distillers_join.DefaultIfEmpty()
+                         where record.ProductionId == production.ProductionID &&
+                         distillers.UserId == userId
+                         select rec).FirstOrDefault();
+                    if (prfRec != null && prfRec.Value != record.ProofGallon)
+                    {
+                        prfRec.Value = record.ProofGallon;
+                    }
+
+                    // save remaining proof to history table
+                    ProductionHistory histTable = new ProductionHistory();
+                    histTable.ProductionID = record.ProductionId;
+                    histTable.UpdateDate = DateTime.UtcNow;
+                    histTable.Proof = record.ProofGallon;
+                    histTable.UserID = userId;
+                    historyList.Add(histTable);
+                }
+
+                _db.TaxWithdrawn.AddRange(taxesList);
+                _db.ProductionHistory.AddRange(historyList);
+
+                _db.SaveChanges();
+                return true;
+            }
+            catch(Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Returns a list of all active Blends for a given userId -> distillerId
         /// </summary>
         /// <param name="prodType"></param>

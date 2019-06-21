@@ -279,6 +279,25 @@ namespace WebApp.Helpers
     }
 
     /// <summary>
+    /// TaxedRecords class contains a list of TaxedRecord objects
+    /// </summary>
+    public class TaxedRecordList
+    {
+        public List<TaxedRecord> TaxedRecords { get; set; }
+    }
+
+    /// <summary>
+    /// TaxedRecord object is used for passing data from front-end Taxes workflow 
+    /// </summary>
+    public class TaxedRecord
+    {
+        public int ProductionId { get; set; }
+        public float ProofGallon { get; set; }
+        public float TaxedProof { get; set; }
+        public System.DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened
+    }
+
+    /// <summary>
     /// BottlingObject object is used to store and transfer Bottling 
     /// specific data between client and server.
     /// </summary>

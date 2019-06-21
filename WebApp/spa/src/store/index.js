@@ -5,6 +5,7 @@ import dictionaryModule from './modules/dictionary';
 import purchaseModule from './modules/purchase';
 import productionModule from './modules/production';
 import reportModule from './modules/report';
+import inventoryModule from './modules/inventory';
 
 Vue.use(Vuex);
 
@@ -14,5 +15,6 @@ export default new Vuex.Store({
     purchase: purchaseModule,
     production: productionModule,
     report: reportModule,
+    inventory: inventoryModule,
   },
 });

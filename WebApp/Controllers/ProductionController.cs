@@ -5,6 +5,7 @@ using WebApp.Models;
 using WebApp.Helpers;
 using Microsoft.AspNet.Identity;
 using WebApp.Workflows;
+using Newtonsoft.Json;
 
 namespace WebApp.Controllers
 {
@@ -50,6 +51,46 @@ namespace WebApp.Controllers
                         else
                         {
                             string message = "Failed to create production record!";
+                            return Json(message);
+                        }
+                    }
+                    else
+                        return Json("Unable to find UserId!");
+                }
+                else
+                    return Json("Unauthenticated user!");
+            }
+            else
+            {
+                return Json("Backend received empty, undefined, or null Object from the client!");
+            }
+        }
+
+        /// <summary>
+        /// CreatetaxRecord method calls into RecordTaxedProof method in production workflow
+        /// to records a sale of spirits bu the distiller
+        /// </summary>
+        /// <param name="taxRecords"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult CreateTaxRecords(TaxedRecordList taxRecords)
+        {
+            if (taxRecords != null)
+            {
+                if (User.Identity.IsAuthenticated)
+                {
+                    var userId = User.Identity.GetUserId<int>();
+                    if (userId > 0)
+                    {
+                        bool returnResult = _production.RecordTaxedProof(taxRecords, userId);
+                        if (returnResult)
+                        {
+                            string message = "Tax Records were created successfully.";
+                            return Json(message);
+                        }
+                        else
+                        {
+                            string message = "Failed to create Tax Record!";
                             return Json(message);
                         }
                     }

@@ -59,6 +59,8 @@ const StorageReportView = () => import('../views/reporting/StorageReportView.vue
 const ProductionReportView = () => import('../views/reporting/ProductionReportView.vue');
 const ProcessingReportView = () => import('../views/reporting/ProcessingReportView.vue');
 
+// Inventory Views
+const Sell = () => import('../views/inventory/SellView.vue');
 Vue.use(Router);
 
 export default new Router({
@@ -266,6 +268,11 @@ export default new Router({
       component: ProcessingReportView,
     },
     ],
+  },
+  {
+    path: '/inventory/Sell',
+    component: Sell,
+    props: true,
   },
   {
     path: '*',

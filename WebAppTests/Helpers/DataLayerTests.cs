@@ -1085,9 +1085,9 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(part2.RecordedLosses, report.Part2.RecordedLosses);
                 Assert.AreEqual(part2.InventoryOverage, report.Part2.InventoryOverage);
                 Assert.AreEqual(part2.OnHandEndofMonth, report.Part2.OnHandEndofMonth);
-                Assert.AreEqual(part2.TaxWithdrawn, report.Part2.TaxWithdrawn);
-                Assert.AreEqual(part2.TotalLine31, report.Part2.TotalLine31);
-                Assert.AreEqual(part2.TotalLine47, report.Part2.TotalLine47, "Processing Report Line 47 values do not match");
+                Assert.AreEqual(part2.TaxWithdrawn, report.Part2.TaxWithdrawn, "Processing Report Part 2 - Line 33 values do not match");
+                Assert.AreEqual(part2.TotalLine31, report.Part2.TotalLine31, "Processing Report Part 2 - Line 31 values do not match");
+                Assert.AreEqual(part2.TotalLine47, report.Part2.TotalLine47, "Processing Report Part 2 - Line 47 values do not match");
             }
 
             if(part4 != null)
@@ -20785,6 +20785,350 @@ namespace WebApp.Helpers.Tests
                     RecordedLosses = 0,
                     TotalLine47 = 0/*Line 44 Losses*/ + 40f/*Tax withdrawn */ + 120f /*On Hand End Of Month*/
                 });
+        }
+
+        /// <summary>
+        /// This method tests if we can record a sale of two bottling records i.e. tax withdrawn
+        /// 1. create bottling record 1 through: Grape Purchase -> Wine -> Distilled -> Blended -> Bottled
+        /// 2. create bottling record 2 through: Wine Purchase -> Distilled -> Blended -> Bottled
+        /// 3. withdraw tax from record 1 and record 2
+        /// 4. Check Processing record
+        /// </summary>
+        [TestMethod()]
+        public void Test_Withdraw_Taxes_On_Multiple_Records()
+        {
+            // Tuple<recordId, table enum value>
+            List<Tuple<int, Table>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
+
+            // Arrange
+            PurchaseFermentable(name: "GrapesPurchase",
+                date: new DateTime(2018, 6, 1),
+                volume: 0f,
+                weight: 1000f,
+                alcoholContent: 0f,
+                proof: 0f,
+                materialDictId: _rawMaterials["Grapes"].RawMaterialId,
+                price: 500f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+            PurchaseAdditive(name: "DistilledWaterPurchase",
+                date: new DateTime(2018, 6, 1),
+                volume: 1000f,
+                weight: 0f,
+                alcoholContent: 0f,
+                proof: 0f,
+                materialDictId: _rawMaterials["DistilledWater"].RawMaterialId,
+                price: 0.1f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
+
+
+            ProduceFerment(name: "Wine",
+                start: new DateTime(2018, 6, 2),
+                end: new DateTime(2018, 6, 2),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 10f,
+                proof: 20f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _purchases["GrapesPurchase"].PurchaseId,
+                        OldVal = 0f,
+                        NewVal = 1000f,
+                        DistillableOrigin = "pur",
+                        BurningDownMethod = "weight"
+                    }
+                });
+
+            ProduceDistill(name: "Brandy",
+                start: new DateTime(2018, 6, 4),
+                end: new DateTime(2018, 6, 4),
+                volume: 25f,
+                weight: 0f,
+                alcoholContent: 50f,
+                proof: 25f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
+                spiritCut: "Heart",
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["Wine"].ProductionId,
+                        OldVal = 0f,
+                        NewVal = 20f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                });
+
+            ProduceBlend(name: "NotWateredDownBrandyBlend",
+                start: new DateTime(2018, 6, 6),
+                end: new DateTime(2018, 6, 6),
+                volume: 25f,
+                weight: 0f,
+                alcoholContent: 50f,
+                proof: 25f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
+                spiritId: _spirits["BrandyUnder170"].SpiritId,
+                gainLoss: 0f,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["Brandy"].ProductionId,
+                        OldVal = 0f,
+                        NewVal = 25f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                },
+                blendingAdditives: new List<BlendingAdditive>
+                {
+                    new BlendingAdditive
+                    {
+                        RawMaterialId = _rawMaterials["DistilledWater"].RawMaterialId,
+                        RawMaterialQuantity = 0f,
+                        RawMaterialName = "DistilledWater",
+                        UnitOfMeasurement = "gal"
+                    }
+                });
+
+            ProduceBottle(name: "BrandedBrandy",
+                start: new DateTime(2018, 6, 8),
+                end: new DateTime(2018, 6, 8),
+                volume: 23.78f, // Use bottling UI workflow to calculate desired volume for given number of cases/bottles
+                weight: 0f,
+                alcoholContent: 50f,
+                proof: 23.77f, // Use bottling UI workflow to calculate desired proof for given number of cases/bottles
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
+                spiritId: _spirits["BrandyUnder170"].SpiritId,
+                gainLoss: -1.23f,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["NotWateredDownBrandyBlend"].ProductionId,
+                        OldVal = 0f,
+                        NewVal = 23.78f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                },
+                bottlingInfo: new BottlingObject
+                {
+                    CaseCapacity = 12,
+                    CaseQuantity = 15f,
+                    BottleQuantity = 180,
+                    BottleCapacity = 500f,
+                });
+
+            List<TaxedRecord> taxedRecords = new List<TaxedRecord>();
+            /**
+            * record a sale 1
+            */
+            TaxedRecord tax = new TaxedRecord
+            {
+                ProductionId = _productions["BrandedBrandy"].ProductionId,
+                ProofGallon = 3.77f,
+                TaxedProof = 20,
+                WithdrawalDate = new DateTime(2018, 6, 12)
+            };
+            taxedRecords.Add(tax);
+
+            tablesForCleanupTupleList.Add(Tuple.Create(_productions["BrandedBrandy"].ProductionId, Table.TaxWithdrawn));
+
+            // second purchase
+            PurchaseFermented(name: "WinePurchase",
+               date: new DateTime(2018, 6, 1),
+               volume: 100f,
+               weight: 0f,
+               alcoholContent: 10f,
+               proof: 25f,
+               materialDictId: _rawMaterials["Wine"].RawMaterialId,
+               spiritTypeReportingId: (int)ReportSpiritTypes.Other,
+               price: 123f,
+               vendorId: _vendors["Vendor"].VendorId,
+               storageId: _storages["Storage"].StorageId);
+
+            ProduceDistill(name: "BrandyDistilFromPurchasedWine",
+                start: new DateTime(2018, 6, 4),
+                end: new DateTime(2018, 6, 4),
+                volume: 25f,
+                weight: 0f,
+                alcoholContent: 50f,
+                proof: 25f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
+                spiritCut: "Heart",
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _purchases["WinePurchase"].PurchaseId,
+                        OldVal = 0f,
+                        NewVal = 25f,
+                        DistillableOrigin = "pur",
+                        BurningDownMethod = "volume"
+                    }
+                });
+
+            ProduceBlend(name: "BrandyBlendFromPurchasedWine",
+                start: new DateTime(2018, 6, 6),
+                end: new DateTime(2018, 6, 6),
+                volume: 25f,
+                weight: 0f,
+                alcoholContent: 50f,
+                proof: 25f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
+                spiritId: _spirits["BrandyUnder170"].SpiritId,
+                gainLoss: 0f,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["BrandyDistilFromPurchasedWine"].ProductionId,
+                        OldVal = 0f,
+                        NewVal = 25f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                },
+                blendingAdditives: new List<BlendingAdditive>
+                {
+                    new BlendingAdditive
+                    {
+                        RawMaterialId = _rawMaterials["DistilledWater"].RawMaterialId,
+                        RawMaterialQuantity = 0f,
+                        RawMaterialName = "DistilledWater",
+                        UnitOfMeasurement = "gal"
+                    }
+                });
+
+            ProduceBottle(name: "BrandyBottledFromPurchasedWine",
+                start: new DateTime(2018, 6, 8),
+                end: new DateTime(2018, 6, 8),
+                volume: 23.78f, // Use bottling UI workflow to calculate desired volume for given number of cases/bottles
+                weight: 0f,
+                alcoholContent: 50f,
+                proof: 23.77f, // Use bottling UI workflow to calculate desired proof for given number of cases/bottles
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
+                spiritId: _spirits["BrandyUnder170"].SpiritId,
+                gainLoss: -1.23f,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["BrandyBlendFromPurchasedWine"].ProductionId,
+                        OldVal = 0f,
+                        NewVal = 23.78f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                },
+                bottlingInfo: new BottlingObject
+                {
+                    CaseCapacity = 12,
+                    CaseQuantity = 15f,
+                    BottleQuantity = 180,
+                    BottleCapacity = 500f,
+                });
+
+            /**
+             * record a sale 2
+             */
+            TaxedRecord tax1 = new TaxedRecord
+            {
+                ProductionId = _productions["BrandyBottledFromPurchasedWine"].ProductionId,
+                ProofGallon = 8.77f,
+                TaxedProof = 15f,
+                WithdrawalDate = new DateTime(2018, 6, 14)
+            };
+            taxedRecords.Add(tax1);
+
+            TaxedRecordList taxes = new TaxedRecordList();
+            taxes.TaxedRecords = taxedRecords;
+
+            tablesForCleanupTupleList.Add(Tuple.Create(_productions["BrandyBottledFromPurchasedWine"].ProductionId, Table.TaxWithdrawn));
+
+            _production.RecordTaxedProof(taxes, _userId);
+
+            // Act
+            var processingReport = GetProcessingReport(new DateTime(2018, 6, 1), new DateTime(2018, 6, 30));
+
+            // Assert
+            try
+            {
+                AssertProcessing(processingReport,
+                                new ReportHeader
+                                {
+                                    ReportDate = "June 2018"
+                                },
+                                new ProcessReportingPart1
+                                {
+                                    OnHandFirstofMonth = 0f, // line 1
+                                    Recd4Process = 50f, // line 2
+                                    Gains = 0f, // line 7
+                                    TotalLine8 = 0f/*OnHandFirstofMonth*/ + 50f/*Recd4Process*/ + 0/*Gains*/,
+                                    AmtBottledPackaged = 50f, // line 9
+                                    BulkIngredients = "spirit", // column (b) or (c)
+                                    Losses = 0f, // line 24
+                                    OnHandEndofMonth = 0f/*TotalLine8*/ - 0f/*TotalLine26*/, // line 25
+                                    TotalLine26 = 50f
+                                },
+                                new ProcessReportingPart2
+                                {
+                                    AmtBottledPackaged = 50f,
+                                    FinishedProduct = "bottled",
+                                    TaxWithdrawn = 35f,
+                                    OnHandEndofMonth = 12.54f,
+                                    TotalLine31 = 50f,
+                                    RecordedLosses = 2.46f,
+                                    TotalLine47 = 50f/*Line 44 Losses*/ + 0f/*Tax withdrawn */
+                                },
+                                new List<ProcessReportingPart4>
+                                {
+                                    new ProcessReportingPart4
+                                    {
+                                        Brandy170Under = 50f,
+                                        ProcessingSpirits = "bulkSpiritDumped",
+                                        ProcessingTypeID = (int)Persistence.BusinessLogicEnums.ProcessingReportType.BrandyDistilledAt170AndUnder,
+                                        StateID = 4
+                                    },
+                                    new ProcessReportingPart4
+                                    {
+                                        Brandy170Under = 23.78f,
+                                        ProcessingSpirits = "bottled",
+                                        ProcessingTypeID = (int)Persistence.BusinessLogicEnums.ProcessingReportType.BrandyDistilledAt170AndUnder,
+                                        StateID = 5
+                                    },
+                                    new ProcessReportingPart4
+                                    {
+                                        Brandy170Under = 23.78f,
+                                        ProcessingSpirits = "bottled",
+                                        ProcessingTypeID = (int)Persistence.BusinessLogicEnums.ProcessingReportType.BrandyDistilledAt170AndUnder,
+                                        StateID = 5
+                                    }
+                                });
+            }
+            catch(Exception e) {}
+            finally
+            {
+                // Cleanup
+                foreach (var i in tablesForCleanupTupleList)
+                {
+                    TestRecordCleanup(i.Item1, i.Item2);
+                }
+            }
         }
 
         /// <summary>
