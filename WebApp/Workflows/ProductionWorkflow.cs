@@ -2140,6 +2140,7 @@ namespace WebApp.Workflows
                          where record.ProductionId == production.ProductionID &&
                          distillers.UserId == userId
                          select rec).FirstOrDefault();
+
                     if (prfRec != null && prfRec.Value != record.ProofGallon)
                     {
                         prfRec.Value = record.ProofGallon;

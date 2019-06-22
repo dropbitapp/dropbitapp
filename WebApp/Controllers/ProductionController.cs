@@ -5,7 +5,6 @@ using WebApp.Models;
 using WebApp.Helpers;
 using Microsoft.AspNet.Identity;
 using WebApp.Workflows;
-using Newtonsoft.Json;
 
 namespace WebApp.Controllers
 {

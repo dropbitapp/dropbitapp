@@ -61,6 +61,7 @@ const ProcessingReportView = () => import('../views/reporting/ProcessingReportVi
 
 // Inventory Views
 const Sell = () => import('../views/inventory/SellView.vue');
+
 Vue.use(Router);
 
 export default new Router({

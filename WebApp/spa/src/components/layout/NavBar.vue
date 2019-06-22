@@ -42,7 +42,7 @@
                     <!-- eslint-disable-next-line max-len -->
                     <router-link class="navbar-item"
                         to="/reporting/processing">Processing Report</router-link>
-                        <!-- INVENTORY NAME DROPDOWN -->
+                    <!-- INVENTORY NAME DROPDOWN -->
                     <div class="navbar-item has-dropdown is-hoverable">
                         <a class="navbar-link is-arrowless">
                             Inventory
