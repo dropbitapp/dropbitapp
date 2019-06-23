@@ -19,7 +19,7 @@ namespace WebApp.Controllers
         private readonly ProcessingReport _processingR;
         private readonly StorageReport _storageR;
         private readonly ReportRepository _reportRepository;
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
 
         private bool _enableNewReportingImplementation = false;
 
