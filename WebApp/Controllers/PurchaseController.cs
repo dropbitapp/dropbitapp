@@ -3,6 +3,9 @@ using WebApp.Models;
 using WebApp.Helpers;
 using Microsoft.AspNet.Identity;
 using WebApp.Workflows;
+using NLog;
+using System;
+using System.Web.Script.Serialization;
 
 namespace WebApp.Controllers
 {
@@ -11,6 +14,7 @@ namespace WebApp.Controllers
         private readonly DistilDBContext _db;
         private readonly DataLayer _dl;
         private readonly PurchaseWorkflow _purchase;
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
 
         public PurchaseController()
         {
@@ -48,6 +52,14 @@ namespace WebApp.Controllers
                     int userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
+                        try
+                        {
+                            _logger.Info("{0} {1}\n\tPurchase Date: {2}\n\tCreatePurchase: {3}", User.Identity.Name, Request.Url.ToString(), purchaseObject.PurchaseDate, new JavaScriptSerializer().Serialize(purchaseObject));
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error(ex, "Logging error");
+                        }
                         var returnResult = _purchase.CreatePurchase(purchaseObject, userId);
                         if (returnResult > 0)
                         {

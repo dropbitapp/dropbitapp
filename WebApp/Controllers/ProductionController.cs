@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Web.Mvc;
+using NLog;
+using System;
+using System.Web.Script.Serialization;
 using WebApp.Models;
 using WebApp.Helpers;
 using Microsoft.AspNet.Identity;
@@ -13,6 +15,7 @@ namespace WebApp.Controllers
         private readonly DistilDBContext _db;
         private readonly DataLayer _dl;
         private readonly ProductionWorkflow _production;
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
 
         public ProductionController()
         {
@@ -41,7 +44,17 @@ namespace WebApp.Controllers
                     var userId = User.Identity.GetUserId<int>();
                     if (userId > 0)
                     {
+                        try
+                        {
+                            _logger.Info("{0} {1}\n\tProduction Start Date: {2}\n\tProduction End Date: {3}\n\tProduction Date: {4}\n\tCreateProduction: {5}", User.Identity.Name, Request.Url.ToString(), prodObject.ProductionStart, prodObject.ProductionEnd, prodObject.ProductionDate, new JavaScriptSerializer().Serialize(prodObject));
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error(ex, "Logging error");
+                        }
+
                         int returnResult = _production.CreateProduction(prodObject, userId);
+
                         if (returnResult > 0)
                         {
                             string message = "Production record created successfully.";
