@@ -84,12 +84,14 @@
 
                     // update edited row.
                     var editRow = parseInt($("#EditDialog").attr('data-row'));
-                    var utcDate = genericWorkflowHelper.convertUTC($("#EditDialogPurchaseDateInput").jqxDateTimeInput('val'), true);
+
+                    // var utcDate = genericWorkflowHelper.convertUTC($("#EditDialogPurchaseDateInput").jqxDateTimeInput('val'), true);
+
                     var rowData = {
                         PurchaseType: "Fermented",
                         PurchaseId: purId,
                         PurBatchName: $('#EditDialogPurBatchNameInput').jqxInput('val'),
-                        PurchaseDate: utcDate,
+                        PurchaseDate: $("#EditDialogPurchaseDateInput").jqxDateTimeInput('val'),
                         Quantity: $("#EditDialogQuantityInput").jqxNumberInput('val'),
                         AlcoholContent: "",
                         VolumeByWeight: "",
@@ -314,14 +316,14 @@
                     }
                 }
 
-                var utcDate = genericWorkflowHelper.convertUTC($("#PurchaseDateInput").jqxDateTimeInput('val'), true);
+                // var utcDate = genericWorkflowHelper.convertUTC($("#PurchaseDateInput").jqxDateTimeInput('val'), true);
                 var purchaseObject = {
                     PurchaseType: "Supply",
                     PurchaseId: "",
                     PurBatchName: 'PUR-'+ $("#PurBatchNameInput").jqxInput('val'),
                     RecordId: $("#MaterialTypeInput").jqxListBox('getSelectedItem').originalItem.RawMaterialId,
                     RecordName: $("#MaterialTypeInput").jqxListBox('getSelectedItem').label,
-                    PurchaseDate: utcDate,
+                    PurchaseDate: $("#PurchaseDateInput").jqxDateTimeInput('val'),
                     Quantity: $("#QuantityInput").jqxNumberInput('val'),
                     AlcoholContent: "",
                     VolumeByWeight: "",

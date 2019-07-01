@@ -1029,12 +1029,12 @@
     <Content Include="Scripts\Helpers\dateModificationHelper.js" />
     <Content Include="Scripts\Helpers\distillcompute.js" />
     <Content Include="Scripts\Helpers\genericWorkflowHelpers.js" />
+    <None Include="Properties\PublishProfiles\loggingsite - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\loggingsite - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\merakiprod - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\merakiprod - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\merakistage - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\merakistage - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\stageLoggingValidation - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\stageLoggingValidation - Web Deploy.pubxml" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
