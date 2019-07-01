@@ -451,16 +451,16 @@
                         storageList = [];
                     }
 
-                    // var prodStartUtc = genericWorkflowHelper.convertUTC($("#EditDialogProductionStartDate").jqxDateTimeInput('val'), true);
-                    // var prodEndUtc = genericWorkflowHelper.convertUTC($("#EditDialogProductionEndDate").jqxDateTimeInput('val'), true);
+                    var prodStartUtc = genericWorkflowHelper.convertUTC($("#EditDialogProductionStartDate").jqxDateTimeInput('val'), true);
+                    var prodEndUtc = genericWorkflowHelper.convertUTC($("#EditDialogProductionEndDate").jqxDateTimeInput('val'), true);
 
                     var rowData = {
                         ProductionType: "Blending",
                         ProductionId: prodId,
                         BatchName: $( '#EditDialogPurBatchNameInput' ).jqxInput( 'val' ),
-                        ProductionDate: $("#EditDialogProductionEndDate").jqxDateTimeInput('val'),
-                        ProductionStart: $("#EditDialogProductionStartDate").jqxDateTimeInput('val'),
-                        ProductionEnd: $("#EditDialogProductionEndDate").jqxDateTimeInput('val'),
+                        ProductionDate: prodEndUtc,
+                        ProductionStart: prodStartUtc,
+                        ProductionEnd: prodEndUtc,
                         Quantity: $("#EditDialogQuantityInput").jqxNumberInput('val'),
                         AlcoholContent: $("#EditDialogAlcConInput").jqxNumberInput('val'),
                         VolumeByWeight: $("#EditDialogVolumeByWeightInput").jqxNumberInput('val'),
@@ -1112,16 +1112,16 @@
 
                 var gainLoss = blendProof - usedMaterialProofSum;
 
-                // var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStartDate").jqxDateTimeInput('val'), true);
-                // var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProductionEndDate").jqxDateTimeInput('val'), true);
+                var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStartDate").jqxDateTimeInput('val'), true);
+                var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProductionEndDate").jqxDateTimeInput('val'), true);
 
                 var ProductionObject = {
                     BatchName: 'PROD-' + $('#BatchName').jqxInput('val'),
                     ProductionType: "Blending",
                     RecordIds: distilledIdsSelected,
-                    ProductionDate: $("#ProductionEndDate").jqxDateTimeInput('val'),
-                    ProductionStart: $("#ProductionStartDate").jqxDateTimeInput('val'),
-                    ProductionEnd: $("#ProductionEndDate").jqxDateTimeInput('val'),
+                    ProductionDate: prodEndUtc,
+                    ProductionStart: prodStartUtc,
+                    ProductionEnd: prodEndUtc,
                     GainLoss: gainLoss,
                     Quantity: $('#BlendingQuantity').jqxNumberInput('val'),
                     VolumeByWeight: $('#BlendingWeight').jqxNumberInput('val'),

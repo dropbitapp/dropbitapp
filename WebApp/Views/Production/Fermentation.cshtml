@@ -301,16 +301,16 @@
                         storageList = [];
                     }
 
-                    // var prodStartUtc = genericWorkflowHelper.convertUTC($('#EditDialogProductionStartDateInput').jqxDateTimeInput('val'), true);
-                    // var prodEndUtc = genericWorkflowHelper.convertUTC($('#EditDialogProductionEndDateInput').jqxDateTimeInput('val'), true);
+                    var prodStartUtc = genericWorkflowHelper.convertUTC($('#EditDialogProductionStartDateInput').jqxDateTimeInput('val'), true);
+                    var prodEndUtc = genericWorkflowHelper.convertUTC($('#EditDialogProductionEndDateInput').jqxDateTimeInput('val'), true);
 
                     var rowData = {
                         ProductionType: 'Fermentation',
                         ProductionId: prodId,
                         BatchName: $('#EditDialogPurBatchNameInput').jqxInput('val'),
-                        ProductionDate: $('#EditDialogProductionEndDateInput').jqxDateTimeInput('val'),
-                        ProductionStart: $('#EditDialogProductionStartDateInput').jqxDateTimeInput('val'),
-                        ProductionEnd: $('#EditDialogProductionEndDateInput').jqxDateTimeInput('val'),
+                        ProductionDate: prodEndUtc,
+                        ProductionStart: prodStartUtc,
+                        ProductionEnd: prodEndUtc,
                         Quantity: $('#EditDialogQuantityInput').jqxNumberInput('val'),
                         AlcoholContent: $('#EditDialogAlcConInput').jqxNumberInput('val'),
                         VolumeByWeight: $('#EditDialogVolumeByWeightInput').jqxNumberInput('val'),
@@ -576,15 +576,15 @@
                     spiritTypeReportingID = spiritType.value;
                 }
 
-                // var prodStartUtc = genericWorkflowHelper.convertUTC( $( '#ProdStartDate' ).jqxDateTimeInput( 'val' ), true );
-                // var prodEndUtc = genericWorkflowHelper.convertUTC($('#ProdEndDate').jqxDateTimeInput('val'), true);
+                var prodStartUtc = genericWorkflowHelper.convertUTC( $( '#ProdStartDate' ).jqxDateTimeInput( 'val' ), true );
+                var prodEndUtc = genericWorkflowHelper.convertUTC($('#ProdEndDate').jqxDateTimeInput('val'), true);
 
                 var productionObject = {
                 	ProductionType: 'Fermentation',
                     BatchName: 'PROD-' + $('#BatchName').jqxInput('val'),
-                    ProductionDate: $('#ProdEndDate').jqxDateTimeInput('val'),
-                    ProductionStart: $('#ProdStartDate').jqxDateTimeInput('val'),
-                    ProductionEnd: $('#ProdEndDate').jqxDateTimeInput('val'),
+                    ProductionDate: prodEndUtc,
+                    ProductionStart: prodStartUtc,
+                    ProductionEnd: prodEndUtc,
                     Quantity: $('#ProdQuantityInput').jqxNumberInput('val'),
                     AlcoholContent: $('#ProdAlcoholContentInput').jqxNumberInput('val'),
                     VolumeByWeight: $('#ProdVolumeByWeightInput').jqxNumberInput('val'),

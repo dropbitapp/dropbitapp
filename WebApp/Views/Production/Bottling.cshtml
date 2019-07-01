@@ -498,17 +498,17 @@
                     var editRow = parseInt($("#EditDialog").attr('data-row'));
                     //var items = $("#EditDialogStorageNameInput").jqxListBox('getSelectedItems');
 
-                    // var prodStartUtc = genericWorkflowHelper.convertUTC($("#EditDialogStartDate").jqxDateTimeInput('val'), true);
-                    // var prodEndUtc = genericWorkflowHelper.convertUTC($("#EditDialogEndDate").jqxDateTimeInput('val'), true);
-                    // var withDrawalDateUtc = genericWorkflowHelper.convertUTC( $( "#EditDialogTaxWithdrawalDate" ).jqxDateTimeInput( 'val' ), true );
+                    var prodStartUtc = genericWorkflowHelper.convertUTC($("#EditDialogStartDate").jqxDateTimeInput('val'), true);
+                    var prodEndUtc = genericWorkflowHelper.convertUTC($("#EditDialogEndDate").jqxDateTimeInput('val'), true);
+                    var withDrawalDateUtc = genericWorkflowHelper.convertUTC( $( "#EditDialogTaxWithdrawalDate" ).jqxDateTimeInput( 'val' ), true );
 
                     var rowData = {
                         ProductionType: "Bottling",
                         ProductionId: globals.prodId,
                         BatchName: $('#EditDialogBatchNameInput').jqxInput('val'),
-                        ProductionDate: $("#EditDialogEndDate").jqxDateTimeInput('val'),
-                        ProductionStart: $("#EditDialogStartDate").jqxDateTimeInput('val'),
-                        ProductionEnd: $("#EditDialogEndDate").jqxDateTimeInput('val'),
+                        ProductionDate: prodEndUtc,
+                        ProductionStart: prodStartUtc,
+                        ProductionEnd: prodEndUtc,
                         CaseCapacity: $("#EditDialogCaseCapacityInput").jqxNumberInput('val'),
                         CaseQuantity: $("#EditDialogCaseQuantityInput").jqxNumberInput('val'),
                         BottleQuantity: $("#EditDialogBottleQuantityInput").jqxNumberInput('val'),
@@ -517,7 +517,7 @@
                         AlcoholContent: $("#EditDialogAlcoholInput").jqxNumberInput('val'),
                         ProofGallon: $("#EditDialogProofInput").jqxNumberInput('val'),
                         TaxedProof: $( "#EditDialogTaxedProof" ).jqxNumberInput( 'val' ),
-                        WithdrawalDate: $("#EditDialogTaxWithdrawalDate").jqxDateTimeInput('val'),
+                        WithdrawalDate: withDrawalDateUtc,
                         Note: $('#EditDialogNotesInput').jqxTextArea('val')
                     };
                     $("#dataTable").jqxDataTable('updateRow', editRow, rowData);
@@ -832,8 +832,8 @@
                     BottleCapacity: $("#BottleCapacityInput").jqxNumberInput('val')
                 }
 
-                // var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStart").jqxDateTimeInput('val'), true);
-                // var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProductionEnd").jqxDateTimeInput('val'), true);
+                var prodStartUtc = genericWorkflowHelper.convertUTC($("#ProductionStart").jqxDateTimeInput('val'), true);
+                var prodEndUtc = genericWorkflowHelper.convertUTC($("#ProductionEnd").jqxDateTimeInput('val'), true);
 
                 var gainLoss = $( '#LossesInput' ).jqxNumberInput( 'val' ) * -1;
 
@@ -843,9 +843,9 @@
                     BatchName: 'PROD-' + $("#BatchNameInput").jqxInput('val'),
                     Quantity: $("#QuantityInput").jqxNumberInput('val'),
                     GainLoss: gainLoss,
-                    ProductionDate: $("#ProductionEnd").jqxDateTimeInput('val'),
-                    ProductionStart: $("#ProductionStart").jqxDateTimeInput('val'),
-                    ProductionEnd: $("#ProductionEnd").jqxDateTimeInput('val'),
+                    ProductionDate: prodEndUtc,
+                    ProductionStart: prodStartUtc,
+                    ProductionEnd: prodEndUtc,
                     AlcoholContent: $("#AlcoholInput").jqxNumberInput('val'),
                     ProofGallon: $("#ProofInput").jqxNumberInput('val'),
                     SpiritId: spiritId,

@@ -76,13 +76,13 @@
                         }
                     }
 
-                    // var utcDate = genericWorkflowHelper.convertUTC($("#EditDialogPurchaseDateInput").jqxDateTimeInput('val'), true);
+                    var utcDate = genericWorkflowHelper.convertUTC($("#EditDialogPurchaseDateInput").jqxDateTimeInput('val'), true);
 
                     var rowData = {
                         PurchaseType: "Fermented",
                         PurchaseId: purId,
                         PurBatchName: $('#EditDialogPurBatchNameInput').jqxInput('val'),
-                        PurchaseDate: $("#EditDialogPurchaseDateInput").jqxDateTimeInput('val'),
+                        PurchaseDate: utcDate,
                         Quantity: $("#EditDialogQuantityInput").jqxNumberInput('val'),
                         VolumeByWeight: $("#EditDialogVolumeByWeightInput").jqxNumberInput('val'),
                         Price: $("#EditDialogPriceInput").jqxNumberInput('val'),
@@ -277,7 +277,7 @@
                     }
                 }
 
-                // var utcDate = genericWorkflowHelper.convertUTC($("#PurchaseDateInput").jqxDateTimeInput('val'), true);
+                var utcDate = genericWorkflowHelper.convertUTC($("#PurchaseDateInput").jqxDateTimeInput('val'), true);
 
                 var purchaseObject =
                 {
@@ -285,7 +285,7 @@
                     PurBatchName: 'PUR-' + $("#PurBatch").jqxInput('val'),
                     RecordId: $("#MaterialTypeInput").jqxListBox('getSelectedItem').originalItem.RawMaterialId,
                     RecordName: $("#MaterialTypeInput").jqxListBox('getSelectedItem').label,
-                    PurchaseDate: $("#PurchaseDateInput").jqxDateTimeInput('val'),
+                    PurchaseDate: utcDate,
                     Quantity: $("#QuantityInput").jqxNumberInput('val'),
                     VolumeByWeight: $("#VolumeByWeightInput").jqxNumberInput('val'),
                     Price: $("#PriceInput").jqxNumberInput('val'),

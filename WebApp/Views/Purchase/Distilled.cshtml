@@ -127,7 +127,7 @@
 
                     // update edited row.
                     var editRow = parseInt($("#EditDialog").attr('data-row'));
-                    // var utcDate = genericWorkflowHelper.convertUTC($("#EditDialogPurDate").jqxDateTimeInput('val'), true);
+                    var utcDate = genericWorkflowHelper.convertUTC($("#EditDialogPurDate").jqxDateTimeInput('val'), true);
                     var rowData = {
                         PurchaseType: "Distilled",
                         PurchaseId: purId,
@@ -137,6 +137,8 @@
                         AlcoholContent: $("#EditDialogAlc").jqxNumberInput('val'),
                         VolumeByWeight: $("#EditDialogVBW").jqxNumberInput('val'),
                         ProofGallon: $("#EditDialogProof").jqxNumberInput('val'),
+                        //UnitOfMeasurementId: "",
+                        //UnitOfMeasurementName: "",
                         Price: $("#EditDialogPrice").jqxNumberInput('val'),
                         VendorId: $("#EditDialogVendor").jqxDropDownList('getSelectedItem').originalItem.VendorId,
                         VendorName: $("#EditDialogVendor").jqxDropDownList('getSelectedItem').label,
@@ -466,7 +468,7 @@
                 var spiritTypeReportingID = $('#ReportingSpiritTypeDropDown').jqxDropDownList('getSelectedItem').originalItem.SpiritTypeReportingID != undefined ?
                     $('#ReportingSpiritTypeDropDown').jqxDropDownList('getSelectedItem').originalItem.SpiritTypeReportingID : null;
 
-                // var utcDate = genericWorkflowHelper.convertUTC($("#PurchaseDateInput").jqxDateTimeInput('val'), true);
+                var utcDate = genericWorkflowHelper.convertUTC($("#PurchaseDateInput").jqxDateTimeInput('val'), true);
 
                 var purchaseObject = {
                     PurchaseType: "Distilled",
@@ -474,7 +476,7 @@
                     PurBatchName: 'PUR-' + $("#PurBatch").jqxInput('val'),
                     RecordId: $("#MaterialTypeInput").jqxListBox('getSelectedItem').originalItem.RawMaterialId,
                     RecordName: $("#MaterialTypeInput").jqxListBox('getSelectedItem').label,
-                    PurchaseDate: $("#PurchaseDateInput").jqxDateTimeInput('val'),
+                    PurchaseDate: utcDate,
                     Quantity: $("#QuantityInput").jqxNumberInput('val'),
                     AlcoholContent: $("#AlcoholContentInput").jqxNumberInput('val'),
                     VolumeByWeight: $("#VolumeByWeightInput").jqxNumberInput('val'),
