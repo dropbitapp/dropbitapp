@@ -45,7 +45,9 @@ namespace WebApp.Models
         public int ProductionID { get; set; }
         public float Value { get; set; }
         public DateTime DateOfSale { get; set; } // date when the sale of the spirit has happened
+        public DateTimeOffset DateOfSaleOffset { get; set; } // date when the sale of the spirit has happened
         public DateTime DateRecorded { get; set; } // date when tax witdrawal was entered in the system
+        public DateTimeOffset DateRecordedOffset { get; set; } // date when tax witdrawal was entered in the system
         public virtual Production Production { get; set; }
     }
 
@@ -253,9 +255,15 @@ namespace WebApp.Models
         [Column(TypeName = "datetime2")]
         [Required]
         public DateTime StartTime { get; set; } // Destruction start time
+        [Column(TypeName = "datetimeoffset")]
+        [Required]
+        public DateTimeOffset StartTimeOffset { get; set; } // Destruction start time
         [Column(TypeName = "datetime2")]
         [Required]
         public DateTime EndTime { get; set; } // Destruction end time
+        [Column(TypeName = "datetimeoffset")]
+        [Required]
+        public DateTimeOffset EndTimeOffset { get; set; } // Destruction end time
         [Required]
         public string DestructionMethod { get; set; } // Manner of the destruction
         [Required]
@@ -288,6 +296,7 @@ namespace WebApp.Models
         public string State { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
+        public DateTime TimeZoneOffset { get; set; } // Represents hour and minute offset in relationship to UTC
         [MaxLength(1024)]
         public string Note { get; set; }
 
@@ -310,6 +319,9 @@ namespace WebApp.Models
         [Column(TypeName = "datetime2")]
         [Required]
         public DateTime PurchaseDate { get; set; }
+        [Column(TypeName = "datetimeoffset")]
+        [Required]
+        public DateTimeOffset PurchaseDateOffset { get; set; }
         [MaxLength(1024)]
         public string Note { get; set; }
         [Required, ForeignKey("State")]
@@ -358,6 +370,8 @@ namespace WebApp.Models
         public string F2HValue { get; set; } // here, we are casting everything to a string, even though it is of different types.
         [Required]
         public DateTime UpdateDate { get; set; }
+        [Required]
+        public DateTimeOffset UpdateDateOffset { get; set; }
         [Timestamp]
         public byte[] RowVersion { get; set; }
     }
@@ -379,6 +393,8 @@ namespace WebApp.Models
         public float Proof { get; set; }
         [Column(TypeName = "datetime2")]
         public DateTime PurchaseDate { get; set; }
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset PurchaseDateOffset { get; set; }
         [MaxLength(1024)]
         public string Note { get; set; }
         public string State { get; set; }
@@ -387,6 +403,8 @@ namespace WebApp.Models
         public int UserID { get; set; } // user that made the change
         [Column(TypeName = "datetime2")]
         public DateTime UpdateDate { get; set; } // stored in UTC
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset UpdateDateOffset { get; set; } // stored in UTC
         public string Storage { get; set; }
         public string RecordName { get; set; } // name of raw material used in this purchase
         public int SpiritTypeReportingID { get; set; }
@@ -405,6 +423,8 @@ namespace WebApp.Models
         public string F2HValue { get; set; } // here, we are casting everything to a string, even though it is of different types.
         [Required]
         public DateTime UpdateDate { get; set; }
+        [Required]
+        public DateTimeOffset UpdateDateOffset { get; set; }
         [Timestamp]
         public byte[] RowVersion { get; set; }
     }
@@ -419,11 +439,17 @@ namespace WebApp.Models
         public int ProductionID { get; set; }
         [Column(TypeName = "datetime2")]
         public DateTime UpdateDate { get; set; } // stored in UTC time
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset UpdateDateOffset { get; set; } // stored in UTC time
         public string ProductionName { get; set; } // production batch name
         [Column(TypeName = "datetime2")]
         public DateTime ProductionStartTime { get; set; }
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset ProductionStartTimeOffset { get; set; }
         [Column(TypeName = "datetime2")]
         public DateTime ProductionEndTime { get; set; }
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset ProductionEndTimeOffset { get; set; }
         public float Volume { get; set; }
         public float Weight { get; set; }
         public float Alcohol { get; set; }
@@ -444,7 +470,9 @@ namespace WebApp.Models
         public int MaterialKindReportingID { get; set; }
         public float TaxedProof { get; set; } // Proof value indicated as taxable. For now, it is used to enable reporting processing. In  other words, how much alcohol has been sold.
         [Column(TypeName = "datetime2")]
-        public System.DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened for Taxed Proof.
+        public DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened for Taxed Proof.
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset WithdrawalDateOffset { get; set; } // This is meant to track when the sale has happened for Taxed Proof.
     }
 
     /// <summary>
@@ -572,6 +600,7 @@ namespace WebApp.Models
         public bool Type { get; set; } // true - gain, false - loss
         public float Quantity { get; set; }
         public DateTime DateRecorded { get; set; }
+        public DateTimeOffset DateRecordedOffset { get; set; }
         public int ProductionId { get; set; } // Blending or bottling production during which a gain or a loss has been observed (production proof - used material sum proof)
     }
 
@@ -697,10 +726,16 @@ namespace WebApp.Models
         public string ProductionName { get; set; } // production batch name
         [Column(TypeName = "datetime2")]
         public DateTime ProductionDate { get; set; }
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset ProductionDateOffset { get; set; }
         [Column(TypeName = "datetime2")]
         public DateTime ProductionStartTime { get; set; } // Ilias requested it. This will help him to understand how much time he spends on distilling {heads, hearts, tails}
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset ProductionStartTimeOffset { get; set; } // Ilias requested it. This will help him to understand how much time he spends on distilling {heads, hearts, tails}
         [Column(TypeName = "datetime2")]
         public DateTime ProductionEndTime { get; set; } // Ilias requested it. This will help him to understand how much time he spends on distilling {heads, hearts, tails}
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset ProductionEndTimeOffset { get; set; } // Ilias requested it. This will help him to understand how much time he spends on distilling {heads, hearts, tails}
         public int VolumeID { get; set; }
         public int WeightID { get; set; }
         public int AlcoholID { get; set; }
@@ -777,6 +812,8 @@ namespace WebApp.Models
         public string FieldValue { get; set; } // stringified value from BottlingInfo table
         [Column(TypeName = "datetime2")]
         public DateTime UpdateDate { get; set; }
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset UpdateDateOffset { get; set; }
         [Timestamp]
         public byte[] RowVersion { get; set; }
     }
@@ -807,6 +844,8 @@ namespace WebApp.Models
         public string FieldValue { get; set; } // stringified value from BottlingInfo table
         [Column(TypeName = "datetime2")]
         public DateTime UpdateDate { get; set; }
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset UpdateDateOffset { get; set; }
         [Timestamp]
         public byte[] RowVersion { get; set; }
     }
@@ -834,6 +873,8 @@ namespace WebApp.Models
         public float AlcoholContent { get; set; }
         [Column(TypeName = "datetime2")]
         public DateTime FillTestDate { get; set; }
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset FillTestDateOffset { get; set; }
         public float FillVariation { get; set; }
         public string CorrectiveAction { get; set; }
 
@@ -866,6 +907,8 @@ namespace WebApp.Models
         public float Value { get; set; }
         [Column(TypeName = "datetime2")]
         public DateTime Date { get; set; }
+        [Column(TypeName = "datetimeoffset")]
+        public DateTimeOffset DateOffset { get; set; }
         public int DistillerID { get; set; }
         public string Custom { get; set; }
     }
