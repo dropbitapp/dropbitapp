@@ -196,7 +196,7 @@ namespace WebApp.Migrations
                     Type = c.Boolean(nullable: false),
                     Quantity = c.Single(nullable: false),
                     DateRecorded = c.DateTime(nullable: false),
-                    ProductionId = c.Int(nullable: false),
+                    BottledRecordId = c.Int(nullable: false),
                 })
                 .PrimaryKey(t => t.GainLossID);
 
