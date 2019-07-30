@@ -13,7 +13,7 @@ namespace WebApp.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201907170533051_ConvertingDateToDateTimeOffset"; }
+            get { return "201907251507273_ConvertingDateToDateTimeOffset"; }
         }
         
         string IMigrationMetadata.Source

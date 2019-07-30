@@ -14,7 +14,7 @@ namespace WebApp.Migrations
             AddColumn("dbo.BottlingInfoHist", "UpdateDateOffset", c => c.DateTimeOffset(nullable: false, precision: 7));
             AddColumn("dbo.Destruction", "StartTimeOffset", c => c.DateTimeOffset(nullable: false, precision: 7));
             AddColumn("dbo.Destruction", "EndTimeOffset", c => c.DateTimeOffset(nullable: false, precision: 7));
-            AddColumn("dbo.DistillerDetail", "TimeZoneOffset", c => c.Int(nullable: false));
+            AddColumn("dbo.DistillerDetail", "TimeZoneOffset", c => c.Single(nullable: false));
             AddColumn("dbo.FillTest", "FillTestDateOffset", c => c.DateTimeOffset(nullable: false, precision: 7));
             AddColumn("dbo.GainLoss", "DateRecordedOffset", c => c.DateTimeOffset(nullable: false, precision: 7));
             AddColumn("dbo.PersistentReport", "DateOffset", c => c.DateTimeOffset(nullable: false, precision: 7));

@@ -296,7 +296,7 @@ namespace WebApp.Models
         public string State { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
-        public DateTime TimeZoneOffset { get; set; } // Represents hour and minute offset in relationship to UTC
+        public float TimeZoneOffset { get; set; } // Represents hour (integer part) and minute (fractional part) offset in relationship to UTC. For example -5.5 represents -5 hours 30 minute offset.
         [MaxLength(1024)]
         public string Note { get; set; }
 
