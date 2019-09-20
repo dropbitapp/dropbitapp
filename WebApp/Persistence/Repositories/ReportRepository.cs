@@ -26,7 +26,7 @@ namespace WebApp.Persistence.Repositories
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public ReportData GetReportData(DateTime endOfReporting, int userId, PersistReportType reportType)
+        public ReportData GetReportData(DateTimeOffset endOfReporting, int userId, PersistReportType reportType)
         {
             ReportData reportData = GetPersistentStorageReportData(endOfReporting, userId);
             return reportData;
@@ -107,9 +107,9 @@ namespace WebApp.Persistence.Repositories
                 throw new ArgumentOutOfRangeException("Reporting row ID and column ID must be greater than 0");
             }
             // converting to PST
-            DateTime purchDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(purchaseData.PurchaseDate, "Pacific Standard Time");
+            DateTimeOffset purchDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(purchaseData.PurchaseDate, "Pacific Standard Time");
             // adding 1 month to update OnHandFirstOfMonth for next month
-            DateTime nextMonth = purchDate.AddMonths(1);
+            DateTimeOffset nextMonth = purchDate.AddMonths(1);
             float proofGal = purchaseData.ProofGallon;
 
             if (purchaseData != null)
@@ -151,11 +151,13 @@ namespace WebApp.Persistence.Repositories
                         cellValue.Value = purchaseData.ProofGallon;
                         if (rowId == (int)PersistReportRow.OnHandFirstOfMonth)
                         {
-                            cellValue.Date = nextMonth;
+                            cellValue.DateOffset = nextMonth;
+                            cellValue.Date = nextMonth.Date;
                         }
                         else
                         {
-                            cellValue.Date = purchDate;
+                            cellValue.DateOffset = purchDate;
+                            cellValue.Date = purchDate.Date;
                         }
                         cellValue.DistillerID = _dl.GetDistillerId(userId);
 
@@ -188,7 +190,7 @@ namespace WebApp.Persistence.Repositories
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public ReportData GetPersistentStorageReportData(DateTime endDate, int userId)
+        public ReportData GetPersistentStorageReportData(DateTimeOffset endDate, int userId)
         {
 
             int identifierId = (int)PersistReportType.Storage;

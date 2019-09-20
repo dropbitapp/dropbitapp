@@ -58,7 +58,7 @@ namespace WebApp.Controllers
         /// <param name="endOfReporting"></param>
         /// <returns></returns>
         [HttpGet]
-        public JsonResult GetProductionReport(System.DateTime startOfReporting, System.DateTime endOfReporting)
+        public JsonResult GetProductionReport(System.DateTimeOffset startOfReporting, System.DateTimeOffset endOfReporting)
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -96,7 +96,7 @@ namespace WebApp.Controllers
         /// <param name="endOfReporting"></param>
         /// <returns></returns>
         [HttpGet]
-        public JsonResult GetProcessingReport(System.DateTime startOfReporting, System.DateTime endOfReporting)
+        public JsonResult GetProcessingReport(System.DateTimeOffset startOfReporting, System.DateTimeOffset endOfReporting)
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -134,7 +134,7 @@ namespace WebApp.Controllers
         /// <param name="endOfReporting"></param>
         /// <returns></returns>
         [HttpGet]
-        public JsonResult GetStorageReport(System.DateTime startOfReporting, System.DateTime endOfReporting)
+        public JsonResult GetStorageReport(System.DateTimeOffset startOfReporting, System.DateTimeOffset endOfReporting)
         {
             if (User.Identity.IsAuthenticated)
             {

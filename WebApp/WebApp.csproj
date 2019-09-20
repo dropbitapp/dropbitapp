@@ -212,6 +212,10 @@
     <Compile Include="Migrations\201808210648225_UpdatingGainLoss.Designer.cs">
       <DependentUpon>201808210648225_UpdatingGainLoss.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201907251507273_ConvertingDateToDateTimeOffset.cs" />
+    <Compile Include="Migrations\201907251507273_ConvertingDateToDateTimeOffset.Designer.cs">
+      <DependentUpon>201907251507273_ConvertingDateToDateTimeOffset.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Base_Spirit.cs" />
@@ -1158,6 +1162,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201808210648225_UpdatingGainLoss.resx">
       <DependentUpon>201808210648225_UpdatingGainLoss.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201907170533051_ConvertingDateToDateTimeOffset.resx">
+      <DependentUpon>201907170533051_ConvertingDateToDateTimeOffset.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

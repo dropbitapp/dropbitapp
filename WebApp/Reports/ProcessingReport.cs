@@ -24,7 +24,7 @@ namespace WebApp.Reports
         /// <param name="endOfReporting">end date</param>
         /// <param name="userId"> user id of person who queries it</param>
         /// <returns></returns>
-        public ProcessingReportingObject GetProcessingReportData(DateTime startOfReporting, DateTime endOfReporting, int userId)
+        public ProcessingReportingObject GetProcessingReportData(DateTimeOffset startOfReporting, DateTimeOffset endOfReporting, int userId)
         {
             ProcessingReportingObject procRepObj = new ProcessingReportingObject();
             ProcessReportingPart1 procRepP1 = new ProcessReportingPart1();
@@ -122,7 +122,7 @@ namespace WebApp.Reports
         /// <param name="endOfReporting"></param>
         /// <param name="procRepP2"></param>
         /// <param name="userId"></param>
-        private void LossesLine44(DateTime startOfReporting, DateTime endOfReporting, ref ProcessReportingPart2 procRepP2, int userId)
+        private void LossesLine44(DateTimeOffset startOfReporting, DateTimeOffset endOfReporting, ref ProcessReportingPart2 procRepP2, int userId)
         {
             var accumulatedLoss =
             (from prod in
@@ -138,8 +138,8 @@ namespace WebApp.Reports
              (
                  prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled
              )
-            && prod.ProductionEndTime >= startOfReporting
-            && prod.ProductionEndTime <= endOfReporting
+            && prod.ProductionEndTimeOffset >= startOfReporting
+            && prod.ProductionEndTimeOffset <= endOfReporting
              select new
              {
                  Quantity = (System.Single?)gl.Quantity ?? (System.Single?)0,
@@ -208,7 +208,7 @@ namespace WebApp.Reports
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <param name="procRepP1"></param>
-        private void GetGains(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
+        private void GetGains(DateTimeOffset startOfReporting, DateTimeOffset endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
         {
             var accumulatedGains =
             (from prod in
@@ -222,8 +222,8 @@ namespace WebApp.Reports
              prod.Gauged == true &&
              gl.Type == true &&
              prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
-             && prod.ProductionEndTime >= startOfReporting
-             && prod.ProductionEndTime <= endOfReporting
+             && prod.ProductionEndTimeOffset >= startOfReporting
+             && prod.ProductionEndTimeOffset <= endOfReporting
              select new
              {
                  Quantity = (System.Single?)gl.Quantity ?? (System.Single?)0,
@@ -254,7 +254,7 @@ namespace WebApp.Reports
         /// <param name="endOfReporting"></param>
         /// <param name="userId">userId is used to get DistillerID to get relevant report</param>
         /// <param name="procRepP4L"></param>
-        private void Part4ProcessingReport(DateTime startOfReporting, DateTime endOfReporting, int userId, ref List<ProcessReportingPart4> procRepP4L)
+        private void Part4ProcessingReport(DateTimeOffset startOfReporting, DateTimeOffset endOfReporting, int userId, ref List<ProcessReportingPart4> procRepP4L)
         {
             try
             {
@@ -283,8 +283,8 @@ namespace WebApp.Reports
                     prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing ||
                     prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) &&
                     (new int[] { (int)Persistence.BusinessLogicEnums.State.Blended, (int)Persistence.BusinessLogicEnums.State.Bottled }).Contains(prod.StateID) &&
-                    prod.ProductionEndTime >= startOfReporting &&
-                    prod.ProductionEndTime <= endOfReporting
+                    prod.ProductionEndTimeOffset >= startOfReporting &&
+                    prod.ProductionEndTimeOffset <= endOfReporting
                  select new
                  {
                      prod.StateID,
@@ -992,7 +992,7 @@ namespace WebApp.Reports
         /// <param name="startOfReporting"></param>
         /// <param name="endOfReporting"></param>
         /// <param name="procRepP2"></param>
-        private void WithdrawnTaxDetermined(DateTime startOfReporting, DateTime endOfReporting, ref ProcessReportingPart2 procRepP2, int userId)
+        private void WithdrawnTaxDetermined(DateTimeOffset startOfReporting, DateTimeOffset endOfReporting, ref ProcessReportingPart2 procRepP2, int userId)
         {
             var taxWithdrawn =
                 from tax in _db.TaxWithdrawn
@@ -1027,7 +1027,7 @@ namespace WebApp.Reports
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <param name="procRepP2"></param>
-        private void OnHandEndOfMonthPart2(DateTime endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
+        private void OnHandEndOfMonthPart2(DateTimeOffset endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
         {
             procRepP2.OnHandEndofMonth = procRepP2.TotalLine31 - (procRepP2.TaxWithdrawn + procRepP2.RecordedLosses); //as we continue on adding new cases for rows 32 through 45 we need to keep adding additional rows to the parentheses
             // round to 3 decimals
@@ -1044,7 +1044,7 @@ namespace WebApp.Reports
         /// <param name="endOfReporting"></param>
         /// <param name="userId">userId is used to get DistillerID so we can pull correct data</param>
         /// <param name="procRepP2"></param>
-        private void BottledOrPackagedpart2(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
+        private void BottledOrPackagedpart2(DateTimeOffset startOfReporting, DateTimeOffset endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
         {
             var bottledPackaged =
                 (from prod in
@@ -1061,8 +1061,8 @@ namespace WebApp.Reports
                    prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled &&
                    (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                    prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing) &&
-                   prod.ProductionEndTime >= startOfReporting &&
-                   prod.ProductionEndTime <= endOfReporting
+                   prod.ProductionEndTimeOffset >= startOfReporting &&
+                   prod.ProductionEndTimeOffset <= endOfReporting
                  select new
                  {
                      Value = (System.Single?)prod4Rep.Proof + (System.Single?)gl.Quantity ?? 0,
@@ -1088,7 +1088,7 @@ namespace WebApp.Reports
         /// <param name="startOfReporting"></param>
         /// <param name="userId"> userID is used to get DistillerID for which we are quering the reports</param>
         /// <param name="procRepP2"></param>
-        private void OnHandFirstOfMonthBottled(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
+        private void OnHandFirstOfMonthBottled(DateTimeOffset startOfReporting, DateTimeOffset endOfReporting, int userId, ref ProcessReportingPart2 procRepP2)
         {
             var p2OnHand2stMo =
                             (from prod in
@@ -1101,7 +1101,7 @@ namespace WebApp.Reports
                                    distillers.UserId == userId &&
                                    prod.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Bottling &&
                                    prod.Gauged == true &&
-                                   prod.ProductionEndTime < startOfReporting &&
+                                   prod.ProductionEndTimeOffset < startOfReporting &&
                                    (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                                    prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing ||
                                    prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled)
@@ -1135,7 +1135,7 @@ namespace WebApp.Reports
                                     distillers.UserId == userId &&
                                     prod.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Bottling &&
                                     prod.Gauged == true &&
-                                    prod.ProductionEndTime < startOfReporting &&
+                                    prod.ProductionEndTimeOffset < startOfReporting &&
                                     (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                                     prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing ||
                                     prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled)
@@ -1170,7 +1170,7 @@ namespace WebApp.Reports
                  where
                  taxes.DateOfSale > endOfReporting
                  && distillers.UserId == userId
-                 && prod.ProductionEndTime < startOfReporting // this is to not include taxed amounts in the first reporting period as they haven't happened yet
+                 && prod.ProductionEndTimeOffset < startOfReporting // this is to not include taxed amounts in the first reporting period as they haven't happened yet
                  select new
                  {
                      Value = (System.Single?)taxes.Value ?? (System.Single?)0,
@@ -1212,7 +1212,7 @@ namespace WebApp.Reports
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <param name="procRepP1"></param>
-        private void LossesLine24(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
+        private void LossesLine24(DateTimeOffset startOfReporting, DateTimeOffset endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
         {
             var accumulatedLoss =
             (from prod in
@@ -1228,8 +1228,8 @@ namespace WebApp.Reports
              (
                  prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
              )
-            && prod.ProductionEndTime >= startOfReporting
-            && prod.ProductionEndTime <= endOfReporting
+            && prod.ProductionEndTimeOffset >= startOfReporting
+            && prod.ProductionEndTimeOffset <= endOfReporting
             select new
             {
                 Quantity = (System.Single?)gl.Quantity ?? (System.Single?)0,
@@ -1258,7 +1258,7 @@ namespace WebApp.Reports
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <param name="procRepP1"></param>
-        private void BottledOrPackaged(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
+        private void BottledOrPackaged(DateTimeOffset startOfReporting, DateTimeOffset endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
         {
             var bottledPackaged =
                 (from prod in
@@ -1275,8 +1275,8 @@ namespace WebApp.Reports
                    prod.StateID == (int)Persistence.BusinessLogicEnums.State.Bottled &&
                    (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                    prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing) &&
-                   prod.ProductionEndTime >= startOfReporting &&
-                   prod.ProductionEndTime <= endOfReporting
+                   prod.ProductionEndTimeOffset >= startOfReporting &&
+                   prod.ProductionEndTimeOffset <= endOfReporting
                  select new
                  {
                      Value = (System.Single?)prod4Rep.Proof + (System.Single?)gl.Quantity ?? 0,
@@ -1303,7 +1303,7 @@ namespace WebApp.Reports
         /// <param name="endOfReporting"></param>
         /// <param name="userId"></param>
         /// <param name="procRepP1"></param>
-        private void Received(DateTime startOfReporting, DateTime endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
+        private void Received(DateTimeOffset startOfReporting, DateTimeOffset endOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
         {
             var recBulk =
             (from prod in
@@ -1316,8 +1316,8 @@ namespace WebApp.Reports
                    distillers.UserId == userId &&
                    prod.Gauged == true &&
                    prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended &&
-                   prod.ProductionEndTime >= startOfReporting &&
-                   prod.ProductionEndTime <= endOfReporting
+                   prod.ProductionEndTimeOffset >= startOfReporting &&
+                   prod.ProductionEndTimeOffset <= endOfReporting
                  select new
                  {
                      Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,
@@ -1345,7 +1345,7 @@ namespace WebApp.Reports
         /// <param name="startOfReporting"></param>
         /// <param name="userId"></param>
         /// <param name="procRepP1"></param>
-        private void OnHandFirstOfMonth(DateTime startOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
+        private void OnHandFirstOfMonth(DateTimeOffset startOfReporting, int userId, ref ProcessReportingPart1 procRepP1)
         {
             var onHands1stMoC =
                 (from prod in
@@ -1363,11 +1363,11 @@ namespace WebApp.Reports
                  where
                  distillers.UserId == userId &&
                  prod.Gauged == true &&
-                 prod.ProductionEndTime < startOfReporting &&
+                 prod.ProductionEndTimeOffset < startOfReporting &&
                  prod.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
                  && (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                  || prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
-                 || (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && outputProduction.ProductionEndTime > startOfReporting && productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedProofGal))
+                 || (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && outputProduction.ProductionEndTimeOffset > startOfReporting && productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedProofGal))
                  select new
                  {
                      Value = (System.Single?)prod4Rep.Proof ?? (System.Single?)0,

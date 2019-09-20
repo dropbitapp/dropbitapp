@@ -116,7 +116,7 @@ namespace WebApp.Helpers.Tests
         {
             // Arrange
             PurchaseFermentable(name: "GrapesPurchase",
-                date: new DateTime(2018, 6, 1),
+                date: new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
                 volume: 0f,
                 weight: 1000f,
                 alcoholContent: 0f,
@@ -127,7 +127,7 @@ namespace WebApp.Helpers.Tests
                 storageId: _storages["Storage"].StorageId);
 
             PurchaseFermented(name: "PomacePurchase",
-                date: new DateTime(2018, 6, 1),
+                date: new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
                 volume: 0f,
                 weight: 100f,
                 alcoholContent: 10f,
@@ -139,7 +139,7 @@ namespace WebApp.Helpers.Tests
                 storageId: _storages["Storage"].StorageId);
 
             PurchaseFermented(name: "WinePurchase",
-                date: new DateTime(2018, 6, 1),
+                date: new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
                 volume: 100f,
                 weight: 0f,
                 alcoholContent: 10f,
@@ -151,7 +151,7 @@ namespace WebApp.Helpers.Tests
                 storageId: _storages["Storage"].StorageId);
 
             PurchaseDistilled(name: "GnsPurchase",
-                date: new DateTime(2018, 6, 1),
+                date: new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
                 volume: 100f,
                 weight: 0f,
                 alcoholContent: 50f,
@@ -163,7 +163,7 @@ namespace WebApp.Helpers.Tests
                 storageId: _storages["Storage"].StorageId);
 
             PurchaseAdditive(name: "DistilledWaterPurchase",
-                date: new DateTime(2018, 6, 1),
+                date: new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
                 volume: 1000f,
                 weight: 0f,
                 alcoholContent: 0f,
@@ -174,7 +174,7 @@ namespace WebApp.Helpers.Tests
                 storageId: _storages["Storage"].StorageId);
 
             PurchaseSupply(name: "Stickers",
-                date: new DateTime(2018, 6, 1),
+                date: new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
                 volume: 100f,
                 materialDictId: _rawMaterials["Sticker"].RawMaterialId,
                 price: 15f,
@@ -182,13 +182,12 @@ namespace WebApp.Helpers.Tests
                 storageId: _storages["Storage"].StorageId);
 
             ProduceFerment(name: "Wine",
-                start: new DateTime(2018, 6, 2),
-                end: new DateTime(2018, 6, 3),
+                start: new DateTimeOffset(2018, 6, 2, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 6, 3, 0, 0, 0, TimeSpan.Zero),
                 volume: 100f,
                 weight: 0f,
                 alcoholContent: 10f,
                 proof: 20f,
-                vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Other,
                 gauged: true,
@@ -203,13 +202,12 @@ namespace WebApp.Helpers.Tests
                 });
 
             ProduceDistill(name: "Brandy",
-                start: new DateTime(2018, 6, 4),
-                end: new DateTime(2018, 6, 5),
+                start: new DateTimeOffset(2018, 6, 4, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 6, 5, 0, 0, 0, TimeSpan.Zero),
                 volume: 25f,
                 weight: 0f,
                 alcoholContent: 50f,
                 proof: 25f,
-                vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
                 spiritCut: "Heart",
@@ -225,13 +223,12 @@ namespace WebApp.Helpers.Tests
                 });
 
             ProduceBlend(name: "NotWateredDownBrandy",
-                start: new DateTime(2018, 6, 6),
-                end: new DateTime(2018, 6, 7),
+                start: new DateTimeOffset(2018, 6, 6, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 6, 7, 0, 0, 0, TimeSpan.Zero),
                 volume: 25f,
                 weight: 0f,
                 alcoholContent: 50f,
                 proof: 25f,
-                vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
                 spiritId: _spirits["BrandyUnder170"].SpiritId,
@@ -258,13 +255,12 @@ namespace WebApp.Helpers.Tests
                 });
 
             ProduceBottle(name: "BrandedBrandy",
-                start: new DateTime(2018, 6, 8),
-                end: new DateTime(2018, 6, 9),
+                start: new DateTimeOffset(2018, 6, 8, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 6, 9, 0, 0, 0, TimeSpan.Zero),
                 volume: 23.78f, // Use bottling UI workflow to calculate desired volume for given number of cases/bottles
                 weight: 0f,
                 alcoholContent: 50f,
                 proof: 23.78f, // Use bottling UI workflow to calculate desired proof for given number of cases/bottles
-                vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.BrandyUnder170,
                 spiritId: _spirits["BrandyUnder170"].SpiritId,
@@ -289,8 +285,8 @@ namespace WebApp.Helpers.Tests
 
             // Act
             var storageReport = GetStorageReport(2018, 6);
-            var productionReport = GetProductionReport(new DateTime(2018, 6, 1), new DateTime(2018, 6, 30));
-            var processingReport = GetProcessingReport(new DateTime(2018, 6, 1), new DateTime(2018, 6, 30));
+            var productionReport = GetProductionReport(new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2018, 6, 30, 0, 0, 0, TimeSpan.Zero));
+            var processingReport = GetProcessingReport(new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2018, 6, 30, 0, 0, 0, TimeSpan.Zero));
 
             // Assert
             AssertStorage(storageReport,
@@ -557,7 +553,7 @@ namespace WebApp.Helpers.Tests
 
         private void PurchaseFermentable(
             string name,
-            DateTime date,
+            DateTimeOffset date,
             float volume,
             float weight,
             float alcoholContent,
@@ -572,7 +568,7 @@ namespace WebApp.Helpers.Tests
 
         private void PurchaseFermented(
             string name,
-            DateTime date,
+            DateTimeOffset date,
             float volume,
             float weight,
             float alcoholContent,
@@ -588,7 +584,7 @@ namespace WebApp.Helpers.Tests
 
         private void PurchaseDistilled(
             string name,
-            DateTime date,
+            DateTimeOffset date,
             float volume,
             float weight,
             float alcoholContent,
@@ -604,7 +600,7 @@ namespace WebApp.Helpers.Tests
 
         private void PurchaseAdditive(
             string name,
-            DateTime date,
+            DateTimeOffset date,
             float volume,
             float weight,
             float alcoholContent,
@@ -619,7 +615,7 @@ namespace WebApp.Helpers.Tests
 
         private void PurchaseSupply(
             string name,
-            DateTime date,
+            DateTimeOffset date,
             float volume,
             int materialDictId,
             float price,
@@ -632,7 +628,7 @@ namespace WebApp.Helpers.Tests
         private void Purchase(
             string name,
             string type,
-            DateTime date,
+            DateTimeOffset date,
             int materialDictId,
             float price,
             int vendorId,
@@ -686,30 +682,28 @@ namespace WebApp.Helpers.Tests
 
         private void ProduceFerment(
             string name,
-            DateTime start,
-            DateTime end,
+            DateTimeOffset start,
+            DateTimeOffset end,
             float volume,
             float weight,
             float alcoholContent,
             float proof,
-            int vendorId,
             int storageId,
             int spiritTypeReportingId,
             bool gauged,
             List<ObjInfo4Burndwn> materialsUsed)
         {
-            Produce(name, "Fermentation", start, end, volume, weight, alcoholContent, proof, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed);
+            Produce(name, "Fermentation", start, end, volume, weight, alcoholContent, proof, storageId, spiritTypeReportingId, gauged, materialsUsed);
         }
 
         private void ProduceDistill(
             string name,
-            DateTime start,
-            DateTime end,
+            DateTimeOffset start,
+            DateTimeOffset end,
             float volume,
             float weight,
             float alcoholContent,
             float proof,
-            int vendorId,
             int storageId,
             int spiritTypeReportingId,
             string spiritCut,
@@ -717,18 +711,17 @@ namespace WebApp.Helpers.Tests
             List<ObjInfo4Burndwn> materialsUsed)
         {
             // Requires spiritType and materialKindReporting
-            Produce(name, "Distillation", start, end, volume, weight, alcoholContent, proof, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritCut: spiritCut);
+            Produce(name, "Distillation", start, end, volume, weight, alcoholContent, proof, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritCut: spiritCut);
         }
 
         private void ProduceBlend(
             string name,
-            DateTime start,
-            DateTime end,
+            DateTimeOffset start,
+            DateTimeOffset end,
             float volume,
             float weight,
             float alcoholContent,
             float proof,
-            int vendorId,
             int storageId,
             int spiritTypeReportingId,
             int spiritId,
@@ -737,27 +730,27 @@ namespace WebApp.Helpers.Tests
             List<ObjInfo4Burndwn> materialsUsed,
             List<BlendingAdditive> blendingAdditives)
         {
-            Produce(name, "Blending", start, end, volume, weight, alcoholContent, proof, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritId: spiritId, gainLoss: gainLoss, blendingAdditives: blendingAdditives);
+            Produce(name, "Blending", start, end, volume, weight, alcoholContent, proof, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritId: spiritId, gainLoss: gainLoss, blendingAdditives: blendingAdditives);
         }
 
         private void ProduceBottle(
             string name,
-            DateTime start,
-            DateTime end,
+            DateTimeOffset start,
+            DateTimeOffset end,
             float volume,
             float weight,
             float alcoholContent,
             float proof,
-            int vendorId,
             int storageId,
             int spiritTypeReportingId,
             int spiritId,
             float gainLoss,
             bool gauged,
             List<ObjInfo4Burndwn> materialsUsed,
-            BottlingObject bottlingInfo = null)
+            BottlingObject bottlingInfo = null,
+            List<FillTestObject> fillTestList = null)
         {
-            Produce(name, "Bottling", start, end, volume, weight, alcoholContent, proof, vendorId, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritId: spiritId, gainLoss: gainLoss, bottlingInfo: bottlingInfo);
+            Produce(name, "Bottling", start, end, volume, weight, alcoholContent, proof, storageId, spiritTypeReportingId, gauged, materialsUsed, spiritId: spiritId, gainLoss: gainLoss, bottlingInfo: bottlingInfo, filltestList: fillTestList);
         }
 
         private int GetSpiritCutId(string spiritCut)
@@ -770,13 +763,12 @@ namespace WebApp.Helpers.Tests
         private void Produce(
             string name,
             string type,
-            DateTime start,
-            DateTime end,
+            DateTimeOffset start,
+            DateTimeOffset end,
             float volume,
             float weight,
             float alcoholContent,
             float proof,
-            int vendorId,
             int storageId,
             int spiritTypeReportingId,
             bool gauged,
@@ -785,7 +777,8 @@ namespace WebApp.Helpers.Tests
             float gainLoss = 0f,
             int spiritId = 0,
             List<BlendingAdditive> blendingAdditives = null,
-            BottlingObject bottlingInfo = null)
+            BottlingObject bottlingInfo = null,
+            List<FillTestObject>filltestList = null)
         {
             int spiritCutId = 0;
 
@@ -811,6 +804,7 @@ namespace WebApp.Helpers.Tests
                 VolumeByWeight = weight,
                 AlcoholContent = alcoholContent,
                 ProofGallon = proof,
+                FillTestList = filltestList,
                 Storage = new List<StorageObject>
                 {
                     new StorageObject
@@ -851,23 +845,23 @@ namespace WebApp.Helpers.Tests
                 _userId);
         }
 
-        private DateTime GetReportStart(int year, int month)
+        private DateTimeOffset GetReportStart(int year, int month)
         {
-            return new DateTime(year, month, 1);
+            return new DateTimeOffset(year, month, 1, 0, 0, 0, TimeSpan.Zero);
         }
 
-        private DateTime GetReportEnd(int year, int month)
+        private DateTimeOffset GetReportEnd(int year, int month)
         {
             int lastDayOfMonth = DateTime.DaysInMonth(year, month);
-            return new DateTime(year, month, lastDayOfMonth);
+            return new DateTimeOffset(year, month, lastDayOfMonth, 0, 0, 0, TimeSpan.Zero);
         }
 
-        private ProductionReportingObject GetProductionReport(DateTime start, DateTime end)
+        private ProductionReportingObject GetProductionReport(DateTimeOffset start, DateTimeOffset end)
         {
             return _productionReport.GetProductionReportData(start, end, _userId);
         }
 
-        private ProcessingReportingObject GetProcessingReport(DateTime start, DateTime end)
+        private ProcessingReportingObject GetProcessingReport(DateTimeOffset start, DateTimeOffset end)
         {
             return _processingReport.GetProcessingReportData(start, end, _userId);
         }
@@ -1208,7 +1202,7 @@ namespace WebApp.Helpers.Tests
         {
             // Arrange
             PurchaseFermentable(name: "GrapesByVolume",
-                    date: new DateTime(2018, 6, 1),
+                    date: new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
                     volume: 1000f,
                     weight: 0f,
                     alcoholContent: 0f,
@@ -1219,7 +1213,7 @@ namespace WebApp.Helpers.Tests
                     storageId: _storages["Storage"].StorageId);
 
             PurchaseFermentable(name: "GrapesByWeight",
-                    date: new DateTime(2018, 6, 1),
+                    date: new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
                     volume: 0f,
                     weight: 1000f,
                     alcoholContent: 0f,
@@ -1230,13 +1224,12 @@ namespace WebApp.Helpers.Tests
                     storageId: _storages["Storage"].StorageId);
 
             ProduceFerment(name: "WineByVolume",
-                start: new DateTime(2018, 6, 2),
-                end: new DateTime(2018, 6, 3),
+                start: new DateTimeOffset(2018, 6, 2, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 6, 3, 0, 0, 0, TimeSpan.Zero),
                 volume: 100f,
                 weight: 0f,
                 alcoholContent: 10f,
                 proof: 20f,
-                vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Other,
                 gauged: true,
@@ -1251,13 +1244,12 @@ namespace WebApp.Helpers.Tests
                 });
 
             ProduceFerment(name: "WineByWeight",
-                start: new DateTime(2018, 6, 2),
-                end: new DateTime(2018, 6, 3),
+                start: new DateTimeOffset(2018, 6, 2, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 6, 3, 0, 0, 0, TimeSpan.Zero),
                 volume: 100f,
                 weight: 0f,
                 alcoholContent: 10f,
                 proof: 20f,
-                vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Other,
                 gauged: true,
@@ -1279,7 +1271,7 @@ namespace WebApp.Helpers.Tests
 
             // Assert Exception is thrown when there's an attempt to create recrds with both weight and volume. 
             PurchaseFermentable(name: "GrapesByVolumeWeight",
-                date: new DateTime(2018, 6, 1),
+                date: new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
                 volume: 1000f,
                 weight: 1000f,
                 alcoholContent: 0f,
@@ -1290,13 +1282,12 @@ namespace WebApp.Helpers.Tests
                 storageId: _storages["Storage"].StorageId);
 
             ProduceFerment(name: "WineByVolumeWeight",
-                start: new DateTime(2018, 6, 2),
-                end: new DateTime(2018, 6, 3),
+                start: new DateTimeOffset(2018, 6, 2, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 6, 3, 0, 0, 0, TimeSpan.Zero),
                 volume: 100f,
                 weight: 100f,
                 alcoholContent: 10f,
                 proof: 20f,
-                vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Other,
                 gauged: true,
@@ -1384,7 +1375,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Grapes";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2016, 11, 2);
+                purchO.PurchaseDate = new DateTimeOffset(2016, 11, 2, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0;
                 purchO.VolumeByWeight = 4753f;
                 purchO.RecordId = grapeMaterialId;
@@ -1405,9 +1396,9 @@ namespace WebApp.Helpers.Tests
                 // Fermentation
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Fermentation";
-                prodO.ProductionDate = new DateTime(2016, 11, 5);
-                prodO.ProductionStart = new DateTime(2016, 11, 5);
-                prodO.ProductionEnd = new DateTime(2016, 11, 5);
+                prodO.ProductionDate = new DateTimeOffset(2016, 11, 5, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2016, 11, 5, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2016, 11, 5, 0, 0, 0, TimeSpan.Zero);
                 prodO.ProductionType = "Fermentation";
                 prodO.Gauged = true;
                 prodO.Quantity = 640f;
@@ -1436,9 +1427,9 @@ namespace WebApp.Helpers.Tests
                 // Distillation
                 ProductionObject prodO2 = new ProductionObject();
                 prodO2.BatchName = "Distillation";
-                prodO2.ProductionDate = new DateTime(2016, 11, 6);
-                prodO2.ProductionStart = new DateTime(2016, 11, 6);
-                prodO2.ProductionEnd = new DateTime(2016, 11, 29);
+                prodO2.ProductionDate = new DateTimeOffset(2016, 11, 6, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionStart = new DateTimeOffset(2016, 11, 6, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionEnd = new DateTimeOffset(2016, 11, 29, 0, 0, 0, TimeSpan.Zero);
                 prodO2.SpiritCutId = 11; // mixed
                 prodO2.Gauged = true;
                 prodO2.ProductionType = "Distillation";
@@ -1473,12 +1464,12 @@ namespace WebApp.Helpers.Tests
                 int novDays = DateTime.DaysInMonth(2016, 11);
                 int decDays = DateTime.DaysInMonth(2016, 12);
 
-                DateTime octStart = new DateTime(2016, 10, 1);
-                DateTime octEnd = new DateTime(2016, 10, octDays);
-                DateTime novStart = new DateTime(2016, 11, 1);
-                DateTime novEnd = new DateTime(2016, 11, novDays);
-                DateTime decStart = new DateTime(2016, 12, 1);
-                DateTime decEnd = new DateTime(2016, 12, decDays);
+                DateTimeOffset octStart = new DateTimeOffset(2016, 10, 1, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset octEnd = new DateTimeOffset(2016, 10, octDays, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset novStart = new DateTimeOffset(2016, 11, 1, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset novEnd = new DateTimeOffset(2016, 11, novDays, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset decStart = new DateTimeOffset(2016, 12, 1, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset decEnd = new DateTimeOffset(2016, 12, decDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject octStorageReport = _storageReport.GetStorageReportData(octStart, octEnd, _userId);
                 StorageReportObject novStorageReport = _storageReport.GetStorageReportData(novStart, novEnd, _userId);
@@ -1646,7 +1637,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Red Wine";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2016, 4, 6);
+                purchO.PurchaseDate = new DateTimeOffset(2016, 4, 6, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f;
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 10f;
@@ -1672,9 +1663,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Distillation 1";
-                prodO.ProductionDate = new DateTime(2016, 7, 8);
-                prodO.ProductionStart = new DateTime(2016, 7, 8);
-                prodO.ProductionEnd = new DateTime(2016, 7, 8);
+                prodO.ProductionDate = new DateTimeOffset(2016, 7, 8, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2016, 7, 8, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2016, 7, 8, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = true;
                 prodO.ProductionType = "Distillation";
@@ -1706,9 +1697,9 @@ namespace WebApp.Helpers.Tests
                 // create 2nd Production Distillation Record
                 ProductionObject prodO2 = new ProductionObject();
                 prodO2.BatchName = "Distillation 2";
-                prodO2.ProductionDate = new DateTime(2016, 8, 13);
-                prodO2.ProductionStart = new DateTime(2016, 8, 13);
-                prodO2.ProductionEnd = new DateTime(2016, 8, 13);
+                prodO2.ProductionDate = new DateTimeOffset(2016, 8, 13, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionStart = new DateTimeOffset(2016, 8, 13, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionEnd = new DateTimeOffset(2016, 8, 13, 0, 0, 0, TimeSpan.Zero);
                 prodO2.SpiritCutId = 11; // mixed
                 prodO2.Gauged = true;
                 prodO2.ProductionType = "Distillation";
@@ -1746,18 +1737,18 @@ namespace WebApp.Helpers.Tests
                 int augDays = DateTime.DaysInMonth(2016, 8);
                 int sepDays = DateTime.DaysInMonth(2016, 9);
 
-                DateTime aprStart = new DateTime(2016, 4, 1);
-                DateTime aprEnd = new DateTime(2016, 4, aprDays);
-                DateTime mayStart = new DateTime(2016, 5, 1);
-                DateTime mayEnd = new DateTime(2016, 5, mayDays);
-                DateTime juneStart = new DateTime(2016, 6, 1);
-                DateTime juneEnd = new DateTime(2016, 6, juneDays);
-                DateTime julyStart = new DateTime(2016, 7, 1);
-                DateTime julyEnd = new DateTime(2016, 7, julyDays);
-                DateTime augStart = new DateTime(2016, 8, 1);
-                DateTime augEnd = new DateTime(2016, 8, augDays);
-                DateTime sepStart = new DateTime(2016, 9, 1);
-                DateTime sepEnd = new DateTime(2016, 9, sepDays);
+                DateTimeOffset aprStart = new DateTimeOffset(2016, 4, 1, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset aprEnd = new DateTimeOffset(2016, 4, aprDays, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset mayStart = new DateTimeOffset(2016, 5, 1, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset mayEnd = new DateTimeOffset(2016, 5, mayDays, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset juneStart = new DateTimeOffset(2016, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset juneEnd = new DateTimeOffset(2016, 6, juneDays, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset julyStart = new DateTimeOffset(2016, 7, 1, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset julyEnd = new DateTimeOffset(2016, 7, julyDays, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset augStart = new DateTimeOffset(2016, 8, 1, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset augEnd = new DateTimeOffset(2016, 8, augDays, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset sepStart = new DateTimeOffset(2016, 9, 1, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset sepEnd = new DateTimeOffset(2016, 9, sepDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject aprStorageReport = _storageReport.GetStorageReportData(aprStart, aprEnd, _userId);
                 StorageReportObject mayStorageReport = _storageReport.GetStorageReportData(mayStart, mayEnd, _userId);
@@ -1973,7 +1964,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "test7Purchase";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 9f;
@@ -1999,9 +1990,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and don't mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
-                prodO.ProductionDate = new DateTime(2017, 09, 3);
-                prodO.ProductionStart = new DateTime(2017, 09, 3);
-                prodO.ProductionEnd = new DateTime(2017, 09, 3);
+                prodO.ProductionDate = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = false;
                 prodO.ProductionType = "Distillation";
@@ -2032,9 +2023,9 @@ namespace WebApp.Helpers.Tests
                 // create 2nd Production Distillation Record and mark it as Gauged
                 ProductionObject prodO2 = new ProductionObject();
                 prodO2.BatchName = "testGaugedDistillRun";
-                prodO2.ProductionDate = new DateTime(2017, 09, 4);
-                prodO2.ProductionStart = new DateTime(2017, 09, 4);
-                prodO2.ProductionEnd = new DateTime(2017, 09, 4);
+                prodO2.ProductionDate = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionStart = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionEnd = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
                 prodO2.SpiritCutId = 9; // hearts
                 prodO2.Gauged = true;
                 prodO2.ProductionType = "Distillation";
@@ -2064,9 +2055,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "testProdBlend";
-                prodBlend.ProductionDate = new DateTime(2017, 09, 5);
-                prodBlend.ProductionStart = new DateTime(2017, 09, 5);
-                prodBlend.ProductionEnd = new DateTime(2017, 09, 5);
+                prodBlend.ProductionDate = new DateTimeOffset(2017, 09, 5, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2017, 09, 5, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2017, 09, 5, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 22.5f; // 22.5 gallons of alcohol
@@ -2107,9 +2098,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Bottling Record
                 ProductionObject prodBottl = new ProductionObject();
                 prodBottl.BatchName = "testProdBottling ";
-                prodBottl.ProductionDate = new DateTime(2017, 09, 6);
-                prodBottl.ProductionStart = new DateTime(2017, 09, 6);
-                prodBottl.ProductionEnd = new DateTime(2017, 09, 6);
+                prodBottl.ProductionDate = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionStart = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionEnd = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
                 prodBottl.Gauged = true;
                 prodBottl.ProductionType = "Bottling";
                 prodBottl.Quantity = 22.39f; // 22.39 gallons of alcohol
@@ -2161,8 +2152,8 @@ namespace WebApp.Helpers.Tests
                 reportHeaderE.DSP = "DSP-WA-21086";
 
                 // reporting time range
-                DateTime start = new DateTime(2017, 09, 01);
-                DateTime end = new DateTime(2017, 09, 30);
+                DateTimeOffset start = new DateTimeOffset(2017, 09, 01, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset end = new DateTimeOffset(2017, 09, 30, 0, 0, 0, TimeSpan.Zero);
 
                 /* PRODUCTION REPORT */
 
@@ -2507,7 +2498,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "test7Purchase";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2017, 11, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 11, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 98f;
@@ -2531,9 +2522,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
-                prodO.ProductionDate = new DateTime(2017, 11, 3);
-                prodO.ProductionStart = new DateTime(2017, 11, 3);
-                prodO.ProductionEnd = new DateTime(2017, 11, 3);
+                prodO.ProductionDate = new DateTimeOffset(2017, 11, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 11, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 11, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = true;
                 prodO.ProductionType = "Distillation";
@@ -2564,9 +2555,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "testProdBlend";
-                prodBlend.ProductionDate = new DateTime(2017, 12, 5);
-                prodBlend.ProductionStart = new DateTime(2017, 12, 5);
-                prodBlend.ProductionEnd = new DateTime(2017, 12, 5);
+                prodBlend.ProductionDate = new DateTimeOffset(2017, 12, 5, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2017, 12, 5, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2017, 12, 5, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 100f;
@@ -2613,14 +2604,14 @@ namespace WebApp.Helpers.Tests
                 int decDays = DateTime.DaysInMonth(2017, 12);
                 int janDays = DateTime.DaysInMonth(2018, 1);
 
-                var octStart = new DateTime(2017, 10, 1);
-                var octEnd = new DateTime(2017, 10, octDays);
-                var novStart = new DateTime(2017, 11, 1);
-                var novEnd = new DateTime(2017, 11, novDays);
-                var decStart = new DateTime(2017, 12, 1);
-                var decEnd = new DateTime(2017, 12, decDays);
-                var janStart = new DateTime(2017, 1, 1);
-                var janEnd = new DateTime(2017, 1, janDays);
+                var octStart = new DateTimeOffset(2017, 10, 1, 0, 0, 0, TimeSpan.Zero);
+                var octEnd = new DateTimeOffset(2017, 10, octDays, 0, 0, 0, TimeSpan.Zero);
+                var novStart = new DateTimeOffset(2017, 11, 1, 0, 0, 0, TimeSpan.Zero);
+                var novEnd = new DateTimeOffset(2017, 11, novDays, 0, 0, 0, TimeSpan.Zero);
+                var decStart = new DateTimeOffset(2017, 12, 1, 0, 0, 0, TimeSpan.Zero);
+                var decEnd = new DateTimeOffset(2017, 12, decDays, 0, 0, 0, TimeSpan.Zero);
+                var janStart = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                var janEnd = new DateTimeOffset(2017, 1, janDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject octStorageReport = _storageReport.GetStorageReportData(octStart, octEnd, _userId);
                 StorageReportObject novStorageReport = _storageReport.GetStorageReportData(novStart, novEnd, _userId);
@@ -2802,7 +2793,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject pomacePurchase = new PurchaseObject();
                 pomacePurchase.PurBatchName = "Fermented Pomace";
                 pomacePurchase.PurchaseType = "Fermented";
-                pomacePurchase.PurchaseDate = new DateTime(2018, 3, 6);
+                pomacePurchase.PurchaseDate = new DateTimeOffset(2018, 3, 6, 0, 0, 0, TimeSpan.Zero);
                 pomacePurchase.Quantity = 0f;
                 pomacePurchase.VolumeByWeight = 2000f; // 2000 lbs
                 pomacePurchase.AlcoholContent = 0f;
@@ -2826,9 +2817,9 @@ namespace WebApp.Helpers.Tests
                 // 2. Distill 1000 lbs to produce 55 gallons at 50% ABV on 4/6/18
                 ProductionObject brandyProduction = new ProductionObject();
                 brandyProduction.BatchName = "Brandy Distillation";
-                brandyProduction.ProductionDate = new DateTime(2018, 4, 6);
-                brandyProduction.ProductionStart = new DateTime(2018, 4, 6);
-                brandyProduction.ProductionEnd = new DateTime(2018, 4, 6);
+                brandyProduction.ProductionDate = new DateTimeOffset(2018, 4, 6, 0, 0, 0, TimeSpan.Zero);
+                brandyProduction.ProductionStart = new DateTimeOffset(2018, 4, 6, 0, 0, 0, TimeSpan.Zero);
+                brandyProduction.ProductionEnd = new DateTimeOffset(2018, 4, 6, 0, 0, 0, TimeSpan.Zero);
                 brandyProduction.SpiritCutId = 11; // mixed
                 brandyProduction.Gauged = true;
                 brandyProduction.ProductionType = "Distillation";
@@ -2859,9 +2850,9 @@ namespace WebApp.Helpers.Tests
                 // 3. Blend that with 10 gallons of water on 5/6/18 to produce 55 gallons of 43% ABV
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "Blended Brandy";
-                prodBlend.ProductionDate = new DateTime(2018, 5, 6);
-                prodBlend.ProductionStart = new DateTime(2018, 5, 6);
-                prodBlend.ProductionEnd = new DateTime(2018, 5, 6);
+                prodBlend.ProductionDate = new DateTimeOffset(2018, 5, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2018, 5, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2018, 5, 6, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 55f; // 55 gallons of alcohol
@@ -2909,17 +2900,17 @@ namespace WebApp.Helpers.Tests
                 int mayDays = DateTime.DaysInMonth(2018, 5);
                 int juneDays = DateTime.DaysInMonth(2018, 6);
 
-                var marStart = new DateTime(2018, 3, 1);
-                var marEnd = new DateTime(2018, 3, marDays);
+                var marStart = new DateTimeOffset(2018, 3, 1, 0, 0, 0, TimeSpan.Zero);
+                var marEnd = new DateTimeOffset(2018, 3, marDays, 0, 0, 0, TimeSpan.Zero);
 
-                var aprStart = new DateTime(2018, 4, 1);
-                var aprEnd = new DateTime(2018, 4, aprDays);
+                var aprStart = new DateTimeOffset(2018, 4, 1, 0, 0, 0, TimeSpan.Zero);
+                var aprEnd = new DateTimeOffset(2018, 4, aprDays, 0, 0, 0, TimeSpan.Zero);
 
-                var mayStart = new DateTime(2018, 5, 1);
-                var mayEnd = new DateTime(2018, 5, mayDays);
+                var mayStart = new DateTimeOffset(2018, 5, 1, 0, 0, 0, TimeSpan.Zero);
+                var mayEnd = new DateTimeOffset(2018, 5, mayDays, 0, 0, 0, TimeSpan.Zero);
 
-                var juneStart = new DateTime(2018, 6, 1);
-                var juneEnd = new DateTime(2018, 6, juneDays);
+                var juneStart = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                var juneEnd = new DateTimeOffset(2018, 6, juneDays, 0, 0, 0, TimeSpan.Zero);
 
                 var marProcessingReport = _processingReport.GetProcessingReportData(marStart, marEnd, _userId);
                 var aprProcessingReport = _processingReport.GetProcessingReportData(aprStart, aprEnd, _userId);
@@ -3072,9 +3063,9 @@ namespace WebApp.Helpers.Tests
                 /// 4. Bottle blended batch on 5/7/18
                 ProductionObject prodBottl = new ProductionObject();
                 prodBottl.BatchName = "Brandy Under 170 Bottling";
-                prodBottl.ProductionDate = new DateTime(2018, 5, 7);
-                prodBottl.ProductionStart = new DateTime(2018, 5, 7);
-                prodBottl.ProductionEnd = new DateTime(2018, 5, 7);
+                prodBottl.ProductionDate = new DateTimeOffset(2018, 5, 7, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionStart = new DateTimeOffset(2018, 5, 7, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionEnd = new DateTimeOffset(2018, 5, 7, 0, 0, 0, TimeSpan.Zero);
                 prodBottl.Gauged = true;
                 prodBottl.ProductionType = "Bottling";
                 prodBottl.Quantity = 53.49f; // 53.49 gallons of alcohol
@@ -3333,7 +3324,7 @@ namespace WebApp.Helpers.Tests
                 {
                     PurBatchName = "TestPurchase-4tUTav",
                     PurchaseType = "Distilled",
-                    PurchaseDate = new DateTime(2017, 1, 1),
+                    PurchaseDate = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     Quantity = 100f,
                     AlcoholContent = 50f,
                     ProofGallon = 100f,
@@ -3355,9 +3346,9 @@ namespace WebApp.Helpers.Tests
                 ProductionObject production = new ProductionObject
                 {
                     BatchName = "TestBlending-4tUTav",
-                    ProductionDate = new DateTime(2017, 1, 1),
-                    ProductionStart = new DateTime(2017, 1, 1),
-                    ProductionEnd = new DateTime(2017, 1, 1),
+                    ProductionDate = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     Gauged = true,
                     ProductionType = "Blending",
                     Quantity = 110f,
@@ -3389,7 +3380,7 @@ namespace WebApp.Helpers.Tests
                 // Act
 
                 // Generate Processing Report
-                ProcessingReportingObject report = _processingReport.GetProcessingReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+                ProcessingReportingObject report = _processingReport.GetProcessingReportData(new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2017, 1, 31, 0, 0, 0, TimeSpan.Zero), _userId);
 
                 // Assert
                 var actual = report.Part4List.Find(x => x.ProcessingReportTypeName == "VODKA" && x.ProcessingSpirits == "bulkSpiritDumped").Vodka;
@@ -3468,7 +3459,7 @@ namespace WebApp.Helpers.Tests
                 {
                     PurBatchName = "GNS Gin",
                     PurchaseType = "Distilled",
-                    PurchaseDate = new DateTime(2017, 11, 1),
+                    PurchaseDate = new DateTimeOffset(2017, 11, 1, 0, 0, 0, TimeSpan.Zero),
                     VolumeByWeight = 1000f,
                     AlcoholContent = 75f,
                     ProofGallon = 100f,
@@ -3489,9 +3480,9 @@ namespace WebApp.Helpers.Tests
                 ProductionObject blending = new ProductionObject
                 {
                     BatchName = "Gin blending",
-                    ProductionDate = new DateTime(2017, 11, 2),
-                    ProductionStart = new DateTime(2017, 11, 2),
-                    ProductionEnd = new DateTime(2017, 11, 2),
+                    ProductionDate = new DateTimeOffset(2017, 11, 2, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2017, 11, 2, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2017, 11, 2, 0, 0, 0, TimeSpan.Zero),
                     Gauged = true,
                     ProductionType = "Blending",
                     VolumeByWeight = 100f,
@@ -3524,9 +3515,9 @@ namespace WebApp.Helpers.Tests
                 ProductionObject bottling = new ProductionObject
                 {
                     BatchName = "Gin bottling",
-                    ProductionDate = new DateTime(2017, 11, 2),
-                    ProductionStart = new DateTime(2017, 11, 2),
-                    ProductionEnd = new DateTime(2017, 11, 2),
+                    ProductionDate = new DateTimeOffset(2017, 11, 2, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2017, 11, 2, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2017, 11, 2, 0, 0, 0, TimeSpan.Zero),
                     Gauged = true,
                     ProductionType = "Bottling",
                     Quantity = 11.89f,
@@ -3558,7 +3549,7 @@ namespace WebApp.Helpers.Tests
                 // Act
 
                 // Generate Processing Report
-                ProcessingReportingObject report = _processingReport.GetProcessingReportData(new DateTime(2017, 11, 1), new DateTime(2017, 11, 30), _userId);
+                ProcessingReportingObject report = _processingReport.GetProcessingReportData(new DateTimeOffset(2017, 11, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2017, 11, 30, 0, 0, 0, TimeSpan.Zero), _userId);
 
                 // Assert
                 Assert.IsNotNull(report);
@@ -3637,7 +3628,7 @@ namespace WebApp.Helpers.Tests
                 {
                     PurBatchName = "FermentedPomaceFromBigGrapesWinery",
                     PurchaseType = "Fermented",
-                    PurchaseDate = new DateTime(2017, 1, 1),
+                    PurchaseDate = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     VolumeByWeight = 1000f,
                     RecordId = rawMaterialId,
                     Price = 2000f,
@@ -3656,9 +3647,9 @@ namespace WebApp.Helpers.Tests
                 ProductionObject production = new ProductionObject
                 {
                     BatchName = "PomaceDistillation",
-                    ProductionDate = new DateTime(2017, 1, 1),
-                    ProductionStart = new DateTime(2017, 1, 1),
-                    ProductionEnd = new DateTime(2017, 1, 1),
+                    ProductionDate = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     Gauged = true,
                     ProductionType = "Distillation",
                     Quantity = 100f,
@@ -3692,10 +3683,10 @@ namespace WebApp.Helpers.Tests
                 // Act
 
                 // Generate Storage Report
-                StorageReportObject storageReport = _storageReport.GetStorageReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+                StorageReportObject storageReport = _storageReport.GetStorageReportData(new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2017, 1, 31, 0, 0, 0, TimeSpan.Zero), _userId);
 
                 // Generate Production Report
-                ProductionReportingObject productionReport = _productionReport.GetProductionReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+                ProductionReportingObject productionReport = _productionReport.GetProductionReportData(new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2017, 1, 31, 0, 0, 0, TimeSpan.Zero), _userId);
 
                 // Assert
 
@@ -3802,7 +3793,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2017, 1, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 98f;
@@ -3827,9 +3818,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil GNS into GIN and mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "RedistilledGns";
-                prodO.ProductionDate = new DateTime(2017, 1, 2);
-                prodO.ProductionStart = new DateTime(2017, 1, 2);
-                prodO.ProductionEnd = new DateTime(2017, 1, 2);
+                prodO.ProductionDate = new DateTimeOffset(2017, 1, 2, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 1, 2, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 1, 2, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = true;
                 prodO.ProductionType = "Distillation";
@@ -3860,9 +3851,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "Gin";
-                prodBlend.ProductionDate = new DateTime(2017, 2, 1);
-                prodBlend.ProductionStart = new DateTime(2017, 2, 1);
-                prodBlend.ProductionEnd = new DateTime(2017, 2, 1);
+                prodBlend.ProductionDate = new DateTimeOffset(2017, 2, 1, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2017, 2, 1, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2017, 2, 1, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 100f; // 100 gallons of alcohol
@@ -3908,14 +3899,14 @@ namespace WebApp.Helpers.Tests
                 int febDays = DateTime.DaysInMonth(2017, 2);
                 int marDays = DateTime.DaysInMonth(2017, 3);
 
-                var decStart = new DateTime(2016, 12, 1);
-                var decEnd = new DateTime(2016, 12, decDays);
-                var janStart = new DateTime(2017, 1, 1);
-                var janEnd = new DateTime(2017, 1, janDays);
-                var febStart = new DateTime(2017, 2, 1);
-                var febEnd = new DateTime(2017, 2, febDays);
-                var marStart = new DateTime(2017, 3, 1);
-                var marEnd = new DateTime(2017, 3, marDays);
+                var decStart = new DateTimeOffset(2016, 12, 1, 0, 0, 0, TimeSpan.Zero);
+                var decEnd = new DateTimeOffset(2016, 12, decDays, 0, 0, 0, TimeSpan.Zero);
+                var janStart = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                var janEnd = new DateTimeOffset(2017, 1, janDays, 0, 0, 0, TimeSpan.Zero);
+                var febStart = new DateTimeOffset(2017, 2, 1, 0, 0, 0, TimeSpan.Zero);
+                var febEnd = new DateTimeOffset(2017, 2, febDays, 0, 0, 0, TimeSpan.Zero);
+                var marStart = new DateTimeOffset(2017, 3, 1, 0, 0, 0, TimeSpan.Zero);
+                var marEnd = new DateTimeOffset(2017, 3, marDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject decStorageReport = _storageReport.GetStorageReportData(decStart, decEnd, _userId);
                 StorageReportObject janStorageReport = _storageReport.GetStorageReportData(janStart, janEnd, _userId);
@@ -4122,7 +4113,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 6, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 50f;
@@ -4145,9 +4136,9 @@ namespace WebApp.Helpers.Tests
                 // Blend GNS into GIN
                 ProductionObject prodBlendGin = new ProductionObject();
                 prodBlendGin.BatchName = "BlendedGin";
-                prodBlendGin.ProductionDate = new DateTime(2018, 6, 1);
-                prodBlendGin.ProductionStart = new DateTime(2018, 6, 1);
-                prodBlendGin.ProductionEnd = new DateTime(2018, 6, 1);
+                prodBlendGin.ProductionDate = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                prodBlendGin.ProductionStart = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                prodBlendGin.ProductionEnd = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
                 prodBlendGin.Gauged = true;
                 prodBlendGin.GainLoss = -10f;
                 prodBlendGin.ProductionType = "Blending";
@@ -4180,8 +4171,8 @@ namespace WebApp.Helpers.Tests
                 #region Act
 
                 int juneDays = DateTime.DaysInMonth(2018, 6);
-                var juneStart = new DateTime(2018, 6, 1);
-                var juneEnd = new DateTime(2018, 6, juneDays);
+                var juneStart = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                var juneEnd = new DateTimeOffset(2018, 6, juneDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject juneStorageReport = _storageReport.GetStorageReportData(juneStart, juneEnd, _userId);
 
@@ -4324,7 +4315,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 6, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 50f;
@@ -4347,9 +4338,9 @@ namespace WebApp.Helpers.Tests
                 // Blend GNS into GIN
                 ProductionObject prodBlendGin = new ProductionObject();
                 prodBlendGin.BatchName = "BlendedGin";
-                prodBlendGin.ProductionDate = new DateTime(2018, 6, 1);
-                prodBlendGin.ProductionStart = new DateTime(2018, 6, 1);
-                prodBlendGin.ProductionEnd = new DateTime(2018, 6, 1);
+                prodBlendGin.ProductionDate = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                prodBlendGin.ProductionStart = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                prodBlendGin.ProductionEnd = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
                 prodBlendGin.Gauged = true;
                 prodBlendGin.GainLoss = -10f;
                 prodBlendGin.ProductionType = "Blending";
@@ -4381,9 +4372,9 @@ namespace WebApp.Helpers.Tests
                 ProductionObject bottling = new ProductionObject
                 {
                     BatchName = "Gin bottling",
-                    ProductionDate = new DateTime(2018, 6, 1),
-                    ProductionStart = new DateTime(2018, 6, 1),
-                    ProductionEnd = new DateTime(2018, 6, 1),
+                    ProductionDate = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero),
                     Gauged = true,
                     ProductionType = "Bottling",
                     Quantity = 39.23f,
@@ -4426,8 +4417,8 @@ namespace WebApp.Helpers.Tests
                 #region Act
 
                 int juneDays = DateTime.DaysInMonth(2018, 6);
-                var juneStart = new DateTime(2018, 6, 1);
-                var juneEnd = new DateTime(2018, 6, juneDays);
+                var juneStart = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                var juneEnd = new DateTimeOffset(2018, 6, juneDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject juneStorageReport = _storageReport.GetStorageReportData(juneStart, juneEnd, _userId);
 
@@ -4569,7 +4560,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 6, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 50f;
@@ -4592,9 +4583,9 @@ namespace WebApp.Helpers.Tests
                 // Blend GNS into GIN
                 ProductionObject prodBlendGin = new ProductionObject();
                 prodBlendGin.BatchName = "BlendedGin";
-                prodBlendGin.ProductionDate = new DateTime(2018, 6, 1);
-                prodBlendGin.ProductionStart = new DateTime(2018, 6, 1);
-                prodBlendGin.ProductionEnd = new DateTime(2018, 6, 1);
+                prodBlendGin.ProductionDate = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                prodBlendGin.ProductionStart = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                prodBlendGin.ProductionEnd = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
                 prodBlendGin.Gauged = true;
                 prodBlendGin.GainLoss = 10f;
                 prodBlendGin.ProductionType = "Blending";
@@ -4628,8 +4619,8 @@ namespace WebApp.Helpers.Tests
                 #region Act
 
                 int juneDays = DateTime.DaysInMonth(2018, 6);
-                var juneStart = new DateTime(2018, 6, 1);
-                var juneEnd = new DateTime(2018, 6, juneDays);
+                var juneStart = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                var juneEnd = new DateTimeOffset(2018, 6, juneDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject juneStorageReport = _storageReport.GetStorageReportData(juneStart, juneEnd, _userId);
 
@@ -4773,7 +4764,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 6, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 6, 1, 12, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 50f;
@@ -4796,9 +4787,9 @@ namespace WebApp.Helpers.Tests
                 // Blend GNS into GIN
                 ProductionObject prodDistilGin = new ProductionObject();
                 prodDistilGin.BatchName = "DistilGin";
-                prodDistilGin.ProductionDate = new DateTime(2018, 6, 1);
-                prodDistilGin.ProductionStart = new DateTime(2018, 6, 1);
-                prodDistilGin.ProductionEnd = new DateTime(2018, 6, 1);
+                prodDistilGin.ProductionDate = new DateTimeOffset(2018, 6, 1, 12, 0, 0, TimeSpan.Zero);
+                prodDistilGin.ProductionStart = new DateTimeOffset(2018, 6, 1, 12, 0, 0, TimeSpan.Zero);
+                prodDistilGin.ProductionEnd = new DateTimeOffset(2018, 6, 1, 12, 0, 0, TimeSpan.Zero);
                 prodDistilGin.Gauged = true;
                 prodDistilGin.ProductionType = "Distillation";
                 prodDistilGin.Quantity = 50f; // 50 gallons of alcohol
@@ -4828,9 +4819,9 @@ namespace WebApp.Helpers.Tests
                 // Blend GNS into GIN
                 ProductionObject prodBlendGin = new ProductionObject();
                 prodBlendGin.BatchName = "BlendedGin";
-                prodBlendGin.ProductionDate = new DateTime(2018, 7, 1);
-                prodBlendGin.ProductionStart = new DateTime(2018, 7, 1);
-                prodBlendGin.ProductionEnd = new DateTime(2018, 7, 1);
+                prodBlendGin.ProductionDate = new DateTimeOffset(2018, 7, 1, 12, 0, 0, TimeSpan.Zero);
+                prodBlendGin.ProductionStart = new DateTimeOffset(2018, 7, 1, 12, 0, 0, TimeSpan.Zero);
+                prodBlendGin.ProductionEnd = new DateTimeOffset(2018, 7, 1, 12, 0, 0, TimeSpan.Zero);
                 prodBlendGin.Gauged = true;
                 prodBlendGin.ProductionType = "Blending";
                 prodBlendGin.Quantity = 15f; // 15 gallons of alcohol
@@ -4917,8 +4908,8 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(50f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 6).Select(x => x.r24_Lines7Through23).Single());
 
                 int julyDays = DateTime.DaysInMonth(2018, 7);
-                var julyStart = new DateTime(2018, 7, 1);
-                var julyEnd = new DateTime(2018, 7, julyDays);
+                var julyStart = new DateTimeOffset(2018, 7, 1, 0, 0, 0, TimeSpan.Zero);
+                var julyEnd = new DateTimeOffset(2018, 7, julyDays, 0, 0, 0, TimeSpan.Zero);
 
                 // Storage report in July 2018
                 StorageReportObject julyStorageReport = _storageReport.GetStorageReportData(julyStart, julyEnd, _userId);
@@ -5056,7 +5047,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 6, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 50f;
@@ -5079,9 +5070,9 @@ namespace WebApp.Helpers.Tests
                 // Distill GNS into GIN
                 ProductionObject prodDistilGin = new ProductionObject();
                 prodDistilGin.BatchName = "DistilGin";
-                prodDistilGin.ProductionDate = new DateTime(2018, 6, 1);
-                prodDistilGin.ProductionStart = new DateTime(2018, 6, 1);
-                prodDistilGin.ProductionEnd = new DateTime(2018, 6, 1);
+                prodDistilGin.ProductionDate = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                prodDistilGin.ProductionStart = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                prodDistilGin.ProductionEnd = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
                 prodDistilGin.Gauged = true;
                 prodDistilGin.ProductionType = "Distillation";
                 prodDistilGin.Quantity = 50f; // 50 gallons of alcohol
@@ -5110,9 +5101,9 @@ namespace WebApp.Helpers.Tests
                 // Blend GNS into GIN
                 ProductionObject prodBlendGin = new ProductionObject();
                 prodBlendGin.BatchName = "BlendedGin";
-                prodBlendGin.ProductionDate = new DateTime(2018, 7, 1);
-                prodBlendGin.ProductionStart = new DateTime(2018, 7, 1);
-                prodBlendGin.ProductionEnd = new DateTime(2018, 7, 1);
+                prodBlendGin.ProductionDate = new DateTimeOffset(2018, 7, 1, 0, 0, 0, TimeSpan.Zero);
+                prodBlendGin.ProductionStart = new DateTimeOffset(2018, 7, 1, 0, 0, 0, TimeSpan.Zero);
+                prodBlendGin.ProductionEnd = new DateTimeOffset(2018, 7, 1, 0, 0, 0, TimeSpan.Zero);
                 prodBlendGin.Gauged = true;
                 prodBlendGin.GainLoss = 10f;
                 prodBlendGin.ProductionType = "Blending";
@@ -5144,8 +5135,8 @@ namespace WebApp.Helpers.Tests
                 #region Act
 
                 int juneDays = DateTime.DaysInMonth(2018, 6);
-                var juneStart = new DateTime(2018, 6, 1);
-                var juneEnd = new DateTime(2018, 6, juneDays);
+                var juneStart = new DateTimeOffset(2018, 6, 1, 0, 0, 0, TimeSpan.Zero);
+                var juneEnd = new DateTimeOffset(2018, 6, juneDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject juneStorageReport = _storageReport.GetStorageReportData(juneStart, juneEnd, _userId);
 
@@ -5199,8 +5190,8 @@ namespace WebApp.Helpers.Tests
                 Assert.AreEqual(50f, juneStorageReport.ReportBody.Where(x => x.SpiritTypeReportingID == 6).Select(x => x.r24_Lines7Through23).Single());
 
                 int julyDays = DateTime.DaysInMonth(2018, 7);
-                var julyStart = new DateTime(2018, 7, 1);
-                var julyEnd = new DateTime(2018, 7, julyDays);
+                var julyStart = new DateTimeOffset(2018, 7, 1, 0, 0, 0, TimeSpan.Zero);
+                var julyEnd = new DateTimeOffset(2018, 7, julyDays, 0, 0, 0, TimeSpan.Zero);
 
                 // Storage report in July 2018
                 StorageReportObject julyStorageReport = _storageReport.GetStorageReportData(julyStart, julyEnd, _userId);
@@ -5288,213 +5279,105 @@ namespace WebApp.Helpers.Tests
         {
             // Tuple<recordId, table enum value>
             List<Tuple<int, Table>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
-
-            int spiritId = 0;
-            int vendorId = 0;
-            int storageId = 0;
-            int gnsMaterialId = 0;
-            int waterMaterialId = 0;
-            int purchaseId = 0;
-            int productionId = 0;
-
             try
             {
                 #region Arrange
-                //  dictionary setup
-                SpiritObject spirit = new SpiritObject();
-                spirit.SpiritName = "GIN";
-                spirit.ProcessingReportTypeID = 18;
-
-                spiritId =_dictionary.CreateSpirit(_userId, spirit);
-
-                // setup Vendor object
-                VendorObject vendor = new VendorObject();
-                vendor.VendorName = "testVendor";
-
-                vendorId = _dictionary.CreateVendor(_userId, vendor);
-                tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
-
-                // setup Storage Object
-                StorageObject storage = new StorageObject();
-                storage.StorageName = "testStorage";
-                storage.SerialNumber = "2H29NNS";
-
-                storageId = _dictionary.CreateStorage(_userId, storage);
-                tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
-
-                // setup Material Object
-                // GNS
-                {
-                    RawMaterialObject gnsMaterial = new RawMaterialObject();
-                    gnsMaterial.RawMaterialName = "GNS for GIN";
-                    gnsMaterial.UnitType = "gal";
-                    gnsMaterial.UnitTypeId = 1;
-                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
-                    materialBoolTypes.Distilled = true;
-                    gnsMaterial.PurchaseMaterialTypes = materialBoolTypes;
-
-                    gnsMaterialId = _dictionary.CreateRawMaterial(_userId, gnsMaterial);
-                    tablesForCleanupTupleList.Add(Tuple.Create(gnsMaterialId, Table.MaterialDict));
-                }
-
-                // water
-                {
-                    RawMaterialObject waterMaterial = new RawMaterialObject();
-                    waterMaterial.RawMaterialName = "Water";
-                    waterMaterial.UnitType = "gal";
-                    waterMaterial.UnitTypeId = 1;
-                    PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
-                    materialBoolTypes.Additive = true;
-                    waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
-
-                    waterMaterialId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
-                    tablesForCleanupTupleList.Add(Tuple.Create(waterMaterialId, Table.MaterialDict));
-                }
-
                 // create Purchase Record (minimal required fields)
-                PurchaseObject purchO = new PurchaseObject();
-                purchO.PurBatchName = "GNS";
-                purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 03, 01);
-                purchO.Quantity = 100f; // 100 gallons
-                purchO.VolumeByWeight = 0f;
-                purchO.AlcoholContent = 98f;
-                purchO.ProofGallon = 196f;
-                purchO.RecordId = gnsMaterialId;
-                purchO.Price = 350f;
-                purchO.VendorId = vendorId;
-                purchO.Gauged = true;
+                PurchaseDistilled(name: "GnsPurchase",
+                date: new DateTimeOffset(2018, 03, 01, 0, 0, 0, TimeSpan.Zero),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 98f,
+                proof: 196f,
+                materialDictId: _rawMaterials["Gns"].RawMaterialId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.AlcoholUnder190,
+                price: 350f,
+                vendorId: _vendors["Vendor"].VendorId,
+                storageId: _storages["Storage"].StorageId);
 
-                List<StorageObject> storageList = new List<StorageObject>();
-                StorageObject storageObject = new StorageObject();
-                storageObject.StorageId = storageId;
-                storageList.Add(storageObject);
-                purchO.Storage = storageList;
+                ProduceDistill(name: "RedistilledGns",
+                start: new DateTimeOffset(2018, 04, 02, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 04, 02, 0, 0, 0, TimeSpan.Zero),
+                volume: 50f,
+                weight: 0f,
+                alcoholContent: 98f,
+                proof: 98f,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Gin,
+                spiritCut: "Mixed",
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _purchases["GnsPurchase"].PurchaseId,
+                        OldVal = 50f,
+                        NewVal = 50f,
+                        Proof = 98f,
+                        DistillableOrigin = "pur",
+                        BurningDownMethod = "volume"
+                    }
+                });
 
-                purchO.SpiritTypeReportingID = 9;
-                purchO.Gauged = true;
+                ProduceBlend(name: "ProducedGin",
+                start: new DateTimeOffset(2018, 05, 03, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 05, 03, 0, 0, 0, TimeSpan.Zero),
+                volume: 100f,
+                weight: 0f,
+                alcoholContent: 49f,
+                proof: 98f,
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Gin,
+                spiritId: _spirits["Gin"].SpiritId,
+                gainLoss: 0f,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["RedistilledGns"].ProductionId,
+                        OldVal = 0f,
+                        NewVal = 50f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                },
+                blendingAdditives: new List<BlendingAdditive>
+                {
+                    new BlendingAdditive
+                    {
+                        RawMaterialId = _rawMaterials["DistilledWater"].RawMaterialId,
+                        RawMaterialQuantity = 50f,
+                        RawMaterialName = "DistilledWater",
+                        UnitOfMeasurement = "gal"
+                    }
+                });
 
-                purchaseId = _purchase.CreatePurchase(purchO, _userId);
-                tablesForCleanupTupleList.Add(Tuple.Create(purchaseId, Table.Purchase));
-
-                // Redistil GNS into GIN and mark it as Gauged
-                ProductionObject prodO = new ProductionObject();
-                prodO.BatchName = "RedistilledGns";
-                prodO.ProductionDate = new DateTime(2018, 04, 02);
-                prodO.ProductionStart = new DateTime(2018, 04, 02);
-                prodO.ProductionEnd = new DateTime(2018, 04, 02);
-                prodO.SpiritCutId = 11; // mixed
-                prodO.Gauged = true;
-                prodO.ProductionType = "Distillation";
-                prodO.Quantity = 50f; // 50 gallons of alcohol
-                prodO.VolumeByWeight = 0f;
-                prodO.AlcoholContent = 98f; // 98%
-                prodO.ProofGallon = 98f; // 98 pfg
-                prodO.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
-                prodO.SpiritTypeReportingID = 6; // Gin
-                prodO.ProductionTypeId = 2;
-
-                List<ObjInfo4Burndwn> usedMats = new List<ObjInfo4Burndwn>();
-                ObjInfo4Burndwn uMat = new ObjInfo4Burndwn();
-                uMat.ID = purchaseId;
-                uMat.OldVal = 50f;
-                uMat.NewVal = 50f;
-                uMat.Proof = 98f;
-                uMat.DistillableOrigin = "pur";
-                uMat.BurningDownMethod = "volume";
-
-                usedMats.Add(uMat);
-
-                prodO.UsedMats = usedMats;
-
-                productionId = _production.CreateProduction(prodO, _userId);
-                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
-
-                // create Production Blending Record
-                ProductionObject prodBlend = new ProductionObject();
-                prodBlend.BatchName = "Gin";
-                prodBlend.ProductionDate = new DateTime(2018, 05, 03);
-                prodBlend.ProductionStart = new DateTime(2018, 05, 03);
-                prodBlend.ProductionEnd = new DateTime(2018, 05, 03);
-                prodBlend.Gauged = true;
-                prodBlend.ProductionType = "Blending";
-                prodBlend.Quantity = 100f; // 100 gallons of alcohol
-                prodBlend.VolumeByWeight = 0f;
-                prodBlend.AlcoholContent = 49f; // 49%
-                prodBlend.ProofGallon = 98f; // 98pfg
-                prodBlend.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
-                prodBlend.SpiritTypeReportingID = 6; // GIN
-                prodBlend.SpiritId = spiritId;
-                prodBlend.ProductionTypeId = 3;
-
-                List<ObjInfo4Burndwn> usedMats4Blend = new List<ObjInfo4Burndwn>();
-                ObjInfo4Burndwn uMat4Blend = new ObjInfo4Burndwn();
-                uMat4Blend.ID = productionId;
-                uMat4Blend.OldVal = 0f;
-                uMat4Blend.NewVal = 50f;
-                uMat4Blend.DistillableOrigin = "prod";
-                uMat4Blend.BurningDownMethod = "volume";
-
-                usedMats4Blend.Add(uMat4Blend);
-                prodBlend.UsedMats = usedMats4Blend;
-
-                List<BlendingAdditive> blendAdditives = new List<BlendingAdditive>();
-                BlendingAdditive blendAd = new BlendingAdditive();
-                blendAd.RawMaterialId = waterMaterialId;
-                blendAd.RawMaterialQuantity = 50f;
-                blendAd.RawMaterialName = "Water";
-                blendAd.UnitOfMeasurement = "gal";
-
-                blendAdditives.Add(blendAd);
-
-                prodBlend.BlendingAdditives = blendAdditives;
-
-                productionId = _production.CreateProduction(prodBlend, _userId); // here productionId is overriden with a new productionId of the new Gauged record
-                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
-
-                // create Production Bottling Record
-                ProductionObject prodBottl = new ProductionObject();
-                prodBottl.BatchName = "GIN Bottling Test ";
-                prodBottl.ProductionDate = new DateTime(2018, 06, 4);
-                prodBottl.ProductionStart = new DateTime(2018, 06, 4);
-                prodBottl.ProductionEnd = new DateTime(2018, 06, 4);
-                prodBottl.Gauged = true;
-                prodBottl.ProductionType = "Bottling";
-                prodBottl.Quantity = 150f; // 150 gallons of alcohol
-                prodBottl.VolumeByWeight = 0f;
-                prodBottl.AlcoholContent = 32.5f; // 45%
-                prodBottl.ProofGallon = 97.5f; // 97.5 pfg
-                prodBottl.Storage = storageList; // we are using the same storage id as we use for Purchase to keep things simple
-                prodBottl.SpiritTypeReportingID = 6; // Gin
-                prodBottl.SpiritId = spiritId;
-                prodO.ProductionTypeId = 4;
-                // BUG?
-
-                List<ObjInfo4Burndwn> usedMats4Bottl = new List<ObjInfo4Burndwn>();
-                ObjInfo4Burndwn uMat4Bottl = new ObjInfo4Burndwn();
-                uMat4Bottl.ID = productionId;
-                uMat4Bottl.OldVal = 0f;
-                uMat4Bottl.NewVal = prodBlend.Quantity;
-                uMat4Bottl.DistillableOrigin = "prod";
-                uMat4Bottl.BurningDownMethod = "volume";
-
-                usedMats4Bottl.Add(uMat4Bottl);
-                prodBottl.UsedMats = usedMats4Bottl;
-
-                BottlingObject bottlingObj = new BottlingObject();
-                bottlingObj.CaseCapacity = 10;
-                bottlingObj.CaseQuantity = 113f;
-                bottlingObj.BottleCapacity = 500f;
-                bottlingObj.BottleQuantity = 1130;
-
-                prodBottl.BottlingInfo = bottlingObj;
-
-                prodBottl.GainLoss = -.5f;
-
-                prodBottl.FillTestList = null;
-
-                productionId = _production.CreateProduction(prodBottl, _userId); // here productionId is overriden with a new productionId of the new Gauged record
-                tablesForCleanupTupleList.Add(Tuple.Create(productionId, Table.Production));
+                ProduceBottle(name: "GIN Bottling Test",
+                start: new DateTimeOffset(2018, 06, 4, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 06, 4, 0, 0, 0, TimeSpan.Zero),
+                volume: 150f, // Use bottling UI workflow to calculate desired volume for given number of cases/bottles
+                weight: 0f,
+                alcoholContent: 32.5f,
+                proof: 97.5f, // Use bottling UI workflow to calculate desired proof for given number of cases/bottles
+                storageId: _storages["Storage"].StorageId,
+                spiritTypeReportingId: (int)ReportSpiritTypes.Gin,
+                spiritId: _spirits["Gin"].SpiritId,
+                gainLoss: -.5f,
+                gauged: true,
+                materialsUsed: new List<ObjInfo4Burndwn> {
+                    new ObjInfo4Burndwn {
+                        ID = _productions["ProducedGin"].ProductionId,
+                        OldVal = 0f,
+                        NewVal = 50f,
+                        DistillableOrigin = "prod",
+                        BurningDownMethod = "volume"
+                    }
+                },
+                bottlingInfo: new BottlingObject
+                {
+                    CaseCapacity = 10,
+                    CaseQuantity = 113f,
+                    BottleQuantity = 1130,
+                    BottleCapacity = 500f,
+                },
+                fillTestList: null);
                 #endregion
 
                 #region Processing Report
@@ -5506,8 +5389,8 @@ namespace WebApp.Helpers.Tests
                 reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
                 reportHeaderE.DSP = "DSP-WA-21086";
 
-                DateTime start = new DateTime(2018, 06, 01);
-                DateTime end = new DateTime(2018, 06, 30);
+                DateTimeOffset start = new DateTimeOffset(2018, 06, 01, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset end = new DateTimeOffset(2018, 06, 30, 0, 0, 0, TimeSpan.Zero);
 
                 ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
 
@@ -5619,7 +5502,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 1, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 1000f; // 1000 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 50f;
@@ -5643,9 +5526,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil GNS into GIN and mark it as Ungauged
                 ProductionObject prodFirstDistill = new ProductionObject();
                 prodFirstDistill.BatchName = "RedistilledGns";
-                prodFirstDistill.ProductionDate = new DateTime(2018, 1, 1);
-                prodFirstDistill.ProductionStart = new DateTime(2018, 1, 1);
-                prodFirstDistill.ProductionEnd = new DateTime(2018, 1, 1);
+                prodFirstDistill.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFirstDistill.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFirstDistill.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodFirstDistill.SpiritCutId = 11; // mixed
                 prodFirstDistill.Gauged = false;
                 prodFirstDistill.ProductionType = "Distillation";
@@ -5678,8 +5561,8 @@ namespace WebApp.Helpers.Tests
                 #region Act
 
                 int janDays = DateTime.DaysInMonth(2018, 1);
-                var janStart = new DateTime(2018, 1, 1);
-                var janEnd = new DateTime(2018, 1, janDays);
+                var janStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                var janEnd = new DateTimeOffset(2018, 1, janDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject janStorageReport = _storageReport.GetStorageReportData(janStart, janEnd, _userId);
 
@@ -5722,9 +5605,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil GNS into GIN a second tie and mark it as Ungauged
                 ProductionObject prodSecondDistill = new ProductionObject();
                 prodSecondDistill.BatchName = "RedistilledGns";
-                prodSecondDistill.ProductionDate = new DateTime(2018, 1, 1);
-                prodSecondDistill.ProductionStart = new DateTime(2018, 1, 1);
-                prodSecondDistill.ProductionEnd = new DateTime(2018, 1, 1);
+                prodSecondDistill.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodSecondDistill.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodSecondDistill.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodSecondDistill.SpiritCutId = 11; // mixed
                 prodSecondDistill.Gauged = false;
                 prodSecondDistill.ProductionType = "Distillation";
@@ -5859,7 +5742,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 1, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 1000f; // 1000 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 50f;
@@ -5883,9 +5766,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil GNS into GIN and mark it as Gauged
                 ProductionObject prodFirstDistill = new ProductionObject();
                 prodFirstDistill.BatchName = "RedistilledGns";
-                prodFirstDistill.ProductionDate = new DateTime(2018, 1, 1);
-                prodFirstDistill.ProductionStart = new DateTime(2018, 1, 1);
-                prodFirstDistill.ProductionEnd = new DateTime(2018, 1, 1);
+                prodFirstDistill.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFirstDistill.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFirstDistill.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodFirstDistill.SpiritCutId = 11; // mixed
                 prodFirstDistill.Gauged = true;
                 prodFirstDistill.ProductionType = "Distillation";
@@ -5918,8 +5801,8 @@ namespace WebApp.Helpers.Tests
                 #region Act
 
                 int janDays = DateTime.DaysInMonth(2018, 1);
-                var janStart = new DateTime(2018, 1, 1);
-                var janEnd = new DateTime(2018, 1, janDays);
+                var janStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                var janEnd = new DateTimeOffset(2018, 1, janDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject janStorageReport = _storageReport.GetStorageReportData(janStart, janEnd, _userId);
 
@@ -5975,9 +5858,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil GNS into GIN a second tie and mark it as Gauged
                 ProductionObject prodSecondDistill = new ProductionObject();
                 prodSecondDistill.BatchName = "RedistilledGns";
-                prodSecondDistill.ProductionDate = new DateTime(2018, 1, 1);
-                prodSecondDistill.ProductionStart = new DateTime(2018, 1, 1);
-                prodSecondDistill.ProductionEnd = new DateTime(2018, 1, 1);
+                prodSecondDistill.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodSecondDistill.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodSecondDistill.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodSecondDistill.SpiritCutId = 11; // mixed
                 prodSecondDistill.Gauged = true;
                 prodSecondDistill.ProductionType = "Distillation";
@@ -6118,7 +6001,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Corn";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 1, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.VolumeByWeight = 50f; // 50 lbs
                 purchO.RecordId = materialId;
                 purchO.Price = 350f;
@@ -6138,9 +6021,9 @@ namespace WebApp.Helpers.Tests
                 // Ferment Corn into a Mash
                 ProductionObject prodFermentedCornMash = new ProductionObject();
                 prodFermentedCornMash.BatchName = "FermentedCorn";
-                prodFermentedCornMash.ProductionDate = new DateTime(2018, 1, 1);
-                prodFermentedCornMash.ProductionStart = new DateTime(2018, 1, 1);
-                prodFermentedCornMash.ProductionEnd = new DateTime(2018, 1, 1);
+                prodFermentedCornMash.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFermentedCornMash.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFermentedCornMash.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodFermentedCornMash.Gauged = true;
                 prodFermentedCornMash.ProductionType = "Fermentation";
                 prodFermentedCornMash.Quantity = 500f; // 500 gallons of alcohol
@@ -6172,8 +6055,8 @@ namespace WebApp.Helpers.Tests
                 #region Act
 
                 int janDays = DateTime.DaysInMonth(2018, 1);
-                var janStart = new DateTime(2018, 1, 1);
-                var janEnd = new DateTime(2018, 1, janDays);
+                var janStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                var janEnd = new DateTimeOffset(2018, 1, janDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject janStorageReport = _storageReport.GetStorageReportData(janStart, janEnd, _userId);
                 ProductionReportingObject janProductionReport = _productionReport.GetProductionReportData(janStart, janEnd, _userId);
@@ -6216,9 +6099,9 @@ namespace WebApp.Helpers.Tests
                 // Distill Corn Mash into GNS and mark it as Gauged
                 ProductionObject prodCornMashGNS = new ProductionObject();
                 prodCornMashGNS.BatchName = "DistillGNS";
-                prodCornMashGNS.ProductionDate = new DateTime(2018, 1, 1);
-                prodCornMashGNS.ProductionStart = new DateTime(2018, 1, 1);
-                prodCornMashGNS.ProductionEnd = new DateTime(2018, 1, 1);
+                prodCornMashGNS.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodCornMashGNS.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodCornMashGNS.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodCornMashGNS.SpiritCutId = 11; // mixed
                 prodCornMashGNS.Gauged = true;
                 prodCornMashGNS.ProductionType = "Distillation";
@@ -6367,9 +6250,9 @@ namespace WebApp.Helpers.Tests
                 // Redistill GNS into GIN first time and mark it as Gauged
                 ProductionObject prodFirstDistill = new ProductionObject();
                 prodFirstDistill.BatchName = "Redistilled_GNS_into_GIN_01";
-                prodFirstDistill.ProductionDate = new DateTime(2018, 1, 1);
-                prodFirstDistill.ProductionStart = new DateTime(2018, 1, 1);
-                prodFirstDistill.ProductionEnd = new DateTime(2018, 1, 1);
+                prodFirstDistill.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFirstDistill.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFirstDistill.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodFirstDistill.SpiritCutId = 11; // mixed
                 prodFirstDistill.Gauged = true;
                 prodFirstDistill.ProductionType = "Distillation";
@@ -6477,9 +6360,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil GNS into GIN a second time and mark it as Gauged
                 ProductionObject prodSecondDistill = new ProductionObject();
                 prodSecondDistill.BatchName = "Redistilled_GNS_into_GIN_02";
-                prodSecondDistill.ProductionDate = new DateTime(2018, 1, 1);
-                prodSecondDistill.ProductionStart = new DateTime(2018, 1, 1);
-                prodSecondDistill.ProductionEnd = new DateTime(2018, 1, 1);
+                prodSecondDistill.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodSecondDistill.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodSecondDistill.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodSecondDistill.SpiritCutId = 11; // mixed
                 prodSecondDistill.Gauged = true;
                 prodSecondDistill.ProductionType = "Distillation";
@@ -6652,7 +6535,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchGNS = new PurchaseObject();
                 purchGNS.PurBatchName = "GNS";
                 purchGNS.PurchaseType = "Distilled";
-                purchGNS.PurchaseDate = new DateTime(2018, 1, 1);
+                purchGNS.PurchaseDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 purchGNS.Quantity = 100f; // 100 gallons
                 purchGNS.VolumeByWeight = 0f;
                 purchGNS.AlcoholContent = 50f;
@@ -6677,8 +6560,8 @@ namespace WebApp.Helpers.Tests
                 #region Act
 
                 int janDays = DateTime.DaysInMonth(2018, 1);
-                var janStart = new DateTime(2018, 1, 1);
-                var janEnd = new DateTime(2018, 1, janDays);
+                var janStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                var janEnd = new DateTimeOffset(2018, 1, janDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject janStorageReport = _storageReport.GetStorageReportData(janStart, janEnd, _userId);
 
@@ -6721,7 +6604,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchGin = new PurchaseObject();
                 purchGin.PurBatchName = "Gin";
                 purchGin.PurchaseType = "Distilled";
-                purchGin.PurchaseDate = new DateTime(2018, 1, 1);
+                purchGin.PurchaseDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 purchGin.Quantity = 100f; // 100 gallons
                 purchGin.VolumeByWeight = 0f;
                 purchGin.AlcoholContent = 50f;
@@ -6871,7 +6754,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS Purchase Test";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 90f;
@@ -6898,9 +6781,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil GNS into GIN and mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "GNS to Gin";
-                prodO.ProductionDate = new DateTime(2017, 09, 3);
-                prodO.ProductionStart = new DateTime(2017, 09, 3);
-                prodO.ProductionEnd = new DateTime(2017, 09, 3);
+                prodO.ProductionDate = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = true;
                 prodO.ProductionType = "Distillation";
@@ -6930,9 +6813,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "GIN Blending Test";
-                prodBlend.ProductionDate = new DateTime(2017, 09, 5);
-                prodBlend.ProductionStart = new DateTime(2017, 09, 5);
-                prodBlend.ProductionEnd = new DateTime(2017, 09, 5);
+                prodBlend.ProductionDate = new DateTimeOffset(2017, 09, 5, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2017, 09, 5, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2017, 09, 5, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 173.9f; // 173.9 gallons of alcohol
@@ -6972,9 +6855,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Bottling Record
                 ProductionObject prodBottl = new ProductionObject();
                 prodBottl.BatchName = "GIN Bottling Test ";
-                prodBottl.ProductionDate = new DateTime(2017, 09, 6);
-                prodBottl.ProductionStart = new DateTime(2017, 09, 6);
-                prodBottl.ProductionEnd = new DateTime(2017, 09, 6);
+                prodBottl.ProductionDate = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionStart = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionEnd = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
                 prodBottl.Gauged = true;
                 prodBottl.ProductionType = "Bottling";
                 prodBottl.Quantity = 149.92f; // 150 gallons of alcohol
@@ -7026,8 +6909,8 @@ namespace WebApp.Helpers.Tests
                 reportHeaderE.DSP = "DSP-WA-21086";
 
                 // reporting time range
-                DateTime start = new DateTime(2017, 09, 01);
-                DateTime end = new DateTime(2017, 09, 30);
+                DateTimeOffset start = new DateTimeOffset(2017, 09, 01, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset end = new DateTimeOffset(2017, 09, 30, 0, 0, 0, TimeSpan.Zero);
 
                 #region Produciton
                 /* PRODUCTION REPORT */
@@ -7367,7 +7250,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS Purchase Test";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 90f;
@@ -7394,9 +7277,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil GNS into GIN and mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "GNS to Gin";
-                prodO.ProductionDate = new DateTime(2017, 09, 3);
-                prodO.ProductionStart = new DateTime(2017, 09, 3);
-                prodO.ProductionEnd = new DateTime(2017, 09, 3);
+                prodO.ProductionDate = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = true;
                 prodO.ProductionType = "Distillation";
@@ -7435,8 +7318,8 @@ namespace WebApp.Helpers.Tests
                 reportHeaderE.DSP = "DSP-WA-21086";
 
                 // reporting time range
-                DateTime start = new DateTime(2017, 09, 01);
-                DateTime end = new DateTime(2017, 09, 30);
+                DateTimeOffset start = new DateTimeOffset(2017, 09, 01, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset end = new DateTimeOffset(2017, 09, 30, 0, 0, 0, TimeSpan.Zero);
 
                 #region Produciton
                 /* PRODUCTION REPORT */
@@ -7724,7 +7607,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS Purchase Test";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 02, 10);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 02, 10, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 96f;
@@ -7751,9 +7634,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil GNS into GIN and mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Navy Gin";
-                prodO.ProductionDate = new DateTime(2018, 02, 11);
-                prodO.ProductionStart = new DateTime(2018, 02, 11);
-                prodO.ProductionEnd = new DateTime(2018, 02, 11);
+                prodO.ProductionDate = new DateTimeOffset(2018, 02, 11, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 02, 11, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 02, 11, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = true;
                 prodO.ProductionType = "Distillation";
@@ -7784,9 +7667,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil Navy GIN into another Navy GIN because the old batch was bad and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "Navy Gin Redistil";
-                prodO1.ProductionDate = new DateTime(2018, 03, 10);
-                prodO1.ProductionStart = new DateTime(2018, 03, 10);
-                prodO1.ProductionEnd = new DateTime(2018, 03, 10);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 03, 10, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 03, 10, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 03, 10, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -7826,8 +7709,8 @@ namespace WebApp.Helpers.Tests
                 reportHeaderE.DSP = "DSP-WA-21086";
 
                 // reporting time range
-                DateTime start = new DateTime(2018, 03, 01);
-                DateTime end = new DateTime(2018, 03, 31);
+                DateTimeOffset start = new DateTimeOffset(2018, 03, 01, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset end = new DateTimeOffset(2018, 03, 31, 0, 0, 0, TimeSpan.Zero);
 
                 /* PRODUCTION REPORT */
                 ProdReportPart1 part1E = new ProdReportPart1();
@@ -7932,8 +7815,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2017, 09, 01);
-            DateTime end = new DateTime(2017, 09, 30);
+            DateTimeOffset start = new DateTimeOffset(2017, 09, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2017, 09, 30, 0, 0, 0, TimeSpan.Zero);
 
             // List used in assertions for received for redistillation
             List<Tuple<int, float>> received4RedistillationLine15L = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
@@ -8007,7 +7890,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "test7Purchase";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 1000f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 9f;
@@ -8033,9 +7916,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "1stDistilRunAndGauged";
-                prodO.ProductionDate = new DateTime(2017, 09, 2);
-                prodO.ProductionStart = new DateTime(2017, 09, 2);
-                prodO.ProductionEnd = new DateTime(2017, 09, 2);
+                prodO.ProductionDate = new DateTimeOffset(2017, 09, 2, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 09, 2, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 09, 2, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = true;
                 prodO.ProductionType = "Distillation";
@@ -8066,9 +7949,9 @@ namespace WebApp.Helpers.Tests
                 // create 2nd Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "2ndDistilRunAndGauged";
-                prodO1.ProductionDate = new DateTime(2017, 09, 3);
-                prodO1.ProductionStart = new DateTime(2017, 09, 3);
-                prodO1.ProductionEnd = new DateTime(2017, 09, 3);
+                prodO1.ProductionDate = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -8233,8 +8116,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2017, 09, 01);
-            DateTime end = new DateTime(2017, 09, 30);
+            DateTimeOffset start = new DateTimeOffset(2017, 09, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2017, 09, 30, 0, 0, 0, TimeSpan.Zero);
 
             // List used in assertions for received for redistillation
             List<Tuple<int, float>> received4RedistillationLine15L = new List<Tuple<int, float>>(); // <SpiritTypeID, ProofGallons>
@@ -8308,7 +8191,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 1000f;
                 purchO.RecordId = grapeMaterialId;
@@ -8329,9 +8212,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2017, 09, 2);
-                prodO.ProductionStart = new DateTime(2017, 09, 7);
-                prodO.ProductionEnd = new DateTime(2017, 09, 7);
+                prodO.ProductionDate = new DateTimeOffset(2017, 09, 2, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 09, 7, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 09, 7, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -8362,9 +8245,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "DistilRunAndGauged";
-                prodO1.ProductionDate = new DateTime(2017, 09, 8);
-                prodO1.ProductionStart = new DateTime(2017, 09, 8);
-                prodO1.ProductionEnd = new DateTime(2017, 09, 8);
+                prodO1.ProductionDate = new DateTimeOffset(2017, 09, 8, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2017, 09, 8, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2017, 09, 8, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -8471,8 +8354,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2017, 09, 01);
-            DateTime end = new DateTime(2017, 09, 30);
+            DateTimeOffset start = new DateTimeOffset(2017, 09, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2017, 09, 30, 0, 0, 0, TimeSpan.Zero);
 
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
 
@@ -8539,7 +8422,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 1000f;
                 purchO.RecordId = grapeMaterialId;
@@ -8561,9 +8444,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2017, 09, 2);
-                prodO.ProductionStart = new DateTime(2017, 09, 7);
-                prodO.ProductionEnd = new DateTime(2017, 09, 7);
+                prodO.ProductionDate = new DateTimeOffset(2017, 09, 2, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 09, 7, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 09, 7, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -8708,8 +8591,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2018, 02, 01);
-            DateTime end = new DateTime(2018, 02, 28);
+            DateTimeOffset start = new DateTimeOffset(2018, 02, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2018, 02, 28, 0, 0, 0, TimeSpan.Zero);
 
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
 
@@ -8757,7 +8640,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 02, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 02, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 4000f;
                 purchO.RecordId = grapeMaterialId;
@@ -8779,9 +8662,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2018, 02, 15);
-                prodO.ProductionStart = new DateTime(2018, 02, 15);
-                prodO.ProductionEnd = new DateTime(2018, 02, 15);
+                prodO.ProductionDate = new DateTimeOffset(2018, 02, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 02, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 02, 15, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -8812,9 +8695,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "DistilRunAndGauged";
-                prodO1.ProductionDate = new DateTime(2018, 03, 20);
-                prodO1.ProductionStart = new DateTime(2018, 03, 20);
-                prodO1.ProductionEnd = new DateTime(2018, 03, 20);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 03, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 03, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 03, 20, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -8902,8 +8785,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2018, 02, 01);
-            DateTime end = new DateTime(2018, 02, 28);
+            DateTimeOffset start = new DateTimeOffset(2018, 02, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2018, 02, 28, 0, 0, 0, TimeSpan.Zero);
 
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
 
@@ -8951,7 +8834,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 02, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 02, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 4000f;
                 purchO.RecordId = grapeMaterialId;
@@ -8973,9 +8856,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2018, 02, 15);
-                prodO.ProductionStart = new DateTime(2018, 02, 15);
-                prodO.ProductionEnd = new DateTime(2018, 02, 15);
+                prodO.ProductionDate = new DateTimeOffset(2018, 02, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 02, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 02, 15, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -9006,9 +8889,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "DistilRunAndGauged";
-                prodO1.ProductionDate = new DateTime(2018, 02, 20);
-                prodO1.ProductionStart = new DateTime(2018, 02, 20);
-                prodO1.ProductionEnd = new DateTime(2018, 02, 20);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 02, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 02, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 02, 20, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -9111,8 +8994,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2018, 01, 01);
-            DateTime end = new DateTime(2018, 01, 31);
+            DateTimeOffset start = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2018, 01, 31, 0, 0, 0, TimeSpan.Zero);
 
             // int - table row id
             // Table - enum identifying table type
@@ -9162,7 +9045,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 2000f;
                 purchO.RecordId = grapeMaterialId;
@@ -9184,9 +9067,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2018, 01, 15);
-                prodO.ProductionStart = new DateTime(2018, 01, 15);
-                prodO.ProductionEnd = new DateTime(2018, 01, 15);
+                prodO.ProductionDate = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -9217,9 +9100,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "DistilRunAndGauged";
-                prodO1.ProductionDate = new DateTime(2018, 01, 20);
-                prodO1.ProductionStart = new DateTime(2018, 01, 20);
-                prodO1.ProductionEnd = new DateTime(2018, 01, 20);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -9380,8 +9263,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2018, 01, 01);
-            DateTime end = new DateTime(2018, 01, 31);
+            DateTimeOffset start = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2018, 01, 31, 0, 0, 0, TimeSpan.Zero);
 
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
 
@@ -9429,7 +9312,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 2000f;
                 purchO.RecordId = grapeMaterialId;
@@ -9451,9 +9334,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2018, 01, 15);
-                prodO.ProductionStart = new DateTime(2018, 01, 15);
-                prodO.ProductionEnd = new DateTime(2018, 01, 15);
+                prodO.ProductionDate = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -9484,9 +9367,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "DistilRunAndGauged";
-                prodO1.ProductionDate = new DateTime(2018, 01, 20);
-                prodO1.ProductionStart = new DateTime(2018, 01, 20);
-                prodO1.ProductionEnd = new DateTime(2018, 01, 20);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -9799,7 +9682,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 2000f;
                 purchO.RecordId = grapeMaterialId;
@@ -9893,7 +9776,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Wine ";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 2000f;
                 purchO.VolumeByWeight = 0f;
                 purchO.RecordId = wineMaterialId;
@@ -9984,7 +9867,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS ";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 2000f;
                 purchO.VolumeByWeight = 0f;
                 purchO.ProofGallon = 96f;
@@ -10076,7 +9959,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Honey";
                 purchO.PurchaseType = "Additive";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 500f;
                 purchO.ProofGallon = 0f;
@@ -10170,7 +10053,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Packaging Bottles";
                 purchO.PurchaseType = "Supply";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 200f;
                 purchO.VolumeByWeight = 0f;
                 purchO.ProofGallon = 0f;
@@ -10266,7 +10149,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Vendor_Deletion_Test";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 2000f;
                 purchO.RecordId = grapeMaterialId;
@@ -10393,7 +10276,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Storage_Deletion_Test";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 2000f;
                 purchO.RecordId = grapeMaterialId;
@@ -10446,7 +10329,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchase = new PurchaseObject();
                 purchase.PurBatchName = "Delete_Storage_Purchase";
                 purchase.PurchaseType = "Fermented";
-                purchase.PurchaseDate = new DateTime(2017, 09, 1);
+                purchase.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchase.Quantity = 1000f; // 100 gallons
                 purchase.VolumeByWeight = 0f;
                 purchase.AlcoholContent = 10f;
@@ -10465,9 +10348,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "TEST",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Distillation",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -10613,7 +10496,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchase = new PurchaseObject();
                 purchase.PurBatchName = "Delete_Spirit_Purchase";
                 purchase.PurchaseType = "Fermented";
-                purchase.PurchaseDate = new DateTime(2017, 09, 1);
+                purchase.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchase.Quantity = 1000f; // 100 gallons
                 purchase.VolumeByWeight = 0f;
                 purchase.AlcoholContent = 10f;
@@ -10637,9 +10520,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "TEST",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Blending",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -10780,7 +10663,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "RawMaterial_Deletion_Test";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 2000f;
                 purchO.RecordId = rawMaterialId;
@@ -10833,7 +10716,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchase = new PurchaseObject();
                 purchase.PurBatchName = "Delete_RawMaterial_Purchase";
                 purchase.PurchaseType = "Fermented";
-                purchase.PurchaseDate = new DateTime(2017, 09, 1);
+                purchase.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchase.Quantity = 1000f; // 100 gallons
                 purchase.VolumeByWeight = 0f;
                 purchase.AlcoholContent = 10f;
@@ -10857,9 +10740,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "TEST",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Blending",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -10996,7 +10879,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchFermentable = new PurchaseObject();
                 purchFermentable.PurBatchName = "Forward_Deletion_Purchase_Fermentable_Test";
                 purchFermentable.PurchaseType = "Fermentable";
-                purchFermentable.PurchaseDate = new DateTime(2018, 01, 01);
+                purchFermentable.PurchaseDate = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero);
                 purchFermentable.Quantity = 0f;
                 purchFermentable.VolumeByWeight = 2000f;
                 purchFermentable.RecordId = grapeMaterialId;
@@ -11021,9 +10904,9 @@ namespace WebApp.Helpers.Tests
                 {
                     AlcoholContent = 39f,
                     BatchName = "TEST",
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Fermentation",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -11157,7 +11040,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchFermented = new PurchaseObject();
                 purchFermented.PurBatchName = "Forward_Deletion_Purchase_Fermented_Test";
                 purchFermented.PurchaseType = "Fermented";
-                purchFermented.PurchaseDate = new DateTime(2018, 01, 01);
+                purchFermented.PurchaseDate = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero);
                 purchFermented.Quantity = 1000f;
                 purchFermented.VolumeByWeight = 0f;
                 purchFermented.RecordId = rawMaterialId;
@@ -11184,9 +11067,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "TEST",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Distillation",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -11321,7 +11204,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchDistilled = new PurchaseObject();
                 purchDistilled.PurBatchName = "Forward_Deletion_Purchase_Distilled_Test";
                 purchDistilled.PurchaseType = "Distilled";
-                purchDistilled.PurchaseDate = new DateTime(2018, 01, 01);
+                purchDistilled.PurchaseDate = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero);
                 purchDistilled.Quantity = 1000f;
                 purchDistilled.VolumeByWeight = 0f;
                 purchDistilled.RecordId = rawMaterialId;
@@ -11348,9 +11231,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "TEST",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Distillation",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -11409,9 +11292,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "TEST",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Blending",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -11466,9 +11349,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "TEST",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Bottling",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -11599,7 +11482,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchAdditive = new PurchaseObject();
                 purchAdditive.PurBatchName = "Forward_Deletion_Purchase_Additive_Test";
                 purchAdditive.PurchaseType = "Additive";
-                purchAdditive.PurchaseDate = new DateTime(2018, 01, 01);
+                purchAdditive.PurchaseDate = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero);
                 purchAdditive.Quantity = 1000f;
                 purchAdditive.VolumeByWeight = 0f;
                 purchAdditive.RecordId = rawMaterialId;
@@ -11626,9 +11509,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "TEST",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Blending",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -11763,7 +11646,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchFermentable = new PurchaseObject();
                 purchFermentable.PurBatchName = "Fementable_Purchase_Test";
                 purchFermentable.PurchaseType = "Fermentable";
-                purchFermentable.PurchaseDate = new DateTime(2018, 01, 01);
+                purchFermentable.PurchaseDate = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero);
                 purchFermentable.Quantity = 0f;
                 purchFermentable.VolumeByWeight = 2000f;
                 purchFermentable.RecordId = grapeMaterialId;
@@ -11788,9 +11671,9 @@ namespace WebApp.Helpers.Tests
                 {
                     AlcoholContent = 39f,
                     BatchName = "Forward_Deletion_Fermenatation_Test_01",
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Fermentation",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -11817,9 +11700,9 @@ namespace WebApp.Helpers.Tests
                 {
                     AlcoholContent = 39f,
                     BatchName = "Forward_Deletion_Fermenatation_Test_02",
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Distillation",
                     ProofGallon = 78f,
                     Quantity = 50f,
@@ -11956,7 +11839,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchFermented = new PurchaseObject();
                 purchFermented.PurBatchName = "Fermented_Purchase_Test";
                 purchFermented.PurchaseType = "Fermented";
-                purchFermented.PurchaseDate = new DateTime(2018, 01, 01);
+                purchFermented.PurchaseDate = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero);
                 purchFermented.Quantity = 1000f;
                 purchFermented.VolumeByWeight = 0f;
                 purchFermented.RecordId = rawMaterialId;
@@ -11981,9 +11864,9 @@ namespace WebApp.Helpers.Tests
                 {
                     AlcoholContent = 50f,
                     BatchName = "Forward_Deletion_Distillation",
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Distillation",
                     ProofGallon = 1000f,
                     Quantity = 1000f,
@@ -12014,9 +11897,9 @@ namespace WebApp.Helpers.Tests
                 {
                     AlcoholContent = 50f,
                     BatchName = "Forward_Deletion_Distillation-Distillation",
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Distillation",
                     ProofGallon = 100f,
                     Quantity = 100f,
@@ -12075,9 +11958,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "Forward_Deletion_Distillation-Blending",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Blending",
                     ProofGallon = 100f,
                     Quantity = 100f,
@@ -12129,9 +12012,9 @@ namespace WebApp.Helpers.Tests
                 ProductionObject prodObjectBottling = new ProductionObject
                 {
                     BatchName = "Forward_Deletion_Distillation-Bottling",
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     Gauged = true,
                     ProductionType = "Bottling",
                     Quantity = 100f,
@@ -12273,7 +12156,7 @@ namespace WebApp.Helpers.Tests
                 {
                     PurBatchName = "Forward_Deletion_Purchase_Distilled_Test",
                     PurchaseType = "Distilled",
-                    PurchaseDate = new DateTime(2018, 01, 01),
+                    PurchaseDate = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero),
                     Quantity = 1000f,
                     VolumeByWeight = 0f,
                     RecordId = rawMaterialId,
@@ -12299,9 +12182,9 @@ namespace WebApp.Helpers.Tests
                 {
                     AlcoholContent = 50f,
                     BatchName = "Forward_Deletion_Distillation",
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Distillation",
                     ProofGallon = 1000f,
                     Quantity = 1000f,
@@ -12330,9 +12213,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "Forward_Deletion_Blending",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Blending",
                     ProofGallon = 100f,
                     Quantity = 100f,
@@ -12358,9 +12241,9 @@ namespace WebApp.Helpers.Tests
                 ProductionObject prodObjectBottling = new ProductionObject
                 {
                     BatchName = "Forward_Deletion_Blending-Bottling",
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     Gauged = true,
                     ProductionType = "Bottling",
                     Quantity = 100f,
@@ -12493,7 +12376,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchase = new PurchaseObject();
                 purchase.PurBatchName = "DeleteProductionTest_Purchase";
                 purchase.PurchaseType = "Fermented";
-                purchase.PurchaseDate = new DateTime(2017, 09, 1);
+                purchase.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchase.Quantity = 1000f; // 100 gallons
                 purchase.VolumeByWeight = 0f;
                 purchase.AlcoholContent = 10f;
@@ -12512,9 +12395,9 @@ namespace WebApp.Helpers.Tests
                     BatchName = "TEST",
                     Gauged = true,
                     MaterialKindReportingID = 92,
-                    ProductionDate = new DateTime(2018, 1, 1),
-                    ProductionEnd = new DateTime(2018, 1, 1),
-                    ProductionStart = new DateTime(2018, 1, 1),
+                    ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     ProductionType = "Distillation",
                     ProofGallon = 78f,
                     Quantity = 100f,
@@ -12620,8 +12503,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2018, 01, 01);
-            DateTime end = new DateTime(2018, 01, 31);
+            DateTimeOffset start = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2018, 01, 31, 0, 0, 0, TimeSpan.Zero);
 
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
 
@@ -12689,7 +12572,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 2000f;
                 purchO.RecordId = grapeMaterialId;
@@ -12711,9 +12594,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2018, 01, 15);
-                prodO.ProductionStart = new DateTime(2018, 01, 15);
-                prodO.ProductionEnd = new DateTime(2018, 01, 15);
+                prodO.ProductionDate = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -12744,9 +12627,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "DistilRunAndGauged";
-                prodO1.ProductionDate = new DateTime(2018, 01, 20);
-                prodO1.ProductionStart = new DateTime(2018, 01, 20);
-                prodO1.ProductionEnd = new DateTime(2018, 01, 20);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -12779,9 +12662,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "testProdBlend";
-                prodBlend.ProductionDate = new DateTime(2018, 01, 21);
-                prodBlend.ProductionStart = new DateTime(2018, 01, 21);
-                prodBlend.ProductionEnd = new DateTime(2018, 01, 21);
+                prodBlend.ProductionDate = new DateTimeOffset(2018, 01, 21, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2018, 01, 21, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2018, 01, 21, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 22.5f; // 22.5 gallons of alcohol
@@ -12944,8 +12827,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2017, 09, 01);
-            DateTime end = new DateTime(2017, 09, 30);
+            DateTimeOffset start = new DateTimeOffset(2017, 09, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2017, 09, 30, 0, 0, 0, TimeSpan.Zero);
 
             try
             {
@@ -13009,7 +12892,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "test7Purchase";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 9f;
@@ -13035,9 +12918,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and don't mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
-                prodO.ProductionDate = new DateTime(2017, 09, 3);
-                prodO.ProductionStart = new DateTime(2017, 09, 3);
-                prodO.ProductionEnd = new DateTime(2017, 09, 3);
+                prodO.ProductionDate = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = false;
                 prodO.ProductionType = "Distillation";
@@ -13068,9 +12951,9 @@ namespace WebApp.Helpers.Tests
                 // create 2nd Production Distillation Record and mark it as Gauged
                 ProductionObject prodO2 = new ProductionObject();
                 prodO2.BatchName = "testGaugedDistillRun";
-                prodO2.ProductionDate = new DateTime(2017, 09, 4);
-                prodO2.ProductionStart = new DateTime(2017, 09, 4);
-                prodO2.ProductionEnd = new DateTime(2017, 09, 4);
+                prodO2.ProductionDate = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionStart = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionEnd = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
                 prodO2.SpiritCutId = 9; // hearts
                 prodO2.Gauged = true;
                 prodO2.ProductionType = "Distillation";
@@ -13100,9 +12983,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "testProdBlend";
-                prodBlend.ProductionDate = new DateTime(2017, 10, 6);
-                prodBlend.ProductionStart = new DateTime(2017, 10, 6);
-                prodBlend.ProductionEnd = new DateTime(2017, 10, 6);
+                prodBlend.ProductionDate = new DateTimeOffset(2017, 10, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2017, 10, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2017, 10, 6, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 22.5f; // 22.5 gallons of alcohol
@@ -13143,9 +13026,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Bottling Record
                 ProductionObject prodBottl = new ProductionObject();
                 prodBottl.BatchName = "testProdBottling ";
-                prodBottl.ProductionDate = new DateTime(2017, 10, 6);
-                prodBottl.ProductionStart = new DateTime(2017, 10, 6);
-                prodBottl.ProductionEnd = new DateTime(2017, 10, 6);
+                prodBottl.ProductionDate = new DateTimeOffset(2017, 10, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionStart = new DateTimeOffset(2017, 10, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionEnd = new DateTimeOffset(2017, 10, 6, 0, 0, 0, TimeSpan.Zero);
                 prodBottl.Gauged = true;
                 prodBottl.ProductionType = "Bottling";
                 prodBottl.Quantity = 22.39f; // 22.39 gallons of alcohol
@@ -13284,7 +13167,7 @@ namespace WebApp.Helpers.Tests
                 // Test October Production report
                 ProductionReportingObject actualProdReportObjectOctober = new ProductionReportingObject();
 
-                actualProdReportObjectOctober = _productionReport.GetProductionReportData(new DateTime(2017, 10, 01), new DateTime(2017, 10, 31), _userId);
+                actualProdReportObjectOctober = _productionReport.GetProductionReportData(new DateTimeOffset(2017, 10, 01, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2017, 10, 31, 0, 0, 0, TimeSpan.Zero), _userId);
                 // verify Production report header
                 Assert.AreEqual(reportHeaderE.DSP, actualProdReportObjectOctober.Header.DSP);
                 Assert.AreEqual(reportHeaderE.EIN, actualProdReportObjectOctober.Header.EIN);
@@ -13392,7 +13275,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "test7Purchase";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2017, 11, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 11, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 98f;
@@ -13416,9 +13299,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
-                prodO.ProductionDate = new DateTime(2017, 11, 3);
-                prodO.ProductionStart = new DateTime(2017, 11, 3);
-                prodO.ProductionEnd = new DateTime(2017, 11, 3);
+                prodO.ProductionDate = new DateTimeOffset(2017, 11, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 11, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 11, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = true;
                 prodO.ProductionType = "Distillation";
@@ -13450,7 +13333,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO1 = new PurchaseObject();
                 purchO1.PurBatchName = "test7Purchase";
                 purchO1.PurchaseType = "Fermented";
-                purchO1.PurchaseDate = new DateTime(2017, 11, 1);
+                purchO1.PurchaseDate = new DateTimeOffset(2017, 11, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO1.Quantity = 100f; // 100 gallons
                 purchO1.VolumeByWeight = 0f;
                 purchO1.AlcoholContent = 98f;
@@ -13474,9 +13357,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "test1stDistill2";
-                prodO1.ProductionDate = new DateTime(2017, 11, 3);
-                prodO1.ProductionStart = new DateTime(2017, 11, 3);
-                prodO1.ProductionEnd = new DateTime(2017, 11, 3);
+                prodO1.ProductionDate = new DateTimeOffset(2017, 11, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2017, 11, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2017, 11, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -13509,8 +13392,8 @@ namespace WebApp.Helpers.Tests
                 #region Act
 
                 int novDays = DateTime.DaysInMonth(2017, 11);
-                var novStart = new DateTime(2017, 11, 1);
-                var novEnd = new DateTime(2017, 11, novDays);
+                var novStart = new DateTimeOffset(2017, 11, 1, 0, 0, 0, TimeSpan.Zero);
+                var novEnd = new DateTimeOffset(2017, 11, novDays, 0, 0, 0, TimeSpan.Zero);
 
                 ProductionReportingObject productionReport = _productionReport.GetProductionReportData(novStart, novEnd, _userId);
 
@@ -13571,8 +13454,8 @@ namespace WebApp.Helpers.Tests
             int purchaseId = 0;
             int productionId = 0;
 
-            DateTime start = new DateTime(2017, 09, 01);
-            DateTime end = new DateTime(2017, 09, 30);
+            DateTimeOffset start = new DateTimeOffset(2017, 09, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2017, 09, 30, 0, 0, 0, TimeSpan.Zero);
 
             try
             {
@@ -13636,7 +13519,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Feremented Purchase";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 9f;
@@ -13662,9 +13545,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and don't mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
-                prodO.ProductionDate = new DateTime(2017, 09, 3);
-                prodO.ProductionStart = new DateTime(2017, 09, 3);
-                prodO.ProductionEnd = new DateTime(2017, 09, 3);
+                prodO.ProductionDate = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = false;
                 prodO.ProductionType = "Distillation";
@@ -13695,9 +13578,9 @@ namespace WebApp.Helpers.Tests
                 // create 2nd Production Distillation Record and mark it as Gauged
                 ProductionObject prodO2 = new ProductionObject();
                 prodO2.BatchName = "testGaugedDistillRun";
-                prodO2.ProductionDate = new DateTime(2017, 09, 4);
-                prodO2.ProductionStart = new DateTime(2017, 09, 4);
-                prodO2.ProductionEnd = new DateTime(2017, 09, 4);
+                prodO2.ProductionDate = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionStart = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionEnd = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
                 prodO2.SpiritCutId = 9; // hearts
                 prodO2.Gauged = true;
                 prodO2.ProductionType = "Distillation";
@@ -13728,9 +13611,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "testProdBlend";
-                prodBlend.ProductionDate = new DateTime(2017, 09, 6);
-                prodBlend.ProductionStart = new DateTime(2017, 09, 6);
-                prodBlend.ProductionEnd = new DateTime(2017, 09, 6);
+                prodBlend.ProductionDate = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 22.5f; // 22.5 gallons of alcohol
@@ -13771,9 +13654,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Bottling Record
                 ProductionObject prodBottl = new ProductionObject();
                 prodBottl.BatchName = "testProdBottling ";
-                prodBottl.ProductionDate = new DateTime(2017, 09, 6);
-                prodBottl.ProductionStart = new DateTime(2017, 09, 6);
-                prodBottl.ProductionEnd = new DateTime(2017, 09, 6);
+                prodBottl.ProductionDate = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionStart = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionEnd = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
                 prodBottl.Gauged = true;
                 prodBottl.ProductionType = "Bottling";
                 prodBottl.Quantity = 22.39f; // 22.39 gallons of alcohol
@@ -14343,8 +14226,8 @@ namespace WebApp.Helpers.Tests
             int purchaseId = 0;
             int productionId = 0;
 
-            DateTime start = new DateTime(2017, 09, 01);
-            DateTime end = new DateTime(2017, 09, 30);
+            DateTimeOffset start = new DateTimeOffset(2017, 09, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2017, 09, 30, 0, 0, 0, TimeSpan.Zero);
 
             try
             {
@@ -14408,7 +14291,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Feremented Purchase";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 9f;
@@ -14434,9 +14317,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and don't mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
-                prodO.ProductionDate = new DateTime(2017, 09, 3);
-                prodO.ProductionStart = new DateTime(2017, 09, 3);
-                prodO.ProductionEnd = new DateTime(2017, 09, 3);
+                prodO.ProductionDate = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = false;
                 prodO.ProductionType = "Distillation";
@@ -14467,9 +14350,9 @@ namespace WebApp.Helpers.Tests
                 // create 2nd Production Distillation Record and mark it as Gauged
                 ProductionObject prodO2 = new ProductionObject();
                 prodO2.BatchName = "testGaugedDistillRun";
-                prodO2.ProductionDate = new DateTime(2017, 09, 4);
-                prodO2.ProductionStart = new DateTime(2017, 09, 4);
-                prodO2.ProductionEnd = new DateTime(2017, 09, 4);
+                prodO2.ProductionDate = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionStart = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionEnd = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
                 prodO2.SpiritCutId = 9; // hearts
                 prodO2.Gauged = true;
                 prodO2.GainLoss = -10f;
@@ -14501,9 +14384,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "testProdBlend";
-                prodBlend.ProductionDate = new DateTime(2017, 09, 6);
-                prodBlend.ProductionStart = new DateTime(2017, 09, 6);
-                prodBlend.ProductionEnd = new DateTime(2017, 09, 6);
+                prodBlend.ProductionDate = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2017, 09, 6, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 22.5f; // 22.5 gallons of alcohol
@@ -15168,8 +15051,8 @@ namespace WebApp.Helpers.Tests
             int purchaseId = 0;
             int productionId = 0;
 
-            DateTime start = new DateTime(2017, 09, 01);
-            DateTime end = new DateTime(2017, 09, 30);
+            DateTimeOffset start = new DateTimeOffset(2017, 09, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2017, 09, 30, 0, 0, 0, TimeSpan.Zero);
 
             try
             {
@@ -15233,7 +15116,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Feremented Purchase";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2017, 09, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2017, 09, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 9f;
@@ -15259,9 +15142,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and don't mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
-                prodO.ProductionDate = new DateTime(2017, 09, 3);
-                prodO.ProductionStart = new DateTime(2017, 09, 3);
-                prodO.ProductionEnd = new DateTime(2017, 09, 3);
+                prodO.ProductionDate = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2017, 09, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = false;
                 prodO.ProductionType = "Distillation";
@@ -15292,9 +15175,9 @@ namespace WebApp.Helpers.Tests
                 // create 2nd Production Distillation Record and mark it as Gauged
                 ProductionObject prodO2 = new ProductionObject();
                 prodO2.BatchName = "testGaugedDistillRun";
-                prodO2.ProductionDate = new DateTime(2017, 09, 4);
-                prodO2.ProductionStart = new DateTime(2017, 09, 4);
-                prodO2.ProductionEnd = new DateTime(2017, 09, 4);
+                prodO2.ProductionDate = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionStart = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionEnd = new DateTimeOffset(2017, 09, 4, 0, 0, 0, TimeSpan.Zero);
                 prodO2.SpiritCutId = 9; // hearts
                 prodO2.Gauged = true;
                 prodO2.ProductionType = "Distillation";
@@ -15692,8 +15575,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2018, 01, 01);
-            DateTime end = new DateTime(2018, 01, 31);
+            DateTimeOffset start = new DateTimeOffset(2018, 01, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2018, 01, 31, 0, 0, 0, TimeSpan.Zero);
 
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
 
@@ -15761,7 +15644,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 01, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 01, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 2000f;
                 purchO.RecordId = grapeMaterialId;
@@ -15783,9 +15666,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2018, 01, 15);
-                prodO.ProductionStart = new DateTime(2018, 01, 15);
-                prodO.ProductionEnd = new DateTime(2018, 01, 15);
+                prodO.ProductionDate = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -15816,9 +15699,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "DistilRunAndGauged";
-                prodO1.ProductionDate = new DateTime(2018, 01, 20);
-                prodO1.ProductionStart = new DateTime(2018, 01, 20);
-                prodO1.ProductionEnd = new DateTime(2018, 01, 20);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -15850,9 +15733,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "testProdBlend";
-                prodBlend.ProductionDate = new DateTime(2018, 01, 21);
-                prodBlend.ProductionStart = new DateTime(2018, 01, 21);
-                prodBlend.ProductionEnd = new DateTime(2018, 01, 21);
+                prodBlend.ProductionDate = new DateTimeOffset(2018, 01, 21, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2018, 01, 21, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2018, 01, 21, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 22.5f;
@@ -15894,9 +15777,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Bottling Record
                 ProductionObject prodBottl = new ProductionObject();
                 prodBottl.BatchName = "testProdBottling ";
-                prodBottl.ProductionDate = new DateTime(2018, 01, 22);
-                prodBottl.ProductionStart = new DateTime(2018, 01, 22);
-                prodBottl.ProductionEnd = new DateTime(2018, 01, 22);
+                prodBottl.ProductionDate = new DateTimeOffset(2018, 01, 22, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionStart = new DateTimeOffset(2018, 01, 22, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionEnd = new DateTimeOffset(2018, 01, 22, 0, 0, 0, TimeSpan.Zero);
                 prodBottl.Gauged = true;
                 prodBottl.ProductionType = "Bottling";
                 prodBottl.Quantity = 22.39f; // 22.39 gallons of alcohol
@@ -16173,8 +16056,8 @@ namespace WebApp.Helpers.Tests
             int purchaseId = 0;
             int productionId = 0;
 
-            DateTime start = new DateTime(2018, 03, 01);
-            DateTime end = new DateTime(2018, 03, 31);
+            DateTimeOffset start = new DateTimeOffset(2018, 03, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2018, 03, 31, 0, 0, 0, TimeSpan.Zero);
 
             try
             {
@@ -16237,7 +16120,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Feremented Purchase";
                 purchO.PurchaseType = "Fermented";
-                purchO.PurchaseDate = new DateTime(2018, 03, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 03, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 9f;
@@ -16263,9 +16146,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and don't mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
-                prodO.ProductionDate = new DateTime(2018, 03, 3);
-                prodO.ProductionStart = new DateTime(2018, 03, 3);
-                prodO.ProductionEnd = new DateTime(2018, 03, 3);
+                prodO.ProductionDate = new DateTimeOffset(2018, 03, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 03, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 03, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = true;
                 prodO.ProductionType = "Distillation";
@@ -18327,8 +18210,8 @@ namespace WebApp.Helpers.Tests
             int gnsMaterialId = 0;
             int waterMaterialId = 0;
 
-            DateTime start = new DateTime(2018, 06, 01);
-            DateTime end = new DateTime(2018, 06, 30);
+            DateTimeOffset start = new DateTimeOffset(2018, 06, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2018, 06, 30, 0, 0, 0, TimeSpan.Zero);
 
             try
             {
@@ -18389,7 +18272,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 06, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 06, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 500f;
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 96f;
@@ -18415,9 +18298,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and don't mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "test1stDistillRun";
-                prodO.ProductionDate = new DateTime(2018, 6, 2);
-                prodO.ProductionStart = new DateTime(2018, 6, 2);
-                prodO.ProductionEnd = new DateTime(2018, 6, 2);
+                prodO.ProductionDate = new DateTimeOffset(2018, 6, 2, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 6, 2, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 6, 2, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = false;
                 prodO.ProductionType = "Distillation";
@@ -18450,9 +18333,9 @@ namespace WebApp.Helpers.Tests
                 // create 2nd Production Distillation Record and don't mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "test1stDistillRun";
-                prodO1.ProductionDate = new DateTime(2018, 6, 3);
-                prodO1.ProductionStart = new DateTime(2018, 6, 3);
-                prodO1.ProductionEnd = new DateTime(2018, 6, 3);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 6, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 6, 3, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 6, 3, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = false;
                 prodO1.ProductionType = "Distillation";
@@ -18551,8 +18434,8 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime start = new DateTime(2018, 03, 01);
-            DateTime end = new DateTime(2018, 03, 31);
+            DateTimeOffset start = new DateTimeOffset(2018, 03, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset end = new DateTimeOffset(2018, 03, 31, 0, 0, 0, TimeSpan.Zero);
 
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
 
@@ -18621,7 +18504,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 03, 01);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 03, 01, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 2000f;
                 purchO.RecordId = grapeMaterialId;
@@ -18643,9 +18526,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2018, 01, 15);
-                prodO.ProductionStart = new DateTime(2018, 01, 15);
-                prodO.ProductionEnd = new DateTime(2018, 01, 15);
+                prodO.ProductionDate = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -18676,9 +18559,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Distillation Record and mark it as Ungauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "DistilRunAndGauged";
-                prodO1.ProductionDate = new DateTime(2018, 01, 20);
-                prodO1.ProductionStart = new DateTime(2018, 01, 20);
-                prodO1.ProductionEnd = new DateTime(2018, 01, 20);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 01, 20, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = false;
                 prodO1.ProductionType = "Distillation";
@@ -18843,7 +18726,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Corn";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 1, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.VolumeByWeight = 50f; // 50 lbs
                 purchO.RecordId = materialId;
                 purchO.Price = 1f;
@@ -18862,9 +18745,9 @@ namespace WebApp.Helpers.Tests
                 // Ferment Corn into a Mash
                 ProductionObject prodFermentedCornMash = new ProductionObject();
                 prodFermentedCornMash.BatchName = "FermentedCorn";
-                prodFermentedCornMash.ProductionDate = new DateTime(2018, 1, 1);
-                prodFermentedCornMash.ProductionStart = new DateTime(2018, 1, 1);
-                prodFermentedCornMash.ProductionEnd = new DateTime(2018, 1, 1);
+                prodFermentedCornMash.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFermentedCornMash.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFermentedCornMash.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodFermentedCornMash.Gauged = true;
                 prodFermentedCornMash.ProductionType = "Fermentation";
                 prodFermentedCornMash.Quantity = 500f; // 500 gallons of alcohol
@@ -18896,17 +18779,17 @@ namespace WebApp.Helpers.Tests
                 #region Act
 
                 int janDays = DateTime.DaysInMonth(2018, 1);
-                var janStart = new DateTime(2018, 1, 1);
-                var janEnd = new DateTime(2018, 1, janDays);
+                var janStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                var janEnd = new DateTimeOffset(2018, 1, janDays, 0, 0, 0, TimeSpan.Zero);
 
                 StorageReportObject janStorageReport = _storageReport.GetStorageReportData(janStart, janEnd, _userId);
                 ProductionReportingObject janProductionReport = _productionReport.GetProductionReportData(janStart, janEnd, _userId);
                 // Distill Corn Mash into GNS and mark it as Gauged
                 ProductionObject prodGNS = new ProductionObject();
                 prodGNS.BatchName = "DistillGNS";
-                prodGNS.ProductionDate = new DateTime(2018, 1, 1);
-                prodGNS.ProductionStart = new DateTime(2018, 1, 1);
-                prodGNS.ProductionEnd = new DateTime(2018, 1, 1);
+                prodGNS.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodGNS.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodGNS.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodGNS.SpiritCutId = 11; // mixed
                 prodGNS.Gauged = true;
                 prodGNS.ProductionType = "Distillation";
@@ -19103,7 +18986,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 03, 01);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 03, 01, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 2000f;
                 purchO.RecordId = grapeMaterialId;
@@ -19125,9 +19008,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2018, 01, 15);
-                prodO.ProductionStart = new DateTime(2018, 01, 15);
-                prodO.ProductionEnd = new DateTime(2018, 01, 15);
+                prodO.ProductionDate = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 01, 15, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -19257,10 +19140,10 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime startMarch = new DateTime(2018, 03, 01);
-            DateTime endMarch = new DateTime(2018, 03, 31);
-            DateTime startApril = new DateTime(2018, 04, 01);
-            DateTime endApril = new DateTime(2018, 04, 30);
+            DateTimeOffset startMarch = new DateTimeOffset(2018, 03, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset endMarch = new DateTimeOffset(2018, 03, 31, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset startApril = new DateTimeOffset(2018, 04, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset endApril = new DateTimeOffset(2018, 04, 30, 0, 0, 0, TimeSpan.Zero);
 
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
 
@@ -19308,7 +19191,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 03, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 03, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 4000f;
                 purchO.RecordId = grapeMaterialId;
@@ -19330,9 +19213,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2018, 03, 15);
-                prodO.ProductionStart = new DateTime(2018, 03, 15);
-                prodO.ProductionEnd = new DateTime(2018, 03, 15);
+                prodO.ProductionDate = new DateTimeOffset(2018, 03, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 03, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 03, 15, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -19364,9 +19247,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "Brandy";
-                prodO1.ProductionDate = new DateTime(2018, 03, 20);
-                prodO1.ProductionStart = new DateTime(2018, 03, 20);
-                prodO1.ProductionEnd = new DateTime(2018, 03, 20);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 03, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 03, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 03, 20, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -19433,9 +19316,9 @@ namespace WebApp.Helpers.Tests
                 // create 2nd Production Distillation Record and mark it as Gauged. Use 1/4 of the original amount of wine
                 ProductionObject prodO2 = new ProductionObject();
                 prodO2.BatchName = "Brandy";
-                prodO2.ProductionDate = new DateTime(2018, 03, 21);
-                prodO2.ProductionStart = new DateTime(2018, 03, 21);
-                prodO2.ProductionEnd = new DateTime(2018, 03, 21);
+                prodO2.ProductionDate = new DateTimeOffset(2018, 03, 21, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionStart = new DateTimeOffset(2018, 03, 21, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionEnd = new DateTimeOffset(2018, 03, 21, 0, 0, 0, TimeSpan.Zero);
                 prodO2.SpiritCutId = 11; // mixed
                 prodO2.Gauged = true;
                 prodO2.ProductionType = "Distillation";
@@ -19484,9 +19367,9 @@ namespace WebApp.Helpers.Tests
                 // create 3rd Production Distillation Record and mark it as Gauged. Use 1/4 of the original amount of wine
                 ProductionObject prodO3 = new ProductionObject();
                 prodO3.BatchName = "Brandy";
-                prodO3.ProductionDate = new DateTime(2018, 04, 05);
-                prodO3.ProductionStart = new DateTime(2018, 04, 05);
-                prodO3.ProductionEnd = new DateTime(2018, 04, 05);
+                prodO3.ProductionDate = new DateTimeOffset(2018, 04, 05, 0, 0, 0, TimeSpan.Zero);
+                prodO3.ProductionStart = new DateTimeOffset(2018, 04, 05, 0, 0, 0, TimeSpan.Zero);
+                prodO3.ProductionEnd = new DateTimeOffset(2018, 04, 05, 0, 0, 0, TimeSpan.Zero);
                 prodO3.SpiritCutId = 11; // mixed
                 prodO3.Gauged = true;
                 prodO3.ProductionType = "Distillation";
@@ -19607,7 +19490,7 @@ namespace WebApp.Helpers.Tests
                 {
                     PurBatchName = "FermentedPomaceFromBigGrapesWinery",
                     PurchaseType = "Fermented",
-                    PurchaseDate = new DateTime(2017, 1, 1),
+                    PurchaseDate = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     VolumeByWeight = 1000f,
                     RecordId = rawMaterialId,
                     Price = 2000f,
@@ -19627,7 +19510,7 @@ namespace WebApp.Helpers.Tests
                 {
                     PurBatchName = "FermentedPomaceFromBigGrapesWinery2",
                     PurchaseType = "Fermented",
-                    PurchaseDate = new DateTime(2017, 1, 1),
+                    PurchaseDate = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     VolumeByWeight = 1000f,
                     RecordId = rawMaterialId,
                     Price = 2000f,
@@ -19646,9 +19529,9 @@ namespace WebApp.Helpers.Tests
                 ProductionObject production = new ProductionObject
                 {
                     BatchName = "PomaceDistillation",
-                    ProductionDate = new DateTime(2017, 1, 1),
-                    ProductionStart = new DateTime(2017, 1, 1),
-                    ProductionEnd = new DateTime(2017, 1, 1),
+                    ProductionDate = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionStart = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    ProductionEnd = new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     Gauged = true,
                     ProductionType = "Distillation",
                     Quantity = 100f,
@@ -19688,7 +19571,7 @@ namespace WebApp.Helpers.Tests
                 testRecords.Add(Tuple.Create(productionId, Table.Production));
 
                 // Act
-                ProductionReportingObject actualProductionReport = _productionReport.GetProductionReportData(new DateTime(2017, 1, 1), new DateTime(2017, 1, 31), _userId);
+                ProductionReportingObject actualProductionReport = _productionReport.GetProductionReportData(new DateTimeOffset(2017, 1, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2017, 1, 31, 0, 0, 0, TimeSpan.Zero), _userId);
 
                 // verify Production Report Part 6
                 // we should display only the remainder of the used materials.
@@ -19738,10 +19621,10 @@ namespace WebApp.Helpers.Tests
             int productionId = 0;
 
             // reporting time range
-            DateTime startMarch = new DateTime(2018, 03, 01);
-            DateTime endMarch = new DateTime(2018, 03, 31);
-            DateTime startApril = new DateTime(2018, 04, 01);
-            DateTime endApril = new DateTime(2018, 04, 30);
+            DateTimeOffset startMarch = new DateTimeOffset(2018, 03, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset endMarch = new DateTimeOffset(2018, 03, 31, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset startApril = new DateTimeOffset(2018, 04, 01, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset endApril = new DateTimeOffset(2018, 04, 30, 0, 0, 0, TimeSpan.Zero);
 
             List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList = new List<Tuple<int, Table>>();
 
@@ -19789,7 +19672,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Riesling Grapes ";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 03, 03);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 03, 03, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 0f;
                 purchO.VolumeByWeight = 4000f;
                 purchO.RecordId = grapeMaterialId;
@@ -19811,9 +19694,9 @@ namespace WebApp.Helpers.Tests
                 // create Fermented record
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "Riesling Wine";
-                prodO.ProductionDate = new DateTime(2018, 03, 15);
-                prodO.ProductionStart = new DateTime(2018, 03, 15);
-                prodO.ProductionEnd = new DateTime(2018, 03, 15);
+                prodO.ProductionDate = new DateTimeOffset(2018, 03, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 03, 15, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 03, 15, 0, 0, 0, TimeSpan.Zero);
                 prodO.Gauged = true;
                 prodO.ProductionType = "Fermentation";
                 prodO.ProductionTypeId = 1;
@@ -19845,9 +19728,9 @@ namespace WebApp.Helpers.Tests
                 // create 1st Production Distillation Record and mark it as Gauged
                 ProductionObject prodO1 = new ProductionObject();
                 prodO1.BatchName = "Brandy";
-                prodO1.ProductionDate = new DateTime(2018, 03, 20);
-                prodO1.ProductionStart = new DateTime(2018, 03, 20);
-                prodO1.ProductionEnd = new DateTime(2018, 03, 20);
+                prodO1.ProductionDate = new DateTimeOffset(2018, 03, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionStart = new DateTimeOffset(2018, 03, 20, 0, 0, 0, TimeSpan.Zero);
+                prodO1.ProductionEnd = new DateTimeOffset(2018, 03, 20, 0, 0, 0, TimeSpan.Zero);
                 prodO1.SpiritCutId = 11; // mixed
                 prodO1.Gauged = true;
                 prodO1.ProductionType = "Distillation";
@@ -19881,9 +19764,9 @@ namespace WebApp.Helpers.Tests
                 // create 2nd Production Distillation Record and mark it as Gauged. Use 1/4 of the original amount of wine
                 ProductionObject prodO2 = new ProductionObject();
                 prodO2.BatchName = "Whisky";
-                prodO2.ProductionDate = new DateTime(2018, 03, 21);
-                prodO2.ProductionStart = new DateTime(2018, 03, 21);
-                prodO2.ProductionEnd = new DateTime(2018, 03, 21);
+                prodO2.ProductionDate = new DateTimeOffset(2018, 03, 21, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionStart = new DateTimeOffset(2018, 03, 21, 0, 0, 0, TimeSpan.Zero);
+                prodO2.ProductionEnd = new DateTimeOffset(2018, 03, 21, 0, 0, 0, TimeSpan.Zero);
                 prodO2.SpiritCutId = 11; // mixed
                 prodO2.Gauged = true;
                 prodO2.ProductionType = "Distillation";
@@ -19997,7 +19880,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "Corn";
                 purchO.PurchaseType = "Fermentable";
-                purchO.PurchaseDate = new DateTime(2018, 1, 1);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 purchO.VolumeByWeight = 100f; // 100 lbs
                 purchO.RecordId = materialId;
                 purchO.Price = 1f;
@@ -20016,9 +19899,9 @@ namespace WebApp.Helpers.Tests
                 // Ferment Corn into a Mash
                 ProductionObject prodFermentedCornMash = new ProductionObject();
                 prodFermentedCornMash.BatchName = "FermentedCorn";
-                prodFermentedCornMash.ProductionDate = new DateTime(2018, 1, 1);
-                prodFermentedCornMash.ProductionStart = new DateTime(2018, 1, 1);
-                prodFermentedCornMash.ProductionEnd = new DateTime(2018, 1, 1);
+                prodFermentedCornMash.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFermentedCornMash.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodFermentedCornMash.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodFermentedCornMash.Gauged = true;
                 prodFermentedCornMash.ProductionType = "Fermentation";
                 prodFermentedCornMash.Quantity = 50f; // 50 gallons of alcohol
@@ -20052,9 +19935,9 @@ namespace WebApp.Helpers.Tests
                 // Distill Corn Mash into GNS and mark it as Gauged
                 ProductionObject prodGNS = new ProductionObject();
                 prodGNS.BatchName = "DistillGNS";
-                prodGNS.ProductionDate = new DateTime(2018, 1, 1);
-                prodGNS.ProductionStart = new DateTime(2018, 1, 1);
-                prodGNS.ProductionEnd = new DateTime(2018, 1, 1);
+                prodGNS.ProductionDate = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodGNS.ProductionStart = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                prodGNS.ProductionEnd = new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 prodGNS.SpiritCutId = 11; // mixed
                 prodGNS.Gauged = true;
                 prodGNS.ProductionType = "Distillation";
@@ -20231,7 +20114,7 @@ namespace WebApp.Helpers.Tests
                 PurchaseObject purchO = new PurchaseObject();
                 purchO.PurBatchName = "GNS";
                 purchO.PurchaseType = "Distilled";
-                purchO.PurchaseDate = new DateTime(2018, 03, 01);
+                purchO.PurchaseDate = new DateTimeOffset(2018, 03, 01, 0, 0, 0, TimeSpan.Zero);
                 purchO.Quantity = 100f; // 100 gallons
                 purchO.VolumeByWeight = 0f;
                 purchO.AlcoholContent = 98f;
@@ -20256,9 +20139,9 @@ namespace WebApp.Helpers.Tests
                 // Redistil GNS into GIN and mark it as Gauged
                 ProductionObject prodO = new ProductionObject();
                 prodO.BatchName = "RedistilledGns";
-                prodO.ProductionDate = new DateTime(2018, 04, 02);
-                prodO.ProductionStart = new DateTime(2018, 04, 02);
-                prodO.ProductionEnd = new DateTime(2018, 04, 02);
+                prodO.ProductionDate = new DateTimeOffset(2018, 04, 02, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionStart = new DateTimeOffset(2018, 04, 02, 0, 0, 0, TimeSpan.Zero);
+                prodO.ProductionEnd = new DateTimeOffset(2018, 04, 02, 0, 0, 0, TimeSpan.Zero);
                 prodO.SpiritCutId = 11; // mixed
                 prodO.Gauged = true;
                 prodO.ProductionType = "Distillation";
@@ -20289,9 +20172,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Blending Record
                 ProductionObject prodBlend = new ProductionObject();
                 prodBlend.BatchName = "Gin";
-                prodBlend.ProductionDate = new DateTime(2018, 05, 03);
-                prodBlend.ProductionStart = new DateTime(2018, 05, 03);
-                prodBlend.ProductionEnd = new DateTime(2018, 05, 03);
+                prodBlend.ProductionDate = new DateTimeOffset(2018, 05, 03, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionStart = new DateTimeOffset(2018, 05, 03, 0, 0, 0, TimeSpan.Zero);
+                prodBlend.ProductionEnd = new DateTimeOffset(2018, 05, 03, 0, 0, 0, TimeSpan.Zero);
                 prodBlend.Gauged = true;
                 prodBlend.ProductionType = "Blending";
                 prodBlend.Quantity = 100f; // 100 gallons of alcohol
@@ -20331,9 +20214,9 @@ namespace WebApp.Helpers.Tests
                 // create Production Bottling Record
                 ProductionObject prodBottl = new ProductionObject();
                 prodBottl.BatchName = "GIN Bottling Test ";
-                prodBottl.ProductionDate = new DateTime(2018, 06, 4);
-                prodBottl.ProductionStart = new DateTime(2018, 06, 4);
-                prodBottl.ProductionEnd = new DateTime(2018, 06, 4);
+                prodBottl.ProductionDate = new DateTimeOffset(2018, 06, 4, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionStart = new DateTimeOffset(2018, 06, 4, 0, 0, 0, TimeSpan.Zero);
+                prodBottl.ProductionEnd = new DateTimeOffset(2018, 06, 4, 0, 0, 0, TimeSpan.Zero);
                 prodBottl.Gauged = true;
                 prodBottl.ProductionType = "Bottling";
                 prodBottl.Quantity = 150f; // 150 gallons of alcohol
@@ -20374,8 +20257,8 @@ namespace WebApp.Helpers.Tests
 
                 // Widrawn For Tax update:
                 TaxWithdrawn taxes = new TaxWithdrawn();
-                taxes.DateOfSale = new DateTime(2018, 06, 10);
-                taxes.DateRecorded = DateTime.UtcNow; //  hmm, I am not sure why we need this. We do store withdrawal date. in any case, we have to be carefull with this date as it is stored in UTC format so possible adjustment would be needed
+                taxes.DateOfSaleOffset = new DateTimeOffset(2018, 06, 10, 0, 0, 0, TimeSpan.Zero);
+                taxes.DateRecordedOffset = new DateTimeOffset(DateTime.UtcNow); //  hmm, I am not sure why we need this. We do store withdrawal date. in any case, we have to be carefull with this date as it is stored in UTC format so possible adjustment would be needed
                 taxes.ProductionID = productionId;
                 taxes.Value = 50f;
 
@@ -20396,8 +20279,8 @@ namespace WebApp.Helpers.Tests
                 reportHeaderE.PlantAddress = "123 Cognac Drive Renton WASHINGTON 98059";
                 reportHeaderE.DSP = "DSP-WA-21086";
 
-                DateTime start = new DateTime(2018, 06, 01);
-                DateTime end = new DateTime(2018, 06, 30);
+                DateTimeOffset start = new DateTimeOffset(2018, 06, 01, 0, 0, 0, TimeSpan.Zero);
+                DateTimeOffset end = new DateTimeOffset(2018, 06, 30, 0, 0, 0, TimeSpan.Zero);
 
                 ProcessingReportingObject actualProcessingReportObject = new ProcessingReportingObject();
 
@@ -20465,7 +20348,7 @@ namespace WebApp.Helpers.Tests
         {
             // Arrange
             PurchaseDistilled(name: "GnsPurchase",
-                date: new DateTime(2018, 1, 1),
+                date: new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                 volume: 100f,
                 weight: 0f,
                 alcoholContent: 98f,
@@ -20477,7 +20360,7 @@ namespace WebApp.Helpers.Tests
                 storageId: _storages["Storage"].StorageId);
 
             PurchaseAdditive(name: "WaterPurchase",
-                date: new DateTime(2018, 1, 1),
+                date: new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero),
                 volume: 1000f,
                 weight: 0f,
                 alcoholContent: 0f,
@@ -20488,13 +20371,12 @@ namespace WebApp.Helpers.Tests
                 storageId: _storages["Storage"].StorageId);
 
             ProduceBlend(name: "Gin",
-                start: new DateTime(2018, 1, 2),
-                end: new DateTime(2018, 1, 2),
+                start: new DateTimeOffset(2018, 1, 2, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 1, 2, 0, 0, 0, TimeSpan.Zero),
                 volume: 217.5f,
                 weight: 0f,
                 alcoholContent: 45f,
                 proof: 195.75f,
-                vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Gin,
                 spiritId: _spirits["Gin"].SpiritId,
@@ -20521,13 +20403,12 @@ namespace WebApp.Helpers.Tests
                 });
 
             ProduceBottle(name: "GinBottling",
-                start: new DateTime(2018, 1, 3),
-                end: new DateTime(2018, 1, 3),
+                start: new DateTimeOffset(2018, 1, 3, 0, 0, 0, TimeSpan.Zero),
+                end: new DateTimeOffset(2018, 1, 3, 0, 0, 0, TimeSpan.Zero),
                 volume: 216.2f, // Use bottling UI workflow to calculate desired volume for given number of cases/bottles
                 weight: 0f,
                 alcoholContent: 45f,
                 proof: 194.57f, // Use bottling UI workflow to calculate desired proof for given number of cases/bottles
-                vendorId: _vendors["Vendor"].VendorId,
                 storageId: _storages["Storage"].StorageId,
                 spiritTypeReportingId: (int)ReportSpiritTypes.Gin,
                 spiritId: _spirits["Gin"].SpiritId,
@@ -20558,7 +20439,7 @@ namespace WebApp.Helpers.Tests
                     ProductionType = "Bottling",
                     ProductionId = _productions["GinBottling"].ProductionId,
                     BatchName = null,
-                    WithdrawalDate = new DateTime(2018, 01, 1),
+                    WithdrawalDate = new DateTimeOffset(2018, 01, 1, 0, 0, 0, TimeSpan.Zero),
                     TaxedProof = 34.57f,
                     ProofGallon = 194.57f - 34.57f
                 },
@@ -20566,7 +20447,7 @@ namespace WebApp.Helpers.Tests
                 );
 
             // Act
-            var processingReport = GetProcessingReport(new DateTime(2018, 1, 1), new DateTime(2018, 1, 31));
+            var processingReport = GetProcessingReport(new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2018, 1, 31, 0, 0, 0, TimeSpan.Zero));
 
             AssertProcessing(processingReport,
                 new ReportHeader
@@ -20620,7 +20501,7 @@ namespace WebApp.Helpers.Tests
                     ProductionType = "Bottling",
                     ProductionId = _productions["GinBottling"].ProductionId,
                     BatchName = null,
-                    WithdrawalDate = new DateTime(2018, 02, 1),
+                    WithdrawalDate = new DateTimeOffset(2018, 02, 1, 0, 0, 0, TimeSpan.Zero),
                     TaxedProof = 40f,
                     ProofGallon = 160f - 40f
                 },
@@ -20630,7 +20511,7 @@ namespace WebApp.Helpers.Tests
             // check processing report
             processingReport = null;
 
-            processingReport = GetProcessingReport(new DateTime(2018, 2, 1), new DateTime(2018, 2, 28));
+            processingReport = GetProcessingReport(new DateTimeOffset(2018, 2, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2018, 2, 28, 0, 0, 0, TimeSpan.Zero));
 
             AssertProcessing(processingReport,
                 new ReportHeader
@@ -20668,14 +20549,14 @@ namespace WebApp.Helpers.Tests
                     ProductionType = "Bottling",
                     ProductionId = _productions["GinBottling"].ProductionId,
                     BatchName = null,
-                    WithdrawalDate = new DateTime(2018, 03, 1),
+                    WithdrawalDate = new DateTimeOffset(2018, 03, 1, 0, 0, 0, TimeSpan.Zero),
                     TaxedProof = 30f,
                     ProofGallon = 120f - 30f
                 },
                 _userId
                 );
 
-            processingReport = GetProcessingReport(new DateTime(2018, 3, 1), new DateTime(2018, 3, 28));
+            processingReport = GetProcessingReport(new DateTimeOffset(2018, 3, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2018, 3, 28, 0, 0, 0, TimeSpan.Zero));
 
             AssertProcessing(processingReport,
                 new ReportHeader
@@ -20708,7 +20589,7 @@ namespace WebApp.Helpers.Tests
 
             // Now let's go in the past to ensure all values persist
             // Check January
-            processingReport = GetProcessingReport(new DateTime(2018, 1, 1), new DateTime(2018, 1, 31));
+            processingReport = GetProcessingReport(new DateTimeOffset(2018, 1, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2018, 1, 31, 0, 0, 0, TimeSpan.Zero));
             AssertProcessing(processingReport,
                 new ReportHeader
                 {
@@ -20755,7 +20636,7 @@ namespace WebApp.Helpers.Tests
                 });
 
             // Check February
-            processingReport = GetProcessingReport(new DateTime(2018, 2, 1), new DateTime(2018, 2, 28));
+            processingReport = GetProcessingReport(new DateTimeOffset(2018, 2, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2018, 2, 28, 0, 0, 0, TimeSpan.Zero));
 
             AssertProcessing(processingReport,
                 new ReportHeader
@@ -20798,7 +20679,7 @@ namespace WebApp.Helpers.Tests
             bool success = false;
 
             // Arrange
-            int distillerId = _dl.GetDistillerId(1);
+            int distillerId = _dl.GetDistillerId(_userId);
 
             switch (tableIdent)
             {
@@ -20809,20 +20690,20 @@ namespace WebApp.Helpers.Tests
                             var rec =
                             (from res in _db.Spirit
                              where res.SpiritID == id
-                             select res).FirstOrDefault();
+                             select res).ToList();
 
                             if (rec != null)
                             {
-                                _db.Spirit.Remove(rec);
+                                _db.Spirit.RemoveRange(rec);
                             }
 
                             _db.SaveChanges();
 
                             success = true;
                         }
-                        catch
+                        catch (Exception e)
                         {
-                            throw;
+                            throw e;
                         }
 
                         break;
@@ -20850,15 +20731,14 @@ namespace WebApp.Helpers.Tests
                             if (rec1 != null)
                             {
                                 _db.VendorDetail.Remove(rec1);
+                                _db.SaveChanges();
+
+                                success = true;
                             }
-
-                            _db.SaveChanges();
-
-                            success = true;
                         }
-                        catch
+                        catch(Exception e)
                         {
-                            throw;
+                            throw e;
                         }
 
                         break;
@@ -20871,21 +20751,21 @@ namespace WebApp.Helpers.Tests
                             var rec =
                             (from res in _db.Storage
                              where res.StorageID == id
-                             select res).FirstOrDefault();
+                             select res).ToList();
 
                             if (rec != null)
                             {
-                                _db.Storage.Remove(rec);
+                                _db.Storage.RemoveRange(rec);
                             }
 
                             var rec1 =
                             (from res in _db.StorageState
                              where res.StorageID == id
-                             select res).FirstOrDefault();
+                             select res).ToList();
 
                             if (rec1 != null)
                             {
-                                _db.StorageState.Remove(rec1);
+                                _db.StorageState.RemoveRange(rec1);
                             }
 
                             var sto2Rec =
@@ -20895,10 +20775,7 @@ namespace WebApp.Helpers.Tests
 
                             if (sto2Rec != null)
                             {
-                                foreach (var i in sto2Rec)
-                                {
-                                    _db.StorageToRecord.Remove(i);
-                                }
+                                _db.StorageToRecord.RemoveRange(sto2Rec);
                             }
 
                             _db.SaveChanges();
@@ -20920,21 +20797,21 @@ namespace WebApp.Helpers.Tests
                             var rec =
                             (from res in _db.MaterialDict
                              where res.MaterialDictID == id
-                             select res).FirstOrDefault();
+                             select res).ToList();
 
                             if (rec != null)
                             {
-                                _db.MaterialDict.Remove(rec);
+                                _db.MaterialDict.RemoveRange(rec);
                             }
 
                             var rec1 =
                             (from res in _db.MaterialType
                              where res.MaterialDictID == id
-                             select res).FirstOrDefault();
+                             select res).ToList();
 
                             if (rec1 != null)
                             {
-                                _db.MaterialType.Remove(rec1);
+                                _db.MaterialType.RemoveRange(rec1);
                             }
 
                             var rec2 =
@@ -20972,90 +20849,81 @@ namespace WebApp.Helpers.Tests
                                 var vol =
                                     (from rec in _db.Volume
                                      where rec.VolumeID == pur.VolumeID
-                                     select rec).FirstOrDefault();
+                                     select rec).ToList();
 
                                 if (vol != null)
                                 {
-                                    _db.Volume.Remove(vol);
+                                    _db.Volume.RemoveRange(vol);
                                 }
 
                                 var weight =
                                     (from rec in _db.Weight
                                      where rec.WeightID == pur.WeightID
-                                     select rec).FirstOrDefault();
+                                     select rec).ToList();
 
                                 if (weight != null)
                                 {
-                                    _db.Weight.Remove(weight);
+                                    _db.Weight.RemoveRange(weight);
                                 }
 
                                 var alc =
                                     (from rec in _db.Alcohol
                                      where rec.AlcoholID == pur.AlcoholID
-                                     select rec).FirstOrDefault();
+                                     select rec).ToList();
 
                                 if (alc != null)
                                 {
-                                    _db.Alcohol.Remove(alc);
+                                    _db.Alcohol.RemoveRange(alc);
                                 }
 
                                 var prf =
                                     (from rec in _db.Proof
                                      where rec.ProofID == pur.ProofID
-                                     select rec).FirstOrDefault();
+                                     select rec).ToList();
 
                                 if (prf != null)
                                 {
-                                    _db.Proof.Remove(prf);
+                                    _db.Proof.RemoveRange(prf);
                                 }
 
                                 var pur2SpiTRep =
                                     (from rec in _db.PurchaseToSpiritTypeReporting
                                      where rec.PurchaseID == pur.PurchaseID
-                                     select rec).FirstOrDefault();
+                                     select rec).ToList();
 
                                 if (pur2SpiTRep != null)
                                 {
-                                    _db.PurchaseToSpiritTypeReporting.Remove(pur2SpiTRep);
+                                    _db.PurchaseToSpiritTypeReporting.RemoveRange(pur2SpiTRep);
                                 }
 
                                 var sto2Rec =
                                     (from rec in _db.StorageToRecord
                                      where rec.RecordId == pur.PurchaseID && rec.TableIdentifier == "pur"
-                                     select rec);
+                                     select rec).ToList();
 
                                 if (sto2Rec != null)
                                 {
-                                    foreach (var i in sto2Rec)
-                                    {
-                                        _db.StorageToRecord.Remove(i);
-                                    }
+                                    _db.StorageToRecord.RemoveRange(sto2Rec);
                                 }
 
                                 var pur4Rep =
                                     (from rec in _db.Purchase4Reporting
                                      where rec.PurchaseID == pur.PurchaseID
-                                     select rec);
+                                     select rec).ToList();
 
                                 if (pur4Rep != null)
                                 {
-                                    foreach (var l in pur4Rep)
-                                    {
-                                        _db.Purchase4Reporting.Remove(l);
-                                    }
+                                    _db.Purchase4Reporting.RemoveRange(pur4Rep);
                                 }
 
                                 var purH =
                                     (from rec in _db.PurchaseHistory
                                      where rec.PurchaseID == pur.PurchaseID
-                                     select rec);
+                                     select rec).ToList();
 
                                 if (purH != null)
                                 {
-                                    foreach (var i in purH)
-                                    {
-                                        _db.PurchaseHistory.Remove(i);
-                                    }
+                                    _db.PurchaseHistory.RemoveRange(purH);
                                 }
 
                                 _db.Purchase.Remove(pur);
@@ -21314,75 +21182,6 @@ namespace WebApp.Helpers.Tests
             }
 
             return success;
-        }
-
-        /// <summary>
-        /// WorkflowBrandyTestSetup this method creates records in 
-        /// dictionary tables for multistep workflow test scenarios
-        /// </summary>
-        /// <param name="tablesForCleanupTupleList"></param>
-        private void WorkflowBrandyTestSetup(ref List<Tuple<int/*recordId*/, Table/*table enum vaue*/>> tablesForCleanupTupleList)
-        {
-            int spiritId = 0;
-            int vendorId = 0;
-            int storageId = 0;
-            int materialDictId = 0;
-
-            // setup Brandy Spirit object
-            SpiritObject spirit = new SpiritObject();
-            spirit.SpiritName = "Brandy Under 170";
-            spirit.ProcessingReportTypeID = 12;
-
-            spiritId =_dictionary.CreateSpirit(_userId, spirit);
-            tablesForCleanupTupleList.Add(Tuple.Create(spiritId, Table.Spirit));
-
-
-            // setup Vendor object
-            VendorObject vendor = new VendorObject();
-            vendor.VendorName = "testVendor";
-
-            vendorId = _dictionary.CreateVendor(_userId, vendor);
-            tablesForCleanupTupleList.Add(Tuple.Create(vendorId, Table.Vendor));
-
-            // setup Storage Object
-            StorageObject storage = new StorageObject();
-            storage.StorageName = "testStorage";
-            storage.SerialNumber = "2H29NNS";
-
-            storageId = _dictionary.CreateStorage(_userId, storage);
-            tablesForCleanupTupleList.Add(Tuple.Create(storageId, Table.Storage));
-
-
-            // setup Material Object
-            // wine
-            {
-                RawMaterialObject wineMaterial = new RawMaterialObject();
-                wineMaterial.RawMaterialName = "Wine For Brandy";
-                wineMaterial.MaterialCategoryID = 2;
-                wineMaterial.UnitType = "gal";
-                wineMaterial.UnitTypeId = 1;
-                PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
-                materialBoolTypes.Fermented = true;
-                wineMaterial.PurchaseMaterialTypes = materialBoolTypes;
-
-                materialDictId = _dictionary.CreateRawMaterial(_userId, wineMaterial);
-                tablesForCleanupTupleList.Add(Tuple.Create(materialDictId, Table.MaterialDict));
-            }
-
-            // water
-            {
-                RawMaterialObject waterMaterial = new RawMaterialObject();
-                waterMaterial.RawMaterialName = "Water";
-                waterMaterial.UnitType = "gal";
-                waterMaterial.UnitTypeId = 1;
-                PurchaseMaterialBooleanTypes materialBoolTypes = new PurchaseMaterialBooleanTypes();
-                materialBoolTypes.Additive = true;
-                waterMaterial.PurchaseMaterialTypes = materialBoolTypes;
-
-                materialDictId = _dictionary.CreateRawMaterial(_userId, waterMaterial);
-                tablesForCleanupTupleList.Add(Tuple.Create(materialDictId, Table.MaterialDict));
-            }
-
         }
     }
 }

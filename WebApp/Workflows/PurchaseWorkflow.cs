@@ -41,7 +41,8 @@ namespace WebApp.Workflows
 
                     if (purchT.PurchaseDate != purchaseObject.PurchaseDate && purchaseObject.PurchaseDate != null)
                     {
-                        purchT.PurchaseDate = purchaseObject.PurchaseDate;
+                        purchT.PurchaseDateOffset = purchaseObject.PurchaseDate;
+                        purchT.PurchaseDate = purchaseObject.PurchaseDate.DateTime;
                     }
 
                     if (purchT.VendorID != purchaseObject.VendorId && purchaseObject?.VendorId != null)
@@ -235,7 +236,8 @@ namespace WebApp.Workflows
 
             Purchase purchT = new Purchase();
             purchT.PurchaseName = purchaseObject.PurBatchName;
-            purchT.PurchaseDate = purchaseObject.PurchaseDate;
+            purchT.PurchaseDateOffset = purchaseObject.PurchaseDate;
+            purchT.PurchaseDate = purchaseObject.PurchaseDate.DateTime;
             purchT.MaterialDictID = purchaseObject.RecordId;
             purchT.Note = purchaseObject.Note;
             purchT.Price = purchaseObject.Price;

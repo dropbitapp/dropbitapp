@@ -152,7 +152,7 @@ namespace WebApp.Helpers
         public void GenerateGaugeSerial(int recordId, int recordType)
         {
             string newSerial = string.Empty;
-            var currentYear = DateTime.Now.Year;
+            var currentYear = DateTimeOffset.Now.Year;
 
             // Find last GaugeSerial record and get it's serial string
             // Sample serial string format: 12017, 23452017(last four digits represent a year)
@@ -206,7 +206,7 @@ namespace WebApp.Helpers
         /// </summary>
         /// <param name="start"></param>
         /// <param name="end"></param>
-        public List<GaugeSerial> GetGaugeSerial(DateTime start, DateTime end)
+        public List<GaugeSerial> GetGaugeSerial(DateTimeOffset start, DateTimeOffset end)
         {
             List<GaugeSerial> records;
 
@@ -217,11 +217,11 @@ namespace WebApp.Helpers
                        join purchase in _db.Purchase on rec.RecordID equals purchase.PurchaseID into purchase_join
                        from purchase in purchase_join.DefaultIfEmpty()
                        where (rec.RecordType == (int)RecordType.Purchase &&
-                             purchase.PurchaseDate > start &&
-                             purchase.PurchaseDate < end)
+                             purchase.PurchaseDateOffset > start &&
+                             purchase.PurchaseDateOffset < end)
                              || (rec.RecordType == (int)RecordType.Production &&
-                             production.ProductionDate > start &&
-                             production.ProductionDate < end)
+                             production.ProductionDateOffset > start &&
+                             production.ProductionDateOffset < end)
                        select rec).DefaultIfEmpty();
 
             if (res != null)
@@ -282,7 +282,7 @@ namespace WebApp.Helpers
                 {
                     PurchaseID = ((System.Int32?)purch.PurchaseID ?? (System.Int32?)0),
                     PurchaseBatchName = purch.PurchaseName ?? string.Empty,
-                    PurchaseDate = purch.PurchaseDate,
+                    PurchaseDate = purch.PurchaseDateOffset,
                     StatusID = ((System.Int32?)purch.StatusID ?? (System.Int32?)0),
                     RawMaterialName = matDic.Name ?? string.Empty,
                     MaterialDictID = ((System.Int32?)matDic.MaterialDictID ?? (System.Int32?)0),
@@ -347,7 +347,7 @@ namespace WebApp.Helpers
                         AlcoholContent = ((System.Single?)alc.Value ?? (System.Single?)0),
                         VolumeByWeight = ((System.Single?)vbw.Value ?? (System.Single?)0),
                         BurningDownMethod = pur.BurningDownMethod ?? null,
-                        PurchaseDate = pur.PurchaseDate
+                        PurchaseDate = pur.PurchaseDateOffset
                     };
 
                 if (purchaseQueryResult != null)
@@ -392,7 +392,7 @@ namespace WebApp.Helpers
                         VolumeByWeight = ((System.Single?)vbw.Value ?? (System.Single?)0),
                         AlcoholContent = ((System.Single?)alc.Value ?? (System.Single?)0),
                         BurningDownMethod = prod.BurningDownMethod ?? null,
-                        ProductionEndDate = prod.ProductionEndTime
+                        ProductionEndDate = prod.ProductionEndTimeOffset
                     };
 
                 if (productionQueryResult != null)
@@ -438,7 +438,7 @@ namespace WebApp.Helpers
                       AlcoholContent = ((System.Single?)alc.Value ?? (System.Single?)0),
                       PurchaseID = ((System.Int32?)purch.PurchaseID ?? (System.Int32?)0),
                       PurchaseBatchName = purch.PurchaseName ?? string.Empty,
-                      PurchaseDate = purch.PurchaseDate,
+                      PurchaseDate = purch.PurchaseDateOffset,
                       StatusID = ((System.Int32?)purch.StatusID ?? (System.Int32?)0),
                       StateID = ((System.Int32?)purch.StateID ?? (System.Int32?)0),
                       Quantity = ((System.Single?)quant.Value ?? (System.Single?)0),
@@ -485,7 +485,7 @@ namespace WebApp.Helpers
                         AlcoholContent = ((System.Single?)alc.Value ?? (System.Single?)0),
                         ProductionID = ((System.Int32?)prod.ProductionID ?? (System.Int32?)0),
                         ProductionName = prod.ProductionName ?? string.Empty,
-                        ProductonEndDate = prod.ProductionEndTime,
+                        ProductonEndDate = prod.ProductionEndTimeOffset,
                         StatusID = ((System.Int32?)prod.StatusID ?? (System.Int32?)0),
                         StateID = ((System.Int32?)prod.StateID ?? (System.Int32?)0),
                         Quantity = ((System.Single?)quant.Value ?? (System.Single?)0),
@@ -869,16 +869,16 @@ namespace WebApp.Helpers
                 purH.Alcohol = purObject.AlcoholContent;
                 purH.Proof = purObject.ProofGallon;
 
-                if (purObject.PurchaseDate != DateTime.MinValue)
+                if (purObject.PurchaseDate != DateTimeOffset.MinValue)
                 {
-                    purH.PurchaseDate = purObject.PurchaseDate;
+                    purH.PurchaseDateOffset = purObject.PurchaseDate;
                 }
                 purH.Note = purObject.Note;
                 purH.State = purObject.PurchaseType;
                 purH.Status = purObject.Status;
                 purH.Gauged = purObject.Gauged;
                 purH.UserID = userId;
-                purH.UpdateDate = DateTime.UtcNow;
+                purH.UpdateDateOffset = new DateTimeOffset(DateTime.UtcNow);
 
 
                 if (purObject.Storage != null)
@@ -1085,8 +1085,8 @@ namespace WebApp.Helpers
                 destrObj.RecordID = destructionObject.RecordID;
                 destrObj.WorkflowType = destructionObject.WorkflowType;
                 destrObj.RepresentativeName = destructionObject.RepresentativeName;
-                destrObj.StartTime = destructionObject.StartTime;
-                destrObj.EndTime = destructionObject.EndTime;
+                destrObj.StartTimeOffset = destructionObject.StartTime;
+                destrObj.EndTimeOffset = destructionObject.EndTime;
                 destrObj.DestructionMethod = destructionObject.DestructionMethod;
                 destrObj.Withdrawn = destructionObject.Withdrawn;
                 destrObj.Volume = destructionObject.Quantity;
@@ -1269,7 +1269,7 @@ namespace WebApp.Helpers
 
         #region Reporting Methods
 
-        public ReportHeader GetDistillerInfoForReportHeader(int distillerID, DateTime startDate)
+        public ReportHeader GetDistillerInfoForReportHeader(int distillerID, DateTimeOffset startDate)
         {
             try
             {
@@ -1309,7 +1309,7 @@ namespace WebApp.Helpers
         /// <param name="end"></param>
         /// <param name="record"></param>
         /// <param name="part1List"></param>
-        private void GetEnteredInProcessingAccount(DateTime start, DateTime end, ProductionReportHelper record, ref List<ProdReportPart1> part1List)
+        private void GetEnteredInProcessingAccount(DateTimeOffset start, DateTimeOffset end, ProductionReportHelper record, ref List<ProdReportPart1> part1List)
         {
             float blendedProof = 0f;
             var blended =
