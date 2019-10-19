@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNet.Identity;
 using System.Web.Mvc;
+using NLog;
+using System;
+using System.Web.Script.Serialization;
 using WebApp.Helpers;
 using WebApp.Models;
 using WebApp.Persistence.BusinessLogicEnums;
@@ -16,6 +19,7 @@ namespace WebApp.Controllers
         private readonly ProcessingReport _processingR;
         private readonly StorageReport _storageR;
         private readonly ReportRepository _reportRepository;
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
 
         private bool _enableNewReportingImplementation = false;
 
@@ -54,14 +58,24 @@ namespace WebApp.Controllers
         /// <param name="endOfReporting"></param>
         /// <returns></returns>
         [HttpGet]
-        public JsonResult GetProductionReport(System.DateTime startOfReporting, System.DateTime endOfReporting)
+        public JsonResult GetProductionReport(System.DateTimeOffset startOfReporting, System.DateTimeOffset endOfReporting)
         {
             if (User.Identity.IsAuthenticated)
             {
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
+                    try
+                    {
+                        _logger.Info("{0} {1}\n\tReporting Start: {2}\n\tReporting End: {3}", User.Identity.Name, Request.Url.ToString(), startOfReporting, endOfReporting);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Logging error");
+                    }
+
                     var productionReport = _productionR.GetProductionReportData(startOfReporting, endOfReporting, userId);
+
                     return Json(productionReport, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -82,14 +96,24 @@ namespace WebApp.Controllers
         /// <param name="endOfReporting"></param>
         /// <returns></returns>
         [HttpGet]
-        public JsonResult GetProcessingReport(System.DateTime startOfReporting, System.DateTime endOfReporting)
+        public JsonResult GetProcessingReport(System.DateTimeOffset startOfReporting, System.DateTimeOffset endOfReporting)
         {
             if (User.Identity.IsAuthenticated)
             {
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
+                    try
+                    {
+                        _logger.Info("{0} {1}\n\tReporting Start: {2}\n\tReporting End: {3}", User.Identity.Name, Request.Url.ToString(), startOfReporting, endOfReporting);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Logging error");
+                    }
+
                     var processingReport = _processingR.GetProcessingReportData(startOfReporting, endOfReporting, userId);
+
                     return Json(processingReport, JsonRequestBehavior.AllowGet);
                 }
                 else
@@ -110,20 +134,31 @@ namespace WebApp.Controllers
         /// <param name="endOfReporting"></param>
         /// <returns></returns>
         [HttpGet]
-        public JsonResult GetStorageReport(System.DateTime startOfReporting, System.DateTime endOfReporting)
+        public JsonResult GetStorageReport(System.DateTimeOffset startOfReporting, System.DateTimeOffset endOfReporting)
         {
             if (User.Identity.IsAuthenticated)
             {
                 int userId = User.Identity.GetUserId<int>();
                 if (userId > 0)
                 {
+                    try
+                    {
+                        _logger.Info("{0} {1}\n\tReporting Start: {2}\n\tReporting End: {3}", User.Identity.Name, Request.Url.ToString(), startOfReporting, endOfReporting);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Logging error");
+                    }
+
                     if (_enableNewReportingImplementation)
                     {
                         var report = _reportRepository.GetReportData(endOfReporting, userId, PersistReportType.Storage);
 
                         return Json(report, JsonRequestBehavior.AllowGet);
                     }
+
                     var storageReport = _storageR.GetStorageReportData(startOfReporting, endOfReporting, userId);
+
                     return Json(storageReport, JsonRequestBehavior.AllowGet);
                 }
                 else

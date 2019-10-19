@@ -35,9 +35,12 @@ namespace WebApp.Workflows
             Production prod = new Production();
             prod.ProductionName = prodObject.BatchName;
             prod.DistillerID = distillerId;
-            prod.ProductionDate = prodObject.ProductionDate;
-            prod.ProductionStartTime = prodObject.ProductionStart;
-            prod.ProductionEndTime = prodObject.ProductionEnd;
+            prod.ProductionDateOffset = prodObject.ProductionDate;
+            prod.ProductionStartTimeOffset = prodObject.ProductionStart;
+            prod.ProductionEndTimeOffset = prodObject.ProductionEnd;
+            prod.ProductionDate = prodObject.ProductionDate.DateTime;
+            prod.ProductionStartTime = prodObject.ProductionStart.DateTime;
+            prod.ProductionEndTime = prodObject.ProductionEnd.DateTime;
             prod.Note = prodObject.Note;
 
             if (prodObject.Gauged)
@@ -256,6 +259,7 @@ namespace WebApp.Workflows
                         GainLoss glt = new GainLoss();
                         glt.Type = true;
                         glt.Quantity = prodObject.GainLoss;
+                        glt.DateRecordedOffset = new DateTimeOffset(DateTime.UtcNow);
                         glt.DateRecorded = DateTime.UtcNow;
                         glt.ProductionId = prod.ProductionID;
                         _db.GainLoss.Add(glt);
@@ -267,6 +271,7 @@ namespace WebApp.Workflows
                         GainLoss glt = new GainLoss();
                         glt.Type = false;
                         glt.Quantity = Math.Abs(prodObject.GainLoss); // since cumulativeGainLoss is negative, making it to be positive
+                        glt.DateRecordedOffset = new DateTimeOffset(DateTime.UtcNow);
                         glt.DateRecorded = DateTime.UtcNow;
                         glt.ProductionId = prod.ProductionID;
                         _db.GainLoss.Add(glt);
@@ -323,6 +328,7 @@ namespace WebApp.Workflows
                         GainLoss glt = new GainLoss();
                         glt.Type = true;
                         glt.Quantity = prodObject.GainLoss;
+                        glt.DateRecordedOffset = new DateTimeOffset(DateTime.UtcNow);
                         glt.DateRecorded = DateTime.UtcNow;
                         glt.ProductionId = prod.ProductionID;
                         _db.GainLoss.Add(glt);
@@ -334,6 +340,7 @@ namespace WebApp.Workflows
                         GainLoss glt = new GainLoss();
                         glt.Type = false;
                         glt.Quantity = Math.Abs(prodObject.GainLoss); // since cumulativeGainLoss is negative, making it to be positive
+                        glt.DateRecordedOffset = new DateTimeOffset(DateTime.UtcNow);
                         glt.DateRecorded = DateTime.UtcNow;
                         glt.ProductionId = prod.ProductionID;
                         _db.GainLoss.Add(glt);
@@ -362,7 +369,8 @@ namespace WebApp.Workflows
                             FillTest fillTest = new FillTest();
                             fillTest.ProductionID = prod.ProductionID;
                             fillTest.AlcoholContent = i.FillAlcoholContent;
-                            fillTest.FillTestDate = i.FillDate;
+                            fillTest.FillTestDateOffset = i.FillDate;
+                            fillTest.FillTestDate = i.FillDate.DateTime;
                             fillTest.FillVariation = i.FillVariation;
                             fillTest.CorrectiveAction = i.CorrectiveAction;
                             _db.FillTest.Add(fillTest);
@@ -888,17 +896,20 @@ namespace WebApp.Workflows
             {
                 ProductionHistory histTable = new ProductionHistory();
                 histTable.ProductionID = prodObject.ProductionId;
+                histTable.UpdateDateOffset = new DateTimeOffset(DateTime.UtcNow);
                 histTable.UpdateDate = DateTime.UtcNow;
                 histTable.ProductionName = prodObject.BatchName;
 
-                if (prodObject.ProductionStart != DateTime.MinValue)
+                if (prodObject.ProductionStart != DateTimeOffset.MinValue)
                 {
-                    histTable.ProductionStartTime = prodObject.ProductionStart;
+                    histTable.ProductionStartTimeOffset = prodObject.ProductionStart;
+                    histTable.ProductionStartTime = prodObject.ProductionStart.DateTime;
                 }
 
-                if (prodObject.ProductionEnd != DateTime.MinValue)
+                if (prodObject.ProductionEnd != DateTimeOffset.MinValue)
                 {
-                    histTable.ProductionEndTime = prodObject.ProductionEnd;
+                    histTable.ProductionEndTimeOffset = prodObject.ProductionEnd;
+                    histTable.ProductionEndTime = prodObject.ProductionEnd.DateTime;
                 }
 
                 histTable.Volume = prodObject.Quantity;
@@ -987,9 +998,10 @@ namespace WebApp.Workflows
 
                 histTable.TaxedProof = prodObject.TaxedProof;
 
-                if (prodObject.WithdrawalDate != DateTime.MinValue)
+                if (prodObject.WithdrawalDate != DateTimeOffset.MinValue)
                 {
-                    histTable.WithdrawalDate = prodObject.WithdrawalDate;
+                    histTable.WithdrawalDateOffset = prodObject.WithdrawalDate;
+                    histTable.WithdrawalDate = prodObject.WithdrawalDate.DateTime;
                 }
 
                 _db.ProductionHistory.Add(histTable);
@@ -1674,8 +1686,8 @@ namespace WebApp.Workflows
                 select new
                 {
                     prod.ProductionName,
-                    prod.ProductionStartTime,
-                    prod.ProductionEndTime,
+                    prod.ProductionStartTimeOffset,
+                    prod.ProductionEndTimeOffset,
                     prod.ProductionDate,
                     prod.Note,
                     ProductionID = ((System.Int32?)prod.ProductionID ?? (System.Int32?)0),
@@ -1698,8 +1710,8 @@ namespace WebApp.Workflows
                     ProductionObject pobj = new ProductionObject();
                     pobj.BatchName = rec.ProductionName;
                     pobj.ProductionDate = rec.ProductionDate;
-                    pobj.ProductionStart = rec.ProductionStartTime;
-                    pobj.ProductionEnd = rec.ProductionEndTime;
+                    pobj.ProductionStart = rec.ProductionStartTimeOffset;
+                    pobj.ProductionEnd = rec.ProductionEndTimeOffset;
                     pobj.ProductionId = (int)rec.ProductionID;
                     pobj.ProductionType = rec.ProdTypeName;
                     pobj.ProductionTypeId = rec.ProductionTypeID;
@@ -1831,19 +1843,22 @@ namespace WebApp.Workflows
                         prodT.ProductionName = pObj.BatchName;
                     }
 
-                    if (prodT.ProductionDate != pObj.ProductionDate && pObj?.ProductionDate != null && pObj.ProductionDate != default(DateTime))
+                    if (prodT.ProductionDateOffset != pObj.ProductionDate && pObj?.ProductionDate != null && pObj.ProductionDate != default(DateTimeOffset))
                     {
-                        prodT.ProductionDate = pObj.ProductionDate;
+                        prodT.ProductionDateOffset = pObj.ProductionDate;
+                        prodT.ProductionDate = pObj.ProductionDate.DateTime;
                     }
 
-                    if (prodT.ProductionStartTime != pObj.ProductionStart && pObj?.ProductionStart != null && pObj.ProductionStart != default(DateTime))
+                    if (prodT.ProductionStartTimeOffset != pObj.ProductionStart && pObj?.ProductionStart != null && pObj.ProductionStart != default(DateTimeOffset))
                     {
-                        prodT.ProductionStartTime = pObj.ProductionStart;
+                        prodT.ProductionStartTimeOffset = pObj.ProductionStart;
+                        prodT.ProductionStartTime = pObj.ProductionStart.DateTime;
                     }
 
-                    if (prodT.ProductionEndTime != pObj.ProductionEnd && pObj?.ProductionEnd != null && pObj.ProductionEnd != default(DateTime))
+                    if (prodT.ProductionEndTimeOffset != pObj.ProductionEnd && pObj?.ProductionEnd != null && pObj.ProductionEnd != default(DateTimeOffset))
                     {
-                        prodT.ProductionEndTime = pObj.ProductionEnd;
+                        prodT.ProductionEndTimeOffset = pObj.ProductionEnd;
+                        prodT.ProductionEndTime = pObj.ProductionEnd.DateTime;
                     }
 
                     if (prodT.Note != pObj.Note && pObj?.Note != null)
@@ -1943,8 +1958,10 @@ namespace WebApp.Workflows
                     {
                         // Widrawn For Tax update:
                         TaxWithdrawn taxes = new TaxWithdrawn();
-                        taxes.DateOfSale = pObj.WithdrawalDate;
-                        taxes.DateRecorded = DateTime.UtcNow; //  hmm, I am not sure why we need this. We do store withdrawal date. in any case, we have to be carefull with this date as it is stored in UTC format so possible adjustment would be needed
+                        taxes.DateOfSaleOffset = pObj.WithdrawalDate;
+                        taxes.DateRecordedOffset = new DateTimeOffset(DateTime.UtcNow); //  hmm, I am not sure why we need this. We do store withdrawal date. in any case, we have to be carefull with this date as it is stored in UTC format so possible adjustment would be needed
+                        taxes.DateOfSale = pObj.WithdrawalDate.DateTime;
+                        taxes.DateRecorded = DateTime.UtcNow;
                         taxes.ProductionID = pObj.ProductionId;
                         taxes.Value = pObj.TaxedProof;
 
@@ -2207,7 +2224,7 @@ namespace WebApp.Workflows
                    {
                        ProductionName = prod.ProductionName,
                        ProductionID = ((System.Int32?)prod.ProductionID ?? (System.Int32?)0),
-                       ProductionEndDate = prod.ProductionEndTime,
+                       ProductionEndDate = prod.ProductionEndTimeOffset,
                        StatusName = status.Name,
                        StateName = state.Name,
                        Quantity = ((System.Single?)quants.Value ?? (System.Single?)0),

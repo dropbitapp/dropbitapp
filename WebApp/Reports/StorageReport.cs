@@ -18,7 +18,7 @@ namespace WebApp.Reports
             _dl = dl;
         }
 
-        public StorageReportObject GetStorageReportData(DateTime startDate, DateTime endDate, int userId)
+        public StorageReportObject GetStorageReportData(DateTimeOffset startDate, DateTimeOffset endDate, int userId)
         {
             try
             {
@@ -138,7 +138,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        private IEnumerable<OnHandFirstOfMonth> GetPurchasedOnHandFirstOfMonthQuery(DateTime startDate, DateTime endDate, int userId)
+        private IEnumerable<OnHandFirstOfMonth> GetPurchasedOnHandFirstOfMonthQuery(DateTimeOffset startDate, DateTimeOffset endDate, int userId)
         {
             return (from purchase in _db.Purchase
                    join distiller in _db.AspNetUserToDistiller on purchase.DistillerID equals distiller.DistillerID into distiller_join
@@ -162,13 +162,13 @@ namespace WebApp.Reports
                    where
                        distiller.UserId == userId
                        && (purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Fermented || purchase.PurchaseTypeID == (int)Persistence.BusinessLogicEnums.PurchaseType.Distilled)
-                       && purchase.PurchaseDate < startDate
+                       && purchase.PurchaseDateOffset < startDate
                        && ((purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (purchase.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
                        && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)))
                        && uOm.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
                    select new OnHandFirstOfMonth()
                    {
-                       ProductionDate = production.ProductionEndTime != null ? production.ProductionEndTime : DateTime.MinValue,
+                       ProductionDate = production.ProductionEndTimeOffset != null ? production.ProductionEndTimeOffset : DateTimeOffset.MinValue,
                        ReportingCategoryName = str.ProductTypeName ?? string.Empty,
                        SpiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                        Proof = (float?)proof.Value ?? 0,
@@ -185,7 +185,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        private IEnumerable<OnHandFirstOfMonth> GetProducedOnHandFirstOfMonthQuery(DateTime startDate, DateTime endDate, int userId)
+        private IEnumerable<OnHandFirstOfMonth> GetProducedOnHandFirstOfMonthQuery(DateTimeOffset startDate, DateTimeOffset endDate, int userId)
         {
             return (from sourceProduction in _db.Production
                    join distiller in _db.AspNetUserToDistiller on sourceProduction.DistillerID equals distiller.DistillerID into distiller_join
@@ -205,13 +205,13 @@ namespace WebApp.Reports
                    where
                        distiller.UserId == userId
                        && (sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || sourceProduction.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
-                       && sourceProduction.ProductionEndTime < startDate
+                       && sourceProduction.ProductionEndTimeOffset < startDate
                        && sourceProduction.Gauged == true
                        && ((sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || sourceProduction.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed) || (sourceProduction.StateID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && dest.EndTime > startDate && dest.EndTime < endDate))
                        && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal)))
                    select new OnHandFirstOfMonth()
                    {
-                       ProductionDate = outputProduction.ProductionEndTime != null ? outputProduction.ProductionEndTime : DateTime.MinValue,
+                       ProductionDate = outputProduction.ProductionEndTimeOffset != null ? outputProduction.ProductionEndTimeOffset : DateTimeOffset.MinValue,
                        ReportingCategoryName = str.ProductTypeName ?? string.Empty,
                        SpiritTypeReportingId = (int?)str.SpiritTypeReportingID ?? 0,
                        ProductionId = (int?)sourceProduction.ProductionID ?? 0,
@@ -228,7 +228,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <param name="storageReportBody"></param>
-        private void GetPurchasedOnHandFirstOfMonth(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        private void GetPurchasedOnHandFirstOfMonth(DateTimeOffset startDate, DateTimeOffset endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             var records = GetPurchasedOnHandFirstOfMonthQuery(startDate, endDate, userId);
 
@@ -281,7 +281,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <param name="storageReportBody"></param>
-        private void GetProducedOnHandFirstOfMonth(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        private void GetProducedOnHandFirstOfMonth(DateTimeOffset startDate, DateTimeOffset endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             var records = GetProducedOnHandFirstOfMonthQuery(startDate, endDate, userId);
 
@@ -334,7 +334,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <param name="storageReportBody"></param>
-        private void GetPurchasedDepositedToStorage(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        private void GetPurchasedDepositedToStorage(DateTimeOffset startDate, DateTimeOffset endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             // Query fermented and distilled purchase records deposited to storage account
             var records =
@@ -370,8 +370,8 @@ namespace WebApp.Reports
                      && (purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
-                     && purchase.PurchaseDate >= startDate
-                     && purchase.PurchaseDate <= endDate
+                     && purchase.PurchaseDateOffset >= startDate
+                     && purchase.PurchaseDateOffset <= endDate
                      && (productionContent == null
                         || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)))
                      && unitOfMeasurement.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
@@ -433,7 +433,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <param name="storageReportBody"></param>
-        private void GetProducedDepositedToStorage(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        private void GetProducedDepositedToStorage(DateTimeOffset startDate, DateTimeOffset endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             // Query distilled production records transferred to storage account
             var records =
@@ -455,13 +455,13 @@ namespace WebApp.Reports
                  where
                     distiller.UserId == userId
                  && (production.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Fermentation || production.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
-                 && production.ProductionEndTime >= startDate
-                 && production.ProductionEndTime <= endDate
+                 && production.ProductionEndTimeOffset >= startDate
+                 && production.ProductionEndTimeOffset <= endDate
                  && production.Gauged == true
                  && (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                     || production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
                     || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && productionOutput.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation)
-                    || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && productionOutput.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Blending && productionOutput.ProductionEndTime > endDate)
+                    || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed && productionOutput.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Blending && productionOutput.ProductionEndTimeOffset > endDate)
                     || (production.StatusID == (int)Persistence.BusinessLogicEnums.Status.Destroyed && destruction.EndTime > endDate))
                  && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal))) // 20 = ProdDistilledProofGal, 23 = ProdFermentedProofGal
                  select new
@@ -473,7 +473,7 @@ namespace WebApp.Reports
                      spiritTypeReportingId = (int?)spiritTypeReporting.SpiritTypeReportingID ?? 0,
                      productionId = (int?)production.ProductionID ?? 0,
                      productionOutputStateId = (int?)productionOutput.StateID ?? 0,
-                     productionOutputProductionDate = (DateTime?)productionOutput.ProductionEndTime,
+                     productionOutputProductionDate = (DateTimeOffset?)productionOutput.ProductionEndTimeOffset,
                      proof = (float?)proof.Value ?? 0,
                      productionContentProof = (float?)productionContent.ContentValue ?? 0,
                      destroyedProof = (float?)destruction.ProofGallons ?? 0
@@ -571,7 +571,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <param name="storageReportBody"></param>
-        private void GetPurchasedStorageToProcessing(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        private void GetPurchasedStorageToProcessing(DateTimeOffset startDate, DateTimeOffset endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             // Query distilled purchase records transferred from storage account to processing account
             var purRes =
@@ -604,9 +604,9 @@ namespace WebApp.Reports
                      && (purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
-                     && purchase.PurchaseDate < endDate
-                     && production.ProductionEndTime >= startDate
-                     && production.ProductionEndTime <= endDate
+                     && purchase.PurchaseDateOffset < endDate
+                     && production.ProductionEndTimeOffset >= startDate
+                     && production.ProductionEndTimeOffset <= endDate
                      && productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal
                      && unitOfMeasurement.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
                  select new
@@ -654,7 +654,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <param name="storageReportBody"></param>
-        private void GetProducedStorageToProcessing(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        private void GetProducedStorageToProcessing(DateTimeOffset startDate, DateTimeOffset endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             // Query distilled production records transferred from storage account to processing account
             var prodRes =
@@ -682,9 +682,9 @@ namespace WebApp.Reports
                         || sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
                         || sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
                      && productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal // ProdDistilledProofGal
-                     && sourceProductionRecord.ProductionEndTime < startDate
-                     && outputProductionRecord.ProductionEndTime >= startDate
-                     && outputProductionRecord.ProductionEndTime <= endDate
+                     && sourceProductionRecord.ProductionEndTimeOffset < startDate
+                     && outputProductionRecord.ProductionEndTimeOffset >= startDate
+                     && outputProductionRecord.ProductionEndTimeOffset <= endDate
                  select new
                  {
                      reportingCategoryName = spiritType.ProductTypeName ?? string.Empty,
@@ -730,7 +730,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <param name="storageReportBody"></param>
-        private void GetPurchasedStorageToProduction(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        private void GetPurchasedStorageToProduction(DateTimeOffset startDate, DateTimeOffset endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             // Query distilled purchase records to transfer from storage account to production account
             var purRes =
@@ -764,9 +764,9 @@ namespace WebApp.Reports
                      && (purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing
                         || purchase.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
-                     && purchase.PurchaseDate < endDate
-                     && production.ProductionEndTime >= startDate
-                     && production.ProductionEndTime <= endDate
+                     && purchase.PurchaseDateOffset < endDate
+                     && production.ProductionEndTimeOffset >= startDate
+                     && production.ProductionEndTimeOffset <= endDate
                      && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurFermentedProofGal
                      || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.PurDistilledProofGal)
                      && unitOfMeasurement.UnitOfMeasurementID != (int)Persistence.BusinessLogicEnums.UnitOfMeasurement.lb
@@ -815,7 +815,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <param name="storageReportBody"></param>
-        private void GetProducedStorageToProduction(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        private void GetProducedStorageToProduction(DateTimeOffset startDate, DateTimeOffset endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             // Query distilled production records transferred from storage account to production account
             var prodRes =
@@ -841,9 +841,9 @@ namespace WebApp.Reports
                      && outputProductionRecord.ProductionTypeID == (int)Persistence.BusinessLogicEnums.ProductionType.Distillation
                      && (sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active || sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing || sourceProductionRecord.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processed)
                  && (productionContent == null || (productionContent != null && (productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdDistilledProofGal || productionContent.ContentFieldID == (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal)))
-                 && sourceProductionRecord.ProductionEndTime <= endDate
-                 && outputProductionRecord.ProductionEndTime >= startDate
-                 && outputProductionRecord.ProductionEndTime <= endDate
+                 && sourceProductionRecord.ProductionEndTimeOffset <= endDate
+                 && outputProductionRecord.ProductionEndTimeOffset >= startDate
+                 && outputProductionRecord.ProductionEndTimeOffset <= endDate
                  && sourceProductionRecord.Gauged == true
                  select new
                  {
@@ -890,7 +890,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <param name="storageReportBody"></param>
-        private void GetStorageReportDestroyed(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        private void GetStorageReportDestroyed(DateTimeOffset startDate, DateTimeOffset endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             // Query production batches destroyed in Storage Account
             var prodDestroyed = (from destruction in _db.Destruction
@@ -1018,7 +1018,7 @@ namespace WebApp.Reports
         /// <param name="endDate"></param>
         /// <param name="userId"></param>
         /// <param name="storageReportBody"></param>
-        private void GetStorageOnHandEndOfMonth(DateTime startDate, DateTime endDate, int userId, ref List<StorageReportCategory> storageReportBody)
+        private void GetStorageOnHandEndOfMonth(DateTimeOffset startDate, DateTimeOffset endDate, int userId, ref List<StorageReportCategory> storageReportBody)
         {
             var nextStart = startDate.AddMonths(1);
             var nextEnd = endDate.Date.AddMonths(1).AddHours(11).AddMinutes(59).AddSeconds(59);

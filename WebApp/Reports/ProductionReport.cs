@@ -39,7 +39,7 @@ namespace WebApp.Reports
         /// <param name="end"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public ProductionReportingObject GetProductionReportData(DateTime start, DateTime end, int userId)
+        public ProductionReportingObject GetProductionReportData(DateTimeOffset start, DateTimeOffset end, int userId)
         {
             ProductionReportingObject prodRepObj = new ProductionReportingObject();
             List<ProdReportPart1> part1List = new List<ProdReportPart1>();
@@ -151,7 +151,7 @@ namespace WebApp.Reports
         /// <param name="start">reporting start period</param>
         /// <param name="end">reporting end period</param>
         /// <param name="tempRepObjList">out parameter object list that needs to be populated</param>
-        private void GetAllProductionReportRecordsForGivenPeriod(int userId, DateTime start, DateTime end, ref List<ProductionReportHelper> tempRepObjList)
+        private void GetAllProductionReportRecordsForGivenPeriod(int userId, DateTimeOffset start, DateTimeOffset end, ref List<ProductionReportHelper> tempRepObjList)
         {
             try
             {
@@ -173,8 +173,8 @@ namespace WebApp.Reports
                    distillers.UserId == userId &&
                    prod.Gauged == true &&
                    (new int[] { (int)Persistence.BusinessLogicEnums.State.Distilled }).Contains(prod.StateID) &&
-                   prod.ProductionEndTime >= start &&
-                   prod.ProductionEndTime <= end
+                   prod.ProductionEndTimeOffset >= start &&
+                   prod.ProductionEndTimeOffset <= end
                  select new
                  {
                      prod.StateID,
@@ -302,7 +302,7 @@ namespace WebApp.Reports
         /// <param name="end"></param>
         /// <param name="part1List"></param>
         /// <param name="tempRepObjList"></param>
-        private void GetProductionReportPart1Records(DateTime start, DateTime end, ref List<ProdReportPart1> part1List, List<ProductionReportHelper> tempRepObjList)
+        private void GetProductionReportPart1Records(DateTimeOffset start, DateTimeOffset end, ref List<ProdReportPart1> part1List, List<ProductionReportHelper> tempRepObjList)
         {
             foreach (var pRec in tempRepObjList)
             {
@@ -319,7 +319,7 @@ namespace WebApp.Reports
         /// <param name="end"></param>
         /// <param name="record"></param>
         /// <param name="part1List"></param>
-        private void GetEnteredInStorageAndProcessingAccount(DateTime start, DateTime end, ProductionReportHelper record, ref List<ProdReportPart1> part1List)
+        private void GetEnteredInStorageAndProcessingAccount(DateTimeOffset start, DateTimeOffset end, ProductionReportHelper record, ref List<ProdReportPart1> part1List)
         {
             float blendedProof = 0f;
             float distilledProof = 0f;
@@ -334,8 +334,8 @@ namespace WebApp.Reports
                  join prod4Rep in _db.Production4Reporting on productionContent.ProductionID equals prod4Rep.ProductionID
                  where productionContent.RecordID == record.ProductionID
                  && gainLoss.Type == false
-                 && production.ProductionEndTime >= start
-                 && production.ProductionEndTime <= end
+                 && production.ProductionEndTimeOffset >= start
+                 && production.ProductionEndTimeOffset <= end
                  && prod4Rep.Redistilled == false
                  && production.StateID == (int)Persistence.BusinessLogicEnums.State.Blended
                  select new
@@ -403,28 +403,28 @@ namespace WebApp.Reports
         /// <param name="start">reporting start period</param>
         /// <param name="end">reporting end period</param>
         /// <param name="tempRepObjList">out parameter object list that needs to be populated</param>
-        public void GetUnfinishedSpiritsForProductionReport(int userId, DateTime start, DateTime end, ref List<ProductionReportHelper> tempRepObjList)
+        public void GetUnfinishedSpiritsForProductionReport(int userId, DateTimeOffset start, DateTimeOffset end, ref List<ProductionReportHelper> tempRepObjList)
         {
             // this section of code checks the reporting month to determine whether we need to report
             // line 17 of production report
             // for February reporting
-            DateTime[] startAndEndDates = new DateTime[2]; // [startDate, endDate]
+            DateTimeOffset[] startAndEndDates = new DateTimeOffset[2]; // [startDate, endDate]
 
             if (end.Month == february)
             {
-                start = new DateTime(end.Year - 1, december, 1);
+                start = new DateTimeOffset(end.Year - 1, december, 1, 0, 0, 0, TimeSpan.Zero);
             }
             else if (end.Month == may)
             {
-                start = new DateTime(end.Year, march, 1);
+                start = new DateTimeOffset(end.Year, march, 1, 0, 0, 0, TimeSpan.Zero);
             }
             else if (end.Month == august)
             {
-                start = new DateTime(end.Year, june, 1);
+                start = new DateTimeOffset(end.Year, june, 1, 0, 0, 0, TimeSpan.Zero);
             }
             else if (end.Month == november)
             {
-                start = new DateTime(end.Year, september, 1);
+                start = new DateTimeOffset(end.Year, september, 1, 0, 0, 0, TimeSpan.Zero);
             }
 
             try
@@ -455,8 +455,8 @@ namespace WebApp.Reports
                    (prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Active ||
                    prod.StatusID == (int)Persistence.BusinessLogicEnums.Status.Processing) &&
                    (new int[] { (int)Persistence.BusinessLogicEnums.State.Distilled, (int)Persistence.BusinessLogicEnums.State.Blended, (int)Persistence.BusinessLogicEnums.State.Bottled }).Contains(prod.StateID) &&
-                   prod.ProductionEndTime >= start &&
-                   prod.ProductionEndTime <= end
+                   prod.ProductionEndTimeOffset >= start &&
+                   prod.ProductionEndTimeOffset <= end
                  select new
                  {
                      prod.StateID,
@@ -606,7 +606,7 @@ namespace WebApp.Reports
         /// <param name="end"></param>
         /// <param name="tempRepObjList"></param>
         /// <param name="prodRPart5L"></param>
-        private void GetReceivedForRedistillationForLine15(int userId, DateTime start, DateTime end, ref List<ProdReportPart1> part1List, ref List<ProdReportPart5> prodRPart5L)
+        private void GetReceivedForRedistillationForLine15(int userId, DateTimeOffset start, DateTimeOffset end, ref List<ProdReportPart1> part1List, ref List<ProdReportPart5> prodRPart5L)
         {
             var ress =
                 (from prod in _db.Production
@@ -625,8 +625,8 @@ namespace WebApp.Reports
                  where
                    distillers.UserId == userId &&
                    (new int[] { (int)Persistence.BusinessLogicEnums.State.Distilled }).Contains(prod.StateID) &&
-                   prod.ProductionEndTime >= start &&
-                   prod.ProductionEndTime <= end
+                   prod.ProductionEndTimeOffset >= start &&
+                   prod.ProductionEndTimeOffset <= end
                  select new
                  {
                      prod.StateID,
@@ -680,7 +680,7 @@ namespace WebApp.Reports
         /// <param name="end"></param>
         /// <param name="prodContentIteratorList"></param>
         /// <param name="currRecordId"></param>
-        private void GetRedistilledProductionContentRecordsForProcessing(DateTime start, DateTime end, ref List<ProductionContentIterator> prodContentIteratorList, int currRecordId/*if it's a first iteration then it is productionID else it is recordID*/)
+        private void GetRedistilledProductionContentRecordsForProcessing(DateTimeOffset start, DateTimeOffset end, ref List<ProductionContentIterator> prodContentIteratorList, int currRecordId/*if it's a first iteration then it is productionID else it is recordID*/)
         {
             bool parentGauged = false;
             int parentState = 0;
@@ -703,8 +703,8 @@ namespace WebApp.Reports
                            (int)Persistence.BusinessLogicEnums.ContenField.ProdBlendedProofGal,
                            (int)Persistence.BusinessLogicEnums.ContenField.ProdFermentedProofGal
                        }).Contains(prodContent.ContentFieldID)
-                       && prod.ProductionStartTime >= start
-                       && prod.ProductionEndTime <= end
+                       && prod.ProductionStartTimeOffset >= start
+                       && prod.ProductionEndTimeOffset <= end
                     select new
                     {
                         prodContent.isProductionComponent, // the record that went into making this production record is from either Purchase or Prod

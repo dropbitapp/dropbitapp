@@ -29,6 +29,7 @@
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,9 +55,16 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.6.5\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -204,6 +212,10 @@
     <Compile Include="Migrations\201808210648225_UpdatingGainLoss.cs" />
     <Compile Include="Migrations\201808210648225_UpdatingGainLoss.Designer.cs">
       <DependentUpon>201808210648225_UpdatingGainLoss.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201907251507273_ConvertingDateToDateTimeOffset.cs" />
+    <Compile Include="Migrations\201907251507273_ConvertingDateToDateTimeOffset.Designer.cs">
+      <DependentUpon>201907251507273_ConvertingDateToDateTimeOffset.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -1006,7 +1018,9 @@
     <Content Include="ClassDiagram1.cd" />
     <Content Include="connections.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
+    <Content Include="NLog.config" />
     <None Include="Properties\PublishProfiles\DistilleryStage - FTP %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\DistilleryStage - FTP %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\DistilleryStage - FTP %284%29.pubxml" />

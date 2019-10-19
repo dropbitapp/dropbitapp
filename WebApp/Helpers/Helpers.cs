@@ -9,7 +9,7 @@ namespace WebApp.Helpers
     /// </summary>
     public class OnHandFirstOfMonth
     {
-        public DateTime ProductionDate { get; set; }
+        public DateTimeOffset ProductionDate { get; set; }
         public string ReportingCategoryName { get; set; }
         public int SpiritTypeReportingId { get; set; }
         public int ProductionId { get; set; }
@@ -186,7 +186,7 @@ namespace WebApp.Helpers
     {
         public int PurchaseId { get; set; }
         public string PurchaseBatchName { get; set; }
-        public DateTime PurchaseDate { get; set; }
+        public DateTimeOffset PurchaseDate { get; set; }
         public int RawMaterialId { get; set; }
         public string MaterialName { get; set; }
         public float VBW { get; set; }
@@ -214,8 +214,8 @@ namespace WebApp.Helpers
         public float ProofGallon { get; set; }
         public int SpiritId { get; set; }
         public string SpiritName { get; set; }
-        public DateTime PurchaseDate { get; set; }
-        public DateTime ProductionEndDate { get; set; }
+        public DateTimeOffset PurchaseDate { get; set; }
+        public DateTimeOffset ProductionEndDate { get; set; }
         public string Note { get; set; }
         public string BurningDownMethod { get; set; } // this is used in distillation when at the time of burning down used materials. Currently, possible values are {"lb", "gal"}
     }
@@ -252,9 +252,9 @@ namespace WebApp.Helpers
         public List<ObjInfo4Burndwn> UsedMats { get; set; } // this attribute is used to keep old/new values and a string containing value that is currently sent using RecordIds. todo: remove RecordIds from all workflows since it is being taken care of with this attribute
         public int SpiritCutId { get; set; }
         public string SpiritCutName { get; set; }
-        public System.DateTime ProductionDate { get; set; }
-        public System.DateTime ProductionStart { get; set; }
-        public System.DateTime ProductionEnd { get; set; }
+        public DateTimeOffset ProductionDate { get; set; }
+        public DateTimeOffset ProductionStart { get; set; }
+        public DateTimeOffset ProductionEnd { get; set; }
         public float Quantity { get; set; }
         public float VolumeByWeight { get; set; }
         public float AlcoholContent { get; set; }
@@ -273,7 +273,7 @@ namespace WebApp.Helpers
         public int MaterialKindReportingID { get; set; }
         public string Note { get; set; }
         public float TaxedProof { get; set; } // Proof value indicated as taxable. For now, it is used to enable reporting processing. In  other words, how much alcohol has been sold.
-        public System.DateTime WithdrawalDate { get; set; } // This is meant to track when the sale has happened
+        public DateTimeOffset WithdrawalDate { get; set; } // This is meant to track when the sale has happened
         public bool Gauged { get; set; }
         public float GainLoss { get; set; }
     }
@@ -361,8 +361,8 @@ namespace WebApp.Helpers
         public string RepresentativeName { get; set; } // The name and title of the proprietor’s representative who accomplished or supervised the destruction.
         public string BatchType { get; set; } // Fermented, Distilled, Fermentation, Distillation, Blending, or Bottling
         public string BatchName { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateTimeOffset StartTime { get; set; }
+        public DateTimeOffset EndTime { get; set; }
         public string DestructionMethod { get; set; } // Manner of the destruction
         public bool Withdrawn { get; set; } // A statement of whether or not the spirits had previously been withdrawn and returned to bond
         public int QuantityGalID { get; set; }
@@ -387,7 +387,7 @@ namespace WebApp.Helpers
         public int RecordId { get; set; }
         public string RecordName { get; set; }
         public int RawMaterialId { get; set; }
-        public System.DateTime PurchaseDate { get; set; }
+        public DateTimeOffset PurchaseDate { get; set; }
         public float Quantity { get; set; } // volume
         public float VolumeByWeight { get; set; } //weight
         public float AlcoholContent { get; set; }
@@ -559,7 +559,7 @@ namespace WebApp.Helpers
     public class FillTestObject
     {
         public float FillAlcoholContent { get; set; }
-        public DateTime FillDate { get; set; }
+        public DateTimeOffset FillDate { get; set; }
         public float FillVariation { get; set; }
         public string CorrectiveAction { get; set; }
     }
