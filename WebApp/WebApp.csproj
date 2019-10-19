@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" />
@@ -1055,7 +1055,16 @@
     <Content Include="spa\public\favicon.ico" />
     <Content Include="spa\public\index.html" />
     <Content Include="spa\src\assets\logo.png" />
+    <Content Include="spa\src\helpers\date-helper.js" />
+    <Content Include="spa\src\helpers\math-helper.js" />
     <Content Include="spa\src\main.js" />
+    <Content Include="spa\src\router\index.js" />
+    <Content Include="spa\src\store\index.js" />
+    <Content Include="spa\src\store\modules\dictionary.js" />
+    <Content Include="spa\src\store\modules\inventory.js" />
+    <Content Include="spa\src\store\modules\production.js" />
+    <Content Include="spa\src\store\modules\purchase.js" />
+    <Content Include="spa\src\store\modules\report.js" />
     <Content Include="spa\vue.config.js" />
     <Content Include="SQL Server\DeleteUserDataFromALLRelevantTables.sql" />
     <Content Include="SQL Server\DictRawMaterialView_v3.sql" />
@@ -1154,6 +1163,57 @@
     <Content Include="spa\src\App.vue" />
     <Content Include="spa\src\components\HelloWorld.vue" />
     <Content Include="Views\Spa\Index.cshtml" />
+    <Content Include="spa\.jsbeautifyrc" />
+    <Content Include="spa\src\mockup\AddRecord.vue" />
+    <Content Include="spa\src\mockup\EditRecord.vue" />
+    <Content Include="spa\src\mockup\Mockup.vue" />
+    <Content Include="spa\src\mockup\RecordDetail.vue" />
+    <Content Include="spa\src\mockup\ViewRecords.vue" />
+    <Content Include="spa\src\views\dictionary\AddDictionaryView.vue" />
+    <Content Include="spa\src\views\dictionary\AddMaterialView.vue" />
+    <Content Include="spa\src\views\dictionary\AddSpiritView.vue" />
+    <Content Include="spa\src\views\dictionary\AddStorageView.vue" />
+    <Content Include="spa\src\views\dictionary\AddVendorView.vue" />
+    <Content Include="spa\src\views\dictionary\Dictionary.vue" />
+    <Content Include="spa\src\views\dictionary\DictionaryView.vue" />
+    <Content Include="spa\src\views\dictionary\MaterialView.vue" />
+    <Content Include="spa\src\views\dictionary\SpiritView.vue" />
+    <Content Include="spa\src\views\dictionary\StorageView.vue" />
+    <Content Include="spa\src\views\dictionary\VendorView.vue" />
+    <Content Include="spa\src\views\HomeView.vue" />
+    <Content Include="spa\src\views\inventory\SellView.vue" />
+    <Content Include="spa\src\views\NotFound.vue" />
+    <Content Include="spa\src\views\production\AddBlendingView.vue" />
+    <Content Include="spa\src\views\production\AddBottlingView.vue" />
+    <Content Include="spa\src\views\production\AddDistillationView.vue" />
+    <Content Include="spa\src\views\production\AddFermentationView.vue" />
+    <Content Include="spa\src\views\production\AddProductionView.vue" />
+    <Content Include="spa\src\views\production\BlendingView.vue" />
+    <Content Include="spa\src\views\production\BottlingView.vue" />
+    <Content Include="spa\src\views\production\DistillationView.vue" />
+    <Content Include="spa\src\views\production\FermentationView.vue" />
+    <Content Include="spa\src\views\production\Production.vue" />
+    <Content Include="spa\src\views\production\ProductionView.vue" />
+    <Content Include="spa\src\views\purchase\AddAdditiveView.vue" />
+    <Content Include="spa\src\views\purchase\AddDistilledView.vue" />
+    <Content Include="spa\src\views\purchase\AddFermentableView.vue" />
+    <Content Include="spa\src\views\purchase\AddFermentedView.vue" />
+    <Content Include="spa\src\views\purchase\AdditiveView.vue" />
+    <Content Include="spa\src\views\purchase\AddPurchaseView.vue" />
+    <Content Include="spa\src\views\purchase\AddSupplyView.vue" />
+    <Content Include="spa\src\views\purchase\DistilledView.vue" />
+    <Content Include="spa\src\views\purchase\FermentableView.vue" />
+    <Content Include="spa\src\views\purchase\FermentedView.vue" />
+    <Content Include="spa\src\views\purchase\Purchase.vue" />
+    <Content Include="spa\src\views\purchase\PurchaseView.vue" />
+    <Content Include="spa\src\views\purchase\SupplyView.vue" />
+    <Content Include="spa\src\views\reporting\ProcessingReport.vue" />
+    <Content Include="spa\src\views\reporting\ProcessingReportView.vue" />
+    <Content Include="spa\src\views\reporting\ProductionReport.vue" />
+    <Content Include="spa\src\views\reporting\ProductionReportView.vue" />
+    <Content Include="spa\src\views\reporting\Reporting.vue" />
+    <Content Include="spa\src\views\reporting\StorageReport.vue" />
+    <Content Include="spa\src\views\reporting\StorageReportView.vue" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
