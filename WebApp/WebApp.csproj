@@ -1021,12 +1021,6 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="NLog.config" />
-    <None Include="Properties\PublishProfiles\DistilleryStage - FTP %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\DistilleryStage - FTP %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\DistilleryStage - FTP %284%29.pubxml" />
-    <None Include="Properties\PublishProfiles\DistilleryStage - Web Deploy %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\DistilleryStage - Web Deploy %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\DistilleryStage - Web Deploy %284%29.pubxml" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\globalize.js" />
@@ -1034,10 +1028,6 @@
     <Content Include="Scripts\Helpers\dateModificationHelper.js" />
     <Content Include="Scripts\Helpers\distillcompute.js" />
     <Content Include="Scripts\Helpers\genericWorkflowHelpers.js" />
-    <None Include="Properties\PublishProfiles\merakiprod - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\merakiprod - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\merakistage - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\merakistage - Web Deploy.pubxml" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
@@ -1217,6 +1207,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
