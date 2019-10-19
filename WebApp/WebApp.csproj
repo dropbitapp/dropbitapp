@@ -1163,9 +1163,6 @@
     <EmbeddedResource Include="Migrations\201808210648225_UpdatingGainLoss.resx">
       <DependentUpon>201808210648225_UpdatingGainLoss.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201907170533051_ConvertingDateToDateTimeOffset.resx">
-      <DependentUpon>201907170533051_ConvertingDateToDateTimeOffset.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
