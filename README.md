@@ -15,7 +15,7 @@
 - Open solution in Visual Studio
 - Run update-database in Package Console Manager
 - Create default account
-  - Uncomment [AllowAnonymous] attribute for following actions in AccountsController.cs
+  - Uncomment [AllowAnonymous] attribute for following actions in AccountController.cs
     - POST: /Account/Register
     - GET: /Account/Register
   - Start Debugging and navigate to /Account/Register using your favorite browser
