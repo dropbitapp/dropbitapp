@@ -1,5 +1,4 @@
 # dropbitdistill
-**NOT FOR PRODUCTION USE**
 ## Instructions
 - git clone https://github.com/dropbitapp/dropbitapp.git
 - Create an empty SQL Server database
