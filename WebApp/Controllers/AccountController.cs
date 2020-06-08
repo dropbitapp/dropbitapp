@@ -6,6 +6,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using WebApp.Models;
+using NLog;
+using System;
 
 namespace WebApp.Controllers
 {
@@ -14,9 +16,12 @@ namespace WebApp.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private readonly DistilDBContext _db;
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
 
         public AccountController()
         {
+            _db = new DistilDBContext();
         }
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
@@ -52,8 +57,61 @@ namespace WebApp.Controllers
         //
         // GET: /Account/Login
         [AllowAnonymous]
-        public ActionResult Login(string returnUrl)
+        public async Task<ActionResult> Login(string returnUrl)
         {
+            string email = "admin@dropbit.io";
+            string password = "P@ssword1!";
+            var defaultAdmin = new ApplicationUser { UserName = email, Email = email };
+
+            // Check to see if default admin user already exists
+            var existingUser = await UserManager.FindByNameAsync(defaultAdmin.UserName);
+            if (existingUser == null)
+            {
+                var seedDistiller = false;
+                try
+                {
+                    await UserManager.CreateAsync(defaultAdmin, password);
+                    seedDistiller = true;
+                }
+                catch(Exception ex)
+                {
+                    _logger.Error("Failed to create default admin user: {0}", ex.ToString());
+                }
+
+                // Find newly created user
+                var newUser = await UserManager.FindByNameAsync(defaultAdmin.UserName);
+
+                // Seed distiller only after successfully creating a user
+                if (seedDistiller)
+                {
+                    try
+                    {
+                        var distiller = _db.Distiller.Add(new Distiller { Name = "Dropbit" });
+                        _db.DistillerDetail.Add(new DistillerDetail
+                        {
+                            DistillerID = distiller.DistillerID,
+                            EIN = "12-3456789",
+                            DSP = "DSP-WA-10000",
+                            StreetAddress = "123 Bourbon Street",
+                            City = "Seattle",
+                            Zip = "98101",
+                            State = "WA",
+                            Phone = "206-123-4567",
+                            Email = "admin@dropbit.io",
+                            TimeZoneOffset = -8,
+                            Note = "Distillery template"
+                        });
+                        _db.AspNetUserToDistiller.Add(new AspNetUserToDistiller { DistillerID = distiller.DistillerID, UserId = newUser.Id });
+                        _db.SaveChanges();
+                    }
+                    catch (Exception ex)
+                    {
+                        // Something is wrong with the connection to the db, log and attempt to revert user creation
+                        _logger.Error("Failed to seed default distiller: \n\t{0}", ex.ToString());
+                        await UserManager.DeleteAsync(newUser);
+                    }
+                }
+            }
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
