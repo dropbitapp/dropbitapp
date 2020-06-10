@@ -6,6 +6,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using WebApp.Models;
+using NLog;
+using System;
 
 namespace WebApp.Controllers
 {
@@ -14,9 +16,12 @@ namespace WebApp.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private readonly DistilDBContext _db;
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
 
         public AccountController()
         {
+            _db = new DistilDBContext();
         }
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
@@ -52,8 +57,49 @@ namespace WebApp.Controllers
         //
         // GET: /Account/Login
         [AllowAnonymous]
-        public ActionResult Login(string returnUrl)
+        public async Task<ActionResult> Login(string returnUrl)
         {
+            string email = "admin@dropbit.io";
+            string password = "P@ssword1!";
+            var defaultAdmin = new ApplicationUser { UserName = email, Email = email };
+
+            // Check to see if default admin user already exists
+            var existingUser = await UserManager.FindByNameAsync(defaultAdmin.UserName);
+            if (existingUser == null)
+            {
+                var userCreationSucceeded = false;
+                try
+                {
+                    var result = await UserManager.CreateAsync(defaultAdmin, password);
+                    if (result.Succeeded)
+                        userCreationSucceeded = true;
+                    else
+                        throw new Exception(string.Concat(result.Errors));
+                }
+                catch(Exception ex)
+                {
+                    _logger.Error("Failed to create default admin user: {0}", ex.ToString());
+                }
+
+                // Insert into AspNetUserToDistiller only after successfully creating a user
+                if (userCreationSucceeded)
+                {
+                    // Find newly created user
+                    var newUser = await UserManager.FindByNameAsync(defaultAdmin.UserName);
+
+                    try
+                    {
+                        _db.AspNetUserToDistiller.Add(new AspNetUserToDistiller { DistillerID = 1, UserId = newUser.Id });
+                        _db.SaveChanges();
+                    }
+                    catch (Exception ex)
+                    {
+                        // Something is wrong with the connection to the db, log and attempt to revert user creation
+                        _logger.Error("Failed to insert into AspNetUserToDistiller table: \n\t{0}", ex.ToString());
+                        await UserManager.DeleteAsync(newUser);
+                    }
+                }
+            }
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
