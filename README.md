@@ -1,7 +1,7 @@
 # Dropbit Technologies
 Dropbit is an open-source distillery management application. Track, audit, and report your monthly operational reports to the TTB with peace of mind.
 
-## Prerequisites
+## Instructions
 - git clone https://github.com/dropbitapp/dropbitapp.git
 - Create an empty SQL Server database
 - Add connections.config file to the root of the WebApp/WebAppTests projects
