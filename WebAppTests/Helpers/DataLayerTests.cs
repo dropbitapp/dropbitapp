@@ -13,7 +13,7 @@ namespace WebApp.Helpers.Tests
     public class DataLayerTests
     {
         // Test Account 
-        private readonly int _userId = 7;
+        private readonly int _userId = 1;
 
         private readonly DistilDBContext _db;
         private readonly DataLayer _dl;

@@ -59,47 +59,13 @@ namespace WebApp.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> Login(string returnUrl)
         {
-            string email = "admin@dropbit.io";
-            string password = "P@ssword1!";
-            var defaultAdmin = new ApplicationUser { UserName = email, Email = email };
+            string defaultPassword = "P@ssword1!";
+            var integrationTestUser = new ApplicationUser { UserName = "test@dropbit.io", Email = "test@dropbit.io" };
+            var defaultUser = new ApplicationUser { UserName = "admin@dropbit.io", Email = "admin@dropbit.io" };
 
-            // Check to see if default admin user already exists
-            var existingUser = await UserManager.FindByNameAsync(defaultAdmin.UserName);
-            if (existingUser == null)
-            {
-                var userCreationSucceeded = false;
-                try
-                {
-                    var result = await UserManager.CreateAsync(defaultAdmin, password);
-                    if (result.Succeeded)
-                        userCreationSucceeded = true;
-                    else
-                        throw new Exception(string.Concat(result.Errors));
-                }
-                catch(Exception ex)
-                {
-                    _logger.Error("Failed to create default admin user: {0}", ex.ToString());
-                }
+            await Helpers.AuthHelper.CheckCreateUser(_db, _logger, UserManager, integrationTestUser, defaultPassword, 1);
+            await Helpers.AuthHelper.CheckCreateUser(_db, _logger, UserManager, defaultUser, defaultPassword, 1);
 
-                // Insert into AspNetUserToDistiller only after successfully creating a user
-                if (userCreationSucceeded)
-                {
-                    // Find newly created user
-                    var newUser = await UserManager.FindByNameAsync(defaultAdmin.UserName);
-
-                    try
-                    {
-                        _db.AspNetUserToDistiller.Add(new AspNetUserToDistiller { DistillerID = 1, UserId = newUser.Id });
-                        _db.SaveChanges();
-                    }
-                    catch (Exception ex)
-                    {
-                        // Something is wrong with the connection to the db, log and attempt to revert user creation
-                        _logger.Error("Failed to insert into AspNetUserToDistiller table: \n\t{0}", ex.ToString());
-                        await UserManager.DeleteAsync(newUser);
-                    }
-                }
-            }
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
