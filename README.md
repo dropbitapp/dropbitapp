@@ -15,18 +15,10 @@ Dropbit is an open-source distillery management application. Track, audit, and r
 ```
 - Open solution in Visual Studio
 - Run update-database in Package Console Manager
-- Create default account
-  - Uncomment [AllowAnonymous] attribute for following actions in AccountController.cs
-    - POST: /Account/Register
-    - GET: /Account/Register
-  - Start Debugging and navigate to /Account/Register using your favorite browser
-  - Create new user
-  - Comment back [AllowAnonymous] attributes for /Account/Register actions
-  - Insert into the following database tables SSMS
-    - Distiller
-    - DistillerDetail
-    - AspNetUserToDistiller (map newly created user to distiller)
-- Login to as newly created user
+- Default user credentials
+  - Username: admin@dropbit.io
+  - Password: P@ssword1!
+- The application may take short time to initialize during first launch
 
 ## Deploying in Azure
 
