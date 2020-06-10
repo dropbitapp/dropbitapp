@@ -67,47 +67,35 @@ namespace WebApp.Controllers
             var existingUser = await UserManager.FindByNameAsync(defaultAdmin.UserName);
             if (existingUser == null)
             {
-                var seedDistiller = false;
+                var userCreationSucceeded = false;
                 try
                 {
-                    await UserManager.CreateAsync(defaultAdmin, password);
-                    seedDistiller = true;
+                    var result = await UserManager.CreateAsync(defaultAdmin, password);
+                    if (result.Succeeded)
+                        userCreationSucceeded = true;
+                    else
+                        throw new Exception(string.Concat(result.Errors));
                 }
                 catch(Exception ex)
                 {
                     _logger.Error("Failed to create default admin user: {0}", ex.ToString());
                 }
 
-                // Find newly created user
-                var newUser = await UserManager.FindByNameAsync(defaultAdmin.UserName);
-
-                // Seed distiller only after successfully creating a user
-                if (seedDistiller)
+                // Insert into AspNetUserToDistiller only after successfully creating a user
+                if (userCreationSucceeded)
                 {
+                    // Find newly created user
+                    var newUser = await UserManager.FindByNameAsync(defaultAdmin.UserName);
+
                     try
                     {
-                        var distiller = _db.Distiller.Add(new Distiller { Name = "Dropbit" });
-                        _db.DistillerDetail.Add(new DistillerDetail
-                        {
-                            DistillerID = distiller.DistillerID,
-                            EIN = "12-3456789",
-                            DSP = "DSP-WA-10000",
-                            StreetAddress = "123 Bourbon Street",
-                            City = "Seattle",
-                            Zip = "98101",
-                            State = "WA",
-                            Phone = "206-123-4567",
-                            Email = "admin@dropbit.io",
-                            TimeZoneOffset = -8,
-                            Note = "Distillery template"
-                        });
-                        _db.AspNetUserToDistiller.Add(new AspNetUserToDistiller { DistillerID = distiller.DistillerID, UserId = newUser.Id });
+                        _db.AspNetUserToDistiller.Add(new AspNetUserToDistiller { DistillerID = 1, UserId = newUser.Id });
                         _db.SaveChanges();
                     }
                     catch (Exception ex)
                     {
                         // Something is wrong with the connection to the db, log and attempt to revert user creation
-                        _logger.Error("Failed to seed default distiller: \n\t{0}", ex.ToString());
+                        _logger.Error("Failed to insert into AspNetUserToDistiller table: \n\t{0}", ex.ToString());
                         await UserManager.DeleteAsync(newUser);
                     }
                 }
