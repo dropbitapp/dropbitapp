@@ -13,7 +13,7 @@ Dropbit is an open-source distillery management application. Track, audit, and r
        connectionString="Data Source=SERVERNAME;Initial Catalog=DATABASENAME;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False" />
 </connectionStrings>
 ```
-- Open solution in Visual Studio
+- Open solution in Visual Studio 2015/2017
 - Run update-database in Package Console Manager
 - Default user credentials
   - Username: admin@dropbit.io
