@@ -4,7 +4,7 @@ Dropbit is an open-source distillery management application. Track, audit, and r
 ## Prerequisites
 - git clone https://github.com/dropbitapp/dropbitapp.git
 - Create an empty SQL Server database
-- Add connections.config file to the root of the WebApp project
+- Add connections.config file to the root of the WebApp/WebAppTests projects
 > 
 ```
 <connectionStrings>
@@ -15,10 +15,12 @@ Dropbit is an open-source distillery management application. Track, audit, and r
 ```
 - Open solution in Visual Studio 2015/2017
 - Run update-database in Package Console Manager
-- Default user credentials
+- Launch the application using the debugger (The application may take short time to initialize during first launch)
+- Login with default user credentials
   - Username: admin@dropbit.io
   - Password: P@ssword1!
-- The application may take short time to initialize during first launch
+- Click Run All from the Test Explorer tab to verify the setup
+  - NOTE: Due to a regression, 49 tests are green, 24 are red
 
 ## Deploying in Azure
 
