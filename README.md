@@ -20,7 +20,7 @@ Dropbit is an open-source distillery management application. Track, audit, and r
   - Username: admin@dropbit.io
   - Password: P@ssword1!
 - Click Run All from the Test Explorer tab to verify the setup
-  - NOTE: Due to a regression, 49 tests are green, 24 are red
+  - NOTE: Due to a regression, 49 tests are currently green and 24 are red
 
 ## Deploying in Azure
 
