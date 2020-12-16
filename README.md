@@ -24,8 +24,4 @@ Dropbit is an open-source distillery management application. Track, audit, and r
 
 ## Deploying in Azure
 
-Dropbit was developed for deployment into the Azure cloud. You can deploy these samples directly through the Azure Portal.
-
-To deploy the using the Azure Portal, by ensuring you have an Azure subscription, an SQL Server along with the credentials for master.
-
-Once the service is deployed, ensure you can navigate to the login page and use the credendials you created earlier to login.
+Dropbit was developed for deployment into the Azure cloud. You can deploy these samples directly through the Azure Portal to App Service and Azure SQL. Consult Azure documentation for further insructions.
